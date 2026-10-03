@@ -142,7 +142,11 @@ func TestEveryMutationRouteIsRegistered(t *testing.T) {
 	registeredSuffixes := regexp.MustCompile(`PathSuffix:\s*"([^"]+)"`).
 		FindAllStringSubmatch(registryText, -1)
 
-	mutationCall := regexp.MustCompile(`\.(Post|Put|Patch|Delete)\(([a-zA-Z0-9_.]+)`)
+	// \s* between the dot and the verb: a route is usually registered as
+	//   private.With(guards...).
+	//       Post(constant, handler)
+	// and a pattern requiring ".Post(" on one line saw 22 of 60 routes.
+	mutationCall := regexp.MustCompile(`\.\s*(Post|Put|Patch|Delete)\(([a-zA-Z0-9_.]+)`)
 
 	var gaps []string
 	for _, file := range routeFiles {
@@ -152,16 +156,16 @@ func TestEveryMutationRouteIsRegistered(t *testing.T) {
 		}
 		for _, match := range mutationCall.FindAllStringSubmatch(string(content), -1) {
 			constant := match[2]
-			shortName := constant
+			shortName, qualifier := constant, ""
 			if dot := strings.LastIndex(constant, "."); dot >= 0 {
-				shortName = constant[dot+1:]
+				shortName, qualifier = constant[dot+1:], constant[:dot]
 			}
 			if _, skip := excluded[shortName]; skip {
 				continue
 			}
 			// The registry matches on path SUFFIX, so compare against the
 			// suffix the constant resolves to rather than its name.
-			suffix := routeSuffix(t, repoRoot, shortName)
+			suffix := routeSuffix(t, repoRoot, qualifier, shortName)
 			if suffix == "" || isRegistered(suffix, registeredSuffixes) {
 				continue
 			}
@@ -187,12 +191,20 @@ func isRegistered(routePath string, registered [][]string) bool {
 	return false
 }
 
-// routeSuffix resolves a route constant to its path by scanning the constants.
-func routeSuffix(t *testing.T, repoRoot, constantName string) string {
+// routeSuffix resolves a route constant to its path by scanning the constants
+// package the route handler named. Route constants share names across
+// modules - RouteUpdate, RouteList - so resolving by bare name found whichever
+// module sorted first, and an unaudited route could pass as another module's
+// registered one.
+func routeSuffix(t *testing.T, repoRoot, qualifier, constantName string) string {
 	t.Helper()
 
-	constantFiles, _ := filepath.Glob(filepath.Join(repoRoot, "pinglego/pkg/*/*constants/*API.go"))
-	pattern := regexp.MustCompile(regexp.QuoteMeta(constantName) + `\s*=\s*"([^"]+)"`)
+	packageGlob := "*constants"
+	if qualifier != "" {
+		packageGlob = qualifier
+	}
+	constantFiles, _ := filepath.Glob(filepath.Join(repoRoot, "pinglego/pkg/*", packageGlob, "*API.go"))
+	pattern := regexp.MustCompile(`\b` + regexp.QuoteMeta(constantName) + `\s*=\s*"([^"]+)"`)
 
 	for _, file := range constantFiles {
 		content, err := os.ReadFile(file)
