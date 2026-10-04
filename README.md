@@ -10,6 +10,7 @@ Integration and conformance test suites verifying multi-tenant isolation, permis
 - **auditconformance**: Audit log integrity and cryptographic hash chain verification.
 - **translationcoverage**: Verification that all 23 language translations are complete and covered.
 - **apicontract**: Conformance against REST API specifications.
+- **loadtest** (opt-in, `./pingletest.sh load`): one licensed organisation under load - twenty people signing in at once, a traced sweep of 200 sites, the Results API and the CSV export - against p95 budgets, with no 5xx and every result stored.
 
 ## Running
 

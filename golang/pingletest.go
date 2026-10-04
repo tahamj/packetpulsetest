@@ -21,6 +21,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 )
@@ -55,6 +56,7 @@ type Response struct {
 	Status int
 	Body   map[string]any
 	Raw    []byte
+	Header http.Header
 }
 
 // String reads a top-level string field.
@@ -117,7 +119,7 @@ func Call(t *testing.T, method, path, token string, payload any) Response {
 	decoded := map[string]any{}
 	_ = json.Unmarshal(raw, &decoded)
 
-	return Response{Status: response.StatusCode, Body: decoded, Raw: raw}
+	return Response{Status: response.StatusCode, Body: decoded, Raw: raw, Header: response.Header}
 }
 
 // UniqueCode builds an organisation code that is actually unique.
@@ -251,11 +253,20 @@ func SignUpUnassigned(t *testing.T, prefix string) (token, userId, email, passwo
 	if response.Status != http.StatusCreated {
 		t.Fatalf("signing up %s: %d %s", prefix, response.Status, response.Raw)
 	}
-	return response.String("token"), response.String("user_id"), email, password
+	// Signing up answers with an authenticator to set up, not a token.
+	return completeSignIn(t, email, response, nil), response.String("user_id"), email, password
 }
 
-// SignIn exchanges credentials for a token.
+// SignIn exchanges credentials for a token: the password, then the second
+// step - setting up an authenticator the first time, a code from it after.
 func SignIn(t *testing.T, email, password string) string {
+	t.Helper()
+	return SignInAt(t, email, password, nil)
+}
+
+// SignInAt is SignIn from a device that reports where it is: the location
+// goes with the code, as the app sends it.
+func SignInAt(t *testing.T, email, password string, location map[string]any) string {
 	t.Helper()
 
 	response := Call(t, http.MethodPost, "/user/signin", "", map[string]any{
@@ -264,17 +275,102 @@ func SignIn(t *testing.T, email, password string) string {
 	if response.Status != http.StatusOK {
 		t.Fatalf("signing in %s: %d %s", email, response.Status, response.Raw)
 	}
-	return response.String("token")
+	return completeSignIn(t, email, response, location)
 }
 
-// SuperUserToken signs in the platform operator, skipping when it is absent.
+// completeSignIn answers a challenge the way the person would.
+func completeSignIn(t *testing.T, email string, challenge Response, location map[string]any) string {
+	t.Helper()
+
+	challengeId := challenge.String("challenge_id")
+	switch method := challenge.String("method"); method {
+	case "totp_enrol":
+		enrolment := Call(t, http.MethodPost, "/user/signin/enrol", "", map[string]any{"challenge_id": challengeId})
+		if enrolment.Status != http.StatusOK {
+			t.Fatalf("setting up an authenticator for %s: %d %s", email, enrolment.Status, enrolment.Raw)
+		}
+		if err := rememberAuthenticator(email, enrolment.String("secret")); err != nil {
+			t.Fatalf("the authenticator secret for %s: %v", email, err)
+		}
+	case "totp":
+	case "sms":
+		// The suites run with no SMS gateway, so anyone set to SMS must fall
+		// back to an authenticator. Being asked for a text means they did not.
+		t.Fatalf("%s was asked for a texted code with no SMS gateway configured", email)
+	default:
+		t.Fatalf("signing in %s answered with no second step: %d %s", email, challenge.Status, challenge.Raw)
+	}
+
+	// A refused code is answered with the next one, as a person would: the
+	// account may have spent this step outside the suite - someone signing in
+	// to the app with the same authenticator - and the server rightly refuses
+	// a code twice. Twice at most: each wrong code counts towards the lock.
+	var verified Response
+	for range 3 {
+		step := map[string]any{"challenge_id": challengeId, "code": NextCode(t, email)}
+		if location != nil {
+			step["location"] = location
+		}
+		verified = Call(t, http.MethodPost, "/user/signin/verify", "", step)
+		if verified.Status == http.StatusOK || verified.ErrorCode() != "invalid_code" {
+			break
+		}
+	}
+	if verified.Status != http.StatusOK {
+		t.Fatalf("the second step for %s: %d %s", email, verified.Status, verified.Raw)
+	}
+	return verified.String("token")
+}
+
+// superUserCredentials is the platform operator the suites sign in as.
+func superUserCredentials() (email, password string) {
+	email = os.Getenv("PINGLE_TEST_SUPERUSER")
+	password = os.Getenv("PINGLE_TEST_SUPERUSER_PASSWORD")
+	if email == "" {
+		email, password = "superuser@pingle.local", "PingleSuper2026!"
+	}
+	return email, password
+}
+
+var superUserCache struct {
+	sync.Mutex
+	token   string
+	expires time.Time
+}
+
+// SuperUserToken signs in the platform operator once per test process and
+// reuses the session. Each sign-in spends an authenticator code, and a code
+// is good once per thirty seconds: signing in afresh for every test would put
+// minutes of waiting into a run.
 func SuperUserToken(t *testing.T) string {
 	t.Helper()
 
-	email := os.Getenv("PINGLE_TEST_SUPERUSER")
-	password := os.Getenv("PINGLE_TEST_SUPERUSER_PASSWORD")
-	if email == "" {
-		email, password = "superuser@pingle.local", "PingleSuper2026!"
+	superUserCache.Lock()
+	defer superUserCache.Unlock()
+	if superUserCache.token != "" && time.Until(superUserCache.expires) > 5*time.Minute {
+		return superUserCache.token
+	}
+	token, expires := superUserSignIn(t)
+	superUserCache.token, superUserCache.expires = token, expires
+	return token
+}
+
+// SuperUserSignIn signs the platform operator in afresh, for a test that is
+// about signing in itself.
+func SuperUserSignIn(t *testing.T) string {
+	t.Helper()
+	token, _ := superUserSignIn(t)
+	return token
+}
+
+func superUserSignIn(t *testing.T) (string, time.Time) {
+	t.Helper()
+
+	email, password := superUserCredentials()
+	if secret := superUserTotpSecret(); secret != "" {
+		if err := rememberAuthenticator(email, secret); err != nil {
+			t.Fatalf("PINGLE_TEST_SUPERUSER_TOTP_SECRET: %v", err)
+		}
 	}
 
 	response := Call(t, http.MethodPost, "/user/signin", "", map[string]any{
@@ -295,7 +391,14 @@ func SuperUserToken(t *testing.T) string {
 		}
 		t.Skipf("no platform superuser available: %d", response.Status)
 	}
-	return response.String("token")
+	if response.String("method") == "totp" && !knowsAuthenticator(email) {
+		t.Fatalf("the superuser has an authenticator this suite does not know: set " +
+			"PINGLE_TEST_SUPERUSER_TOTP_SECRET to the server's OWNER_TOTP_SECRET")
+	}
+
+	token := completeSignIn(t, email, response, nil)
+	expires := time.Now().Add(time.Hour)
+	return token, expires
 }
 
 // ListOf reads a named array out of a list response.
@@ -314,4 +417,29 @@ func ListOf(t *testing.T, response Response, key string) []map[string]any {
 		}
 	}
 	return rows
+}
+
+// superUserTotpSecret is the superuser's authenticator secret: from the
+// environment, or - for a run on a development machine, as DATABASE_URL is -
+// from the repository's .env, where the server seeds it from.
+func superUserTotpSecret() string {
+	if secret := os.Getenv("PINGLE_TEST_SUPERUSER_TOTP_SECRET"); secret != "" {
+		return secret
+	}
+	directory, err := os.Getwd()
+	if err != nil {
+		return ""
+	}
+	for range 6 {
+		if content, err := os.ReadFile(directory + "/.env"); err == nil {
+			for _, line := range strings.Split(string(content), "\n") {
+				if value, ok := strings.CutPrefix(strings.TrimSpace(line), "PINGLE_TEST_SUPERUSER_TOTP_SECRET="); ok {
+					return strings.TrimSpace(value)
+				}
+			}
+			return ""
+		}
+		directory = directory[:max(strings.LastIndex(directory, "/"), 0)]
+	}
+	return ""
 }

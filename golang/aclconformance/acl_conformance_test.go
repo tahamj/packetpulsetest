@@ -40,7 +40,22 @@ var gatedRoutes = []routeCheck{
 	{"list roles", http.MethodGet, "/staff/role/list", nil, "acl_manage"},
 	{"list audit trail", http.MethodGet, "/auditlog/list", nil, "auditlog_view"},
 	{"read LDAP settings", http.MethodGet, "/ldap/config", nil, "ldap_manage"},
+	// The SMS gateway is part of how people sign in, so it is gated by the
+	// capability that decides who signs in how.
+	{"read SMS gateway", http.MethodGet, "/sms/gateway", nil, "staff_manage"},
+	// Where people signed in and out is about people; so is whether their
+	// sign-in needs a location.
+	{"list check-ins", http.MethodGet, "/staff/checkin/list", nil, "staff_manage"},
+	{"save organisation settings", http.MethodPut, "/organisation/settings",
+		map[string]any{"require_checkin_location": false, "device_test_target": ""}, "staff_manage"},
 	{"list API keys", http.MethodGet, "/apikey/list", nil, "apikey_manage"},
+	// The result export hands the organisation's results to a machine, as the
+	// Results API does, so the same capability gates it.
+	{"read result export", http.MethodGet, "/export/target", nil, "apikey_manage"},
+	{"save result export", http.MethodPut, "/export/target",
+		map[string]any{"is_enabled": false, "protocol": "sftp"}, "apikey_manage"},
+	// A ticket that does not exist: 404 to whoever may export, 403 to the rest.
+	{"download a ticket's CSV", http.MethodGet, "/diagnostic/00000000-0000-4000-8000-000000000000/report.csv", nil, "report_export"},
 	{"view licence", http.MethodGet, "/licence/my", nil, "licence_view"},
 }
 
@@ -169,4 +184,36 @@ func findStaffId(t *testing.T, ownerToken, roleName string) string {
 		}
 	}
 	return ""
+}
+
+// Everyone in an organisation reads its settings - they decide what its
+// sign-in asks for - and only its own.
+func TestEveryMemberReadsTheirOrganisationsSettings(t *testing.T) {
+	pingletest.RequireServer(t)
+
+	ownerToken, organisationId := pingletest.SignUpOrganisation(t, "aclsettings")
+	roles := pingletest.Call(t, http.MethodGet, "/staff/role/list", ownerToken, nil)
+	viewerRoleId := ""
+	for _, role := range pingletest.ListOf(t, roles, "roles") {
+		if role["role_name"] == "Viewer" {
+			viewerRoleId, _ = role["role_id"].(string)
+		}
+	}
+	viewer := colleagueWithRole(t, ownerToken, viewerRoleId, "Viewer")
+	if viewer == "" {
+		t.Fatal("could not provision a Viewer")
+	}
+
+	saved := pingletest.Call(t, http.MethodPut, "/organisation/settings", ownerToken,
+		map[string]any{"require_checkin_location": true, "device_test_target": "https://NOC.Example.net/health"})
+	if saved.Status != http.StatusOK || saved.Body["require_checkin_location"] != true ||
+		saved.String("device_test_target") != "noc.example.net" {
+		t.Fatalf("saving: %d %s", saved.Status, saved.Raw)
+	}
+	// Everyone reads it: the target is what their own device tests.
+	read := pingletest.Call(t, http.MethodGet, "/organisation/settings", viewer, nil)
+	if read.Status != http.StatusOK || read.String("organisation_id") != organisationId ||
+		read.Body["require_checkin_location"] != true || read.String("device_test_target") != "noc.example.net" {
+		t.Errorf("a Viewer reading the settings: %d %s", read.Status, read.Raw)
+	}
 }

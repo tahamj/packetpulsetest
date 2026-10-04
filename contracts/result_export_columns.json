@@ -1,0 +1,30 @@
+{
+  "_comment": "The header row of every Pingle results CSV - the download beside a ticket (GET /diagnostic/{id}/report.csv), the Results API pull (GET /result/export.csv) and the scheduled push to an organisation's own server. An IT system's importer is written against this list, so columns are only ever ADDED, at the end. The Go writer's test asserts it writes exactly these; the integration suite asserts the server sends exactly these.",
+  "columns": [
+    "result_id",
+    "request_id",
+    "source",
+    "tt_number",
+    "customer_id",
+    "site_name",
+    "address",
+    "resolved_ip",
+    "ip_version",
+    "counted",
+    "method",
+    "reachable",
+    "packets_sent",
+    "packets_received",
+    "packets_lost",
+    "loss_pct",
+    "min_rtt_ms",
+    "avg_rtt_ms",
+    "max_rtt_ms",
+    "jitter_ms",
+    "mos",
+    "sla_status",
+    "fault_class",
+    "error_message",
+    "checked_on_utc"
+  ]
+}

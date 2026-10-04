@@ -1,5 +1,15 @@
 {
-  "_comment": "The fields one entry of POST /diagnostic/clientobservation `observations` may carry. The server decodes strictly - any other field is a 400 - so this list is the contract. The Go handler test asserts the server's request type accepts exactly these; the Flutter test asserts the client sends only these. Change both sides and this file together.",
+  "_comment": "The fields POST /diagnostic/clientobservation may carry: `request_fields` at the top of the body, `fields` in each entry of `observations`. The server decodes strictly - any other field is a 400 - so these lists are the contract. The Go handler test asserts the server's request types accept exactly these; the Flutter test asserts the client sends only these. Change both sides and this file together.",
+  "request_fields": [
+    "customer_id",
+    "tt_number",
+    "notes",
+    "sample_count",
+    "timeout_ms",
+    "observations",
+    "download_mbps",
+    "upload_mbps"
+  ],
   "fields": [
     "target_label",
     "target_address",

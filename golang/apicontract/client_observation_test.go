@@ -78,6 +78,10 @@ func TestClientObservationIsRecordedAsClientSourced(t *testing.T) {
 	if success, _ := request["success_count"].(float64); success != 1 {
 		t.Errorf("success_count = %v, want 1 - the dead target must not count", success)
 	}
+	// No speed test with this run: none recorded, not a zero.
+	if _, has := request["download_mbps"]; has {
+		t.Errorf("download_mbps = %v on a run with no speed test", request["download_mbps"])
+	}
 
 	results := pingletest.ListOf(t, attached, "results")
 	if len(results) != 2 {
@@ -212,5 +216,31 @@ func TestClientObservationRefusesAnAnonymousCaller(t *testing.T) {
 		"", oneRun("TT-ANON"))
 	if response.Status != http.StatusUnauthorized {
 		t.Errorf("status = %d, want 401: %s", response.Status, response.Raw)
+	}
+}
+
+// A speed measured with the run is filed with it and read back with the ticket.
+func TestALineSpeedIsFiledWithTheDevicesRun(t *testing.T) {
+	pingletest.RequireServer(t)
+
+	ownerToken, _ := pingletest.SignUpOrganisation(t, "clientspeed")
+	ttNumber := fmt.Sprintf("TT-SPEED-%d", time.Now().UnixNano())
+	run := oneRun(ttNumber)
+	run["download_mbps"], run["upload_mbps"] = 87.4, 12.25
+
+	attached := pingletest.Call(t, http.MethodPost, "/diagnostic/clientobservation", ownerToken, run)
+	if attached.Status != http.StatusCreated {
+		t.Fatalf("attach returned %d: %s", attached.Status, attached.Raw)
+	}
+	requestId, _ := attached.Body["request"].(map[string]any)["request_id"].(string)
+	detail := pingletest.Call(t, http.MethodGet, "/diagnostic/"+requestId, ownerToken, nil)
+	request, _ := detail.Body["request"].(map[string]any)
+	if request["download_mbps"] != 87.4 || request["upload_mbps"] != 12.25 {
+		t.Errorf("read back %v / %v, want 87.4 / 12.25", request["download_mbps"], request["upload_mbps"])
+	}
+
+	run["tt_number"], run["upload_mbps"] = ttNumber+"-X", -3
+	if refused := pingletest.Call(t, http.MethodPost, "/diagnostic/clientobservation", ownerToken, run); refused.Status != http.StatusUnprocessableEntity {
+		t.Errorf("a negative speed answered %d, want 422", refused.Status)
 	}
 }

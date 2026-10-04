@@ -23,7 +23,7 @@ var contractFields = []string{
 
 // resultFields are the per-site fields it promises.
 var resultFields = []string{
-	"site_name", "ip_address", "reachable",
+	"site_name", "ip_address", "ip_version", "report_only", "reachable",
 	"packets_sent", "packets_recv", "packets_lost", "packet_loss",
 }
 

@@ -9,6 +9,7 @@ package tenancyisolation
 import (
 	"fmt"
 	"net/http"
+	"strings"
 	"testing"
 	"time"
 
@@ -276,4 +277,122 @@ func TestFreeingASeatRequiresStaffManage(t *testing.T) {
 	if list.Status != http.StatusForbidden {
 		t.Errorf("a member listing the organisation's sessions got %d, want 403", list.Status)
 	}
+}
+
+// A field engineer's sign-in and sign-out are their organisation's check-ins,
+// with where each happened. Another organisation never sees them, and an
+// administrator's own sign-ins are in the activity trail instead.
+func TestCheckinsAreTheOrganisationsOwnFieldSessions(t *testing.T) {
+	pingletest.RequireServer(t)
+
+	ownerA, _ := pingletest.SignUpOrganisation(t, "checkina")
+	ownerB, _ := pingletest.SignUpOrganisation(t, "checkinb")
+
+	roles := pingletest.Call(t, http.MethodGet, "/staff/role/list", ownerA, nil)
+	engineerRoleId := ""
+	for _, role := range pingletest.ListOf(t, roles, "roles") {
+		if role["role_name"] == "NOC Engineer" {
+			engineerRoleId, _ = role["role_id"].(string)
+		}
+	}
+	email := fmt.Sprintf("engineer-%s@pingle.test", pingletest.UniqueCode("field"))
+	const password = "FieldPass2026!"
+	created := pingletest.Call(t, http.MethodPost, "/user/add", ownerA, map[string]any{
+		"email": email, "password": password, "display_name": "Field Engineer", "role_id": engineerRoleId,
+	})
+	if created.Status != http.StatusCreated {
+		t.Fatalf("adding an engineer: %d %s", created.Status, created.Raw)
+	}
+
+	token := pingletest.SignInAt(t, email, password, map[string]any{
+		"status": "captured", "latitude": 19.076090, "longitude": 72.877426, "accuracy_m": 9,
+	})
+	if out := pingletest.Call(t, http.MethodPost, "/user/signout", token, map[string]any{
+		"location": map[string]any{"status": "unavailable"},
+	}); out.Status != http.StatusOK {
+		t.Fatalf("signing out: %d %s", out.Status, out.Raw)
+	}
+
+	ours := pingletest.ListOf(t, pingletest.Call(t, http.MethodGet, "/staff/checkin/list", ownerA, nil), "checkins")
+	if len(ours) != 1 {
+		t.Fatalf("A lists %d check-ins, want the engineer's one - and not the owner's own sign-ins", len(ours))
+	}
+	row := ours[0]
+	in, _ := row["in"].(map[string]any)
+	out, _ := row["out"].(map[string]any)
+	if row["email"] != strings.ToLower(email) || row["session_state"] != "signed_out" ||
+		in["status"] != "captured" || in["latitude"] != 19.07609 || out["status"] != "unavailable" {
+		t.Errorf("check-in = %v", row)
+	}
+	if _, leaked := row["token_id"]; leaked {
+		t.Error("a check-in carries a token id")
+	}
+
+	theirs := pingletest.Call(t, http.MethodGet, "/staff/checkin/list", ownerB, nil)
+	if list := pingletest.ListOf(t, theirs, "checkins"); theirs.Status != http.StatusOK || len(list) != 0 {
+		t.Errorf("B lists %d check-ins (%d), want none of A's", len(list), theirs.Status)
+	}
+}
+
+// Results leave an organisation three ways - a ticket's CSV, the API key
+// pull, and the push to its own file server - and each carries only its own.
+func TestExportsCarryOnlyTheOrganisationsOwnResults(t *testing.T) {
+	pingletest.RequireServer(t)
+	alphaToken, _ := pingletest.SignUpOrganisation(t, "export-a")
+	betaToken, _ := pingletest.SignUpOrganisation(t, "export-b")
+
+	pingletest.Call(t, http.MethodPost, "/dnssite/add", alphaToken, map[string]any{
+		"site_name": "loopback", "ip_address": "127.0.0.1",
+	})
+	ttNumber := fmt.Sprintf("TT-EXPORT-ISO-%d", testStamp())
+	submit := pingletest.Call(t, http.MethodPost, "/diagnostic/submit", alphaToken, map[string]any{
+		"customer_id": "CUST-ISO", "tt_number": ttNumber, "packet_count": 1, "timeout_ms": 900,
+	})
+	if submit.Status != http.StatusCreated {
+		t.Skipf("alpha could not run a diagnostic: %d %s", submit.Status, submit.Raw)
+	}
+	request, _ := submit.Body["request"].(map[string]any)
+	requestId, _ := request["request_id"].(string)
+
+	t.Run("beta cannot download alpha's ticket", func(t *testing.T) {
+		response := pingletest.Call(t, http.MethodGet, "/diagnostic/"+requestId+"/report.csv", betaToken, nil)
+		if response.Status != http.StatusNotFound || strings.Contains(string(response.Raw), ttNumber) {
+			t.Errorf("beta's download of alpha's ticket = %d %s", response.Status, response.Raw)
+		}
+	})
+
+	t.Run("beta's key pulls none of alpha's results", func(t *testing.T) {
+		issued := pingletest.Call(t, http.MethodPost, "/apikey/add", betaToken, map[string]any{"label": "iso"})
+		if issued.Status != http.StatusCreated {
+			t.Skipf("could not issue beta a key: %d", issued.Status)
+		}
+		pulled := pingletest.Call(t, http.MethodGet, "/result/export.csv", issued.String("api_key"), nil)
+		if pulled.Status != http.StatusOK || strings.Contains(string(pulled.Raw), ttNumber) {
+			t.Errorf("beta's pull = %d, holding alpha's ticket: %v", pulled.Status, strings.Contains(string(pulled.Raw), ttNumber))
+		}
+	})
+
+	t.Run("beta cannot see or change alpha's file server", func(t *testing.T) {
+		saved := pingletest.Call(t, http.MethodPut, "/export/target", alphaToken, map[string]any{
+			"is_enabled": false, "protocol": "sftp", "host": "alpha-files.example.com",
+			"username": "alpha", "password": "alpha-secret",
+		})
+		if saved.Status != http.StatusOK || saved.Body["has_password"] != true {
+			t.Fatalf("alpha's save: %d %s", saved.Status, saved.Raw)
+		}
+		if strings.Contains(string(saved.Raw), "alpha-secret") {
+			t.Error("the password came back in the response")
+		}
+		betaView := pingletest.Call(t, http.MethodGet, "/export/target", betaToken, nil)
+		if betaView.Status != http.StatusOK || betaView.String("host") != "" || betaView.Body["has_password"] != false {
+			t.Errorf("beta sees %d %s, want an empty target of its own", betaView.Status, betaView.Raw)
+		}
+		pingletest.Call(t, http.MethodPut, "/export/target", betaToken, map[string]any{
+			"is_enabled": false, "protocol": "ftp", "host": "beta-files.example.com",
+		})
+		alphaView := pingletest.Call(t, http.MethodGet, "/export/target", alphaToken, nil)
+		if alphaView.String("host") != "alpha-files.example.com" || alphaView.Body["has_password"] != true {
+			t.Errorf("beta's save changed alpha's target: %s", alphaView.Raw)
+		}
+	})
 }

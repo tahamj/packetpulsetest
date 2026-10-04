@@ -286,13 +286,11 @@ func TestOwnSessionsDoNotConsumeASecondSeat(t *testing.T) {
 
 	// Three sign-ins by the same person against a one-seat licence. A seat is
 	// held by a PERSON, not by a tab.
+	// Each completes both steps: a session is what holds a seat, and only the
+	// second step opens one. SignIn fails the test on any refusal.
 	for attempt := 1; attempt <= 3; attempt++ {
-		response := pingletest.Call(t, http.MethodPost, "/user/signin", "", map[string]any{
-			"email": email, "password": password,
-		})
-		if response.Status != http.StatusOK {
-			t.Fatalf("sign-in %d of the same person was refused: %d %s",
-				attempt, response.Status, response.Raw)
+		if token := pingletest.SignIn(t, email, password); token == "" {
+			t.Fatalf("sign-in %d of the same person opened no session", attempt)
 		}
 	}
 }
@@ -302,7 +300,7 @@ func TestSuperUserIsNotSeatLimited(t *testing.T) {
 	pingletest.RequireServer(t)
 
 	for attempt := 1; attempt <= 3; attempt++ {
-		if token := pingletest.SuperUserToken(t); token == "" {
+		if token := pingletest.SuperUserSignIn(t); token == "" {
 			t.Fatalf("the superuser was refused on attempt %d", attempt)
 		}
 	}
@@ -389,3 +387,56 @@ func addColleague(t *testing.T, ownerToken, organisationId string) (email, passw
 // anything that has to be unique against rows already stored - an org_code,
 // which the database declares UNIQUE - use pingletest.UniqueCode instead.
 func randomStamp() int64 { return time.Now().UnixNano() }
+
+// A password alone opens nothing. The token comes from the second step, a
+// wrong code says how many tries are left, and a challenge id that is not one
+// is refused outright.
+func TestSignInNeedsTheSecondFactor(t *testing.T) {
+	pingletest.RequireServer(t)
+
+	_, _, email, password := pingletest.SignUpUnassigned(t, "twostep")
+
+	first := pingletest.Call(t, http.MethodPost, "/user/signin", "", map[string]any{
+		"email": email, "password": password,
+	})
+	if first.Status != http.StatusOK || first.String("token") != "" || first.String("method") != "totp" {
+		t.Fatalf("the password step = %d %s, want an authenticator challenge and no token", first.Status, first.Raw)
+	}
+	challengeId := first.String("challenge_id")
+
+	wrong := pingletest.Call(t, http.MethodPost, "/user/signin/verify", "", map[string]any{
+		"challenge_id": challengeId, "code": "000000",
+	})
+	if wrong.Status != http.StatusUnauthorized || wrong.ErrorCode() != "invalid_code" {
+		t.Fatalf("a wrong code = %d %s", wrong.Status, wrong.Raw)
+	}
+	if details, _ := wrong.Body["error"].(map[string]any)["details"].(map[string]any); details["attempts_left"] != "4" {
+		t.Errorf("a wrong code did not say four tries remain: %s", wrong.Raw)
+	}
+
+	malformed := pingletest.Call(t, http.MethodPost, "/user/signin/verify", "", map[string]any{
+		"challenge_id": "not-a-challenge", "code": "123456",
+	})
+	if malformed.Status != http.StatusBadRequest {
+		t.Errorf("a malformed challenge = %d, want 400", malformed.Status)
+	}
+
+	right := pingletest.Call(t, http.MethodPost, "/user/signin/verify", "", map[string]any{
+		"challenge_id": challengeId, "code": pingletest.NextCode(t, email),
+	})
+	token := right.String("token")
+	if right.Status != http.StatusOK || token == "" {
+		t.Fatalf("the right code = %d %s", right.Status, right.Raw)
+	}
+	if me := pingletest.Call(t, http.MethodGet, "/user/me", token, nil); me.Status != http.StatusOK {
+		t.Errorf("the token from the second step does not work: %d", me.Status)
+	}
+
+	// A finished sign-in cannot be finished again.
+	again := pingletest.Call(t, http.MethodPost, "/user/signin/verify", "", map[string]any{
+		"challenge_id": challengeId, "code": pingletest.NextCode(t, email),
+	})
+	if again.Status != http.StatusUnauthorized || again.ErrorCode() != "challenge_expired" {
+		t.Errorf("finishing a sign-in twice = %d %s", again.Status, again.Raw)
+	}
+}
