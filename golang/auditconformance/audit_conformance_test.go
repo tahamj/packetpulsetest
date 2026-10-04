@@ -356,3 +356,47 @@ func TestAnAdministratorsSignInAndOutShowWhereTheyHappened(t *testing.T) {
 		t.Errorf("the chain does not verify: %d %s", verify.Status, verify.Raw)
 	}
 }
+
+// A wrong password on an administrator's account reaches the trail as a
+// failed sign-in - the account, why, and from where - and the chain still
+// verifies with it in. Asked for by the customer: administrator logins
+// tracked in full, which includes the ones that did not get in.
+func TestAFailedAdministratorSignInIsRecorded(t *testing.T) {
+	pingletest.RequireServer(t)
+
+	ownerToken, _ := pingletest.SignUpOrganisation(t, "auditfailed")
+	waitForSignIn(t, ownerToken)
+	me := pingletest.Call(t, http.MethodGet, "/user/me", ownerToken, nil)
+
+	refused := pingletest.Call(t, http.MethodPost, "/user/signin", "", map[string]any{
+		"email": me.String("email"), "password": "not-the-password",
+	})
+	if refused.Status != http.StatusUnauthorized {
+		t.Fatalf("a wrong password answered %d", refused.Status)
+	}
+
+	var failed map[string]any
+	deadline := time.Now().Add(10 * time.Second)
+	for failed == nil && time.Now().Before(deadline) {
+		response := pingletest.Call(t, http.MethodGet, "/auditlog/list?entity_type=session&limit=200", ownerToken, nil)
+		for _, entry := range pingletest.ListOf(t, response, "entries") {
+			if entry["event_type"] == "sign_in_failed" {
+				failed = entry
+			}
+		}
+		if failed == nil {
+			time.Sleep(200 * time.Millisecond)
+		}
+	}
+	if failed == nil {
+		t.Fatal("the failed sign-in never reached the activity trail")
+	}
+	details, _ := failed["details"].(map[string]any)
+	if failed["actor_email"] != me.String("email") || failed["actor_ip"] == "" || details["reason"] != "wrong_password" {
+		t.Errorf("failed sign-in = %v, want the account, its address and the reason", failed)
+	}
+	verify := pingletest.Call(t, http.MethodGet, "/auditlog/verify", ownerToken, nil)
+	if verify.Status != http.StatusOK || verify.Body["intact"] != true {
+		t.Errorf("the chain does not verify with the failure in it: %d %s", verify.Status, verify.Raw)
+	}
+}

@@ -1,0 +1,5 @@
+# Renders manual-testing/parts/*.md into the two generated editions of the
+# guide (MANUAL_TESTING_GUIDE.md and manual-testing-guide.html) through
+# manual-testing/build/build_guide.py, which the docs suite runs with --check.
+# MIT-licensed, pure Python; its only dependency is mdurl.
+markdown-it-py==3.0.0

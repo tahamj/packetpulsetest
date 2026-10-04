@@ -1,0 +1,1268 @@
+<div align="center">
+
+# 📡 Pingle Manual Testing Guide
+
+### *& Master Knowledge Manual*
+
+**The single source of truth for testing, understanding, selling, operating, and releasing Pingle.**
+
+<br>
+
+`v2026.10-PROD-v1`  ·  `Verified against source 2026-10-04`
+
+<br>
+
+| 🧭 Screens | 🔌 API routes | 🔐 Capabilities | 🗄️ Migrations | 💬 Catalogue strings | ❓ Help topics | 🧪 Guard suites |
+|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| **17** <br><sub>in the navigation rail</sub> | **110** <br><sub>under `/api/v1`</sub> | **17** <br><sub>3 built-in roles</sub> | **24** <br><sub>applied at boot</sub> | **835** <br><sub>English, server-served</sub> | **18** <br><sub>one per screen</sub> | **11** <br><sub>+ `load`, opt-in</sub> |
+
+<br>
+
+*Quad-Lens Architecture — an **executable QA playbook**, an **onboarding & user manual**, a **commercial & sales pitch**, and a **developer release confidence guide**.*
+
+<sub>🔒 Every number above is asserted against source by **`./pingletest.sh docs`**. This guide is **generated** from `pingletest/manual-testing/parts/` by `pingletest/manual-testing/build/build_guide.py` — edit the parts, not the outputs.</sub>
+
+</div>
+
+---
+
+## 🧭 How To Read This Manual
+
+Pingle is a multi-tenant network-diagnostics service for telecom operators: a Go API, a Flutter client (web, desktop, phone) and PostgreSQL, live at **https://pingle.rummaan53.com**. It is structurally a server-side request forgery primitive with a user interface — an authenticated person names an address and the server sends traffic to it — so much of what follows is about what must **not** happen.
+
+| If you are a… | Read, in this order | What you get |
+|---|---|---|
+| 💼 **Sales & account lead** | Part L → every chapter's **🌟 Commercial Presentation** → Journeys `JRN-001`, `JRN-004`, `JRN-006` | What to say, to whom, and the evidence behind each claim. |
+| 👥 **Operator / NOC user** | Part L → every chapter's **📖 User Guide** → Journeys `JRN-002`, `JRN-003` | Which screen does what, what each status means, and how to recover from each refusal. |
+| 🧪 **QA & field tester** | Part 0 → Part II test tables → Part III → Part IV → Part V §3 | Concrete steps, expected results, and the **🛑 Must NOT happen** assertions. |
+| ⚙️ **Backend engineer** | Part 0 §0.3–§0.6 → each chapter's **⚙️ Developer Guide** → Appendix A–D | Routes, capabilities, migrations, invariants, and the suites that guard them. |
+| 📱 **Flutter engineer** | Part 0 §0.4 → Part II → Part IV §4.1–§4.3 | Screens, states (skeleton, empty, error, 403), catalogue strings, and form-factor rules. |
+| 🛡️ **Security reviewer** | Part IV §4.4 → `AUTH-*`, `AUD-*`, `EXP-*`, `SITE-*` cases → Appendix A | Tenancy, the destination policy, the activity trail, and secrets handling. |
+
+<br>
+
+### Reading conventions
+
+| Badge | Meaning |
+|:---:|---|
+| ✅ **VERIFIED** | Checked against source on 2026-10-04. The file, route or constant is cited. |
+| 🔒 **INVARIANT** | A guarantee of the system. Seeing it violated is a **P0 release blocker** (Part V §5.2). |
+| 🛡️ **GUARD** | A server-side refusal, with its status code and envelope `code`. |
+| ⚠️ **TRAP** | A place testers have drawn the wrong conclusion before. Read it before filing a bug. |
+| 🌟 **SALES** | The customer value and how to say it. |
+| 📖 **USER** | Which screen, which button, what it means. |
+| ⚙️ **DEV** | Routes, tables, invariants and the automated coverage. |
+| 🛑 **MUST NOT HAPPEN** | The negative assertion each test case exists to make. |
+
+> [!TIP]
+> Every manual test case carries a stable **Test ID** (`AUTH-004`, `JRN-003`, …). Quote it in bug reports and run records. IDs are **never reused** — a retired case leaves its number vacant — and `./pingletest.sh docs` fails if two cases share one.
+
+> [!CAUTION]
+> **Never test against live customer data.** Use a local server with a disposable database (Part 0 §0.2), or the live demo organisation for read-only walkthroughs. Tenancy, ACL and audit cases need **two organisations** of your own — testing them from a single account proves nothing.
+
+---
+
+## 📋 What Changed in v1 — the October 2026 Customer Release
+
+> [!IMPORTANT]
+> **Deployed to https://pingle.rummaan53.com on 2026-10-04.** It answers eight requirements from Northwind Telecom plus their remark that administrator logins be tracked. Every row below must be verified before a release is signed off.
+
+| Requirement | What changed | Where to test | Source of truth |
+|---|---|---|---|
+| **1. Show IPv6** | Client IPs are read only from trusted proxies and shown canonically; a dual-stack site is measured over **both** families, the IPv6 result **reported, not counted**; the device test shows its IPv4 and IPv6 egress. | `V6-*`, `DEV-004` | `pinglego/pkg/common/probeguard/ProbeGuardPolicy.go`<br>`pinglego/pkg/common/dbclient/migrations/0023_2026_10_04_dual_stack_results.sql` |
+| **2. Two-step sign-in** | Every sign-in has a second step: an authenticator app (TOTP) or a texted code through the organisation's **own Twilio account**. Owners and superusers always use an authenticator; recovery codes for a lost phone. | `AUTH-*`, `SMS-*` | `pinglego/pkg/usermicroservice/userservice/UserSignInSteps.go`<br>`pinglego/pkg/common/dbclient/migrations/0019_2026_10_03_two_step_sign_in.sql` |
+| **3. No target dropdown** | *Test from this device* tests the target the organisation chose (Cloudflare DNS by default), with one-tap presets for whoever may change it. | `DEV-*` | `pingleflutter/lib/diagnosticmicroservice/presentation/screens/ClientProbeScreen.dart` |
+| **4. Location at check-in** | Sign-in and sign-out record the device's position for people set to *Record location*; field engineers on a separate **Check-ins** screen with address and map link; a per-organisation *Require location* rule. | `CHK-*`, `LOC-*` | `pinglego/pkg/common/dbclient/migrations/0020_2026_10_03_session_checkin.sql`<br>`pinglego/pkg/common/geocode/Geocode.go` |
+| **5. Loss and jitter** | Loss and RFC 3550 jitter on every result, ticket, history row, dashboard row, PDF and SLA report. | `DIAG-005`, `HIST-*`, `MON-*` | `pinglego/pkg/pingmicroservice/pingprobe/PingVoiceQuality.go`<br>`pinglego/pkg/common/dbclient/migrations/0022_2026_10_03_loss_and_jitter.sql` |
+| **6. CSV, FTP and download** | **Export CSV** on every ticket; a Results API bulk pull; a scheduled push to the organisation's own **SFTP / FTPS / FTP** server with the SSH host key confirmed first. | `CSV-*`, `EXP-*` | `pinglego/pkg/diagnosticmicroservice/diagnosticexport/DiagnosticExport.go`<br>`pinglego/pkg/exportmicroservice/exportservice/ExportService.go` |
+| **7. English only** | The other 22 languages were removed; wording is still served by the server, in English. | `SET-003` | `scripts/intellicodegen/pinglestrings.py` |
+| **8. Load testing** | A device line-speed test (Cloudflare), and a platform load suite: 20 people at once, a traced 200-site sweep, API and CSV pulls against p95 budgets. | `DEV-005`, Part IV §4.5 | `pingletest/golang/loadtest/load_test.go`<br>`.github/workflows/pingle-load.yml` |
+| **Admin logins tracked** | Administrators' sign-ins and sign-outs in the **Activity** trail with device, browser, address and place; **failed** attempts on their accounts too, with the reason. | `AUD-*` | `pinglego/pkg/auditlogmicroservice/auditlogconstants/AuditLogRegistry.go` |
+
+---
+# Part 0 — Operational Prerequisites
+
+Everything you need before the first test case: where to run Pingle, how to sign in to it, and how the automated gate relates to the manual one.
+
+## 0.1 Environments
+
+| Environment | Address | Database | Use it for | Never use it for |
+|---|---|---|---|---|
+| **Local development** | `http://localhost:8080` (API) · `flutter run -d chrome` (app) | `pingledb` on the local PostgreSQL | Building and trying features | Destructive cases you cannot undo by hand |
+| **Disposable test** | any free port, e.g. `http://localhost:18080` | a database you create for the run (e.g. `pingle_manual_test`) | **Every manual test pass** and the integration suites | — |
+| **Live** | **https://pingle.rummaan53.com** (site `/`, app `/app/`, API `/api/`) | `pingledb` on the Oracle host, behind PgBouncer | Read-only walkthroughs in the demo organisation; the post-deploy checks of Part V §5.4 | Tenancy, ACL, lockout or delete cases; anything that changes a real customer's data |
+
+> [!WARNING]
+> ⚠️ **TRAP — the `.env` fallback.** The Go database tests read `DATABASE_URL`, and when it is unset they fall back to the repository's `.env` — your development database — and **apply every migration to it on first connect**. Always export a disposable `DATABASE_URL` before `go test`, or run tests only through `./pingletest.sh`, which does.
+
+## 0.2 Toolchain
+
+| Tool | Version | Why |
+|---|---|---|
+| Go | 1.26 | `pinglego/` and the integration suites in `pingletest/golang/` |
+| Flutter | 3.35 | `pingleflutter/` — web, macOS, Windows, Android, iOS |
+| PostgreSQL | 18 (client tools too) | The database, and `pg_dump` for the backup suite |
+| Python | 3.9+ (3.13 recommended) | `scripts/intellicodegen/pinglestrings.py`, the coverage floors, this guide's generator |
+| gpg, rsync | any recent | The backup suite (`scripts/deploy/backup/`) |
+| govulncheck | latest | Part of the `unit` suite |
+| Node | 18+ | The public self-test page's probe engine tests |
+
+## 0.3 Starting a disposable stack
+
+```bash
+# 1. a database of your own
+createdb pingle_manual_test
+
+# 2. the API, migrating that database at boot (migrations are embedded in the binary)
+cd pinglego
+DATABASE_URL=postgres://pingle:…@localhost:5432/pingle_manual_test?sslmode=disable \
+PORT=18080 APP_ENV=test REVERSE_GEOCODING=off go run ./cmd/pingleserver
+
+# 3. the app, pointed at it
+cd ../pingleflutter
+flutter run -d chrome --dart-define=PINGLE_API_BASE_URL=http://localhost:18080
+```
+
+`REVERSE_GEOCODING=off` stops sign-in positions being sent to a map service from a test run. Every other setting comes from `.env` (copy `.env.example`); Appendix D lists them all.
+
+## 0.4 Accounts and authenticators
+
+| Account | How it exists | Second step |
+|---|---|---|
+| **Platform superuser** | `OWNER_EMAIL` / `OWNER_PASSWORD` in `.env`, created at boot | Authenticator. Outside production, `OWNER_TOTP_SECRET` pre-enrols it so scripts can sign in; production refuses to boot with that set. |
+| **Demo owner** (`SEED_DEMO=true`) | `DEMO_EMAIL` / `DEMO_PASSWORD`, with an organisation, sites and a licence | Authenticator; `DEMO_TOTP_SECRET` likewise, outside production only. |
+| **Anyone else** | Sign up (lands in the holding organisation) or **Staff → Add** by an administrator | Sets up an authenticator at first sign-in, unless set to text and a gateway is on. |
+
+To act as a person in a manual test, add the authenticator secret shown at enrolment to any TOTP app (or `oathtool --totp -b <secret>`). Keep the **recovery codes** shown once at the end of enrolment — several cases use them.
+
+> [!IMPORTANT]
+> 🔒 **INVARIANT** — production refuses `OWNER_TOTP_SECRET` and `DEMO_TOTP_SECRET`: a second factor written in a configuration file is held by everyone who can read the file. `pinglego/pkg/common/config/Config.go` returns an error at boot; `REL-004` checks the live host.
+
+## 0.5 The automated gate
+
+`./pingletest.sh` runs every suite; `./pingletest.sh unit client` is the fast pair. Manual testing **adds to** this gate — it does not replace it. A release needs both (Part V).
+
+| Suite | What it proves | Needs |
+|---|---|---|
+| `tenancy` | One organisation can never read or change another's data | server |
+| `assignment` | Sign-up lands in the holding organisation; assignment and seats | server |
+| `acl` | Every role gets exactly its capabilities, both ways | server |
+| `audit` | The registry covers every mutation; the chain verifies; sign-ins (and failed ones) are recorded | server |
+| `translation` | The catalogue is complete and served | server |
+| `contract` | The Results API and CSV shapes, the export's destination guard | server |
+| `monitor` | SLA grading, schedules, alert damping, maintenance windows | server |
+| `unit` | Every Go package with `-race -shuffle`, coverage floors, govulncheck, the string generator | database |
+| `client` | Every Flutter screen, `flutter analyze`, the client coverage floor | — |
+| `backup` | The backup, drill and restore scripts, for real | database |
+| `docs` | This guide is current and every number, path, route and capability in it matches source | — |
+| `load` *(opt-in)* | 20 people, a traced 200-site sweep, API and CSV pulls against p95 budgets | server |
+
+Integration suites read `PINGLE_TEST_URL` (default `http://localhost:8080`). `PINGLE_TEST_REQUIRE_SUPERUSER=1` turns a missing superuser into a failure rather than a skip — a skipped suite looks exactly like a passing one.
+
+## 0.6 Deploying
+
+`scripts/deploy/PingleDeploy.sh --host mshop.rummaan53.com` builds from the working tree, runs `unit client backup` and the integration suites against `PINGLE_TEST_URL`, cross-compiles for linux/arm64, builds the web app with base href `/app/`, backs up the live database, then switches the release and restarts. `--api-only`, `--web-only` and `--site-only` ship one part; `--skip-guards` and `--skip-backup` are for a logged emergency only. Part V §5.4 is what to check afterwards.
+
+---
+# Part L — Learn Pingle
+
+The ideas every other part assumes, in plain words. Read this once, whatever your role.
+
+## L.1 Organisations, people and seats
+
+An **organisation** is one customer — a telecom operator such as Northwind Telecom. Everything it owns (sites, diagnostics, keys, settings, its trail) is invisible to every other organisation. 🔒 **INVARIANT** — every tenant query carries the caller's `organisation_id`; a request with none is refused, never answered for everyone.
+
+Signing up does **not** create an organisation. A new account waits in the **holding organisation** until the platform operator creates a tenant, places the account in it and issues a **licence**. The licence sets **seats** — how many people may be signed in *at once* — and how many sites may be tested. Forty engineers can share twenty seats across shifts; a person on a laptop and a phone holds one seat, not two.
+
+People hold a **role** (Administrator, NOC Engineer, Viewer, or one of the organisation's own) made of **capabilities** such as `diagnostic_run` or `staff_manage` (Appendix B). A person can be given an individual *allow* or *deny* on top. Changing someone's authority signs them out at once.
+
+## L.2 Sites, tickets and sweeps
+
+A **site** is an address worth testing: a customer router, a point of presence, a resolver. It may be an IP address or a hostname (resolved at test time, so a name that stops resolving is itself a fault).
+
+A **diagnostic** tests sites and files the result against a **TT number** — a trouble ticket in the operator's own system — and a **Customer ID**. A ticket can be tested many times; the attempts together show how the fault was worked. The engine sends ICMP echoes (or TCP connects where ICMP is unavailable), in parallel, and when **Trace failures** is on, walks the path to each failing site hop by hop.
+
+## L.3 What the numbers mean
+
+| Figure | Meaning | Good |
+|---|---|---|
+| **Loss** | Packets sent minus received, as a percentage. On a device test it is *query* loss, because a browser cannot send a packet. | 0% |
+| **Round trip** | Average, fastest and slowest response time, in ms. | Under the site's target |
+| **Jitter** | RFC 3550 interarrival jitter — how much *consecutive* round trips differ. Voice cares about this more than raw latency. | Low single digits of ms |
+| **MOS** | Mean Opinion Score (ITU-T G.107 E-model): how a phone call would sound over this path, 1–5. | Above 4.0; below 3.6 is noticed on a call |
+| **SLA** | **OK**, **Degraded** (within 80% of a threshold) or **Breached**, against the site's targets. | OK |
+| **Verdict** | Where the fault most likely lies — the customer's network, the access circuit, the carrier — with confidence and evidence. | "clean" |
+
+## L.4 IPv4, IPv6 and "not counted"
+
+A site whose name resolves to both an IPv4 and an IPv6 address is measured over **both**. The IPv6 result is shown, kept and exported, but marked **not counted**: the site's totals, alerts and SLA availability are carried by IPv4, because the customer's agreement is for the service and IPv4 still carries it. A site that is IPv6 *only* counts over IPv6 — otherwise it could never fail. When the server itself has no IPv6 route, an IPv6 address is reported as *could not be tested from here* rather than as an outage.
+
+## L.5 Two vantage points
+
+A **server-side diagnostic** measures from Pingle's data centre. **Test from this device** measures from wherever the person is, over their own connection — the right tool for "is it slow for me?". The two will not match, and both are correct: they measure different layers from different places. A device test can be **attached** to a ticket, where it sits beside the server's figures, labelled as measured on a device.
+
+## L.6 Two-step sign-in
+
+After the password, everyone gives a second step: a 6-digit code from an **authenticator app** (TOTP), or a code **texted** to their mobile through the organisation's own SMS gateway. Owners and the platform superuser always use an authenticator — they are the accounts that must never depend on a gateway someone else configures. Ten **recovery codes**, shown once at set-up, each sign in once if the phone is lost. Wrong codes count: ten across challenges lock the account for fifteen minutes. A wrong *password* never locks anything, so a stranger cannot lock someone out by typing their address.
+
+## L.7 Location at sign-in
+
+For people set to **Record location**, the device's position is recorded when they sign in and out — with the browser's or phone's permission, and a refusal recorded as one. A field engineer's appear on **Check-ins**; an administrator's beside their entries in **Activity**. An organisation can make sharing a position a condition of signing in. The address is looked up afterwards (Google, or OpenStreetMap when no key is set), so it may appear a moment later; the position is the record.
+
+## L.8 The activity trail
+
+Every successful change — who, what, from where, when — is written to a **hash chain**: each entry's hash covers the one before, so altering or removing any entry breaks every entry after it, and **Verify** names the first that does not follow. Administrators' sign-ins and sign-outs are in it, and so are **failed** sign-ins to administrators' accounts (at most twenty an hour per account). A position is shown beside an entry but never sealed into its hash: it is personal data that may have to be erased, and a chain entry never can be.
+
+## L.9 Results leaving Pingle
+
+| Way out | Who uses it | What |
+|---|---|---|
+| **Export PDF** | A person, from a ticket | The evidence document for the ticket or the customer |
+| **Export CSV** | A person, from a ticket | The same results as a spreadsheet, one row per site and family |
+| **Results API** | A machine with an API key | One ticket by TT number (JSON), or every result of up to 31 days as CSV |
+| **Result export** | Pingle, on a schedule | A CSV file per period, delivered to the organisation's own SFTP, FTPS or FTP server |
+
+All CSV comes from one writer with one header — the contract an IT system's importer is written against (`pingletest/contracts/result_export_columns.json`).
+
+---
+# Part II — Feature Chapters
+
+One chapter per area of the product, in the order a new customer meets them. Every chapter carries all four lenses — **🌟 Commercial**, **📖 User Guide**, **🧪 Testing Playbook** and **⚙️ Developer** — and `./pingletest.sh docs` fails if one is missing.
+
+Run every case on a disposable stack (Part 0 §0.3) with **two organisations of your own**: `ACME` (yours) and `RIVAL` (someone else's). Unless a case says otherwise, "an administrator" is ACME's owner and "an engineer" holds ACME's built-in *NOC Engineer* role.
+
+| Group | Chapters | Test IDs |
+|---|---|---|
+| 1 · Access | Sign-in and the second step · Sign-in security | `AUTH-*`, `SMS-*`, `LOC-*` |
+| 2 · People | Staff · Roles and permissions · Sessions and seats · Check-ins · Activity | `STF-*`, `ACL-*`, `SEAT-*`, `CHK-*`, `AUD-*` |
+| 3 · Diagnostics | Sites · Diagnostics and results · IPv6 · CSV · History and dashboard | `SITE-*`, `DIAG-*`, `V6-*`, `CSV-*`, `HIST-*` |
+| 4 · The customer's side | Test from this device | `DEV-*` |
+| 5 · Monitoring | SLA targets, schedules, alerts, maintenance, SLA report | `MON-*` |
+| 6 · Integrations | Results API keys · Result export · Directory | `API-*`, `EXP-*`, `LDAP-*` |
+| 7 · Platform and settings | Platform console · Settings · Public site | `PLAT-*`, `SET-*`, `WEB-*` |
+
+---
+## Group 1 — Access
+
+Signing in, the second step, and the organisation's own rules for both.
+
+---
+
+### 1.1 🔑 Sign-in and the second step
+
+**Screen:** the sign-in page at `/app/` · **Routes:** `POST /user/signin`, `/user/signin/verify`, `/user/signin/resend`, `/user/signin/enrol`, `/user/signout`
+
+- 🌟 **Commercial Presentation & Sales Pitch**: Two-step sign-in for *everyone*, not a premium add-on. A stolen password alone opens nothing. Field staff can get codes by text through **the operator's own Twilio account** — their sender, their DLT registration, their bill — while owners and the platform operator always use an authenticator app, so the accounts that matter most never depend on a gateway someone else configures. Recovery codes mean a lost phone is an inconvenience, not a helpdesk ticket.
+- 📖 **User Guide & Operational Flow**:
+  - **First sign-in:** email and password → scan the QR code with any authenticator app (or type the key shown beneath it) → enter one code → **save the ten recovery codes** shown once → you are in.
+  - **Every sign-in after:** email and password → the 6-digit code from the app (or texted to •••• 1234 if your administrator set you up for text; *Resend* after 30 seconds).
+  - **Lost phone:** *Lost your phone? Use a recovery code* on the code screen. Each works once. No codes left? Your administrator uses **Staff → Reset authenticator**; an owner asks the platform operator.
+  - **Location:** if you are asked to share your location, the browser or phone asks your permission. See §1.2 for when sharing is required.
+- 🧪 **Manual Testing Playbook**:
+  | ID | Persona | Scenario | Steps | Observable Expected Result |
+  |---|---|---|---|---|
+  | `AUTH-001` | New engineer | First sign-in sets up the authenticator | Administrator adds the engineer (**Staff → Add**). Engineer signs in with email and password | QR code and key shown; one correct code opens the app **after** the ten recovery codes are shown. 🛑 **Must NOT** reach the app before the codes are shown, or show them again later |
+  | `AUTH-002` | Engineer | Normal sign-in | Sign out; sign in; enter the current code | Signed in. The **Sessions and seats** row shows this device |
+  | `AUTH-003` | Engineer | A wrong code says how many tries are left | Enter `000000` | Refused (`invalid_code`) with attempts left; after **5** wrong codes on one challenge it is spent (`challenge_expired`, *Start again*). 🛑 **Must NOT** accept a 6th guess on the same challenge |
+  | `AUTH-004` | Engineer | A code cannot be used twice | Sign in with a code; sign out; sign in again within the same 30 seconds with the **same** code | Second use refused; the next code (30 s later) works. 🛑 **Must NOT** accept a replayed code |
+  | `AUTH-005` | Engineer | A recovery code works once | On the code screen choose *Lost your phone? Use a recovery code*, enter one; sign out; try the same one again | First signs in; second refused. 🛑 **Must NOT** accept a spent recovery code |
+  | `AUTH-006` | Tester | Ten wrong codes lock the account, a wrong password never does | Give 10 wrong codes across fresh challenges; then the right password and right code. Separately, 15 wrong **passwords** on another account | First account: *Locked — try again later* (`locked_out`, 15 min) even with the right code. Second account: still signs in with the right password. 🛑 **Must NOT** lock an account by wrong passwords — a stranger could lock anyone out |
+  | `AUTH-007` | Tester | Sign-in does not reveal which addresses exist | Sign in with an unknown email; then a known email with a wrong password | The same message and a similar response time. 🛑 **Must NOT** say "no such user" or answer the unknown address noticeably faster |
+  | `AUTH-008` | Owner | Owners always use an authenticator | Set the owner to *Text message* in **Staff → How they sign in** with a gateway on; sign in as the owner | Authenticator code asked, not a text. 🛑 **Must NOT** text an owner's code |
+  | `AUTH-009` | Engineer set to text | A texted code, with resend limits | Gateway on (§1.2), engineer has a mobile number and *Text message*. Sign in; wait; *Resend* | Code arrives; hint shows the last four digits; *Resend* unavailable for 30 s; at most 3 sends per sign-in and 5 per hour (`rate_limited`) |
+  | `AUTH-010` | Engineer set to text | No gateway means the authenticator, not a lock-out | Switch the gateway **off**; sign in as the engineer | Authenticator set-up (or code) asked instead. 🛑 **Must NOT** refuse the sign-in for want of a gateway |
+  | `AUTH-011` | Engineer set to text | A failing gateway is said, not bypassed | Gateway on with a wrong auth token; sign in as the engineer | 503 *Your sign-in code could not be sent just now. Try again.* 🛑 **Must NOT** fall back to an authenticator the engineer never set up |
+  | `AUTH-012` | Administrator | Reset authenticator for a lost phone | **Staff → (engineer) → Reset authenticator** | The engineer's sessions end at once; their next sign-in sets up a new authenticator. Activity shows the reset, by whom |
+  | `AUTH-013` | Superuser | Only the platform operator resets an owner | **Platform → (organisation) → Owners → Reset**; then try `POST /user/{ownerId}/secondfactor/reset` as an organisation administrator | Superuser: reset done, audited. Administrator: 403. 🛑 **Must NOT** let anyone inside the organisation reset its owner |
+  | `AUTH-014` | Engineer | An ended session returns to sign-in once | Revoke the engineer's session from another device, then use the app | One clean return to the sign-in page. 🛑 **Must NOT** loop between sign-in and an error |
+  | `AUTH-015` | Tester | A forged client address is ignored | `curl -H 'True-Client-IP: 6.6.6.6' -H 'X-Forwarded-For: 6.6.6.6'` a sign-in from a machine that is not a trusted proxy | Sessions and Activity show the real peer address. 🛑 **Must NOT** record `6.6.6.6` |
+- ⚙️ **Developer Guide & Release Confidence**:
+  - Flow: `pinglego/pkg/usermicroservice/userservice/UserSignInSteps.go` — the password step returns a challenge (`totp`, `totp_enrol` or `sms`), never a session; `newSession` runs only after verify. Challenge ids are 32 random bytes, stored as SHA-256; texted codes are keyed HMACs.
+  - 🔒 Attempts are counted **before** the code is checked, in one conditional `UPDATE … RETURNING`, so parallel guesses cannot slip under the limit.
+  - Limits: `maxAttempts = 5`, `lockAfter = 10`, `lockFor = 15m`, `resendAfter = 30s`, 3 sends per challenge, 5 texts per hour; a separate rate limiter for the second step (`SECOND_STEP_ATTEMPTS_PER_MINUTE`).
+  - Client IPs: `pinglego/pkg/common/apiratelimit/ApiRateLimit.go` walks `X-Forwarded-For` from the right past `TRUSTED_PROXIES` only, and returns canonical addresses (`::ffff:a.b.c.d` → `a.b.c.d`).
+  - Coverage: `pinglego/pkg/usermicroservice/userservice/UserSignInSteps_test.go`, the `assignment` and `audit` suites (every integration test signs in with a real TOTP code).
+
+---
+
+### 1.2 🛡️ Sign-in security — the SMS gateway and the location rule
+
+**Screen:** Configure → **Sign-in security** · **Routes:** `GET/PUT /sms/gateway`, `POST /sms/gateway/test`, `GET/PUT /organisation/settings` · **Capability:** `staff_manage`
+
+- 🌟 **Commercial Presentation & Sales Pitch**: The operator brings its own SMS provider account, so codes go out under its registered sender at its negotiated rates — and in India, under its own DLT template. One switch makes **sharing a location a condition of signing in**, for operators who must prove where field staff were. Owners are always let in, so a browser that will not share a position can never lock the organisation out.
+- 📖 **User Guide & Operational Flow**:
+  - **SMS gateway:** Twilio account SID (`AC…`), auth token (stored encrypted, never shown again — leave empty to keep it), a sender number or a messaging service SID, and the message with `%s` where the code goes. **Send a test to my mobile** texts *your own* number from your staff record.
+  - **Location at sign-in:** *Require location to sign in* refuses a sign-in without a position for people whose location is recorded. Who is recorded is set per person on **Staff → Record location at sign-in and sign-out**.
+- 🧪 **Manual Testing Playbook**:
+  | ID | Persona | Scenario | Steps | Observable Expected Result |
+  |---|---|---|---|---|
+  | `SMS-001` | Administrator | The form names each mistake | Save with SID `AB123`, sender `98765`, message without `%s`, and a 301-character message | Each field shows its own error (`validation_failed`). 🛑 **Must NOT** save any part of it |
+  | `SMS-002` | Administrator | The token is kept, never shown | Save a full gateway; reload; save again with the token empty | *A token is stored. Leave this empty to keep it.* hint; the second save keeps it. `GET /sms/gateway` carries `has_auth_token: true` and no token. 🛑 **Must NOT** return the token or clear it on an empty save |
+  | `SMS-003` | Administrator | Switching on needs everything a send needs | Turn the gateway on with no sender and no token | Refused against those fields. Saved switched **off**, the half-filled form is kept |
+  | `SMS-004` | Administrator | The test goes only to my own mobile | Clear your own mobile number on the Staff screen; *Send a test to my mobile*; then add it and send again | First: *Add your own mobile number on the Staff screen*. Second: sent, naming your number. 🛑 **Must NOT** accept a number from the request — the endpoint takes none |
+  | `SMS-005` | Administrator | A refused account is named | Save a wrong token, switch on, send a test | *The SMS provider refused these credentials* against the token. 🛑 **Must NOT** show the provider's raw reply (it can carry the SID) |
+  | `LOC-001` | Administrator | The location rule saves alone | Turn *Require location to sign in* on | Saved; the device-test target (§4.1) is unchanged. 🛑 **Must NOT** reset any other organisation setting |
+  | `LOC-002` | Engineer | Required means refused without a position | Rule on; engineer with *Record location* on; deny the browser's location prompt at sign-in | Refused (`location_required`, action *share location*) with guidance to allow it. Allowing it signs in. The owner, denying it, still signs in |
+  | `LOC-003` | Engineer | Not required means recorded as refused | Rule off; deny the prompt | Signed in; **Check-ins** shows *Location refused* for that sign-in |
+  | `LOC-004` | Engineer | A garbled position is not trusted | Send `POST /user/signin/verify` with `latitude: 123` | Refused as an invalid location (422) at sign-in; at sign-out recorded as *unavailable* rather than refusing the sign-out |
+- ⚙️ **Developer Guide & Release Confidence**:
+  - Gateway: `pinglego/pkg/smsmicroservice/smsservice/SmsService.go` (token sealed with the server's secret box, keyed from `JWT_SECRET`); provider: `pinglego/pkg/common/smsprovider/` (Twilio, fixed host).
+  - Settings: `pinglego/pkg/staffmicroservice/staffservice/StaffCheckinService.go`; `PUT /organisation/settings` requires **both** `require_checkin_location` and `device_test_target` — a whole-row save.
+  - Policy: superusers and owners are always asked for a position and never required to give one; no staff row means not asked; otherwise the person's `capture_location` and the organisation's rule decide. An unreadable policy fails closed.
+  - Coverage: `pinglego/pkg/smsmicroservice/**`, `pinglego/pkg/usermicroservice/userservice/UserCheckin_test.go`, `pingleflutter/test/sign_in_security_screen_test.dart`.
+
+---
+## Group 2 — People
+
+Who is in the organisation, what each may do, who is signed in, and the record of what they did.
+
+---
+
+### 2.1 👥 Staff
+
+**Screen:** Administer → **Staff** · **Routes:** `GET /staff/list`, `PUT/DELETE /staff/{staffId}`, `PUT /staff/{staffId}/secondfactor`, `POST /staff/{staffId}/secondfactor/reset`, `POST /user/add` · **Capability:** `staff_manage` (adding people: `user_manage`)
+
+- 🌟 **Commercial Presentation & Sales Pitch**: One screen to add a colleague, give them a role, decide how they sign in and whether their position is recorded — and to stop them instantly. Disabling someone signs them out at once, not when a token happens to expire, which is the property an auditor asks about first.
+- 📖 **User Guide & Operational Flow**: **Add** a person with email, a starting password and a role. Edit to change their role, staff code (unique in the organisation), department and designation (labels only — authority comes from the role). **How they sign in** sets the second step (authenticator or text, with their mobile number) and **Record location at sign-in and sign-out**. **Reset authenticator** is for a lost phone. Turning **Enabled** off signs them out and blocks sign-in.
+- 🧪 **Manual Testing Playbook**:
+  | ID | Persona | Scenario | Steps | Observable Expected Result |
+  |---|---|---|---|---|
+  | `STF-001` | Administrator | Add a colleague | **Add** with role *NOC Engineer* | They appear with the role; their first sign-in sets up an authenticator (`AUTH-001`) |
+  | `STF-002` | Administrator | Staff codes are unique inside the organisation | Give two people the same staff code; then give RIVAL's person the same code | First: refused (`conflict`). RIVAL: allowed — uniqueness is per organisation |
+  | `STF-003` | Administrator | Disabling signs out at once | Engineer signed in on another browser; untick **Enabled** and save | The engineer's next action returns them to sign-in; signing in is refused. 🛑 **Must NOT** leave the session working until it expires |
+  | `STF-004` | Administrator | How they sign in, saved whole | Set *Text message* with mobile `+919876543210` and *Record location* off; save. Then edit only the department and save | Second save keeps the method, number and location setting. 🛑 **Must NOT** reset what the department edit did not show |
+  | `STF-005` | Administrator | A bad mobile number is refused | Set *Text message* with `98765 43210` | Refused: international form needed (E.164) |
+  | `STF-006` | Administrator | Changing a role signs the person out | Engineer signed in; change their role to *Viewer* | Their next action returns them to sign-in; signed in again, they see only Viewer's screens |
+  | `STF-007` | Viewer | Without `staff_manage` there is no Staff screen | Sign in as a Viewer; call `GET /staff/list` | No **Staff** in the rail; the API answers 403 |
+- ⚙️ **Developer Guide & Release Confidence**:
+  - `pinglego/pkg/staffmicroservice/staffapp/StaffRouteHandler.go`; the second-step settings are a **separate** route (`PUT /staff/{staffId}/secondfactor`) because the whole-row staff update would otherwise wipe them; it requires `second_factor`, `phone_number` and `capture_location`.
+  - 🔒 Every write is scoped by the caller's organisation; editing RIVAL's `staffId` answers 404.
+  - Coverage: `pinglego/pkg/staffmicroservice/**`, `pingleflutter/test/staff_screen_test.dart`, the `acl` and `tenancy` suites.
+
+---
+
+### 2.2 🧩 Roles and permissions
+
+**Screen:** Administer → **Permission matrix** · **Routes:** `GET/POST /staff/role/*`, `PUT /staff/{staffId}/access`, `GET /user/capability/list` · **Capability:** `acl_manage`
+
+- 🌟 **Commercial Presentation & Sales Pitch**: Seventeen plain-language capabilities, three built-in roles (Administrator 17, NOC Engineer 8, Viewer 5) and as many of the operator's own as it likes — plus a per-person *allow* or *deny* for the exception that does not deserve a role. Changes take effect on the next request, not the next sign-in.
+- 📖 **User Guide & Operational Flow**: The matrix lists roles across and capabilities down. **Add a role**, tick what it may do, save — the whole set is saved, so nothing is left to an invisible default. Built-in roles are read-only. A role somebody holds cannot be deleted. Per person: *Inherit*, *Allow* or *Deny* each capability.
+- 🧪 **Manual Testing Playbook**:
+  | ID | Persona | Scenario | Steps | Observable Expected Result |
+  |---|---|---|---|---|
+  | `ACL-001` | Administrator | Built-in roles cannot be changed | Try to edit *Viewer* | Not editable; `PUT /staff/role/{viewerId}` answers 403 or 409. 🛑 **Must NOT** change a role every organisation shares |
+  | `ACL-002` | Administrator | A custom role grants exactly what is ticked | Add *Shift lead* with `diagnostic_run` and `report_view` only; give it to an engineer | They can run diagnostics and see the dashboard; **Staff**, **Monitoring** edits and **API keys** are absent. Each refused route answers 403 |
+  | `ACL-003` | Administrator | A role in use cannot be deleted | Delete *Shift lead* while someone holds it | Refused, naming that people hold it |
+  | `ACL-004` | Administrator | A per-person deny wins over the role | Deny `report_export` to one engineer | That engineer has no **Export PDF**/**Export CSV**; `GET /diagnostic/{id}/report.csv` answers 403. Other engineers unaffected |
+  | `ACL-005` | Tester | Every role, both directions | Run `./pingletest.sh acl` | Passes — each role is refused what it lacks and allowed what it holds |
+- ⚙️ **Developer Guide & Release Confidence**:
+  - Capabilities: `pinglego/pkg/common/pingleaccess/PingleAccessCategory.go` (Appendix B); guards: `pingleaccess.RequireCapability` on each route (Appendix A).
+  - 🔒 Authority is read fresh on every request; a role change revokes the person's sessions.
+  - Coverage: `pingletest/golang/aclconformance/acl_conformance_test.go` (the full matrix), `pingleflutter/test/permission_matrix_screen_test.dart`.
+
+---
+
+### 2.3 💺 Sessions and seats
+
+**Screen:** Administer → **Sessions and seats** · **Routes:** `GET /staff/session/list`, `DELETE /staff/session/{sessionId}`, `GET /staff/session/organisation`, `DELETE /staff/session/organisation/{sessionId}`
+
+- 🌟 **Commercial Presentation & Sales Pitch**: Floating licences: seats count people signed in *now*, not accounts. Forty engineers share twenty seats across shifts, and an administrator can free a seat left signed in on a desk without disabling anyone.
+- 📖 **User Guide & Operational Flow**: Your own sessions list every device you are signed in on, with its address (IPv4 or IPv6, in full in the tooltip). Administrators also see everyone signed in, and **Free this seat** ends one session.
+- 🧪 **Manual Testing Playbook**:
+  | ID | Persona | Scenario | Steps | Observable Expected Result |
+  |---|---|---|---|---|
+  | `SEAT-001` | Engineer | The next person over the limit is refused | Licence of 2 seats (Platform → seats); two people signed in; a third signs in | Third refused (`seat_limit_reached`) with guidance to ask an administrator. 🛑 **Must NOT** sign the third person in |
+  | `SEAT-002` | Engineer | One person, two devices, one seat | Sign in on a laptop and a phone | Seat count rises by one |
+  | `SEAT-003` | Engineer | A second tab never locks you out | All seats full; open a second tab and sign in as yourself | Allowed. 🛑 **Must NOT** refuse you for your own seat |
+  | `SEAT-004` | Administrator | Free a seat | **Free this seat** on a colleague's session | Their next action returns them to sign-in; Activity records who freed whose seat |
+  | `SEAT-005` | Engineer | An IPv6 address shows whole | Sign in over IPv6 (or seed a session with `2401:4900:1c2a:8e1f::1`) | One line, ellipsised, full address in the tooltip and selectable. 🛑 **Must NOT** wrap across lines or overflow at phone width |
+- ⚙️ **Developer Guide & Release Confidence**:
+  - Seats are checked at the password step **and** when the session opens (`enforceSeatLimit`), counted per person over live, unrevoked sessions.
+  - Coverage: `pingletest/golang/tenancyassignment/`, `pingleflutter/test/session_screen_test.dart`.
+
+---
+
+### 2.4 📍 Check-ins
+
+**Screen:** Administer → **Check-ins** · **Route:** `GET /staff/checkin/list` · **Capability:** `staff_manage`
+
+- 🌟 **Commercial Presentation & Sales Pitch**: Where every field engineer was when they signed in and out — position, accuracy, street address and a map link — on a list of its own, separate from the administrators' audit trail. Proof of attendance without a separate app.
+- 📖 **User Guide & Operational Flow**: One row per session of a person whose location is recorded and who is **not** an administrator: who, signed in (time, place, *Open in Maps*), signed out (time, place, or *still signed in* / *expired* / *ended*), address and device. Filter by date range; the default is the last seven days.
+- 🧪 **Manual Testing Playbook**:
+  | ID | Persona | Scenario | Steps | Observable Expected Result |
+  |---|---|---|---|---|
+  | `CHK-001` | Engineer | A sign-in records where | *Record location* on; sign in and allow location | **Check-ins** shows the time, the position ± accuracy and — a moment later — the address; *Open in Maps* opens the spot |
+  | `CHK-002` | Engineer | A sign-out records where it ended | Sign out, allowing location | The same row gains the sign-out time and place |
+  | `CHK-003` | Engineer | A session left to expire says so | Sign in; let the session expire (or shorten `JWT_TTL`) | *Expired*, not a sign-out time |
+  | `CHK-004` | Engineer | A refusal is recorded as one | Deny the location prompt (rule off) | *Location refused* — no position, no map link |
+  | `CHK-005` | Administrator | Administrators are not on Check-ins | The owner signs in with location | No Check-ins row; the sign-in is in **Activity** (`AUD-001`) |
+  | `CHK-006` | RIVAL administrator | Another organisation's check-ins are never shown | RIVAL opens Check-ins | Only RIVAL's people. 🛑 **Must NOT** show ACME's |
+- ⚙️ **Developer Guide & Release Confidence**:
+  - `session_checkin`, one row per session, keyed by `staff_session.session_id` (`pinglego/pkg/common/dbclient/migrations/0020_2026_10_03_session_checkin.sql`); coordinates only with status `captured`, checked by `CHECK`s.
+  - Addresses: a background worker (`pinglego/pkg/common/geocode/Geocode.go`) — Google with `GOOGLE_MAPS_API_KEY`, else OpenStreetMap Nominatim at one request a second. `REVERSE_GEOCODING=off` disables it.
+  - Coverage: `pinglego/pkg/staffmicroservice/staffservice/`, `pingleflutter/test/checkin_screen_test.dart`, `pingletest/golang/tenancyisolation/`.
+
+---
+
+### 2.5 🧾 Activity
+
+**Screen:** Administer → **Activity** · **Routes:** `GET /auditlog/list`, `GET /auditlog/verify` · **Capability:** `auditlog_view`
+
+- 🌟 **Commercial Presentation & Sales Pitch**: A tamper-evident record of every change and every administrator sign-in — device, browser, address, second step and where they were — and of every **refused** attempt on an administrator's account, with why. Hash-chained: altering or deleting one entry breaks every entry after it, and *Verify chain* names the first. Positions sit beside entries, never inside their hash, so the record stays verifiable *and* erasable under a retention policy.
+- 📖 **User Guide & Operational Flow**: Newest first. Select a row for its details: role, second step, device, **browser** ("Chrome 128 on macOS", with the raw string beneath), place with *Open in Maps*, session id and entry hash. **Sign-ins and sign-outs only** narrows the list. A *Sign-in failed* row shows **Why**: wrong password, wrong code, or locked after too many wrong codes.
+- 🧪 **Manual Testing Playbook**:
+  | ID | Persona | Scenario | Steps | Observable Expected Result |
+  |---|---|---|---|---|
+  | `AUD-001` | Administrator | An administrator's sign-in is recorded in full | Sign in as the owner from Chrome, allowing location; open **Activity** | *Signed in* by the owner: role, second step, device, *Chrome NN on <system>*, the IP (v4 or v6), the place with a map link, the session id |
+  | `AUD-002` | Administrator | And their sign-out | Sign out with location; sign back in | A *Signed out* row with its own place |
+  | `AUD-003` | Tester | A wrong password on an administrator's account is recorded | From another browser, sign in as the owner with a wrong password | *Sign-in failed* — Why: *Wrong password*, from that address. 🛑 **Must NOT** carry a position in the entry |
+  | `AUD-004` | Tester | A wrong code, and the lock | Owner's right password, then wrong codes until locked | *Sign-in failed* rows: *Wrong code* (naming the authenticator) until the 10th, which says *Locked after too many wrong codes*; the next right password is recorded as locked too |
+  | `AUD-005` | Tester | Not everyone's failures are activity | An engineer's wrong code; an unknown email's wrong password | Neither appears. 🛑 **Must NOT** record a field engineer's mistype, or list addresses people guessed |
+  | `AUD-006` | Tester | The record cannot be flooded | 25 wrong passwords at the owner's address within an hour | At most **20** *Sign-in failed* rows for that account in the hour; the rest go to the server log |
+  | `AUD-007` | Administrator | Verify the chain | *Verify chain* | *Intact*, with how many entries were checked and the head hash |
+  | `AUD-008` | Tester | Tampering is caught (disposable stack only) | `UPDATE auditlog_activity SET actor_email='x' WHERE activity_id = <some id>`; *Verify chain* | *Broken* at exactly that entry, with the reason |
+  | `AUD-009` | Engineer | A refused change leaves no entry | As a Viewer, try to add a site (403) | No entry. Only what happened is recorded |
+  | `AUD-010` | Administrator | Exports and integrations are on the record | Download a ticket's CSV; save the result export; test its connection | Rows: *Exported* (diagnostic), *Changed* and *Tested* (result_export) |
+  | `AUD-011` | RIVAL administrator | Another organisation's trail is never shown | RIVAL opens Activity | Only RIVAL's entries |
+- ⚙️ **Developer Guide & Release Confidence**:
+  - Registry: `pinglego/pkg/auditlogmicroservice/auditlogconstants/AuditLogRegistry.go` — every mutating route is there or excluded with a reason, and `TestEveryMutationRouteIsRegistered` fails a route added without either.
+  - Sign-ins are recorded by UserMS itself (`recordSignIn`, `recordSignOut`, `recordFailedSignIn` in `pinglego/pkg/usermicroservice/userservice/UserSignInSteps.go`) because the routes are public; failed ones are capped by `maxFailedEntriesPerHour = 20` per account.
+  - 🔒 The list joins positions from `session_checkin` by session id; the chain's `details` never hold coordinates.
+  - Coverage: `pingletest/golang/auditconformance/`, `pinglego/pkg/common/auditlog/`, `pingleflutter/test/audit_log_screen_test.dart`, `pingleflutter/test/user_agent_test.dart`.
+
+---
+## Group 3 — Diagnostics
+
+The core of the product: what to test, testing it against a ticket, and reading what came back.
+
+---
+
+### 3.1 🌐 Sites
+
+**Screen:** Configure → **DNS sites** · **Routes:** `GET /dnssite/list`, `POST /dnssite/add`, `POST /dnssite/bulkimport`, `PUT/DELETE /dnssite/{dnsSiteId}` · **Capabilities:** `dns_site_view`, `dns_site_manage`
+
+- 🌟 **Commercial Presentation & Sales Pitch**: Paste a whole inventory in one go — one bad line never rejects the rest — and Pingle refuses to be turned against its own host: loopback, link-local and cloud-metadata addresses are never probed, whatever a site says.
+- 📖 **User Guide & Operational Flow**: **Add site** with a name, an IP address or hostname, an optional circuit ID and SLA policy. **Bulk import** takes lines, commas or spaces; `Branch 12=10.0.0.1` names a site. Each entry is reported as added, a duplicate, or invalid with the reason.
+- 🧪 **Manual Testing Playbook**:
+  | ID | Persona | Scenario | Steps | Observable Expected Result |
+  |---|---|---|---|---|
+  | `SITE-001` | Administrator | Add by address and by name | Add `Mumbai POP` = `203.0.113.10`; add `Resolver` = `one.one.one.one` | Both listed; the hostname is resolved at test time, not stored as an address |
+  | `SITE-002` | Administrator | One bad line does not sink a paste | Bulk import `Pune=203.0.113.11`, `not an address`, `Pune=203.0.113.11` | First added, second invalid with a reason, third a duplicate |
+  | `SITE-003` | Administrator | Labels with spaces survive | Bulk import `Branch 12=10.0.0.12` | One site named `Branch 12`. 🛑 **Must NOT** split into `Branch` and `12` |
+  | `SITE-004` | Engineer | The host is never a target | Add `127.0.0.1`, `169.254.169.254` and `::1`; run a diagnostic over them | Each result is a refusal (*destination refused by probe policy*), never a measurement. 🛑 **Must NOT** send traffic to loopback or cloud metadata |
+  | `SITE-005` | RIVAL administrator | The same address in two organisations | RIVAL adds `203.0.113.10` too | Allowed — the endpoint is unique per organisation, not globally |
+- ⚙️ **Developer Guide & Release Confidence**:
+  - Policy: `pinglego/pkg/common/probeguard/ProbeGuardPolicy.go` — every address a name resolves to is checked, and one refused address refuses them all; IPv4-mapped IPv6 is judged as IPv4.
+  - Coverage: `pinglego/pkg/dnssitemicroservice/**`, `pinglego/pkg/common/probeguard/`, `pingleflutter/test/dns_site_screen_test.dart`.
+  - ⚠️ **TRAP** — a licence carries a **site limit** (shown on the Platform console), but adding or importing sites does not check it yet. Do not file a site count above the limit as a regression; it is a known gap.
+
+---
+
+### 3.2 🩺 Diagnostics and results
+
+**Screen:** Operate → **Run diagnostic** · **Routes:** `POST /diagnostic/submit`, `GET /diagnostic/{requestId}`, `GET /diagnostic/{requestId}/report.pdf` · **Capabilities:** `diagnostic_run`, `diagnostic_view_all`, `report_export` · **Licence:** required to run
+
+- 🌟 **Commercial Presentation & Sales Pitch**: One form, one sweep, one report against the ticket. Every figure a NOC argues about — loss, latency, RFC 3550 jitter, MOS — and a verdict on *where* the fault lies, with the evidence. A lapsed licence stops new tests but never takes away the evidence already gathered.
+- 📖 **User Guide & Operational Flow**: Enter **Customer ID** and **TT number**, pick sites (or leave empty for every enabled site), choose packet count and timeout, tick **Trace failures** for the path to anything that fails. The result shows headline cards (sites reachable, average loss, average jitter), then a row per site and family: reachable, the packet line verbatim (*Sent = 4, Received = 4, Lost = 0*), round trips, jitter, MOS with its band, SLA grade, verdict, and — for a failure — the hops with the first lossy one marked. **Export PDF** and **Export CSV** sit at the top.
+- 🧪 **Manual Testing Playbook**:
+  | ID | Persona | Scenario | Steps | Observable Expected Result |
+  |---|---|---|---|---|
+  | `DIAG-001` | Engineer | A sweep files against the ticket | Run against every enabled site with TT `TT-MAN-001` | Status *Completed*; one row per site (and family); the packet line exactly as specified |
+  | `DIAG-002` | Engineer | A ticket keeps every attempt | Run `TT-MAN-001` again | **History** for the ticket shows both attempts, newest first |
+  | `DIAG-003` | Engineer | Tracing marks where loss begins | Include a black-holed address (`203.0.113.99`) with **Trace failures** | Its row lists hops; the first hop with loss is marked. A trace that runs out of time leaves the result intact without hops |
+  | `DIAG-004` | Engineer | The PDF is evidence | **Export PDF** | Named `pingle-<TT>-<UTC time>.pdf`; Customer ID, TT, UTC timestamps, Jitter and MOS columns, average loss and jitter cards; a long IPv6 address wraps onto two lines. 🛑 **Must NOT** truncate an address |
+  | `DIAG-005` | Engineer | Loss and jitter on the ticket | Open the result; open **History** | Headline cards show average loss and average jitter; the history row shows the same figures |
+  | `DIAG-006` | Engineer | A lapsed licence stops new runs only | Platform suspends the licence; run a diagnostic; open an old one and export it | Run refused (`licence_suspended`, who can renew named); the old result opens and exports. 🛑 **Must NOT** hide recorded evidence |
+  | `DIAG-007` | RIVAL engineer | Another organisation's ticket is not found | Open `/diagnostic/<ACME request id>` as RIVAL | 404. 🛑 **Must NOT** reveal that the ticket exists |
+  | `DIAG-008` | Tester | A malformed id is refused before it is looked up | `GET /diagnostic/not-a-uuid` | 400 |
+- ⚙️ **Developer Guide & Release Confidence**:
+  - Engine: `pinglego/pkg/pingmicroservice/pingprobe/PingProbeRunner.go` (pro-bing, unprivileged ICMP, TCP fallback); jitter: `pinglego/pkg/pingmicroservice/pingprobe/PingVoiceQuality.go` (`InterarrivalJitter`, RFC 3550).
+  - 🔒 Results are saved under their **own** deadline, never the sweep's or the trace's: a traced sweep that runs long still stores everything it measured (`load` suite §4.5 proves it, and goes red with the old bug restored).
+  - Ticket figures (`avg_loss_pct`, `max_loss_pct`, `avg_jitter_ms`) are computed in `RequestFinish` from the run's counted results (`pinglego/pkg/common/dbclient/migrations/0022_2026_10_03_loss_and_jitter.sql`).
+  - Coverage: `pinglego/pkg/diagnosticmicroservice/**`, `pinglego/pkg/pingmicroservice/**`, `pingleflutter/test/diagnostic_submit_screen_test.dart`, the `tenancy` and `contract` suites.
+
+---
+
+### 3.3 🌍 IPv4 and IPv6
+
+**Where:** every result list, the PDF, the SLA report, the Results API and the CSV
+
+- 🌟 **Commercial Presentation & Sales Pitch**: A site healthy over IPv4 and dark over IPv6 is a real, common, hard-to-prove fault. Pingle measures both, side by side, without letting an IPv6 problem the customer did not buy an SLA for change their availability figure.
+- 📖 **User Guide & Operational Flow**: A dual-stack site has two rows. The IPv6 one carries a **not counted** tag (hover for why). The PDF marks it `icmp v6 *` with a footnote; the SLA report lists `(v6)` lines separately and `(v6*)` for report-only ones.
+- 🧪 **Manual Testing Playbook**:
+  | ID | Persona | Scenario | Steps | Observable Expected Result |
+  |---|---|---|---|---|
+  | `V6-001` | Engineer | Both families, one counted | Add a dual-stack site (e.g. `one.one.one.one`) on a host with IPv6; run | Two rows: IPv4 counted, IPv6 tagged *not counted* with its tooltip |
+  | `V6-002` | Engineer | An IPv6 failure does not breach the site | A dual-stack site whose IPv6 fails while IPv4 answers | No alert; the site counts as reachable; availability unchanged. 🛑 **Must NOT** raise an alert for report-only IPv6 |
+  | `V6-003` | Engineer | IPv6-only counts | A site with only an IPv6 address that fails | Counted as a failure, alerting and grading as usual |
+  | `V6-004` | Engineer | No IPv6 route is said plainly | On a server without IPv6, a dual-stack site | The IPv6 row reads *There is no IPv6 route from this vantage point, so this IPv6 address could not be tested from here.* 🛑 **Must NOT** report it as the site being down |
+  | `V6-005` | Engineer | Traceroute over IPv6 shows its hops | Trace a failing IPv6 address on a host with IPv6 | Intermediate hops listed (not only the destination) |
+- ⚙️ **Developer Guide & Release Confidence**:
+  - `ping_result.ip_version` (4, 6 or NULL when nothing was probed) and `report_only`; the daily rollup is keyed by family (`pinglego/pkg/common/dbclient/migrations/0023_2026_10_04_dual_stack_results.sql`).
+  - `probeguard.ResolveAllAndCheck` returns one checked address per family; the runner probes them in parallel and marks IPv6 report-only only when there is more than one family.
+  - ICMPv6 Time Exceeded parsing walks extension headers (`quotedSequenceIPv6` in `pinglego/pkg/pingmicroservice/pingprobe/PingTraceRunner.go`).
+
+---
+
+### 3.4 📄 CSV download
+
+**Where:** **Export CSV** on every result · **Route:** `GET /diagnostic/{requestId}/report.csv` · **Capability:** `report_export`
+
+- 🌟 **Commercial Presentation & Sales Pitch**: The same results, in the columns an IT system imports, in one click — and safe to open: a site name typed as a spreadsheet formula is written as text, so an export can never run code on someone else's desk.
+- 📖 **User Guide & Operational Flow**: **Export CSV** saves `pingle-<TT>-<UTC time>.csv` beside the PDF of the same ticket. One row per site and family; empty cells (not zeros) where a probe had no reply.
+- 🧪 **Manual Testing Playbook**:
+  | ID | Persona | Scenario | Steps | Observable Expected Result |
+  |---|---|---|---|---|
+  | `CSV-001` | Engineer | The file has the contracted header | **Export CSV**; open it | Header exactly as in `pingletest/contracts/result_export_columns.json`, `result_id` first; times in UTC (`…Z`); an unreachable row has empty round-trip cells |
+  | `CSV-002` | Engineer | A formula is written as text | Name a site `=HYPERLINK("http://x","y")`; run; export; open in Excel or Sheets | The cell shows the text starting `'=`. 🛑 **Must NOT** become a live formula or link |
+  | `CSV-003` | Engineer | Names in any script survive | Name a site `पुणे केंद्र`; export | The name intact (UTF-8). 🛑 **Must NOT** show mojibake |
+  | `CSV-004` | Viewer | No export without `report_export` | Open a result as a Viewer | No **Export CSV** or **Export PDF**; the route answers 403 |
+  | `CSV-005` | Tester | The download is on the record | Export a CSV; open **Activity** | An *Exported* entry naming the diagnostic |
+- ⚙️ **Developer Guide & Release Confidence**:
+  - One writer for every CSV: `pinglego/pkg/diagnosticmicroservice/diagnosticexport/DiagnosticExport.go`; one projection and scanner: `pinglego/pkg/diagnosticmicroservice/diagnosticdomain/repository/DiagnosticExportPostgres.go` (the run's organisation must match the ticket's).
+  - The browser download is `text/csv` (`pingleflutter/lib/common/services/PingleFileSaverWeb.dart`); desktop and phone use the share sheet.
+
+---
+
+### 3.5 🗂️ History and dashboard
+
+**Screens:** Operate → **History**, **Dashboard** · **Routes:** `GET /diagnostic/list`, `GET /diagnostic/tt/{ttNumber}`, `GET /ping/dashboard`, `GET /diagnostic/faults`
+
+- 🌟 **Commercial Presentation & Sales Pitch**: Every ticket investigated, with its loss and jitter on the row, and a management view of where faults lay over the last 90 days — the customer's own network, the access circuit or the carrier — for the supplier review.
+- 📖 **User Guide & Operational Flow**: **History** searches by TT number or Customer ID; each row shows reachable/total, breaches, loss and jitter. **Dashboard** shows sites, the last sweep, the licence, 30 days of availability (a day with nothing measured is a gap, never zero) and the fault breakdown.
+- 🧪 **Manual Testing Playbook**:
+  | ID | Persona | Scenario | Steps | Observable Expected Result |
+  |---|---|---|---|---|
+  | `HIST-001` | Engineer | Find a ticket | Search `TT-MAN-001` | Its attempts, with loss and jitter on each row |
+  | `HIST-002` | Engineer | A failed search is not an empty result | Stop the API; search | The failure, with *Try again*. 🛑 **Must NOT** show *No diagnostics yet* |
+  | `HIST-003` | Engineer | A device run reads as one | Attach a device test (§4.1); find it in History | Marked as measured on a device; its loss is *query* loss |
+  | `HIST-004` | Engineer | A quiet day is a gap | A schedule paused for a day; open **Dashboard** | The availability line has a gap. 🛑 **Must NOT** plot 0% for a day with nothing measured |
+- ⚙️ **Developer Guide & Release Confidence**:
+  - Row figures: `pingleflutter/lib/diagnosticmicroservice/presentation/widgets/DiagnosticFigures.dart`.
+  - Coverage: `pingleflutter/test/diagnostic_history_screen_test.dart`, `pingleflutter/test/dashboard_screen_test.dart`.
+
+---
+## Group 4 — The Customer's Side
+
+Measuring from where the person is, not from where Pingle is.
+
+---
+
+### 4.1 📱 Test from this device
+
+**Screen:** Operate → **Test from this device** · **Routes:** `GET /organisation/settings`, `PUT /organisation/settings` (`staff_manage`), `POST /diagnostic/clientobservation` (`diagnostic_run`, licensed)
+
+- 🌟 **Commercial Presentation & Sales Pitch**: "Is it slow for me?" answered from the customer's own connection, in one tap, with no target to choose: everyone in the organisation measures the same host, so results compare. It shows the device's IPv4 **and** IPv6 addresses and its download and upload speed, then files the run against the ticket beside the server's figures — labelled as measured on a device.
+- 📖 **User Guide & Operational Flow**: The screen names what it is **Testing against** — the organisation's host, or *Cloudflare DNS (1.1.1.1)* with a note when none is chosen. **Start test** runs it. Whoever manages people sees **Change target**: one tap for *Cloudflare DNS* or *Google DNS (dns.google)*, or *Your own host* to type one. **Measure speed** is a separate button because it moves about 12 MB each way. A finished run can be attached to a TT number.
+- 🧪 **Manual Testing Playbook**:
+  | ID | Persona | Scenario | Steps | Observable Expected Result |
+  |---|---|---|---|---|
+  | `DEV-001` | Engineer | No target to choose | Open the screen | *Testing against* names one host; there is no dropdown or free host field. With none chosen: *Cloudflare DNS (1.1.1.1)* and the default note |
+  | `DEV-002` | Administrator | Presets, and your own host | **Change target** → *Google DNS*; save. Reopen → *Your own host* → type `noc.northwind.example`; save | First saves `dns.google`; second saves the typed host. While *Your own host* is chosen with the field still empty, that chip — not Cloudflare — is lit |
+  | `DEV-003` | Administrator | The target saves alone | Change the target | The *Require location* rule (§1.2) is unchanged. 🛑 **Must NOT** reset another setting |
+  | `DEV-004` | Engineer | Both addresses | Run from a dual-stack connection; then from one without IPv6 | *IPv4 a.b.c.d · IPv6 2401:…*; then *No IPv6 connectivity* |
+  | `DEV-005` | Engineer | Line speed | **Measure speed** | Download and upload in Mbit/s (median, warm-up excluded); the ~12 MB note shown before it runs |
+  | `DEV-006` | Engineer | Attach to a ticket | Run, measure speed, attach to `TT-MAN-002` | The ticket shows the device run with its line speed and *measured on a device*; loss is *query* loss |
+  | `DEV-007` | Viewer | Only people managers change the target | Open as a Viewer | No **Change target**. `PUT /organisation/settings` answers 403 |
+  | `DEV-008` | Engineer | An unreadable setting does not block the test | Stop the API after the screen loads; reopen it | *Your organisation's target could not be read, so this tests Cloudflare DNS*; the test still runs |
+  | `DEV-009` | Superuser | No organisation, still a test | Sign in as the platform superuser; open the screen | Tests Cloudflare DNS. The screen needs no organisation and no licence |
+- ⚙️ **Developer Guide & Release Confidence**:
+  - A browser cannot send ICMP, so the web build measures DNS-over-HTTPS (Cloudflare) or an HTTPS reach to the chosen host; the app on a desktop or phone can also ping it. Jitter is RFC 3550 with the standard deviation beside it.
+  - Target normalisation (pasted URL → host, lower case, canonical IPs, zones refused): `NormaliseTestTarget` in `pinglego/pkg/staffmicroservice/staffservice/StaffCheckinService.go`.
+  - Speed: `pingleflutter/lib/diagnosticmicroservice/service/ClientThroughput.dart` (Cloudflare `__down`/`__up`, median after a warm-up); egress: `pingleflutter/lib/diagnosticmicroservice/service/ClientEgress.dart`.
+  - Coverage: `pingleflutter/test/client_probe_screen_test.dart`, `pingleflutter/test/client_probe_run_test.dart`, `pingleflutter/test/client_throughput_test.dart`, `pingleflutter/test/client_egress_test.dart`.
+
+---
+## Group 5 — Monitoring
+
+Turning on-demand testing into a continuous watch, with alerts that mean something.
+
+---
+
+### 5.1 📈 SLA targets, schedules, alerts and maintenance
+
+**Screen:** Configure → **Monitoring** · **Routes:** `/monitor/sla/*`, `/monitor/schedule/*`, `/monitor/channel/*`, `/monitor/maintenance/*`, `GET /monitor/alert/list`, `GET /monitor/slareport`, `GET /monitor/slareport.pdf`, `GET /monitor/trend` · **Capabilities:** `sla_view`, `sla_manage`, `schedule_manage`, `report_view`, `report_export`
+
+- 🌟 **Commercial Presentation & Sales Pitch**: Targets per site for latency, jitter, loss and MOS, graded **OK / Degraded / Breached** — Degraded warns at 80% of a threshold, before the customer notices. Alerts that do not cry wolf: a breach must persist for the sweeps you choose, then is announced once, its recovery once, and an outage that follows a warning is escalated even inside the quiet period. Planned work is excluded from the figure a customer is measured against, and the monthly SLA report — availability, loss, jitter and MOS, IPv4 and IPv6 separately — exports as the document for the customer.
+- 📖 **User Guide & Operational Flow**:
+  - **Service targets:** maximum latency, jitter and loss and a minimum MOS; mark one **default** so new sites are measured against it.
+  - **Schedules:** every *N* minutes (five or more), over **every enabled site** (including ones added later) or named sites. **Run now** runs one at once.
+  - **Alert channels:** an email address or an HTTPS webhook. **Send a test** proves it works now.
+  - **Alert history:** what fired, when, and whether it was delivered.
+  - **Maintenance windows:** the whole organisation, a region or named sites, in the window's own timezone. Results inside are *excluded*: no alert, no effect on availability.
+  - **SLA report:** a month per site; a month with no measurements has no figure — never 100%. **Export PDF**.
+- 🧪 **Manual Testing Playbook**:
+  | ID | Persona | Scenario | Steps | Observable Expected Result |
+  |---|---|---|---|---|
+  | `MON-001` | Administrator | Grading against a target | Target: latency 100 ms; a site averaging 85 ms; another at 120 ms | 85 ms → *Degraded* (past 80% of 100); 120 ms → *Breached*; one under 80 ms → *OK* |
+  | `MON-002` | Administrator | The default target applies to new sites | Mark a target default; add a site with no target; run | The new site is graded against the default |
+  | `MON-003` | Administrator | Schedules run, and run now | Schedule every 5 minutes; **Run now** | A diagnostic `<prefix>-<UTC date-time>` appears in History at once, and again every 5 minutes. An interval under 5 is refused |
+  | `MON-004` | Administrator | A breach is announced once, its recovery once | Webhook channel; a site that fails three sweeps then recovers, damping set to 2 consecutive breaches | One alert after the 2nd failing sweep, none on the 3rd, one recovery alert. 🛑 **Must NOT** alert on every failing sweep |
+  | `MON-005` | Administrator | An outage after a warning is escalated | Quiet period 60 min; a site goes *Degraded* (alert), then *Breached* 5 minutes later | A second, critical alert despite the quiet period |
+  | `MON-006` | Administrator | A webhook cannot reach the host | Add a channel `https://127.0.0.1/hook`, then `http://example.com/hook` | Both refused: loopback is not a destination, and a webhook must be HTTPS |
+  | `MON-007` | Administrator | Maintenance excludes and silences | A window over a failing site, in `Asia/Kolkata`, viewed from a device in another timezone | Results inside are *excluded*: no alert, availability unaffected; the window's hours are Kolkata wall-clock hours |
+  | `MON-008` | Engineer | The SLA report says what it measured | Open a month with data and one without | With data: availability, loss, jitter and MOS per site, IPv6 lines marked `(v6)`; without: no figure. 🛑 **Must NOT** show 100% for an unmeasured month |
+  | `MON-009` | Engineer | The report exports | **Export PDF** on the SLA report | The month's document, with the Loss column and the `(v6*)` footnote where report-only lines appear |
+  | `MON-010` | Tester | The guard suite | `./pingletest.sh monitor` | Passes — grading, damping, recovery and maintenance against a live server |
+- ⚙️ **Developer Guide & Release Confidence**:
+  - Damping: `DecideAlert` in `pinglego/pkg/monitormicroservice/monitordomain/shared/` (consecutive breaches, cooldown, escalation); runner: `pinglego/pkg/monitormicroservice/monitorservice/MonitorScheduleRunner.go` (claims due schedules with `FOR UPDATE SKIP LOCKED`).
+  - Results are partitioned by month and rolled up daily per site **and family** (`pinglego/pkg/common/dbclient/migrations/0012_2026_10_01_result_partitioning_and_retention.sql`, `0023`); the retention runner keeps partitions three months ahead.
+  - 🔒 Report-only IPv6 never enters availability (`NOT report_only` in the rollup and the SLA queries).
+  - Coverage: `pingletest/golang/monitorconformance/`, `pinglego/pkg/monitormicroservice/**`, `pingleflutter/test/monitor_screen_test.dart`, `pingleflutter/test/monitor_flows_test.dart`.
+
+---
+## Group 6 — Integrations
+
+How results reach the operator's own systems, and how its directory signs people in.
+
+---
+
+### 6.1 🔌 Results API keys
+
+**Screen:** Configure → **Results API keys** · **Routes:** `GET /apikey/list`, `POST /apikey/add`, `DELETE /apikey/{credentialId}`; with a key: `GET /result/bytt/{ttNumber}`, `GET /result/export.csv` · **Capability:** `apikey_manage`
+
+- 🌟 **Commercial Presentation & Sales Pitch**: The ticketing system pulls the evidence itself — one ticket as JSON, or a month of results as CSV — with a key scoped to the operator's own organisation, readable even if a renewal is late. The key is shown once and stored only as a hash.
+- 📖 **User Guide & Operational Flow**: **Issue key** with a label and an optional expiry; copy it — it is never shown again. Your system sends it as `Authorization: Bearer <key>`. `GET /api/v1/result/export.csv?from=…&to=…` takes RFC 3339 times, at most 31 days apart; with no `from`, the day before `to` (default now).
+- 🧪 **Manual Testing Playbook**:
+  | ID | Persona | Scenario | Steps | Observable Expected Result |
+  |---|---|---|---|---|
+  | `API-001` | Administrator | A key is shown once | Issue a key; reload the screen | The full key appeared once; afterwards only its prefix, label, expiry and last use |
+  | `API-002` | Integrator | One ticket as JSON | `curl -H "Authorization: Bearer <key>" https://…/api/v1/result/bytt/TT-MAN-001` | The ticket with every result, including `ip_version` and `report_only` |
+  | `API-003` | Integrator | A period as CSV | `…/result/export.csv?from=2026-10-01T00:00:00Z&to=2026-10-02T00:00:00Z` | `text/csv`, the contracted header, one row per result of the diagnostics that finished in that window |
+  | `API-004` | Integrator | Bad periods are refused, not guessed | `from` 40 days before `to`; `to=tomorrow`; `from` after `to` | 422 (*at most 31 days*), 400 (unreadable time), 422. 🛑 **Must NOT** answer with a partial file |
+  | `API-005` | Integrator | The wrong credential is refused | No header; a person's session token; a revoked key | 401 each |
+  | `API-006` | RIVAL integrator | A key reads only its own organisation | RIVAL's key for ACME's TT, and a period covering ACME's tickets | 404; a CSV with none of ACME's rows |
+- ⚙️ **Developer Guide & Release Confidence**:
+  - `pinglego/pkg/common/apikeyauth/`; the organisation comes from the key, never from the request.
+  - The bulk pull **streams**; a failure after rows have gone out aborts the response rather than ending a short file a system would take as whole.
+  - Coverage: `pingletest/golang/apicontract/results_api_test.go`, `pingletest/golang/apicontract/result_export_test.go`, `pinglego/pkg/diagnosticmicroservice/diagnosticapp/`.
+
+---
+
+### 6.2 📤 Result export
+
+**Screen:** Configure → **Result export** · **Routes:** `GET/PUT /export/target`, `POST /export/target/test` · **Capability:** `apikey_manage`
+
+- 🌟 **Commercial Presentation & Sales Pitch**: Results delivered to the operator's own SFTP or FTPS server as CSV, every interval it chooses — no integration project. Nothing is lost: a failed delivery is retried with the same period, and each row carries a `result_id` so a file that arrives twice is recognised. The server's key is confirmed before anything is sent, and a saved password is only ever sent to the server it was entered for.
+- 📖 **User Guide & Operational Flow**:
+  - **Protocol:** SFTP (recommended), FTP over TLS, or FTP — with a clear warning that plain FTP is unencrypted.
+  - **Server, Port, Username, Password** (or for SFTP a private key). Saved credentials are never shown again; leave the field empty to keep them, or tick *Remove the saved password*.
+  - **Test connection** signs in, writes and removes a small file. For SFTP it shows the server's key: check it with whoever runs the server, then **Trust this key** and **Save**.
+  - **Folder** and **Deliver every (minutes)** — 15 to 1440.
+  - The status card says how the last delivery went: *Sent <file> with N results*, *Nothing new to send*, or *Not delivered: <why>*.
+- 🧪 **Manual Testing Playbook**:
+  | ID | Persona | Scenario | Steps | Observable Expected Result |
+  |---|---|---|---|---|
+  | `EXP-001` | Administrator | A target nobody set up | Open the screen | *Not delivered yet. The first delivery is one interval after saving.*; SFTP, port 22, 60 minutes; switched off |
+  | `EXP-002` | Administrator | Confirm the server's key | Fill in an SFTP server; **Test connection** | *Trust this server?* showing `SHA256:…`. **Cancel** → *Not trusted yet*; test again → **Trust this key** → *Trusted: SHA256:…*; **Save** |
+  | `EXP-003` | Administrator | Switching on needs everything a delivery needs | Switch on with no server, no username, no password and no trusted key | Refused against each field |
+  | `EXP-004` | Administrator | A changed key is a warning, not a detail | Re-key the SFTP server (or point the name at another); **Test connection** | *The server's key has changed* with the new key to check; the trusted key stays until you trust the new one. 🛑 **Must NOT** deliver to a server showing a different key |
+  | `EXP-005` | Administrator | A saved password goes nowhere new | With a saved password, change the server (or port, username or protocol) and test or save | The password field becomes required again (*Enter the password again…*). 🛑 **Must NOT** sign in to the new server with the saved password |
+  | `EXP-006` | Administrator | A delivery lands whole | Switched on, every 15 minutes, a diagnostic run after saving; wait for the interval | `pingle-results-<from>-<to>.csv` in the folder (written as `.part`, renamed when whole); the card says *Sent … with N results* |
+  | `EXP-007` | Administrator | A quiet period sends nothing | No diagnostics in an interval | No file; *Nothing new to send* |
+  | `EXP-008` | Administrator | A failure is retried, nothing lost | Change the server's password; wait for a delivery; restore it; wait again | First: *Not delivered: The server refused the sign-in…*; the next delivery covers the same results. 🛑 **Must NOT** skip the failed period |
+  | `EXP-009` | Administrator | Pingle's own host is not a destination | Server `127.0.0.1`, `localhost`, `169.254.169.254` or `::1`; **Test connection** | Refused against **Server**: *Pingle may not connect to that address.* |
+  | `EXP-010` | Administrator | Plain FTP is warned about | Choose FTP | The unencrypted warning; port moves to 21; the private key and server key disappear |
+  | `EXP-011` | Administrator | FTPS with a private authority | FTPS to a server whose certificate your own CA signed, without and then with that CA | Without: *certificate is not trusted*; with it pasted: test passes |
+  | `EXP-012` | Tester | Credentials never come back | `GET /api/v1/export/target` | `has_password`, `has_private_key` — never the password, key or sealed text |
+- ⚙️ **Developer Guide & Release Confidence**:
+  - `pinglego/pkg/exportmicroservice/` (target, test, runner each minute); transport: `pinglego/pkg/common/filedrop/FileDrop.go` (SFTP via `pkg/sftp`, FTP/FTPS via `jlaffaye/ftp`).
+  - 🔒 Every connection — the FTP **data** connection included — is made by `probeguard.Dialer`, whose `Control` hook checks the resolved address before connecting. A dial *function* would have made the FTP library send FTPS data unencrypted.
+  - The watermark (`exported_through`) moves only on a delivery, and only from where the run found it; a run catches up a day per file; the last two minutes are left to settle.
+  - `EXPORT_ALLOW_LOOPBACK` permits a server on Pingle's own host for development; production refuses to boot with it.
+  - Coverage: `pinglego/pkg/common/filedrop/` (in-process SFTP and FTP/FTPS servers), `pinglego/pkg/exportmicroservice/**`, `pingleflutter/test/result_export_screen_test.dart`, `pingletest/golang/apicontract/result_export_test.go`.
+
+---
+
+### 6.3 🏢 Directory
+
+**Screen:** Configure → **Directory** · **Routes:** `GET/PUT /ldap/config`, `POST /ldap/config/test`, `/ldap/groupmap/*` · **Capability:** `ldap_manage`
+
+- 🌟 **Commercial Presentation & Sales Pitch**: Staff sign in with their existing network password over LDAP or Active Directory, and their directory group decides their Pingle role — after the second step, so a directory password alone still opens nothing. The owner always keeps a local password, so a directory outage cannot lock out the person who fixes it.
+- 📖 **User Guide & Operational Flow**: Host and port (389 LDAP/StartTLS, 636 LDAPS), encryption, the CA certificate of your own authority, a read-only bind account, the base DN; then **Test connection** before enabling. **Group mappings** give each directory group a role.
+- 🧪 **Manual Testing Playbook**:
+  | ID | Persona | Scenario | Steps | Observable Expected Result |
+  |---|---|---|---|---|
+  | `LDAP-001` | Administrator | Connect and test | Point at a test directory with its CA certificate; **Test connection** | Success; a wrong CA → certificate error; skipping verification is warned against |
+  | `LDAP-002` | Directory user | The group decides the role — after the second step | Map group `noc` → *NOC Engineer*; a directory user in `noc` signs in | Password checked by the directory; second step asked; only then the role applied |
+  | `LDAP-003` | Owner | The owner keeps a local password | Directory switched on and unreachable; owner signs in with their local password | Signed in. Others: *Your organisation's directory server could not be reached. Please retry.* |
+  | `LDAP-004` | Tester | An outage is not a failed sign-in | Directory down; an administrator signs in | No *Sign-in failed* entry in Activity — nobody got the password wrong |
+- ⚙️ **Developer Guide & Release Confidence**:
+  - `pinglego/pkg/common/ldapclient/`, `pinglego/pkg/ldapmicroservice/`; the bind password is sealed like every secret; the directory is dialled through the directory policy (private yes; loopback only with `LDAP_ALLOW_LOOPBACK`, refused in production).
+  - Coverage: `pinglego/pkg/common/ldaptest/` (an in-process directory), `pingleflutter/test/ldap_settings_screen_test.dart`.
+
+---
+## Group 7 — Platform and Settings
+
+The operator of Pingle itself, each person's own settings, and the public face.
+
+---
+
+### 7.1 🏛️ Platform console and licences
+
+**Screen:** Administer → **Platform** (superuser only) · **Routes:** `/platform/*` · **Access:** platform superuser
+
+- 🌟 **Commercial Presentation & Sales Pitch**: Tenants are created deliberately, never self-asserted: signing up cannot make an organisation or join one. Licences carry seats, sites, a period and a price, scale in proportion when sold for an unusual term, and keep a history of every change with who made it and why.
+- 📖 **User Guide & Operational Flow**: **Organisations → Add**; place an unassigned account in it (as owner, or with a role); **Issue licence** with plan, seats, sites, months and currency. Per licence: **Suspend**, **Resume**, **Revoke**, **Renew**, change seats. **Owners** lists an organisation's owners and resets one's authenticator.
+- 🧪 **Manual Testing Playbook**:
+  | ID | Persona | Scenario | Steps | Observable Expected Result |
+  |---|---|---|---|---|
+  | `PLAT-001` | Superuser | Onboard a customer | Create `ACME`; assign a signed-up account as owner; issue a 12-month, 10-seat licence | The owner's next sign-in lands in ACME with every Administrator capability |
+  | `PLAT-002` | Superuser | Suspend and resume | Suspend ACME's licence with a reason; resume it | While suspended: running a diagnostic is refused, reading is not. History shows both, with the reason |
+  | `PLAT-003` | Superuser | Seats cannot drop below who is signed in | Four people signed in; set seats to 3 | Refused, naming the people signed in |
+  | `PLAT-004` | Superuser | Renewal scales the price | Renew a 12-month licence for 36 months | Three times the period price; the new end runs from the current end (or today if lapsed) |
+  | `PLAT-005` | Superuser | A superuser is not a tenant | Call `GET /dnssite/list` as the superuser | 400 — no organisation. 🛑 **Must NOT** answer with every organisation's sites |
+  | `PLAT-006` | Organisation owner | Signing up never joins an organisation | Sign up with an address at ACME's domain | The account waits unassigned; it sees only **Test from this device** and **Settings** |
+- ⚙️ **Developer Guide & Release Confidence**:
+  - `pinglego/pkg/platformmicroservice/`; `pingleaccess.RequireSuperUser` on the console group (Appendix A); licence changes recorded in the licence history and the activity trail.
+  - Coverage: `pingletest/golang/tenancyassignment/`, `pinglego/pkg/platformmicroservice/**`, `pingleflutter/test/platform_console_screen_test.dart`.
+
+---
+
+### 7.2 ⚙️ Settings
+
+**Screen:** Administer → **Settings** · **Routes:** `POST /user/appearance`, `POST /user/password`
+
+- 🌟 **Commercial Presentation & Sales Pitch**: Five themes in light and dark — including a warm, low-blue-light theme for night shifts and a high-contrast one — every one contrast-checked, with status colours that never change meaning. They follow the person, not the device.
+- 📖 **User Guide & Operational Flow**: Light, dark or follow the device; theme; density; reduce motion; change password. Pingle is in English; there is no language choice.
+- 🧪 **Manual Testing Playbook**:
+  | ID | Persona | Scenario | Steps | Observable Expected Result |
+  |---|---|---|---|---|
+  | `SET-001` | Engineer | Appearance follows the person | Choose a dark theme on a laptop; sign in on another browser | The same theme there |
+  | `SET-002` | Engineer | Status colours keep their meaning | Switch through every theme on a result with OK, Degraded and Breached rows | Green, amber and red in every theme, each with its icon |
+  | `SET-003` | Engineer | English only | Look for a language picker in the bar and in Settings | None. Every label is English, served by the server. 🛑 **Must NOT** show a key such as `s812` in place of a label |
+  | `SET-004` | Engineer | Change password | Change it; sign out; sign in with the old, then the new | Old refused, new accepted (then the second step) |
+- ⚙️ **Developer Guide & Release Confidence**:
+  - Strings: `scripts/intellicodegen/pinglestrings.py` generates the Go catalogue and the Dart index; entries are positional, so retired ones stay in `DEPRECATED`. Help: `pinglego/pkg/initmicroservice/initconstants/PingleHelp.go`.
+  - Coverage: `pingleflutter/test/settings_screen_test.dart`, the `translation` suite.
+
+---
+
+### 7.3 🌐 Public site and self-test
+
+**Pages:** `https://pingle.rummaan53.com/` and `/selftest.html` (`pingleweb/`)
+
+- 🌟 **Commercial Presentation & Sales Pitch**: The product site says only what the product does today, and the public self-test lets a prospect measure their own connection in the browser before talking to anyone.
+- 📖 **User Guide & Operational Flow**: **Sign in** opens the app at `/app/`; **Test my connection** opens the self-test.
+- 🧪 **Manual Testing Playbook**:
+  | ID | Persona | Scenario | Steps | Observable Expected Result |
+  |---|---|---|---|---|
+  | `WEB-001` | Visitor | The site is current | Read the capabilities | Two-step sign-in, IPv4 and IPv6, CSV into your systems, check-ins, the device test with line speed. 🛑 **Must NOT** promise 23 languages |
+  | `WEB-002` | Visitor | Site and app are different documents | Open `/` and `/app/` | The marketing page and the app respectively — never the same document |
+  | `WEB-003` | Visitor | The self-test runs in the browser | **Test my connection** → run | Round trips, jitter and loss for each resolver, measured from the visitor's connection |
+- ⚙️ **Developer Guide & Release Confidence**:
+  - `pingleweb/index.html`, `pingleweb/selftest.html`; the probe engine's tests: `pingleweb/assets/pingle-probe.test.mjs` (part of `unit`).
+  - The deploy asserts `/` and `/app/` differ, so the nginx misroute that once served a blank app is caught by the deploy.
+
+---
+## Feature → Coverage Matrix
+
+What guards each area automatically, so a manual pass can spend its time where automation cannot reach: real devices, real browsers, real file servers, and judgement.
+
+| Area | Manual IDs | Go unit and repository | Integration suites | Flutter |
+|---|---|---|---|---|
+| Sign-in, second step | `AUTH-*` | `pinglego/pkg/usermicroservice/userservice/` | `assignment`, `audit` | `pingleflutter/test/sign_in_test.dart` |
+| SMS gateway, location rule | `SMS-*`, `LOC-*` | `pinglego/pkg/smsmicroservice/`, `pinglego/pkg/common/smsprovider/` | `acl` | `pingleflutter/test/sign_in_security_screen_test.dart` |
+| Staff, roles | `STF-*`, `ACL-*` | `pinglego/pkg/staffmicroservice/` | `acl`, `tenancy` | `pingleflutter/test/staff_screen_test.dart` |
+| Sessions, seats | `SEAT-*` | `pinglego/pkg/staffmicroservice/` | `assignment`, `tenancy` | `pingleflutter/test/session_screen_test.dart` |
+| Check-ins | `CHK-*` | `pinglego/pkg/common/geocode/` | `tenancy`, `audit` | `pingleflutter/test/checkin_screen_test.dart` |
+| Activity | `AUD-*` | `pinglego/pkg/common/auditlog/` | `audit` | `pingleflutter/test/audit_log_screen_test.dart` |
+| Sites, policy | `SITE-*` | `pinglego/pkg/dnssitemicroservice/`, `pinglego/pkg/common/probeguard/` | `tenancy` | `pingleflutter/test/dns_site_screen_test.dart` |
+| Diagnostics, IPv6 | `DIAG-*`, `V6-*` | `pinglego/pkg/pingmicroservice/`, `pinglego/pkg/diagnosticmicroservice/` | `contract`, `tenancy`, `load` | `pingleflutter/test/diagnostic_submit_screen_test.dart` |
+| CSV | `CSV-*`, `API-003` | `pinglego/pkg/diagnosticmicroservice/diagnosticexport/` | `contract`, `tenancy`, `load` | `pingleflutter/test/diagnostic_history_screen_test.dart` |
+| Device test | `DEV-*` | `pinglego/pkg/diagnosticmicroservice/diagnosticservice/` | `contract` | `pingleflutter/test/client_probe_run_test.dart` |
+| Monitoring | `MON-*` | `pinglego/pkg/monitormicroservice/` | `monitor` | `pingleflutter/test/monitor_flows_test.dart` |
+| Results API | `API-*` | `pinglego/pkg/common/apikeyauth/` | `contract`, `tenancy` | `pingleflutter/test/api_key_screen_test.dart` |
+| Result export | `EXP-*` | `pinglego/pkg/common/filedrop/`, `pinglego/pkg/exportmicroservice/` | `contract`, `acl`, `tenancy`, `audit` | `pingleflutter/test/result_export_screen_test.dart` |
+| Directory | `LDAP-*` | `pinglego/pkg/common/ldapclient/`, `pinglego/pkg/ldapmicroservice/` | — | `pingleflutter/test/ldap_settings_screen_test.dart` |
+| Platform | `PLAT-*` | `pinglego/pkg/platformmicroservice/` | `assignment` | `pingleflutter/test/platform_console_screen_test.dart` |
+| Settings, catalogue | `SET-*` | `pinglego/pkg/initmicroservice/` | `translation` | `pingleflutter/test/settings_screen_test.dart` |
+
+> [!NOTE]
+> What no suite covers, and why manual cases exist for it: a **real SMS** arriving on a phone (`AUTH-009`), a **real authenticator app** (`AUTH-001`), **browser location prompts** (`CHK-001`, `LOC-002`), **real SFTP and FTPS servers** (`EXP-006`, `EXP-011`), **spreadsheet applications** opening the CSV (`CSV-002`), and **IPv6 on the live host** (`V6-001`).
+
+---
+# Part III — End-to-End Journeys
+
+Each journey crosses several chapters the way a real customer does. Run them on a disposable stack after the chapter cases; every step's result is the precondition of the next, so stop at the first failure and file it against the step's case ID.
+
+---
+
+### JRN-001 · A new customer, from contract to first evidence
+
+**Personas:** platform superuser, ACME owner, NOC engineer · **Covers:** `PLAT-001`, `AUTH-001`, `STF-001`, `SITE-002`, `DIAG-001`, `DIAG-004`, `CSV-001`
+
+1. The owner signs up; the superuser creates **ACME**, assigns the owner and issues a 10-seat licence.
+2. The owner signs in, sets up an authenticator and saves the recovery codes.
+3. The owner adds an engineer (*NOC Engineer*) and pastes twenty sites with **Bulk import**.
+4. The engineer signs in (sets up an authenticator), runs a diagnostic with TT `TT-JRN-001`, **Trace failures** on.
+5. The engineer exports the **PDF** and the **CSV**.
+
+**Expected:** the PDF and CSV carry `TT-JRN-001`; Activity shows the owner's sign-in, the staff and site changes, both exports. 🛑 The engineer's sign-in is **not** in Activity.
+
+---
+
+### JRN-002 · A NOC engineer works a ticket
+
+**Covers:** `DIAG-001`–`DIAG-005`, `HIST-001`, `V6-001`
+
+1. Ticket `TT-JRN-002` arrives: Customer `CUST-88412`, slow calls.
+2. Run against the customer's sites. Read loss, jitter and MOS; open the failing site's hops.
+3. Re-run after the carrier's fix.
+4. In **History**, compare both attempts.
+
+**Expected:** both attempts kept; the second's average loss and jitter lower; the dual-stack site shows its IPv6 row *not counted*.
+
+---
+
+### JRN-003 · A field engineer's day
+
+**Covers:** `STF-004`, `LOC-002`, `CHK-001`–`CHK-002`, `DEV-001`–`DEV-006`
+
+1. The administrator sets the engineer to **Record location** and turns on **Require location to sign in**.
+2. On a phone, the engineer signs in, allowing location.
+3. At the customer's site: **Test from this device**, **Measure speed**, attach to `TT-JRN-003`.
+4. Signs out, allowing location.
+
+**Expected:** **Check-ins** shows the sign-in and sign-out with places and a map link; the ticket shows the device run with its line speed; the administrator's Activity shows no entry for the engineer's sign-in.
+
+---
+
+### JRN-004 · The IT system takes the results
+
+**Covers:** `API-001`–`API-003`, `EXP-002`, `EXP-006`–`EXP-008`
+
+1. The administrator issues a Results API key; the IT system pulls yesterday's CSV.
+2. The administrator sets up **Result export** to the IT team's SFTP server: test, trust the key, save, every 15 minutes.
+3. Engineers run diagnostics for an hour.
+4. The SFTP password is changed on the server for one interval, then restored.
+
+**Expected:** a file per interval with results; the interval with the wrong password shows *Not delivered*, and the next file holds that period's results too; every `result_id` appears exactly once across all the files — a failed delivery sent nothing, so nothing is sent twice.
+
+---
+
+### JRN-005 · Monitoring catches an outage and its recovery
+
+**Covers:** `MON-001`–`MON-005`, `MON-007`
+
+1. A default target; a schedule every 5 minutes over every enabled site; a webhook channel; damping 2.
+2. Black-hole one site for 15 minutes, then restore it.
+3. Declare a maintenance window over another site and break it inside the window.
+
+**Expected:** one breach alert, one recovery; the maintenance site raises nothing and its availability is untouched.
+
+---
+
+### JRN-006 · An attack on an administrator's account
+
+**Covers:** `AUD-003`–`AUD-006`, `AUTH-006`, `AUTH-007`
+
+1. From an unfamiliar browser, try the owner's address with ten wrong passwords.
+2. Then, with the right password (a leaked one), ten wrong codes.
+
+**Expected:** Activity shows the wrong passwords and wrong codes as *Sign-in failed* with the address and browser, ending in *Locked after too many wrong codes*; the owner, from their own browser with their authenticator, is locked for 15 minutes and then signs in. 🛑 The wrong passwords alone did not lock the account.
+
+---
+
+### JRN-007 · A lost phone
+
+**Covers:** `AUTH-005`, `AUTH-012`, `AUTH-013`
+
+1. An engineer loses their phone: signs in with a recovery code.
+2. Their administrator resets their authenticator; they set up a new one.
+3. The owner loses theirs with no codes left: the platform superuser resets it.
+
+**Expected:** each reset signs the person out and is in Activity, naming who reset whom; nobody inside ACME could reset the owner.
+
+---
+
+### JRN-008 · A licence lapses
+
+**Covers:** `DIAG-006`, `PLAT-002`, `API-002`
+
+1. The superuser suspends ACME's licence.
+2. Engineers try to run a diagnostic; read and export old ones; the IT system pulls through the API.
+3. The superuser resumes it.
+
+**Expected:** runs refused with who can renew; reading, exports and the Results API keep working throughout.
+
+---
+# Part IV — Non-Functional Matrix
+
+What every screen owes every person, whatever the feature.
+
+## 4.1 Form factors
+
+The app runs on the web (the live build), macOS, Windows, Android and iOS from one codebase. Below 600 px a list row reads as two lines; below 1000 px the navigation rail drops its group names.
+
+| ID | Check | Expected |
+|---|---|---|
+| `NFR-001` | Every screen at 390 × 844 (a phone) | No horizontal page scroll; no overflow stripes; tables scroll within their card |
+| `NFR-002` | Long values: a 39-character IPv6 address, a 60-character site name, a Devanagari name | One line, ellipsised, the whole value in the tooltip and selectable. 🛑 **Must NOT** break the row or truncate silently |
+| `NFR-003` | The rail at 1600, 1000 and 600 px | Grouped with names; grouped with dividers; the drawer |
+
+## 4.2 States every screen has
+
+| ID | State | Expected |
+|---|---|---|
+| `NFR-004` | Loading | A skeleton, never a blank or a spinner over an empty frame |
+| `NFR-005` | Empty | The designed empty state with what to do next |
+| `NFR-006` | Failed | The failure with **Try again** when the server says it is worth retrying. 🛑 **Must NOT** show the empty state — "No sites yet" under a refusal reads as data loss |
+| `NFR-007` | 403 | What the server says to do: a lapsed licence names who can renew; a missing capability says to ask an administrator |
+| `NFR-008` | Forms | Required fields end with ` *`; a refused save names each field; a form whose load failed offers no **Save** |
+
+## 4.3 Appearance and accessibility
+
+| ID | Check | Expected |
+|---|---|---|
+| `NFR-009` | Each of the five themes in light and dark | Text contrast passes; status colours unchanged in meaning |
+| `NFR-010` | Reduce motion on (app setting or the device's) | No transitions |
+| `NFR-011` | Status by colour alone | Every pill carries an icon as well as a colour |
+| `NFR-012` | Every user-visible sentence | From the catalogue: no English hard-coded in a widget, no raw key shown |
+
+## 4.4 Security
+
+| ID | Check | Expected |
+|---|---|---|
+| `NFR-013` | Tenancy, for every id-taking route | RIVAL's id answers 404 or an empty list — `./pingletest.sh tenancy` |
+| `NFR-014` | The destination policy, everywhere Pingle connects out | Sweeps, traceroutes, webhooks, the directory and the result export all refuse loopback, link-local and cloud metadata |
+| `NFR-015` | Error responses | No SQLSTATE, driver names, file paths or a remote server's raw reply in any error envelope |
+| `NFR-016` | Secrets at rest | SMS tokens, bind passwords and export credentials sealed with the server's secret box; API keys stored as hashes; never returned |
+| `NFR-017` | CSV injection | Cells starting `=`, `+`, `-`, `@`, tab or carriage return are written as text |
+| `NFR-018` | Production configuration | Production refuses `OWNER_TOTP_SECRET`, `DEMO_TOTP_SECRET`, `LDAP_ALLOW_LOOPBACK`, `EXPORT_ALLOW_LOOPBACK` and open CORS |
+
+## 4.5 Performance — the load suite
+
+`./pingletest.sh load` provisions one licensed organisation — the owner and nineteen engineers, each with an authenticator, and 200 sites on TEST-NET-3 — and measures it. It also runs nightly (`.github/workflows/pingle-load.yml`). Budgets are 95th percentiles; the measured figures are from a developer laptop against a local server.
+
+| Scenario | Measured p95 | Budget |
+|---|---|---|
+| Sign-in, password step — all 20 at once | 750 ms | 3 s |
+| Sign-in, authenticator step — all 20 at once | 16 ms | 1 s |
+| Reads — list, sites, dashboard, me; 20 people × 10 | 9 ms | 750 ms |
+| Sweep of 200 sites, failures traced | 91 s | 120 s |
+| Diagnostic of 5 sites — 10 people at once | 4.1 s | 20 s |
+| Results API by ticket (200 results) — 200 pulls, 10 at a time | 16 ms | 1 s |
+| CSV export of the whole run (250 rows) | 2 ms | 10 s |
+
+🔒 Absolute whatever the machine: no 5xx; the traced 200-site sweep stores all 200 results; the CSV holds every stored result once. With the old bug restored (saving under the sweep's deadline) the sweep answers 500 and the suite goes red.
+
+---
+# Part V — Release Governance
+
+How a release is judged ready, shipped, checked and — if it must be — rolled back.
+
+## 5.1 The automated gate
+
+A release candidate passes all of these, with **no skips**, before anything ships:
+
+```bash
+PINGLE_TEST_URL=http://localhost:18080 PINGLE_TEST_REQUIRE_SUPERUSER=1 ./pingletest.sh
+./pingletest.sh load          # before a release that touches sweeps, sign-in or exports
+```
+
+`./pingletest.sh` runs `tenancy assignment acl audit translation contract monitor unit client backup docs`. Coverage floors are a ratchet (`scripts/PingleCoverageFloor.py`, `scripts/PingleFlutterCoverageFloor.py`): raised when real coverage rises, never lowered to make a build pass.
+
+## 5.2 What blocks a release
+
+| Severity | Definition | Examples |
+|---|---|---|
+| **P0 — blocks** | Any 🔒 INVARIANT or 🛑 MUST NOT HAPPEN observed | One organisation sees another's data; a probe reaches loopback or metadata; a session survives being disabled; a secret is returned; the chain verifies after tampering; results lost after a sweep |
+| **P1 — blocks unless waived in writing** | A documented flow cannot be completed | Sign-in impossible for a role; an export cannot be downloaded; a screen shows its empty state under a refusal |
+| **P2 — fix next release** | Wrong but recoverable | A misaligned column at one width; an unclear message |
+
+## 5.3 Go / No-Go checklist
+
+| ID | Check | Owner |
+|---|---|---|
+| `REL-001` | `./pingletest.sh` green with no skips, on the commit being shipped | QA |
+| `REL-002` | Every row of *What changed* (front matter) manually verified: `AUTH-001`, `AUTH-009`, `CHK-001`, `DEV-002`, `DEV-005`, `V6-001`, `CSV-001`, `EXP-006`, `AUD-003` | QA |
+| `REL-003` | Journeys `JRN-001`, `JRN-003`, `JRN-004`, `JRN-006` on a disposable stack | QA |
+| `REL-004` | The live `.env` has `APP_ENV=production` and none of `OWNER_TOTP_SECRET`, `DEMO_TOTP_SECRET`, `EXPORT_ALLOW_LOOPBACK=true`, `LDAP_ALLOW_LOOPBACK=true` | Release owner |
+| `REL-005` | New migrations read for what they change on live data (a migration that revokes sessions, rewrites figures or changes a key is announced to users) | Backend |
+| `REL-006` | Public documents (`pingleweb/index.html`, `docs/*.html` and their PDFs) promise nothing the release does not do | Product |
+
+## 5.4 Deploy and verify
+
+```bash
+scripts/deploy/PingleDeploy.sh --host mshop.rummaan53.com
+```
+
+The script backs the live database up before the new release boots and migrates it. Afterwards:
+
+| ID | Check | Expected |
+|---|---|---|
+| `REL-007` | `https://pingle.rummaan53.com/healthz` and `/readyz` | 200 |
+| `REL-008` | The live database's newest migration | The newest file in `pinglego/pkg/common/dbclient/migrations/` |
+| `REL-009` | A new route answers an anonymous caller | 401, not 404 (e.g. `GET /api/v1/export/target`) |
+| `REL-010` | `/` and `/app/` | Different documents; the app loads and signs in (`AUTH-002`) |
+| `REL-011` | The server log since boot | No `level=ERROR` |
+| `REL-012` | `/proc/sys/net/ipv4/ping_group_range` on the host | `0 2147483647` — unprivileged ICMP, so sweeps report `icmp` rather than falling back to TCP |
+
+## 5.5 Rollback
+
+Releases live in `/opt/pingle/releases/<version>`; the last three are kept. To roll back the API, point `current` at the previous release and restart:
+
+```bash
+ssh mshop.rummaan53.com 'ls -1t /opt/pingle/releases'
+ssh mshop.rummaan53.com 'sudo ln -sfn /opt/pingle/releases/<previous> /opt/pingle/current && sudo systemctl restart pingle'
+```
+
+> [!WARNING]
+> ⚠️ **TRAP** — migrations run forward only. Rolling the binary back does not roll the schema back; an older binary runs against a newer schema, which is safe only while every migration since added rather than removed. If a migration must be undone, restore the pre-deploy backup taken by the deploy (`scripts/deploy/backup/`), whose restore drill is part of the `backup` suite.
+
+---
+# Appendices
+
+## Appendix A — Every API route
+
+All routes are under `/api/v1`. **Access**: *public* (no session), *session* (signed in), *member* (signed in **and** in an organisation), *superuser* (the platform operator), *api key* (a Results API key with `read:results`). **Licence**: refused while the organisation's licence is suspended, revoked or expired. **Audited**: recorded by the audit middleware from `pinglego/pkg/auditlogmicroservice/auditlogconstants/AuditLogRegistry.go`; sign-in, sign-out and failed sign-ins are recorded by the user service itself (§2.5). `./pingletest.sh docs` derives this table from the route handlers and fails if it drifts.
+
+| Method | Path | Access | Capability | Licence | Audited |
+|---|---|---|---|:---:|:---:|
+| `POST` | `/apikey/add` | member | `apikey_manage` | required | ✅ |
+| `GET` | `/apikey/list` | member | `apikey_manage` | — | — |
+| `DELETE` | `/apikey/{credentialId}` | member | `apikey_manage` | — | ✅ |
+| `GET` | `/auditlog/list` | session | `auditlog_view` | — | — |
+| `GET` | `/auditlog/verify` | session | `auditlog_view` | — | — |
+| `POST` | `/diagnostic/clientobservation` | member | `diagnostic_run` | required | ✅ |
+| `GET` | `/diagnostic/faults` | member | `report_view` | — | — |
+| `GET` | `/diagnostic/list` | member | `diagnostic_view_all` | — | — |
+| `POST` | `/diagnostic/submit` | member | `diagnostic_run` | required | ✅ |
+| `GET` | `/diagnostic/tt/{ttNumber}` | member | `diagnostic_view_all` | — | — |
+| `GET` | `/diagnostic/{requestId}` | member | `diagnostic_view_all` | — | — |
+| `GET` | `/diagnostic/{requestId}/report.csv` | member | `report_export` | — | ✅ |
+| `GET` | `/diagnostic/{requestId}/report.pdf` | member | `report_export` | — | ✅ |
+| `POST` | `/dnssite/add` | member | `dns_site_manage` | required | ✅ |
+| `POST` | `/dnssite/bulkimport` | member | `dns_site_manage` | required | ✅ |
+| `GET` | `/dnssite/list` | member | `dns_site_view` | — | — |
+| `DELETE` | `/dnssite/{dnsSiteId}` | member | `dns_site_manage` | — | ✅ |
+| `PUT` | `/dnssite/{dnsSiteId}` | member | `dns_site_manage` | required | ✅ |
+| `GET` | `/export/target` | member | `apikey_manage` | — | — |
+| `PUT` | `/export/target` | member | `apikey_manage` | — | ✅ |
+| `POST` | `/export/target/test` | member | `apikey_manage` | — | ✅ |
+| `GET` | `/init` | public | — | — | — |
+| `GET` | `/init/help/{screenId}` | public | — | — | — |
+| `GET` | `/init/language/list` | public | — | — | — |
+| `GET` | `/ldap/config` | member | `ldap_manage` | — | — |
+| `PUT` | `/ldap/config` | member | `ldap_manage` | — | ✅ |
+| `POST` | `/ldap/config/test` | member | `ldap_manage` | — | — |
+| `POST` | `/ldap/groupmap/add` | member | `ldap_manage` | — | ✅ |
+| `GET` | `/ldap/groupmap/list` | member | `ldap_manage` | — | — |
+| `DELETE` | `/ldap/groupmap/{mapId}` | member | `ldap_manage` | — | ✅ |
+| `GET` | `/licence/my` | member | `licence_view` | — | — |
+| `GET` | `/monitor/alert/list` | member | `sla_view` | — | — |
+| `POST` | `/monitor/channel/add` | member | `sla_manage` | required | ✅ |
+| `GET` | `/monitor/channel/list` | member | `sla_view` | — | — |
+| `DELETE` | `/monitor/channel/{channelId}` | member | `sla_manage` | — | ✅ |
+| `POST` | `/monitor/channel/{channelId}/test` | member | `sla_manage` | required | ✅ |
+| `POST` | `/monitor/maintenance/add` | member | `schedule_manage` | required | ✅ |
+| `GET` | `/monitor/maintenance/list` | member | `sla_view` | — | — |
+| `DELETE` | `/monitor/maintenance/{windowId}` | member | `schedule_manage` | required | ✅ |
+| `PUT` | `/monitor/maintenance/{windowId}` | member | `schedule_manage` | required | ✅ |
+| `POST` | `/monitor/schedule/add` | member | `schedule_manage` | required | ✅ |
+| `GET` | `/monitor/schedule/list` | member | `schedule_manage` | — | — |
+| `DELETE` | `/monitor/schedule/{scheduleId}` | member | `schedule_manage` | — | ✅ |
+| `PUT` | `/monitor/schedule/{scheduleId}` | member | `schedule_manage` | required | ✅ |
+| `POST` | `/monitor/schedule/{scheduleId}/run` | member | `schedule_manage` | required | ✅ |
+| `POST` | `/monitor/sla/add` | member | `sla_manage` | required | ✅ |
+| `GET` | `/monitor/sla/list` | member | `sla_view` | — | — |
+| `DELETE` | `/monitor/sla/{slaPolicyId}` | member | `sla_manage` | — | ✅ |
+| `PUT` | `/monitor/sla/{slaPolicyId}` | member | `sla_manage` | required | ✅ |
+| `GET` | `/monitor/slareport` | member | `report_view` | — | — |
+| `GET` | `/monitor/slareport.pdf` | member | `report_export` | — | — |
+| `GET` | `/monitor/trend` | member | `report_view` | — | — |
+| `GET` | `/organisation/settings` | member | — | — | — |
+| `PUT` | `/organisation/settings` | member | `staff_manage` | — | ✅ |
+| `GET` | `/ping/dashboard` | member | `report_view` | — | — |
+| `POST` | `/ping/run` | member | `diagnostic_run` | required | — |
+| `GET` | `/ping/run/{runId}` | member | `diagnostic_view_all` | — | — |
+| `GET` | `/ping/run/{runId}/report.pdf` | member | `report_export` | — | — |
+| `GET` | `/ping/runlist` | member | `diagnostic_view_all` | — | — |
+| `GET` | `/platform/currency/list` | superuser | — | — | — |
+| `POST` | `/platform/licence/issue` | superuser | — | — | ✅ |
+| `GET` | `/platform/licence/list` | superuser | — | — | — |
+| `GET` | `/platform/licence/{licenceId}/event/list` | superuser | — | — | — |
+| `POST` | `/platform/licence/{licenceId}/renew` | superuser | — | — | ✅ |
+| `POST` | `/platform/licence/{licenceId}/resume` | superuser | — | — | ✅ |
+| `POST` | `/platform/licence/{licenceId}/revoke` | superuser | — | — | ✅ |
+| `PUT` | `/platform/licence/{licenceId}/seats` | superuser | — | — | ✅ |
+| `POST` | `/platform/licence/{licenceId}/suspend` | superuser | — | — | ✅ |
+| `POST` | `/platform/organisation/add` | superuser | — | — | ✅ |
+| `GET` | `/platform/organisation/list` | superuser | — | — | — |
+| `POST` | `/platform/organisation/{organisationId}/assign` | superuser | — | — | ✅ |
+| `GET` | `/platform/organisation/{organisationId}/licence` | superuser | — | — | — |
+| `GET` | `/platform/organisation/{organisationId}/owners` | superuser | — | — | — |
+| `GET` | `/platform/plan/list` | superuser | — | — | — |
+| `GET` | `/platform/user/unassigned` | superuser | — | — | — |
+| `GET` | `/result/bytt/{ttNumber}` | api key | — | — | — |
+| `GET` | `/result/export.csv` | api key | — | — | — |
+| `GET` | `/sms/gateway` | member | `staff_manage` | — | — |
+| `PUT` | `/sms/gateway` | member | `staff_manage` | — | ✅ |
+| `POST` | `/sms/gateway/test` | member | `staff_manage` | — | ✅ |
+| `GET` | `/staff/checkin/list` | member | `staff_manage` | — | — |
+| `GET` | `/staff/list` | member | `staff_manage` | — | — |
+| `POST` | `/staff/role/add` | member | `acl_manage` | — | ✅ |
+| `GET` | `/staff/role/list` | member | `acl_manage` | — | — |
+| `DELETE` | `/staff/role/{roleId}` | member | `acl_manage` | — | ✅ |
+| `PUT` | `/staff/role/{roleId}` | member | `acl_manage` | — | ✅ |
+| `GET` | `/staff/session/list` | session | — | — | — |
+| `GET` | `/staff/session/organisation` | member | `staff_manage` | — | — |
+| `DELETE` | `/staff/session/organisation/{sessionId}` | member | `staff_manage` | — | ✅ |
+| `DELETE` | `/staff/session/{sessionId}` | session | — | — | ✅ |
+| `DELETE` | `/staff/{staffId}` | member | `staff_manage` | — | ✅ |
+| `PUT` | `/staff/{staffId}` | member | `staff_manage` | — | ✅ |
+| `PUT` | `/staff/{staffId}/access` | member | `acl_manage` | — | ✅ |
+| `PUT` | `/staff/{staffId}/secondfactor` | member | `staff_manage` | — | ✅ |
+| `POST` | `/staff/{staffId}/secondfactor/reset` | member | `staff_manage` | — | ✅ |
+| `POST` | `/user/add` | member | `user_manage` | required | ✅ |
+| `POST` | `/user/appearance` | session | — | — | — |
+| `GET` | `/user/capability/list` | session | — | — | — |
+| `POST` | `/user/language` | session | — | — | — |
+| `GET` | `/user/list` | member | `user_manage` | — | — |
+| `GET` | `/user/me` | session | — | — | — |
+| `POST` | `/user/password` | session | — | — | ✅ |
+| `POST` | `/user/signin` | public | — | — | — |
+| `POST` | `/user/signin/enrol` | public | — | — | — |
+| `POST` | `/user/signin/resend` | public | — | — | — |
+| `POST` | `/user/signin/verify` | public | — | — | — |
+| `POST` | `/user/signout` | session | — | — | — |
+| `POST` | `/user/signup` | public | — | — | — |
+| `PATCH` | `/user/{userId}` | member | `user_manage` | — | ✅ |
+| `POST` | `/user/{userId}/secondfactor/reset` | superuser | — | — | ✅ |
+
+## Appendix B — Capabilities and the built-in roles
+
+| Capability | What it allows | Administrator | NOC Engineer | Viewer |
+|---|---|:---:|:---:|:---:|
+| `dns_site_view` | View the DNS site inventory. | ✅ | ✅ | ✅ |
+| `dns_site_manage` | Add, edit and remove DNS sites. | ✅ | — | — |
+| `diagnostic_run` | Submit a diagnostic against a TT number. | ✅ | ✅ | — |
+| `diagnostic_view_own` | View diagnostics this person submitted. | ✅ | ✅ | ✅ |
+| `diagnostic_view_all` | View every diagnostic in the organisation. | ✅ | ✅ | ✅ |
+| `sla_view` | View SLA policies and breach status. | ✅ | ✅ | ✅ |
+| `sla_manage` | Create and edit SLA policies and alert channels. | ✅ | — | — |
+| `schedule_manage` | Create and edit scheduled monitoring. | ✅ | ✅ | — |
+| `report_view` | View reports and analytics. | ✅ | ✅ | ✅ |
+| `report_export` | Download PDF and CSV reports. | ✅ | ✅ | — |
+| `user_manage` | Invite and deactivate user accounts. | ✅ | — | — |
+| `staff_manage` | Edit staff records and assign roles. | ✅ | — | — |
+| `acl_manage` | Change roles and permission grants. | ✅ | — | — |
+| `auditlog_view` | Read the activity trail. | ✅ | — | — |
+| `ldap_manage` | Configure directory integration. | ✅ | — | — |
+| `apikey_manage` | Issue and revoke Results API keys, and set up the result export. | ✅ | — | — |
+| `licence_view` | View the organisation's licence and seat usage. | ✅ | — | — |
+
+Built-in roles are shared by every organisation and cannot be edited; an organisation adds its own (§2.2). The organisation **owner** and the **platform superuser** are not roles: the owner holds every capability in its organisation, and the superuser none — it administers the platform, not a tenant.
+
+## Appendix C — Migrations
+
+Embedded in the server binary and applied in order at boot (`pinglego/pkg/common/dbclient/migrations/`). They only ever move forward (§5.5).
+
+| File | What it does |
+|---|---|
+| `0001_2026_09_30_initial_schema.sql` | Pingle initial schema. |
+| `0002_2026_09_30_tenancy_staff_and_access.sql` | Tenancy, staff and the permission model. |
+| `0003_2026_09_30_platform_licensing.sql` | Platform licensing: currencies, price book, licences and their evidentiary |
+| `0004_2026_09_30_diagnostics_and_api_keys.sql` | The diagnostic request: a NOC engineer investigating a trouble ticket. |
+| `0005_2026_09_30_telecom_sla_and_schedules.sql` | Telecom depth: path analysis, service-level targets, alerting and scheduled |
+| `0006_2026_09_30_audit_trail.sql` | The activity trail. |
+| `0007_2026_09_30_ldap_integration.sql` | Directory integration, per organisation. |
+| `0008_2026_09_30_user_appearance.sql` | Appearance preferences, per user. |
+| `0009_2026_09_30_holding_org_and_seats.sql` | Addenda 1-3: only a superuser creates organisations and issues licences, and |
+| `0010_2026_10_01_client_observations.sql` | Client-side observations: a measurement taken by the customer's own device |
+| `0011_2026_10_01_maintenance_and_alert_damping.sql` | Maintenance windows, and discipline for alerting. |
+| `0012_2026_10_01_result_partitioning_and_retention.sql` | Monthly partitioning for the result tables, and a retention policy. |
+| `0013_2026_10_01_fault_verdict.sql` | The fault verdict, stored with the result it describes. |
+| `0014_2026_10_01_dns_site_endpoint_uniqueness.sql` | One monitored endpoint per organisation - by the endpoint actually probed. |
+| `0015_2026_10_01_audit_trail_outlives_its_subjects.sql` | The audit trail must outlive what it describes, unchanged. |
+| `0016_2026_10_02_alert_escalation.sql` | An alert that gets worse inside its cooldown is announced. |
+| `0017_2026_10_02_licence_period.sql` | The period a licence's amount pays for. |
+| `0018_2026_10_02_ldap_ca_certificate.sql` | The authority an organisation's directory certificate is checked against. |
+| `0019_2026_10_03_two_step_sign_in.sql` | Two-step sign-in. |
+| `0020_2026_10_03_session_checkin.sql` | Where people sign in and out. |
+| `0021_2026_10_03_device_test.sql` | Test from this device: what it tests against, and how fast the line was. |
+| `0022_2026_10_03_loss_and_jitter.sql` | Loss and jitter on the ticket, not only on each site. |
+| `0023_2026_10_04_dual_stack_results.sql` | Dual-stack sites, measured on both families and reported separately. |
+| `0024_2026_10_04_result_export.sql` | Results delivered to an organisation's own server, on a schedule, and |
+
+## Appendix D — Settings
+
+Read from the environment, falling back to `.env` (see `.env.example`); defined in `pinglego/pkg/common/config/Config.go`.
+
+| Setting | Default | What it decides |
+|---|---|---|
+| `APP_ENV` | `development` | `production` refuses the settings in Part IV `NFR-018` |
+| `APP_NAME` | `Pingle` | The name in reports and the user agent |
+| `PORT` | `8080` | Where the API listens |
+| `DATABASE_URL` | local `pingledb` | The database (through PgBouncer on the live host) |
+| `JWT_SECRET` | — (required, 32+ characters) | Signs sessions **and** seals every stored secret: rotating it signs everyone out and makes stored SMS tokens, bind passwords and export credentials unreadable until re-entered |
+| `JWT_TTL` | `12h` | How long a session lasts |
+| `CORS_ORIGINS` | `*` | Must be explicit origins in production |
+| `TRUSTED_PROXIES` | `127.0.0.0/8, ::1/128` | Whose `X-Forwarded-For` is believed — the client address in sessions, limits and the trail |
+| `AUTH_ATTEMPTS_PER_MINUTE` | `10` | Password-step requests per client address |
+| `SECOND_STEP_ATTEMPTS_PER_MINUTE` | `30` | Second-step requests per client address |
+| `ALLOW_SIGNUP` | `true` | Whether anyone may sign up (into the holding organisation) |
+| `OWNER_EMAIL`, `OWNER_PASSWORD`, `OWNER_NAME` | — | The platform superuser, created at boot |
+| `OWNER_TOTP_SECRET` | — | Pre-enrols the superuser's authenticator — **outside production only** |
+| `OWNER_RESET_SECOND_FACTOR` | `false` | Break-glass: clears the superuser's authenticator at boot |
+| `SEED_DEMO`, `DEMO_EMAIL`, `DEMO_PASSWORD`, `DEMO_NAME`, `DEMO_ORGANISATION_NAME` | `false`, … | A demo organisation with sites and a licence |
+| `DEMO_TOTP_SECRET` | — | Pre-enrols the demo owner — **outside production only** |
+| `TRIAL_DAYS`, `TRIAL_SEATS`, `TRIAL_SITES` | `14`, `5`, `25` | A trial licence's terms |
+| `PING_COUNT`, `PING_TIMEOUT`, `PING_INTERVAL`, `PING_CONCURRENCY` | `4`, `5s`, `200ms`, `16` | The probe engine's defaults |
+| `PING_TCP_FALLBACK` | `true` | TCP connect where ICMP cannot be sent |
+| `PING_ALLOW_PRIVATE` | `true` | Whether RFC 1918 and unique-local addresses may be probed |
+| `LDAP_ALLOW_LOOPBACK` | `false` | A directory on Pingle's own host (development only) |
+| `EXPORT_ALLOW_LOOPBACK` | `false` | A result-export server on Pingle's own host (development only) |
+| `REVERSE_GEOCODING` | `auto` | `off` stops addresses being looked up for sign-in positions |
+| `GOOGLE_MAPS_API_KEY` | — | Google Geocoding; without it, OpenStreetMap Nominatim |
+| `GEOCODE_CONTACT` | `https://pingle.rummaan53.com` | Sent to Nominatim, which requires a contact |
+
+## Appendix E — Response codes and actions
+
+Every refusal is a JSON envelope: `{"error": {"code", "message", "request_id", "details", "action"}}`. The app shows `message`, names `details` against their fields, and acts on `action`.
+
+| `code` | Status | Meaning |
+|---|:---:|---|
+| `bad_request` | 400 | Malformed input — an id that is not a UUID, an unreadable time, no organisation |
+| `validation_failed` | 422 | Fields to correct, each named in `details` |
+| `unauthorized` | 401 | No session or key, or one that has ended |
+| `forbidden` | 403 | A capability the caller lacks |
+| `not_found` | 404 | Absent — or another organisation's, which is the same thing to the caller |
+| `conflict` | 409 | The state forbids it — e.g. a diagnostic with no results to report, a changed server key |
+| `rate_limited` | 429 | Too many attempts from this address, or texts for this person |
+| `internal_error` | 500 | Logged with the `request_id`; never carries the cause |
+| `licence_expired`, `licence_suspended` | 403 | The organisation's licence stops this |
+| `seat_limit_reached` | 403 | Every seat is taken |
+| `invalid_code` | 401 | A wrong second-step code, with attempts left |
+| `challenge_expired` | 401 | The sign-in must start again |
+| `locked_out` | 429 | Too many wrong codes; wait |
+| `location_required` | 403 | The organisation requires a position to sign in |
+
+| `action` | What the app does |
+|---|---|
+| `retry` | Offers **Try again** |
+| `renew` | Names who can renew the licence |
+| `ask_administrator` | Says to ask an administrator |
+| `restart_sign_in` | Returns to the password step |
+| `wait` | Says when to try again |
+| `share_location` | Explains how to allow location and try again |
+
+## Appendix F — Glossary
+
+| Term | Meaning |
+|---|---|
+| **Dual-stack** | A site reachable over both IPv4 and IPv6 |
+| **Holding organisation** | Where a signed-up account waits until the platform operator places it |
+| **MOS** | Mean Opinion Score — estimated call quality, 1–5 (ITU-T G.107 E-model) |
+| **Report only** | A result shown and kept but not counted: the IPv6 half of a dual-stack site |
+| **RFC 3550 jitter** | Interarrival jitter: the smoothed difference between consecutive round trips |
+| **Seat** | One person signed in, however many devices |
+| **Sweep** | One run of probes over a set of sites |
+| **TOTP** | Time-based one-time password — the 6-digit code an authenticator app shows |
+| **TT number** | A trouble ticket number from the operator's own ticketing system |
+| **Watermark** | How far the result export has delivered: results of diagnostics finished after it are still to send |
+
+---
+
+*Guide version `v2026.10-PROD-v1` — verified against source on 2026-10-04, and continuously re-verified by `./pingletest.sh docs`.*

@@ -3,3 +3,7 @@
 .DS_Store
 .idea/
 .vscode/
+
+# The docs suite's Python environment (markdown-it-py), made by pingletest.sh.
+.venv/
+__pycache__/
