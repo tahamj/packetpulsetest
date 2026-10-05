@@ -14,7 +14,7 @@
 
 | 🧭 Screens | 🔌 API routes | 🔐 Capabilities | 🗄️ Migrations | 💬 Catalogue strings | ❓ Help topics | 🧪 Guard suites |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| **16** <br><sub>in the navigation rail</sub> | **104** <br><sub>under `/api/v1`</sub> | **17** <br><sub>3 built-in roles</sub> | **27** <br><sub>applied at boot</sub> | **881** <br><sub>English, server-served</sub> | **18** <br><sub>one per screen</sub> | **11** <br><sub>+ `load`, opt-in</sub> |
+| **16** <br><sub>in the navigation rail</sub> | **104** <br><sub>under `/api/v1`</sub> | **17** <br><sub>3 built-in roles</sub> | **28** <br><sub>applied at boot</sub> | **881** <br><sub>English, server-served</sub> | **18** <br><sub>one per screen</sub> | **11** <br><sub>+ `load`, opt-in</sub> |
 
 <br>
 

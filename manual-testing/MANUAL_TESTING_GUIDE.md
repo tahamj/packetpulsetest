@@ -14,7 +14,7 @@
 
 | 🧭 Screens | 🔌 API routes | 🔐 Capabilities | 🗄️ Migrations | 💬 Catalogue strings | ❓ Help topics | 🧪 Guard suites |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| **16** <br><sub>in the navigation rail</sub> | **104** <br><sub>under `/api/v1`</sub> | **17** <br><sub>3 built-in roles</sub> | **27** <br><sub>applied at boot</sub> | **881** <br><sub>English, server-served</sub> | **18** <br><sub>one per screen</sub> | **11** <br><sub>+ `load`, opt-in</sub> |
+| **16** <br><sub>in the navigation rail</sub> | **104** <br><sub>under `/api/v1`</sub> | **17** <br><sub>3 built-in roles</sub> | **28** <br><sub>applied at boot</sub> | **881** <br><sub>English, server-served</sub> | **18** <br><sub>one per screen</sub> | **11** <br><sub>+ `load`, opt-in</sub> |
 
 <br>
 
@@ -1227,6 +1227,7 @@ Embedded in the server binary and applied in order at boot (`packetpulsego/pkg/c
 | `0025_2026_10_05_otp_only_and_licence_files.sql` | Sign-in by one-time code only, and licences from signed files. |
 | `0026_2026_10_05_own_results_places_and_indexes.sql` | Whose tests a person reads, where each test was run, and the indexes the busiest reads need. |
 | `0027_2026_10_05_path_analysis_removed.sql` | Path analysis is removed: hops and fault verdicts are no longer written. |
+| `0028_2026_10_05_rename_the_partition_function.sql` | The partition function under its PacketPulse name, on every database. |
 
 ## Appendix D — Settings
 
