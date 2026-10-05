@@ -592,6 +592,11 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td><code>DEMO_EMAIL</code> / <code>DEMO_PASSWORD</code> (owner), plus <code>demo-engineer@…</code> and <code>demo-viewer@…</code></td>
 <td>The texted-code step, with the code (<code>DEMO_SMS_CODE</code>) shown on screen instead of sent. At most <code>DEMO_SEATS</code> walkthroughs at once.</td>
 </tr>
+<tr>
+<td><strong>A hand-made demo tenant</strong> (<code>DEMO_ORGANISATION_CODE</code>, console only)</td>
+<td>Everyone in the organisation that licence code names — on the live console, Northwind (<code>NWTEL</code>)</td>
+<td>The same on-screen code, for the owner too; nothing is emailed.</td>
+</tr>
 </tbody>
 </table></div>
 <p>To act as a person in a manual test, read their code from the <strong>code outbox</strong>: when <code>OTP_OUTBOX_FILE</code> is set, every code is appended to that file as one JSON line (<code>challenge_id</code>, <code>channel</code>, <code>to</code>, <code>code</code>, <code>at</code>) instead of being emailed or texted. Without it, codes go to real mailboxes through the Gmail accounts in <code>SMTP_FROM_n</code> / <code>SMTP_PASSWORD_n</code>.</p>
@@ -4245,6 +4250,11 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/packetpulse/releases/&lt;previous&gt;
 <td><code>DEMO_SMS_CODE</code>, <code>DEMO_SEATS</code></td>
 <td><code>111111</code>, <code>3</code></td>
 <td>The demo's on-screen code, and how many demo walkthroughs may run at once</td>
+</tr>
+<tr>
+<td><code>DEMO_ORGANISATION_CODE</code></td>
+<td>—</td>
+<td>Gives an organisation that already exists, by its licence's code, the demo sign-in: the on-screen code instead of an emailed or texted one, no password changes, the <code>DEMO_SEATS</code> cap, and public-only sweeps. Seeds nothing. <strong>Console only</strong>, and not with <code>SEED_DEMO</code></td>
 </tr>
 <tr>
 <td><code>TRIAL_DAYS</code>, <code>TRIAL_SEATS</code>, <code>TRIAL_SITES</code></td>

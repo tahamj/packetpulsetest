@@ -53,6 +53,7 @@ With the development key pair in `.env` (`LICENCE_PUBLIC_KEY` and `LICENCE_SIGNI
 | **Organisation owner** | The first sign-up with the address named in the organisation's licence file becomes its Administrator | A code emailed to the owner, always. |
 | **Anyone else** | **Staff → Add** by an administrator, who shares the sign-in with them | A code emailed to their sign-in address, or texted when they are set to text and the organisation's SMS gateway is on. |
 | **Demo logins** (`SEED_DEMO=true`, console only) | `DEMO_EMAIL` / `DEMO_PASSWORD` (owner), plus `demo-engineer@…` and `demo-viewer@…` | The texted-code step, with the code (`DEMO_SMS_CODE`) shown on screen instead of sent. At most `DEMO_SEATS` walkthroughs at once. |
+| **A hand-made demo tenant** (`DEMO_ORGANISATION_CODE`, console only) | Everyone in the organisation that licence code names — on the live console, Northwind (`NWTEL`) | The same on-screen code, for the owner too; nothing is emailed. |
 
 To act as a person in a manual test, read their code from the **code outbox**: when `OTP_OUTBOX_FILE` is set, every code is appended to that file as one JSON line (`challenge_id`, `channel`, `to`, `code`, `at`) instead of being emailed or texted. Without it, codes go to real mailboxes through the Gmail accounts in `SMTP_FROM_n` / `SMTP_PASSWORD_n`.
 
