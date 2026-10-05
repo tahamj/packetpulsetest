@@ -28,9 +28,9 @@ func TestANightlyBackupRestoresExactlyIntoAScratchDatabase(t *testing.T) {
 		t.Errorf("state.json does not record the %s migrations the database holds:\n%s", live, state)
 	}
 
-	scratch := uniqueName("pingle_bk_drill")
+	scratch := uniqueName("packetpulse_bk_drill")
 	dropAfter(t, scratch)
-	drill := run(t, "PingleRestoreDrill.sh", f.env(nil), "--into", scratch)
+	drill := run(t, "PacketPulseRestoreDrill.sh", f.env(nil), "--into", scratch)
 	if drill.code != 0 {
 		t.Fatalf("the drill failed on a good backup:\n%s", drill.output)
 	}
@@ -58,7 +58,7 @@ echo "COPY public.schema_migrations (version) FROM stdin;"
 head -c 20000 /dev/urandom | base64
 exit 0
 `)
-	out := run(t, "PingleBackup.sh", f.env(map[string]string{"PATH": fakes + ":" + os.Getenv("PATH")}))
+	out := run(t, "PacketPulseBackup.sh", f.env(map[string]string{"PATH": fakes + ":" + os.Getenv("PATH")}))
 	assertFailedBackup(t, f, out, "cut short")
 }
 
@@ -68,14 +68,14 @@ func TestAFailedDumpIsNeverRecordedAsASuccess(t *testing.T) {
 	f := newFixture(t)
 	fakes := t.TempDir()
 	writeExecutable(t, filepath.Join(fakes, "pg_dump"), "#!/bin/bash\necho 'pg_dump: error: connection refused' >&2\nexit 1\n")
-	out := run(t, "PingleBackup.sh", f.env(map[string]string{"PATH": fakes + ":" + os.Getenv("PATH")}))
+	out := run(t, "PacketPulseBackup.sh", f.env(map[string]string{"PATH": fakes + ":" + os.Getenv("PATH")}))
 	assertFailedBackup(t, f, out, "pg_dump FAILED")
 }
 
-// A complete dump of some other database is not a Pingle backup.
-func TestADumpWithoutSchemaMigrationsIsNotAPingleBackup(t *testing.T) {
+// A complete dump of some other database is not a PacketPulse backup.
+func TestADumpWithoutSchemaMigrationsIsNotAPacketPulseBackup(t *testing.T) {
 	f := newFixture(t)
-	other := uniqueName("pingle_bk_other")
+	other := uniqueName("packetpulse_bk_other")
 	dropAfter(t, other)
 	sql(t, "postgres", `CREATE DATABASE "`+other+`"`)
 	sql(t, other, "CREATE TABLE filler AS SELECT g, md5(g::text) AS h FROM generate_series(1, 2000) g")
@@ -83,8 +83,8 @@ func TestADumpWithoutSchemaMigrationsIsNotAPingleBackup(t *testing.T) {
 	if err := os.WriteFile(envFile, []byte("DATABASE_URL="+withDatabase(t, adminURL(), other)+"\n"), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	out := run(t, "PingleBackup.sh", f.env(map[string]string{"PINGLE_ENV_FILE": envFile}))
-	assertFailedBackup(t, f, out, "not a Pingle database")
+	out := run(t, "PacketPulseBackup.sh", f.env(map[string]string{"PACKETPULSE_ENV_FILE": envFile}))
+	assertFailedBackup(t, f, out, "not a PacketPulse database")
 }
 
 func assertFailedBackup(t *testing.T, f fixture, out result, why string) {
@@ -154,7 +154,7 @@ func TestBackupsRefuseToGoThroughPgBouncer(t *testing.T) {
 	if err := os.WriteFile(envFile, []byte("DATABASE_URL="+pooled+"\n"), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	out := run(t, "PingleBackup.sh", f.env(map[string]string{"PINGLE_ENV_FILE": envFile}))
+	out := run(t, "PacketPulseBackup.sh", f.env(map[string]string{"PACKETPULSE_ENV_FILE": envFile}))
 	if out.code == 0 || !strings.Contains(out.output, "PgBouncer") {
 		t.Fatalf("a backup through port 6432 was not refused (exit %d):\n%s", out.code, out.output)
 	}
@@ -165,25 +165,25 @@ func TestBackupsRefuseToGoThroughPgBouncer(t *testing.T) {
 
 // MShop's backup looked for its .env beside itself, never found the real one,
 // and failed every night for the life of the deployment. On the server these
-// scripts live in /opt/pingle/backup/ and the .env one level up.
+// scripts live in /opt/packetpulse/backup/ and the .env one level up.
 func TestTheEnvFileIsFoundOneLevelAboveTheScripts(t *testing.T) {
 	f := newFixture(t)
-	install := filepath.Join(t.TempDir(), "opt", "pingle")
+	install := filepath.Join(t.TempDir(), "opt", "packetpulse")
 	if err := os.MkdirAll(filepath.Join(install, "backup"), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	script := readFile(t, scriptPath(t, "PingleBackup.sh"))
-	writeExecutable(t, filepath.Join(install, "backup", "PingleBackup.sh"), script)
+	script := readFile(t, scriptPath(t, "PacketPulseBackup.sh"))
+	writeExecutable(t, filepath.Join(install, "backup", "PacketPulseBackup.sh"), script)
 	if err := os.WriteFile(filepath.Join(install, ".env"), []byte(readFile(t, f.envFile)), 0o600); err != nil {
 		t.Fatal(err)
 	}
 
-	command := exec.Command("/bin/bash", filepath.Join(install, "backup", "PingleBackup.sh"))
+	command := exec.Command("/bin/bash", filepath.Join(install, "backup", "PacketPulseBackup.sh"))
 	command.Env = []string{"PATH=" + os.Getenv("PATH"), "HOME=" + os.Getenv("HOME"),
-		"PINGLE_BACKUP_DIR=" + f.root, "PINGLE_BACKUP_KEY_FILE=/nonexistent"}
+		"PACKETPULSE_BACKUP_DIR=" + f.root, "PACKETPULSE_BACKUP_KEY_FILE=/nonexistent"}
 	out, err := command.CombinedOutput()
 	if err != nil {
-		t.Fatalf("with no PINGLE_ENV_FILE the backup did not find ../.env: %v\n%s", err, out)
+		t.Fatalf("with no PACKETPULSE_ENV_FILE the backup did not find ../.env: %v\n%s", err, out)
 	}
 	if !strings.Contains(string(out), filepath.Join(install, ".env")) {
 		t.Errorf("the log does not say which .env it used:\n%s", out)
@@ -195,7 +195,7 @@ func TestTheEnvFileIsFoundOneLevelAboveTheScripts(t *testing.T) {
 func TestTheEnvTravelsEncryptedToTheBackupKeyOnly(t *testing.T) {
 	f := newFixture(t)
 	keys := newTestKey(t)
-	dir := f.takeBackup(t, map[string]string{"PINGLE_BACKUP_KEY_FILE": keys.publicKey})
+	dir := f.takeBackup(t, map[string]string{"PACKETPULSE_BACKUP_KEY_FILE": keys.publicKey})
 
 	sealed := readFile(t, filepath.Join(dir, "secrets.gpg"))
 	if strings.Contains(sealed, f.jwtSecret) {
@@ -271,7 +271,7 @@ func TestASecondBackupWaitsButADeadOneDoesNotBlock(t *testing.T) {
 	if err := os.WriteFile(marker, []byte(strconv.Itoa(os.Getpid())), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	out := run(t, "PingleBackup.sh", f.env(nil))
+	out := run(t, "PacketPulseBackup.sh", f.env(nil))
 	if out.code == 0 || !strings.Contains(out.output, "in progress") {
 		t.Fatalf("a second backup started while one was running:\n%s", out.output)
 	}

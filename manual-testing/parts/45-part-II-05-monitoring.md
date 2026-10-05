@@ -28,11 +28,11 @@ Turning on-demand testing into a continuous watch, with alerts that mean somethi
   | `MON-007` | Administrator | Maintenance excludes and silences | A window over a failing site, in `Asia/Kolkata`, viewed from a device in another timezone | Results inside are *excluded*: no alert, availability unaffected; the window's hours are Kolkata wall-clock hours |
   | `MON-008` | Engineer | The SLA report says what it measured | Open a month with data and one without | With data: availability, loss, jitter and MOS per site, IPv6 lines marked `(v6)`; without: no figure. 🛑 **Must NOT** show 100% for an unmeasured month |
   | `MON-009` | Engineer | The report exports | **Export PDF** on the SLA report | The month's document, with the Loss column and the `(v6*)` footnote where report-only lines appear |
-  | `MON-010` | Tester | The guard suite | `./pingletest.sh monitor` | Passes — grading, damping, recovery and maintenance against a live server |
+  | `MON-010` | Tester | The guard suite | `./packetpulsetest.sh monitor` | Passes — grading, damping, recovery and maintenance against a live server |
 - ⚙️ **Developer Guide & Release Confidence**:
-  - Damping: `DecideAlert` in `pinglego/pkg/monitormicroservice/monitordomain/shared/` (consecutive breaches, cooldown, escalation); runner: `pinglego/pkg/monitormicroservice/monitorservice/MonitorScheduleRunner.go` (claims due schedules with `FOR UPDATE SKIP LOCKED`).
-  - Results are partitioned by month and rolled up daily per site **and family** (`pinglego/pkg/common/dbclient/migrations/0012_2026_10_01_result_partitioning_and_retention.sql`, `0023`); the retention runner keeps partitions three months ahead.
+  - Damping: `DecideAlert` in `packetpulsego/pkg/monitormicroservice/monitordomain/shared/` (consecutive breaches, cooldown, escalation); runner: `packetpulsego/pkg/monitormicroservice/monitorservice/MonitorScheduleRunner.go` (claims due schedules with `FOR UPDATE SKIP LOCKED`).
+  - Results are partitioned by month and rolled up daily per site **and family** (`packetpulsego/pkg/common/dbclient/migrations/0012_2026_10_01_result_partitioning_and_retention.sql`, `0023`); the retention runner keeps partitions three months ahead.
   - 🔒 Report-only IPv6 never enters availability (`NOT report_only` in the rollup and the SLA queries).
-  - Coverage: `pingletest/golang/monitorconformance/`, `pinglego/pkg/monitormicroservice/**`, `pingleflutter/test/monitor_screen_test.dart`, `pingleflutter/test/monitor_flows_test.dart`.
+  - Coverage: `packetpulsetest/golang/monitorconformance/`, `packetpulsego/pkg/monitormicroservice/**`, `packetpulseflutter/test/monitor_screen_test.dart`, `packetpulseflutter/test/monitor_flows_test.dart`.
 
 ---

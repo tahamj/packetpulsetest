@@ -1,6 +1,6 @@
 # Part II — Feature Chapters
 
-One chapter per area of the product, in the order a new customer meets them. Every chapter carries all four lenses — **🌟 Commercial**, **📖 User Guide**, **🧪 Testing Playbook** and **⚙️ Developer** — and `./pingletest.sh docs` fails if one is missing.
+One chapter per area of the product, in the order a new customer meets them. Every chapter carries all four lenses — **🌟 Commercial**, **📖 User Guide**, **🧪 Testing Playbook** and **⚙️ Developer** — and `./packetpulsetest.sh docs` fails if one is missing.
 
 Run every case on a disposable stack (Part 0 §0.3) with **two organisations of your own**: `ACME` (yours) and `RIVAL` (someone else's). Unless a case says otherwise, "an administrator" is ACME's owner and "an engineer" holds ACME's built-in *NOC Engineer* role.
 

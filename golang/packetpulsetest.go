@@ -1,4 +1,4 @@
-// Package pingletest holds the shared harness for Pingle's guard suite.
+// Package packetpulsetest holds the shared harness for PacketPulse's guard suite.
 //
 // These are INTEGRATION tests: they drive the real API over HTTP against a
 // running server and a real database, because the properties they protect -
@@ -9,25 +9,31 @@
 //
 // Every test skips, rather than fails, when the server is not running, so the
 // suite is safe to run in a checkout that has not been started.
-package pingletest
+package packetpulsetest
 
 import (
 	"bytes"
 	"crypto/rand"
+	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 	"sync"
+	"syscall"
 	"testing"
 	"time"
 )
 
 // BaseURL is where the suite expects the API.
 func BaseURL() string {
+	if url := os.Getenv("PACKETPULSE_TEST_URL"); url != "" {
+		return url
+	}
 	if url := os.Getenv("PINGLE_TEST_URL"); url != "" {
 		return url
 	}
@@ -42,12 +48,12 @@ func RequireServer(t *testing.T) {
 
 	response, err := httpClient.Get(BaseURL() + "/healthz")
 	if err != nil {
-		t.Skipf("Pingle is not running at %s: %v", BaseURL(), err)
+		t.Skipf("PacketPulse is not running at %s: %v", BaseURL(), err)
 	}
 	defer func() { _ = response.Body.Close() }()
 
 	if response.StatusCode != http.StatusOK {
-		t.Skipf("Pingle at %s answered /healthz with %d", BaseURL(), response.StatusCode)
+		t.Skipf("PacketPulse at %s answered /healthz with %d", BaseURL(), response.StatusCode)
 	}
 }
 
@@ -146,9 +152,28 @@ func UniqueCode(prefix string) string {
 		// Unreachable in practice, and a panic here is the honest outcome: a
 		// fixture that cannot guarantee uniqueness would fail later, further
 		// away, with a misleading message.
-		panic("pingletest: no randomness available for a unique code: " + err.Error())
+		panic("packetpulsetest: no randomness available for a unique code: " + err.Error())
 	}
 	return strings.ToUpper(prefix) + hex.EncodeToString(buffer)
+}
+
+// SuperUserEmail is the console operator. The server compiles the address
+// in; the suite writes it out rather than importing it, so that a change on
+// one side fails here instead of being agreed with.
+const SuperUserEmail = "superuser@rummaan53.com"
+
+// Organisation is a licensed customer the suite created for one test: the
+// console recorded it and issued its licence file, the file was installed
+// where the server reads licences, and its owner signed up with the address
+// the licence names.
+type Organisation struct {
+	Id            string
+	Code          string
+	LicenceId     string
+	LicencePath   string
+	OwnerEmail    string
+	OwnerPassword string
+	OwnerToken    string
 }
 
 // SignUpOrganisation creates a fresh, licensed organisation and returns its
@@ -156,70 +181,63 @@ func UniqueCode(prefix string) string {
 //
 // Each test gets its OWN organisation, named after the moment it ran, so tests
 // cannot interfere with one another or with the demo data.
-//
-// Since Addendum 1 this is no longer one call. Signing up lands an account in
-// the holding organisation; only a superuser creates a tenant, assigns the
-// account to it, and issues the licence that makes the product usable. The
-// helper performs all four steps so that a test which only needs "an owner of a
-// working organisation" still reads as one line.
 func SignUpOrganisation(t *testing.T, prefix string) (token, organisationId string) {
 	t.Helper()
 	return SignUpOrganisationWithSeats(t, prefix, 25)
 }
 
-// SignUpOrganisationWithSeats is SignUpOrganisation with an explicit seat
-// count, for tests that care about the concurrent-seat limit (Addendum 3).
+// SignUpOrganisationWithSeats is SignUpOrganisation with an explicit number of
+// people on the licence.
 func SignUpOrganisationWithSeats(t *testing.T, prefix string, seats int) (token, organisationId string) {
+	t.Helper()
+	organisation := NewOrganisation(t, prefix, seats)
+	return organisation.OwnerToken, organisation.Id
+}
+
+// NewOrganisation does what a customer's first day does, in order: the
+// console records the organisation and issues its licence file, the file is
+// installed on the server, and the owner the licence names signs up -
+// finishing with the code emailed to them - and becomes its Administrator.
+func NewOrganisation(t *testing.T, prefix string, seats int) Organisation {
+	t.Helper()
+	organisation := LicensedOrganisation(t, prefix, seats)
+	organisation.OwnerToken = SignUpOwner(t, organisation.OwnerEmail, organisation.OwnerPassword, prefix+" owner")
+	return organisation
+}
+
+// LicensedOrganisation is NewOrganisation stopped before the owner signs up:
+// the licence is installed and names an owner who has no account yet.
+func LicensedOrganisation(t *testing.T, prefix string, seats int) Organisation {
 	t.Helper()
 
 	stamp := time.Now().UnixNano()
-	email := fmt.Sprintf("%s-%d@pingletest.local", prefix, stamp)
-	const password = "PingleTest2026x"
-
-	signUp := Call(t, http.MethodPost, "/user/signup", "", map[string]any{
-		"email":        email,
-		"password":     password,
-		"display_name": prefix + " owner",
-	})
-	if signUp.Status != http.StatusCreated {
-		t.Fatalf("signing up %s: %d %s", prefix, signUp.Status, signUp.Raw)
+	organisation := Organisation{
+		Code:          UniqueCode("T"),
+		OwnerEmail:    fmt.Sprintf("%s-%d@packetpulsetest.local", prefix, stamp),
+		OwnerPassword: "PacketPulseTest2026x",
 	}
-	userId := signUp.String("user_id")
-
 	superUser := SuperUserToken(t)
 
 	created := Call(t, http.MethodPost, "/platform/organisation/add", superUser, map[string]any{
-		"org_code":      UniqueCode("T"),
+		"org_code":      organisation.Code,
 		"org_name":      fmt.Sprintf("%s %d", prefix, stamp),
 		"country_code":  "IN",
-		"contact_email": email,
+		"contact_email": organisation.OwnerEmail,
 	})
 	if created.Status != http.StatusCreated {
 		t.Fatalf("creating an organisation for %s: %d %s", prefix, created.Status, created.Raw)
 	}
-	organisationId = created.String("organisation_id")
-
-	assigned := Call(t, http.MethodPost,
-		"/platform/organisation/"+organisationId+"/assign", superUser, map[string]any{
-			"user_id":      userId,
-			"role_name":    "Administrator",
-			"is_org_owner": true,
-		})
-	if assigned.Status != http.StatusOK {
-		t.Fatalf("assigning %s to its organisation: %d %s", prefix, assigned.Status, assigned.Raw)
-	}
-
-	IssueLicence(t, superUser, organisationId, seats)
-
-	// Assignment revokes every session minted against the holding organisation,
-	// so the token from signup is deliberately dead by now: sign in again to get
-	// one scoped to the real tenant.
-	return SignIn(t, email, password), organisationId
+	organisation.Id = created.String("organisation_id")
+	organisation.LicenceId = IssueLicence(t, superUser, organisation.Id, seats)
+	filename, content := LicenceFile(t, superUser, organisation.LicenceId, organisation.OwnerEmail)
+	organisation.LicencePath = InstallLicence(t, filename, content)
+	return organisation
 }
 
-// IssueLicence gives an organisation an active licence. Superuser-only
-// (Addendum 2).
-func IssueLicence(t *testing.T, superUserToken, organisationId string, seats int) {
+// IssueLicence records a licence for an organisation on the console and
+// answers with its id. It licenses nothing by itself: a server honours only
+// the signed file (see LicenceFile).
+func IssueLicence(t *testing.T, superUserToken, organisationId string, seats int) string {
 	t.Helper()
 
 	response := Call(t, http.MethodPost, "/platform/licence/issue", superUserToken, map[string]any{
@@ -234,31 +252,66 @@ func IssueLicence(t *testing.T, superUserToken, organisationId string, seats int
 	if response.Status != http.StatusCreated && response.Status != http.StatusOK {
 		t.Fatalf("issuing a licence: %d %s", response.Status, response.Raw)
 	}
+	return response.String("licence_id")
 }
 
-// SignUpUnassigned creates an account and leaves it in the holding
-// organisation, which is where Addendum 1 says a self-signup belongs.
-func SignUpUnassigned(t *testing.T, prefix string) (token, userId, email, password string) {
+// LicenceFile has the console sign a recorded licence as the file a customer
+// installs, naming the owner who may sign up.
+func LicenceFile(t *testing.T, superUserToken, licenceId, ownerEmail string) (filename, content string) {
 	t.Helper()
 
-	stamp := time.Now().UnixNano()
-	email = fmt.Sprintf("%s-%d@pingletest.local", prefix, stamp)
-	password = "PingleTest2026x"
+	response := Call(t, http.MethodPost, "/platform/licence/"+licenceId+"/file", superUserToken,
+		map[string]any{"owner_email": ownerEmail})
+	if response.Status != http.StatusOK || response.String("content") == "" {
+		t.Fatalf("signing the licence file: %d %s", response.Status, response.Raw)
+	}
+	return response.String("filename"), response.String("content")
+}
+
+// InstallLicence puts a licence file where the server under test reads them,
+// as a customer does, and answers with its path. The suite runs on the same
+// machine as that server, locally and in CI.
+//
+// The file is removed when the test ends: the server re-reads and re-verifies
+// every licence at each sign-in, and a directory that grew with every run
+// would make each one slower.
+func InstallLicence(t *testing.T, filename, content string) string {
+	t.Helper()
+
+	directory := setting("PACKETPULSE_TEST_LICENCE_DIR", "LICENCE_DIR")
+	if directory == "" {
+		t.Fatal("no licence directory: set LICENCE_DIR for the server and the suite " +
+			"(or PACKETPULSE_TEST_LICENCE_DIR for the suite alone)")
+	}
+	if err := os.MkdirAll(directory, 0o700); err != nil {
+		t.Fatalf("the licence directory: %v", err)
+	}
+	path := filepath.Join(directory, filepath.Base(filename))
+	if err := os.WriteFile(path, []byte(content), 0o600); err != nil {
+		t.Fatalf("installing the licence: %v", err)
+	}
+	t.Cleanup(func() { _ = os.Remove(path) })
+	return path
+}
+
+// SignUpOwner creates the licensed owner's account and finishes it with the
+// emailed code, answering with their first session.
+func SignUpOwner(t *testing.T, email, password, displayName string) string {
+	t.Helper()
 
 	response := Call(t, http.MethodPost, "/user/signup", "", map[string]any{
 		"email":        email,
 		"password":     password,
-		"display_name": prefix,
+		"display_name": displayName,
 	})
 	if response.Status != http.StatusCreated {
-		t.Fatalf("signing up %s: %d %s", prefix, response.Status, response.Raw)
+		t.Fatalf("signing up %s: %d %s", email, response.Status, response.Raw)
 	}
-	// Signing up answers with an authenticator to set up, not a token.
-	return completeSignIn(t, email, response, nil), response.String("user_id"), email, password
+	return completeSignIn(t, email, response, nil)
 }
 
-// SignIn exchanges credentials for a token: the password, then the second
-// step - setting up an authenticator the first time, a code from it after.
+// SignIn exchanges credentials for a token: the password, then the code the
+// server sent.
 func SignIn(t *testing.T, email, password string) string {
 	t.Helper()
 	return SignInAt(t, email, password, nil)
@@ -278,127 +331,146 @@ func SignInAt(t *testing.T, email, password string, location map[string]any) str
 	return completeSignIn(t, email, response, location)
 }
 
-// completeSignIn answers a challenge the way the person would.
+// completeSignIn answers a challenge the way the person would: with the code
+// that reached them.
 func completeSignIn(t *testing.T, email string, challenge Response, location map[string]any) string {
 	t.Helper()
 
-	challengeId := challenge.String("challenge_id")
 	switch method := challenge.String("method"); method {
-	case "totp_enrol":
-		enrolment := Call(t, http.MethodPost, "/user/signin/enrol", "", map[string]any{"challenge_id": challengeId})
-		if enrolment.Status != http.StatusOK {
-			t.Fatalf("setting up an authenticator for %s: %d %s", email, enrolment.Status, enrolment.Raw)
-		}
-		if err := rememberAuthenticator(email, enrolment.String("secret")); err != nil {
-			t.Fatalf("the authenticator secret for %s: %v", email, err)
-		}
-	case "totp":
-	case "sms":
-		// The suites run with no SMS gateway, so anyone set to SMS must fall
-		// back to an authenticator. Being asked for a text means they did not.
-		t.Fatalf("%s was asked for a texted code with no SMS gateway configured", email)
+	case "email", "sms":
 	default:
 		t.Fatalf("signing in %s answered with no second step: %d %s", email, challenge.Status, challenge.Raw)
 	}
-
-	// A refused code is answered with the next one, as a person would: the
-	// account may have spent this step outside the suite - someone signing in
-	// to the app with the same authenticator - and the server rightly refuses
-	// a code twice. Twice at most: each wrong code counts towards the lock.
-	var verified Response
-	for range 3 {
-		step := map[string]any{"challenge_id": challengeId, "code": NextCode(t, email)}
-		if location != nil {
-			step["location"] = location
-		}
-		verified = Call(t, http.MethodPost, "/user/signin/verify", "", step)
-		if verified.Status == http.StatusOK || verified.ErrorCode() != "invalid_code" {
-			break
-		}
+	challengeId := challenge.String("challenge_id")
+	step := map[string]any{"challenge_id": challengeId, "code": CodeFor(t, challengeId)}
+	if location != nil {
+		step["location"] = location
 	}
+	verified := Call(t, http.MethodPost, "/user/signin/verify", "", step)
 	if verified.Status != http.StatusOK {
 		t.Fatalf("the second step for %s: %d %s", email, verified.Status, verified.Raw)
 	}
 	return verified.String("token")
 }
 
-// superUserCredentials is the platform operator the suites sign in as.
-func superUserCredentials() (email, password string) {
-	email = os.Getenv("PINGLE_TEST_SUPERUSER")
-	password = os.Getenv("PINGLE_TEST_SUPERUSER_PASSWORD")
-	if email == "" {
-		email, password = "superuser@pingle.local", "PingleSuper2026!"
+// CodeFor is the code the server sent for a sign-in, read from its outbox:
+// the file a development or test server writes codes to instead of emailing
+// or texting them. The server writes it before it answers, so it is there by
+// the time the challenge is.
+//
+// Lines are matched on the challenge, never on the newest for an address:
+// the suites sign in as the same person from several processes at once. The
+// last match wins, because a resent code replaces the one before it.
+func CodeFor(t *testing.T, challengeId string) string {
+	t.Helper()
+
+	path := setting("PACKETPULSE_TEST_OTP_OUTBOX", "OTP_OUTBOX_FILE")
+	if path == "" {
+		t.Fatal("no code outbox: set OTP_OUTBOX_FILE for the server and the suite " +
+			"(or PACKETPULSE_TEST_OTP_OUTBOX for the suite alone)")
 	}
-	return email, password
+	content, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("reading the code outbox: %v", err)
+	}
+	code := ""
+	for _, line := range bytes.Split(content, []byte("\n")) {
+		var entry struct {
+			ChallengeId string `json:"challenge_id"`
+			Code        string `json:"code"`
+		}
+		if json.Unmarshal(line, &entry) == nil && entry.ChallengeId == challengeId && challengeId != "" {
+			code = entry.Code
+		}
+	}
+	if code == "" {
+		t.Fatalf("the server sent no code for that sign-in to %s", path)
+	}
+	return code
 }
 
 var superUserCache struct {
 	sync.Mutex
 	token   string
-	expires time.Time
+	checked time.Time
 }
 
-// SuperUserToken signs in the platform operator once per test process and
-// reuses the session. Each sign-in spends an authenticator code, and a code
-// is good once per thirty seconds: signing in afresh for every test would put
-// minutes of waiting into a run.
+// SuperUserToken is a session for the console operator, signed in once and
+// shared by every suite process.
+//
+// A sign-in costs an emailed code, and nobody is sent more than ten an hour.
+// One sign-in per process - eight suites in a gate run - would lock the
+// operator out by the second run, so the session is kept in a file of the
+// temporary directory, readable only by its owner, as the spent
+// authenticator steps once were. It is checked before it is reused, and
+// replaced when it no longer works.
 func SuperUserToken(t *testing.T) string {
 	t.Helper()
 
 	superUserCache.Lock()
 	defer superUserCache.Unlock()
-	if superUserCache.token != "" && time.Until(superUserCache.expires) > 5*time.Minute {
+	if superUserCache.token != "" && time.Since(superUserCache.checked) < 10*time.Minute {
 		return superUserCache.token
 	}
-	token, expires := superUserSignIn(t)
-	superUserCache.token, superUserCache.expires = token, expires
-	return token
-}
 
-// SuperUserSignIn signs the platform operator in afresh, for a test that is
-// about signing in itself.
-func SuperUserSignIn(t *testing.T) string {
-	t.Helper()
-	token, _ := superUserSignIn(t)
-	return token
-}
+	digest := sha256.Sum256([]byte(BaseURL()))
+	path := filepath.Join(os.TempDir(), "packetpulsetest-superuser-"+hex.EncodeToString(digest[:8]))
+	file, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0o600)
+	if err != nil {
+		t.Fatalf("the shared superuser session: %v", err)
+	}
+	defer file.Close()
+	if err := syscall.Flock(int(file.Fd()), syscall.LOCK_EX); err != nil {
+		t.Fatalf("locking the shared superuser session: %v", err)
+	}
+	defer func() { _ = syscall.Flock(int(file.Fd()), syscall.LOCK_UN) }()
 
-func superUserSignIn(t *testing.T) (string, time.Time) {
-	t.Helper()
-
-	email, password := superUserCredentials()
-	if secret := superUserTotpSecret(); secret != "" {
-		if err := rememberAuthenticator(email, secret); err != nil {
-			t.Fatalf("PINGLE_TEST_SUPERUSER_TOTP_SECRET: %v", err)
+	stored, _ := io.ReadAll(file)
+	token := strings.TrimSpace(string(stored))
+	if token == "" || !isSuperUserSession(t, token) {
+		token = superUserSignIn(t)
+		if err := file.Truncate(0); err != nil {
+			t.Fatalf("saving the superuser session: %v", err)
+		}
+		if _, err := file.WriteAt([]byte(token), 0); err != nil {
+			t.Fatalf("saving the superuser session: %v", err)
 		}
 	}
+	superUserCache.token, superUserCache.checked = token, time.Now()
+	return token
+}
 
+// isSuperUserSession reports whether a token still opens the console.
+func isSuperUserSession(t *testing.T, token string) bool {
+	t.Helper()
+	me := Call(t, http.MethodGet, "/user/me", token, nil)
+	return me.Status == http.StatusOK && me.Body["is_superuser"] == true
+}
+
+func superUserSignIn(t *testing.T) string {
+	t.Helper()
+
+	password := setting("PACKETPULSE_TEST_SUPERUSER_PASSWORD", "OWNER_PASSWORD")
 	response := Call(t, http.MethodPost, "/user/signin", "", map[string]any{
-		"email": email, "password": password,
+		"email": SuperUserEmail, "password": password,
 	})
 	if response.Status != http.StatusOK {
-		// A skip here is dangerous: the suites that need a superuser are the
-		// licensing and tenant-assignment ones, and a skipped suite is
-		// indistinguishable from a passing suite on the board. Locally a skip
-		// is a convenience; anywhere that claims to have verified the product
-		// it is a lie, so CI sets PINGLE_TEST_REQUIRE_SUPERUSER and gets a
-		// failure instead.
-		if os.Getenv("PINGLE_TEST_REQUIRE_SUPERUSER") != "" {
-			t.Fatalf("no platform superuser available (sign-in returned %d) and "+
-				"PINGLE_TEST_REQUIRE_SUPERUSER is set: seed one with OWNER_EMAIL "+
-				"and OWNER_PASSWORD, or point PINGLE_TEST_SUPERUSER at one",
+		// A skip here is dangerous: every suite that creates an organisation
+		// needs the console, and a skipped suite is indistinguishable from a
+		// passing suite on the board. Locally a skip is a convenience;
+		// anywhere that claims to have verified the product it is a lie, so
+		// CI sets PACKETPULSE_TEST_REQUIRE_SUPERUSER and gets a failure instead.
+		if os.Getenv("PACKETPULSE_TEST_REQUIRE_SUPERUSER") != "" {
+			t.Fatalf("no console superuser available (sign-in returned %d) and "+
+				"PACKETPULSE_TEST_REQUIRE_SUPERUSER is set: run the server as the console "+
+				"(LICENCE_SIGNING_KEY and OWNER_PASSWORD set), and give the suite the "+
+				"password as OWNER_PASSWORD or PACKETPULSE_TEST_SUPERUSER_PASSWORD",
 				response.Status)
 		}
-		t.Skipf("no platform superuser available: %d", response.Status)
-	}
-	if response.String("method") == "totp" && !knowsAuthenticator(email) {
-		t.Fatalf("the superuser has an authenticator this suite does not know: set " +
-			"PINGLE_TEST_SUPERUSER_TOTP_SECRET to the server's OWNER_TOTP_SECRET")
+		t.Skipf("no console superuser available: %d", response.Status)
 	}
 
-	token := completeSignIn(t, email, response, nil)
-	expires := time.Now().Add(time.Hour)
-	return token, expires
+	return completeSignIn(t, SuperUserEmail, response, nil)
 }
 
 // ListOf reads a named array out of a list response.
@@ -419,12 +491,16 @@ func ListOf(t *testing.T, response Response, key string) []map[string]any {
 	return rows
 }
 
-// superUserTotpSecret is the superuser's authenticator secret: from the
-// environment, or - for a run on a development machine, as DATABASE_URL is -
-// from the repository's .env, where the server seeds it from.
-func superUserTotpSecret() string {
-	if secret := os.Getenv("PINGLE_TEST_SUPERUSER_TOTP_SECRET"); secret != "" {
-		return secret
+// setting reads a value the suite shares with the server it tests: from the
+// environment under the suite's own name or the server's, or - on a
+// development machine, as DATABASE_URL is - from the repository's .env under
+// the server's name.
+func setting(own, servers string) string {
+	if value := os.Getenv(own); value != "" {
+		return value
+	}
+	if value := os.Getenv(servers); value != "" {
+		return value
 	}
 	directory, err := os.Getwd()
 	if err != nil {
@@ -433,8 +509,8 @@ func superUserTotpSecret() string {
 	for range 6 {
 		if content, err := os.ReadFile(directory + "/.env"); err == nil {
 			for _, line := range strings.Split(string(content), "\n") {
-				if value, ok := strings.CutPrefix(strings.TrimSpace(line), "PINGLE_TEST_SUPERUSER_TOTP_SECRET="); ok {
-					return strings.TrimSpace(value)
+				if value, ok := strings.CutPrefix(strings.TrimSpace(line), servers+"="); ok {
+					return strings.Trim(strings.TrimSpace(value), `"`)
 				}
 			}
 			return ""

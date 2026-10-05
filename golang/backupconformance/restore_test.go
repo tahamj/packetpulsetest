@@ -21,7 +21,7 @@ func newRestoreRig(t *testing.T) restoreRig {
 	t.Helper()
 	f := newFixture(t)
 	f.takeBackup(t, nil)
-	prefix := uniqueName("pingle_bk_rst")
+	prefix := uniqueName("packetpulse_bk_rst")
 	dropAfter(t, prefix)
 	rig := restoreRig{
 		f:          f,
@@ -39,12 +39,12 @@ func (r restoreRig) restore(t *testing.T, healthCmd string, args ...string) resu
 	t.Helper()
 	controller := filepath.Join(t.TempDir(), "servicectl")
 	writeExecutable(t, controller, "#!/bin/bash\necho \"$*\" >> '"+r.serviceLog+"'\n")
-	return run(t, "PingleRestore.sh", r.f.env(map[string]string{
-		"PINGLE_RESTORE_STAGING_DB": r.staging,
-		"PINGLE_LIVE_DB":            r.live,
-		"PINGLE_SERVICE_CTL":        controller,
-		"PINGLE_HEALTH_CMD":         healthCmd,
-		"PINGLE_HEALTH_WAIT":        "1",
+	return run(t, "PacketPulseRestore.sh", r.f.env(map[string]string{
+		"PACKETPULSE_RESTORE_STAGING_DB": r.staging,
+		"PACKETPULSE_LIVE_DB":            r.live,
+		"PACKETPULSE_SERVICE_CTL":        controller,
+		"PACKETPULSE_HEALTH_CMD":         healthCmd,
+		"PACKETPULSE_HEALTH_WAIT":        "1",
 	}), args...)
 }
 
@@ -102,12 +102,12 @@ func TestASwapPutsTheBackupIntoServiceAndKeepsTheOriginal(t *testing.T) {
 	if databaseExists(t, r.staging) {
 		t.Error("staging still exists after being swapped into service")
 	}
-	if calls := r.serviceCalls(t); calls != "stop pingle\nstart pingle" {
+	if calls := r.serviceCalls(t); calls != "stop packetpulse\nstart packetpulse" {
 		t.Errorf("service calls = %q, want a stop then a start", calls)
 	}
 }
 
-// If Pingle does not come up on the restored data, the swap is undone: the
+// If PacketPulse does not come up on the restored data, the swap is undone: the
 // service goes back onto the database it had, and the restored copy is kept
 // under the staging name for inspection.
 func TestASwapThatDoesNotComeUpIsRolledBack(t *testing.T) {
@@ -125,7 +125,7 @@ func TestASwapThatDoesNotComeUpIsRolledBack(t *testing.T) {
 	if aside := sql(t, "postgres", "SELECT datname FROM pg_database WHERE datname LIKE '"+r.live+"_before_%'"); aside != "" {
 		t.Errorf("a renamed-aside database was left behind: %s", aside)
 	}
-	if calls := r.serviceCalls(t); calls != "stop pingle\nstart pingle\nstop pingle\nstart pingle" {
+	if calls := r.serviceCalls(t); calls != "stop packetpulse\nstart packetpulse\nstop packetpulse\nstart packetpulse" {
 		t.Errorf("service calls = %q, want the swap's stop/start and the rollback's stop/start", calls)
 	}
 }

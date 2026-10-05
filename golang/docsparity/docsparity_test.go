@@ -1,6 +1,6 @@
 // Package docsparity holds the manual testing guide to the code it describes.
 //
-// The guide (pingletest/manual-testing/) states numbers, cites paths, lists
+// The guide (packetpulsetest/manual-testing/) states numbers, cites paths, lists
 // every route, capability and migration, and promises things about itself:
 // four lenses per chapter, a unique ID per test case. A document like that
 // drifts the week after it is written - MShop's did, through three versions,
@@ -25,7 +25,7 @@ import (
 
 func guide(t *testing.T, root string) string {
 	t.Helper()
-	return read(t, filepath.Join(root, "pingletest/manual-testing/MANUAL_TESTING_GUIDE.md"))
+	return read(t, filepath.Join(root, "packetpulsetest/manual-testing/MANUAL_TESTING_GUIDE.md"))
 }
 
 // section is the guide's text from one heading to the next of the same level.
@@ -47,12 +47,12 @@ func section(t *testing.T, text, heading string) string {
 
 func TestTheGeneratedEditionsAreCurrent(t *testing.T) {
 	root := repoRoot(t)
-	python := filepath.Join(root, "pingletest/.venv/bin/python3")
+	python := filepath.Join(root, "packetpulsetest/.venv/bin/python3")
 	if _, err := os.Stat(python); err != nil {
-		t.Fatalf("the guide's generator needs pingletest/.venv (markdown-it-py); ./pingletest.sh docs makes it: %v", err)
+		t.Fatalf("the guide's generator needs packetpulsetest/.venv (markdown-it-py); ./packetpulsetest.sh docs makes it: %v", err)
 	}
 	command := exec.Command(python, "build/build_guide.py", "--check")
-	command.Dir = filepath.Join(root, "pingletest/manual-testing")
+	command.Dir = filepath.Join(root, "packetpulsetest/manual-testing")
 	if output, err := command.CombinedOutput(); err != nil {
 		t.Errorf("the generated guide is stale or will not build:\n%s", output)
 	}
@@ -60,7 +60,7 @@ func TestTheGeneratedEditionsAreCurrent(t *testing.T) {
 
 // ── 2. every repository path the guide cites exists ─────────────────────
 
-var citedPath = regexp.MustCompile("`((?:pinglego|pingleflutter|pingletest|pingleweb|scripts|docs|\\.github)/[^`\\s]+)`")
+var citedPath = regexp.MustCompile("`((?:packetpulsego|packetpulseflutter|packetpulsetest|packetpulseweb|scripts|docs|\\.github)/[^`\\s]+)`")
 
 func TestEveryCitedRepoPathExists(t *testing.T) {
 	root := repoRoot(t)
@@ -106,17 +106,17 @@ func TestTheHeadlineNumbersMatchSource(t *testing.T) {
 		stated = append(stated, number)
 	}
 
-	shell := read(t, filepath.Join(root, "pingleflutter/lib/common/presentation/PingleShell.dart"))
+	shell := read(t, filepath.Join(root, "packetpulseflutter/lib/common/presentation/PacketPulseShell.dart"))
 	screens := strings.Count(shell, "    _Destination(\n")
 	capabilityCodes, _ := capabilities(t, root)
 	countMatch := regexp.MustCompile(`static const int stringCount = (\d+);`).FindStringSubmatch(
-		read(t, filepath.Join(root, "pingleflutter/lib/common/localization/PingleStringsIndex.dart")))
+		read(t, filepath.Join(root, "packetpulseflutter/lib/common/localization/PacketPulseStringsIndex.dart")))
 	if countMatch == nil {
-		t.Fatal("PingleStringsIndex.dart declares no stringCount")
+		t.Fatal("PacketPulseStringsIndex.dart declares no stringCount")
 	}
 	stringCount, _ := strconv.Atoi(countMatch[1])
 	helpMatch := regexp.MustCompile(`HELP_SCREEN_COUNT = (\d+)`).FindStringSubmatch(
-		read(t, filepath.Join(root, "pinglego/pkg/initmicroservice/initconstants/PingleHelp.go")))
+		read(t, filepath.Join(root, "packetpulsego/pkg/initmicroservice/initconstants/PacketPulseHelp.go")))
 	help, _ := strconv.Atoi(helpMatch[1])
 	all, _ := suites(t, root)
 
@@ -144,14 +144,25 @@ func TestTheHeadlineNumbersMatchSource(t *testing.T) {
 
 // ── 4. the appendices are the source's lists ────────────────────────────
 
-var routeRow = regexp.MustCompile("(?m)^\\| `(GET|POST|PUT|PATCH|DELETE)` \\| `([^`]+)` \\| ([a-z ]+) \\| (`[a-z_]+`|—) \\| (required|—) \\| (✅|—) \\|$")
+// A capability cell is one capability, or several joined by "or" (either)
+// and "and" (both); "or" binds first.
+var routeRow = regexp.MustCompile("(?m)^\\| `(GET|POST|PUT|PATCH|DELETE)` \\| `([^`]+)` \\| ([a-z ]+) \\| (`[a-z_]+`(?: (?:or|and) `[a-z_]+`)*|—) \\| (required|—) \\| (✅|—) \\|$")
+
+var capabilityCell = strings.NewReplacer("`", "", " or ", "|", " and ", "+")
+
+// capabilityCodes turns a requirement in capability names into one in codes.
+func capabilityCodes(requirement string, codes map[string]string) string {
+	return regexp.MustCompile(`[A-Za-z]+`).ReplaceAllStringFunc(requirement, func(name string) string {
+		return codes[name]
+	})
+}
 
 func TestAppendixAIsEveryRouteAsRegistered(t *testing.T) {
 	root := repoRoot(t)
 	written := map[string]route{}
 	for _, match := range routeRow.FindAllStringSubmatch(section(t, guide(t, root), "## Appendix A"), -1) {
 		entry := route{Method: match[1], Path: match[2], Access: match[3],
-			Capability: strings.Trim(match[4], "`"), Licensed: match[5] == "required", Audited: match[6] == "✅"}
+			Capability: capabilityCell.Replace(match[4]), Licensed: match[5] == "required", Audited: match[6] == "✅"}
 		if entry.Capability == "—" {
 			entry.Capability = ""
 		}
@@ -164,7 +175,7 @@ func TestAppendixAIsEveryRouteAsRegistered(t *testing.T) {
 	source := sourceRoutes(t, root)
 	for _, actual := range source {
 		if actual.Capability != "" {
-			actual.Capability = codes[actual.Capability]
+			actual.Capability = capabilityCodes(actual.Capability, codes)
 		}
 		stated, ok := written[actual.key()]
 		if !ok {
@@ -203,7 +214,7 @@ func TestAppendixBIsEveryCapabilityAndBuiltInGrant(t *testing.T) {
 		}
 		for index, role := range roles {
 			if (row[3+index] == "✅") != grants[role][row[1]] {
-				t.Errorf("Appendix B says %s %v %s; the seed migration disagrees", role, row[3+index] == "✅", row[1])
+				t.Errorf("Appendix B says %s %v %s; the migrations disagree", role, row[3+index] == "✅", row[1])
 			}
 		}
 	}
@@ -238,10 +249,10 @@ func TestEveryNamedSuiteExists(t *testing.T) {
 	for _, name := range append(all, optIn...) {
 		known[name] = true
 	}
-	for _, match := range regexp.MustCompile("\\./pingletest\\.sh((?: [a-z]+)+)").FindAllStringSubmatch(guide(t, root), -1) {
+	for _, match := range regexp.MustCompile("\\./packetpulsetest\\.sh((?: [a-z]+)+)").FindAllStringSubmatch(guide(t, root), -1) {
 		for _, name := range strings.Fields(match[1]) {
 			if !known[name] {
-				t.Errorf("the guide names suite %q, which pingletest.sh does not have", name)
+				t.Errorf("the guide names suite %q, which packetpulsetest.sh does not have", name)
 			}
 		}
 	}

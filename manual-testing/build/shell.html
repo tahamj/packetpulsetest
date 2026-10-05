@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Pingle Testing &amp; Knowledge Manual ({{TITLE_VERSION}})</title>
+<title>PacketPulse Testing &amp; Knowledge Manual ({{TITLE_VERSION}})</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="The Pingle manual testing guide, sales presentation, user handbook, and developer release manual.">
+<meta name="description" content="The PacketPulse manual testing guide, sales presentation, user handbook, and developer release manual.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap">
@@ -149,7 +149,7 @@ nav.side .nohit.on{display:block}
 <body>
 <div class="shell">
   <nav class="side" aria-label="Contents">
-    <p class="sb"><span class="mk" aria-hidden="true"></span> Pingle Testing Manual</p>
+    <p class="sb"><span class="mk" aria-hidden="true"></span> PacketPulse Testing Manual</p>
     <p class="ver">{{VERSION}} · internal</p>
     <div class="find">
       <input id="navfind" type="search" placeholder="Filter contents…" aria-label="Filter contents" autocomplete="off">
@@ -159,7 +159,7 @@ nav.side .nohit.on{display:block}
   </nav>
   <main>
     <div class="topbar">
-      <span class="crumb">pingle / pingletest / manual-testing / <strong>guide ({{VERSION}})</strong></span>
+      <span class="crumb">packetpulse / packetpulsetest / manual-testing / <strong>guide ({{VERSION}})</strong></span>
       <button id="theme" type="button" aria-label="Toggle light/dark theme">🌓 Theme</button>
       <a class="btn" href="javascript:window.print()">🖨️ Print / PDF</a>
     </div>
@@ -171,7 +171,7 @@ nav.side .nohit.on{display:block}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.1/mermaid.min.js"></script>
 <script>
 const root=document.documentElement;
-try{const t=localStorage.getItem('pingle_guide_theme'); if(t==='dark'||t==='light') root.setAttribute('data-theme',t);}catch(e){}
+try{const t=localStorage.getItem('packetpulse_guide_theme'); if(t==='dark'||t==='light') root.setAttribute('data-theme',t);}catch(e){}
 
 // ── mermaid ───────────────────────────────────────────────────────────
 // Diagrams are emitted as pre.mermaid blocks. Without this init they render
@@ -188,7 +188,7 @@ document.getElementById('theme').addEventListener('click',()=>{
   const cur=root.getAttribute('data-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
   const next=cur==='dark'?'light':'dark';
   root.setAttribute('data-theme',next);
-  try{localStorage.setItem('pingle_guide_theme',next)}catch(e){}
+  try{localStorage.setItem('packetpulse_guide_theme',next)}catch(e){}
 });
 
 // ── sidebar filter ────────────────────────────────────────────────────

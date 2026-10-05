@@ -15,7 +15,7 @@ import (
 	"testing"
 	"time"
 
-	pingletest "github.com/tahamj/pingletest"
+	packetpulsetest "github.com/tahamj/packetpulsetest"
 )
 
 const (
@@ -35,10 +35,10 @@ type monitoredOrg struct {
 // with the given damping, a channel, and a disabled alerting schedule.
 func setUp(t *testing.T, prefix string, thresholdRuns int) monitoredOrg {
 	t.Helper()
-	pingletest.RequireServer(t)
-	token, _ := pingletest.SignUpOrganisation(t, prefix)
+	packetpulsetest.RequireServer(t)
+	token, _ := packetpulsetest.SignUpOrganisation(t, prefix)
 
-	site := pingletest.Call(t, http.MethodPost, "/dnssite/add", token, map[string]any{
+	site := packetpulsetest.Call(t, http.MethodPost, "/dnssite/add", token, map[string]any{
 		"site_name": "Branch", "ip_address": failing, "is_enabled": true,
 	})
 	if site.Status != http.StatusCreated && site.Status != http.StatusOK {
@@ -46,7 +46,7 @@ func setUp(t *testing.T, prefix string, thresholdRuns int) monitoredOrg {
 	}
 
 	// Generous thresholds: only reachability decides, never internet latency.
-	policy := pingletest.Call(t, http.MethodPost, "/monitor/sla/add", token, map[string]any{
+	policy := packetpulsetest.Call(t, http.MethodPost, "/monitor/sla/add", token, map[string]any{
 		"policy_name": "Reachability", "max_latency_ms": 2000, "max_jitter_ms": 1000,
 		"max_loss_pct": 50, "min_mos_score": 0, "is_default": true,
 		"breach_threshold_runs": thresholdRuns, "alert_cooldown_minutes": 60,
@@ -55,14 +55,14 @@ func setUp(t *testing.T, prefix string, thresholdRuns int) monitoredOrg {
 		t.Fatalf("add policy: %d %s", policy.Status, policy.Raw)
 	}
 
-	channel := pingletest.Call(t, http.MethodPost, "/monitor/channel/add", token, map[string]any{
+	channel := packetpulsetest.Call(t, http.MethodPost, "/monitor/channel/add", token, map[string]any{
 		"channel_name": "NOC mailbox", "channel_type": "email", "target": "noc@operator.test",
 	})
 	if channel.Status != http.StatusCreated && channel.Status != http.StatusOK {
 		t.Fatalf("add channel: %d %s", channel.Status, channel.Raw)
 	}
 
-	schedule := pingletest.Call(t, http.MethodPost, "/monitor/schedule/add", token, map[string]any{
+	schedule := packetpulsetest.Call(t, http.MethodPost, "/monitor/schedule/add", token, map[string]any{
 		"schedule_name": "Branch watch", "interval_minutes": 60,
 		"dns_site_ids": []string{site.String("dns_site_id")}, "customer_id": "CUST-MON",
 		"tt_number_prefix": "MON", "packet_count": 2, "alert_on_failure": true, "is_enabled": false,
@@ -74,15 +74,15 @@ func setUp(t *testing.T, prefix string, thresholdRuns int) monitoredOrg {
 }
 
 // run points the site at an address and runs the schedule once.
-func (m monitoredOrg) run(t *testing.T, address string) pingletest.Response {
+func (m monitoredOrg) run(t *testing.T, address string) packetpulsetest.Response {
 	t.Helper()
-	update := pingletest.Call(t, http.MethodPut, "/dnssite/"+m.site, m.token, map[string]any{
+	update := packetpulsetest.Call(t, http.MethodPut, "/dnssite/"+m.site, m.token, map[string]any{
 		"site_name": "Branch", "ip_address": address, "is_enabled": true,
 	})
 	if update.Status != http.StatusOK {
 		t.Fatalf("point site at %s: %d %s", address, update.Status, update.Raw)
 	}
-	run := pingletest.Call(t, http.MethodPost, "/monitor/schedule/"+m.schedule+"/run", m.token, nil)
+	run := packetpulsetest.Call(t, http.MethodPost, "/monitor/schedule/"+m.schedule+"/run", m.token, nil)
 	if run.Status != http.StatusOK {
 		t.Fatalf("run schedule: %d %s", run.Status, run.Raw)
 	}
@@ -91,11 +91,11 @@ func (m monitoredOrg) run(t *testing.T, address string) pingletest.Response {
 
 func (m monitoredOrg) alerts(t *testing.T) []map[string]any {
 	t.Helper()
-	response := pingletest.Call(t, http.MethodGet, "/monitor/alert/list", m.token, nil)
+	response := packetpulsetest.Call(t, http.MethodGet, "/monitor/alert/list", m.token, nil)
 	if response.Status != http.StatusOK {
 		t.Fatalf("list alerts: %d %s", response.Status, response.Raw)
 	}
-	return pingletest.ListOf(t, response, "alerts")
+	return packetpulsetest.ListOf(t, response, "alerts")
 }
 
 func severities(alerts []map[string]any) []string {
@@ -155,7 +155,7 @@ func TestDampingWaitsForConsecutiveBreaches(t *testing.T) {
 func TestPlannedWorkIsExcludedAndSilent(t *testing.T) {
 	m := setUp(t, "monwin", 1)
 	now := time.Now().UTC()
-	window := pingletest.Call(t, http.MethodPost, "/monitor/maintenance/add", m.token, map[string]any{
+	window := packetpulsetest.Call(t, http.MethodPost, "/monitor/maintenance/add", m.token, map[string]any{
 		"window_name": "Line card swap", "scope": "all",
 		"starts_on": now.Add(-time.Hour).Format(time.RFC3339), "ends_on": now.Add(time.Hour).Format(time.RFC3339),
 		"recurrence": "none", "timezone": "UTC", "is_enabled": true,
@@ -180,10 +180,10 @@ func TestPlannedWorkIsExcludedAndSilent(t *testing.T) {
 // A measurement from a customer's own device cannot be graded against the
 // server's targets: it grades "unknown" and counts no breach, however bad.
 func TestAClientObservationIsNeverABreach(t *testing.T) {
-	pingletest.RequireServer(t)
-	token, _ := pingletest.SignUpOrganisation(t, "monobs")
+	packetpulsetest.RequireServer(t)
+	token, _ := packetpulsetest.SignUpOrganisation(t, "monobs")
 
-	response := pingletest.Call(t, http.MethodPost, "/diagnostic/clientobservation", token, map[string]any{
+	response := packetpulsetest.Call(t, http.MethodPost, "/diagnostic/clientobservation", token, map[string]any{
 		"customer_id": "CUST-OBS", "tt_number": "TT-OBS-1", "sample_count": 10, "timeout_ms": 2000,
 		"observations": []map[string]any{{
 			"method": "https-dns", "target_label": "Cloudflare", "target_address": "1.1.1.1",

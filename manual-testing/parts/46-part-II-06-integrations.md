@@ -20,9 +20,9 @@ How results reach the operator's own systems, and how its directory signs people
   | `API-005` | Integrator | The wrong credential is refused | No header; a person's session token; a revoked key | 401 each |
   | `API-006` | RIVAL integrator | A key reads only its own organisation | RIVAL's key for ACME's TT, and a period covering ACME's tickets | 404; a CSV with none of ACME's rows |
 - ⚙️ **Developer Guide & Release Confidence**:
-  - `pinglego/pkg/common/apikeyauth/`; the organisation comes from the key, never from the request.
+  - `packetpulsego/pkg/common/apikeyauth/`; the organisation comes from the key, never from the request.
   - The bulk pull **streams**; a failure after rows have gone out aborts the response rather than ending a short file a system would take as whole.
-  - Coverage: `pingletest/golang/apicontract/results_api_test.go`, `pingletest/golang/apicontract/result_export_test.go`, `pinglego/pkg/diagnosticmicroservice/diagnosticapp/`.
+  - Coverage: `packetpulsetest/golang/apicontract/results_api_test.go`, `packetpulsetest/golang/apicontract/result_export_test.go`, `packetpulsego/pkg/diagnosticmicroservice/diagnosticapp/`.
 
 ---
 
@@ -45,19 +45,19 @@ How results reach the operator's own systems, and how its directory signs people
   | `EXP-003` | Administrator | Switching on needs everything a delivery needs | Switch on with no server, no username, no password and no trusted key | Refused against each field |
   | `EXP-004` | Administrator | A changed key is a warning, not a detail | Re-key the SFTP server (or point the name at another); **Test connection** | *The server's key has changed* with the new key to check; the trusted key stays until you trust the new one. 🛑 **Must NOT** deliver to a server showing a different key |
   | `EXP-005` | Administrator | A saved password goes nowhere new | With a saved password, change the server (or port, username or protocol) and test or save | The password field becomes required again (*Enter the password again…*). 🛑 **Must NOT** sign in to the new server with the saved password |
-  | `EXP-006` | Administrator | A delivery lands whole | Switched on, every 15 minutes, a diagnostic run after saving; wait for the interval | `pingle-results-<from>-<to>.csv` in the folder (written as `.part`, renamed when whole); the card says *Sent … with N results* |
+  | `EXP-006` | Administrator | A delivery lands whole | Switched on, every 15 minutes, a diagnostic run after saving; wait for the interval | `packetpulse-results-<from>-<to>.csv` in the folder (written as `.part`, renamed when whole); the card says *Sent … with N results* |
   | `EXP-007` | Administrator | A quiet period sends nothing | No diagnostics in an interval | No file; *Nothing new to send* |
   | `EXP-008` | Administrator | A failure is retried, nothing lost | Change the server's password; wait for a delivery; restore it; wait again | First: *Not delivered: The server refused the sign-in…*; the next delivery covers the same results. 🛑 **Must NOT** skip the failed period |
-  | `EXP-009` | Administrator | Pingle's own host is not a destination | Server `127.0.0.1`, `localhost`, `169.254.169.254` or `::1`; **Test connection** | Refused against **Server**: *Pingle may not connect to that address.* |
+  | `EXP-009` | Administrator | PacketPulse's own host is not a destination | Server `127.0.0.1`, `localhost`, `169.254.169.254` or `::1`; **Test connection** | Refused against **Server**: *PacketPulse may not connect to that address.* |
   | `EXP-010` | Administrator | Plain FTP is warned about | Choose FTP | The unencrypted warning; port moves to 21; the private key and server key disappear |
   | `EXP-011` | Administrator | FTPS with a private authority | FTPS to a server whose certificate your own CA signed, without and then with that CA | Without: *certificate is not trusted*; with it pasted: test passes |
   | `EXP-012` | Tester | Credentials never come back | `GET /api/v1/export/target` | `has_password`, `has_private_key` — never the password, key or sealed text |
 - ⚙️ **Developer Guide & Release Confidence**:
-  - `pinglego/pkg/exportmicroservice/` (target, test, runner each minute); transport: `pinglego/pkg/common/filedrop/FileDrop.go` (SFTP via `pkg/sftp`, FTP/FTPS via `jlaffaye/ftp`).
+  - `packetpulsego/pkg/exportmicroservice/` (target, test, runner each minute); transport: `packetpulsego/pkg/common/filedrop/FileDrop.go` (SFTP via `pkg/sftp`, FTP/FTPS via `jlaffaye/ftp`).
   - 🔒 Every connection — the FTP **data** connection included — is made by `probeguard.Dialer`, whose `Control` hook checks the resolved address before connecting. A dial *function* would have made the FTP library send FTPS data unencrypted.
   - The watermark (`exported_through`) moves only on a delivery, and only from where the run found it; a run catches up a day per file; the last two minutes are left to settle.
-  - `EXPORT_ALLOW_LOOPBACK` permits a server on Pingle's own host for development; production refuses to boot with it.
-  - Coverage: `pinglego/pkg/common/filedrop/` (in-process SFTP and FTP/FTPS servers), `pinglego/pkg/exportmicroservice/**`, `pingleflutter/test/result_export_screen_test.dart`, `pingletest/golang/apicontract/result_export_test.go`.
+  - `EXPORT_ALLOW_LOOPBACK` permits a server on PacketPulse's own host for development; production refuses to boot with it.
+  - Coverage: `packetpulsego/pkg/common/filedrop/` (in-process SFTP and FTP/FTPS servers), `packetpulsego/pkg/exportmicroservice/**`, `packetpulseflutter/test/result_export_screen_test.dart`, `packetpulsetest/golang/apicontract/result_export_test.go`.
 
 ---
 
@@ -65,7 +65,7 @@ How results reach the operator's own systems, and how its directory signs people
 
 **Screen:** Configure → **Directory** · **Routes:** `GET/PUT /ldap/config`, `POST /ldap/config/test`, `/ldap/groupmap/*` · **Capability:** `ldap_manage`
 
-- 🌟 **Commercial Presentation & Sales Pitch**: Staff sign in with their existing network password over LDAP or Active Directory, and their directory group decides their Pingle role — after the second step, so a directory password alone still opens nothing. The owner always keeps a local password, so a directory outage cannot lock out the person who fixes it.
+- 🌟 **Commercial Presentation & Sales Pitch**: Staff sign in with their existing network password over LDAP or Active Directory, and their directory group decides their PacketPulse role — after the second step, so a directory password alone still opens nothing. The owner always keeps a local password, so a directory outage cannot lock out the person who fixes it.
 - 📖 **User Guide & Operational Flow**: Host and port (389 LDAP/StartTLS, 636 LDAPS), encryption, the CA certificate of your own authority, a read-only bind account, the base DN; then **Test connection** before enabling. **Group mappings** give each directory group a role.
 - 🧪 **Manual Testing Playbook**:
   | ID | Persona | Scenario | Steps | Observable Expected Result |
@@ -75,7 +75,7 @@ How results reach the operator's own systems, and how its directory signs people
   | `LDAP-003` | Owner | The owner keeps a local password | Directory switched on and unreachable; owner signs in with their local password | Signed in. Others: *Your organisation's directory server could not be reached. Please retry.* |
   | `LDAP-004` | Tester | An outage is not a failed sign-in | Directory down; an administrator signs in | No *Sign-in failed* entry in Activity — nobody got the password wrong |
 - ⚙️ **Developer Guide & Release Confidence**:
-  - `pinglego/pkg/common/ldapclient/`, `pinglego/pkg/ldapmicroservice/`; the bind password is sealed like every secret; the directory is dialled through the directory policy (private yes; loopback only with `LDAP_ALLOW_LOOPBACK`, refused in production).
-  - Coverage: `pinglego/pkg/common/ldaptest/` (an in-process directory), `pingleflutter/test/ldap_settings_screen_test.dart`.
+  - `packetpulsego/pkg/common/ldapclient/`, `packetpulsego/pkg/ldapmicroservice/`; the bind password is sealed like every secret; the directory is dialled through the directory policy (private yes; loopback only with `LDAP_ALLOW_LOOPBACK`, refused in production).
+  - Coverage: `packetpulsego/pkg/common/ldaptest/` (an in-process directory), `packetpulseflutter/test/ldap_settings_screen_test.dart`.
 
 ---

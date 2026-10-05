@@ -1,5 +1,5 @@
 {
-  "_comment": "The header row of every Pingle results CSV - the download beside a ticket (GET /diagnostic/{id}/report.csv), the Results API pull (GET /result/export.csv) and the scheduled push to an organisation's own server. An IT system's importer is written against this list, so columns are only ever ADDED, at the end. The Go writer's test asserts it writes exactly these; the integration suite asserts the server sends exactly these.",
+  "_comment": "The header row of every PacketPulse results CSV - the download beside a ticket (GET /diagnostic/{id}/report.csv), the Results API pull (GET /result/export.csv) and the scheduled push to an organisation's own server. An IT system's importer is written against this list, so columns are only ever ADDED, at the end. The Go writer's test asserts it writes exactly these; the integration suite asserts the server sends exactly these.",
   "columns": [
     "result_id",
     "request_id",

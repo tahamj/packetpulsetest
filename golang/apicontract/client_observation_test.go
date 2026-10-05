@@ -13,11 +13,11 @@ import (
 	"testing"
 	"time"
 
-	pingletest "github.com/tahamj/pingletest"
+	packetpulsetest "github.com/tahamj/packetpulsetest"
 )
 
 // oneRun is a real browser measurement: the numbers below were produced by
-// pingle-probe.js against Cloudflare, plus a target that never answered.
+// packetpulse-probe.js against Cloudflare, plus a target that never answered.
 func oneRun(ttNumber string) map[string]any {
 	return map[string]any{
 		"customer_id":  "CUST-CLIENT",
@@ -46,12 +46,12 @@ func oneRun(ttNumber string) map[string]any {
 }
 
 func TestClientObservationIsRecordedAsClientSourced(t *testing.T) {
-	pingletest.RequireServer(t)
+	packetpulsetest.RequireServer(t)
 
-	ownerToken, _ := pingletest.SignUpOrganisation(t, "clientobs")
+	ownerToken, _ := packetpulsetest.SignUpOrganisation(t, "clientobs")
 	ttNumber := fmt.Sprintf("TT-CLIENT-%d", time.Now().UnixNano())
 
-	attached := pingletest.Call(t, http.MethodPost, "/diagnostic/clientobservation",
+	attached := packetpulsetest.Call(t, http.MethodPost, "/diagnostic/clientobservation",
 		ownerToken, oneRun(ttNumber))
 	if attached.Status != http.StatusCreated {
 		t.Fatalf("attach returned %d: %s", attached.Status, attached.Raw)
@@ -83,7 +83,7 @@ func TestClientObservationIsRecordedAsClientSourced(t *testing.T) {
 		t.Errorf("download_mbps = %v on a run with no speed test", request["download_mbps"])
 	}
 
-	results := pingletest.ListOf(t, attached, "results")
+	results := packetpulsetest.ListOf(t, attached, "results")
 	if len(results) != 2 {
 		t.Fatalf("stored %d results, want 2", len(results))
 	}
@@ -104,12 +104,12 @@ func TestClientObservationIsRecordedAsClientSourced(t *testing.T) {
 // detail, and exports as a PDF, because it shares one results model with a
 // server sweep rather than living in a parallel one.
 func TestAttachedClientRunBehavesLikeAnyOtherDiagnostic(t *testing.T) {
-	pingletest.RequireServer(t)
+	packetpulsetest.RequireServer(t)
 
-	ownerToken, _ := pingletest.SignUpOrganisation(t, "clientobs2")
+	ownerToken, _ := packetpulsetest.SignUpOrganisation(t, "clientobs2")
 	ttNumber := fmt.Sprintf("TT-CLIENT-%d", time.Now().UnixNano())
 
-	attached := pingletest.Call(t, http.MethodPost, "/diagnostic/clientobservation",
+	attached := packetpulsetest.Call(t, http.MethodPost, "/diagnostic/clientobservation",
 		ownerToken, oneRun(ttNumber))
 	if attached.Status != http.StatusCreated {
 		t.Fatalf("attach returned %d: %s", attached.Status, attached.Raw)
@@ -117,12 +117,12 @@ func TestAttachedClientRunBehavesLikeAnyOtherDiagnostic(t *testing.T) {
 	request, _ := attached.Body["request"].(map[string]any)
 	requestId, _ := request["request_id"].(string)
 
-	byTt := pingletest.Call(t, http.MethodGet, "/diagnostic/tt/"+ttNumber, ownerToken, nil)
+	byTt := packetpulsetest.Call(t, http.MethodGet, "/diagnostic/tt/"+ttNumber, ownerToken, nil)
 	if byTt.Status != http.StatusOK {
 		t.Fatalf("lookup by ticket returned %d: %s", byTt.Status, byTt.Raw)
 	}
 
-	report := pingletest.Call(t, http.MethodGet,
+	report := packetpulsetest.Call(t, http.MethodGet,
 		"/diagnostic/"+requestId+"/report.pdf", ownerToken, nil)
 	if report.Status != http.StatusOK {
 		t.Fatalf("PDF export returned %d: %s", report.Status, report.Raw)
@@ -135,9 +135,9 @@ func TestAttachedClientRunBehavesLikeAnyOtherDiagnostic(t *testing.T) {
 }
 
 func TestClientObservationRefusesWhatItCannotRecordHonestly(t *testing.T) {
-	pingletest.RequireServer(t)
+	packetpulsetest.RequireServer(t)
 
-	ownerToken, _ := pingletest.SignUpOrganisation(t, "clientobs3")
+	ownerToken, _ := packetpulsetest.SignUpOrganisation(t, "clientobs3")
 
 	cases := []struct {
 		name   string
@@ -170,7 +170,7 @@ func TestClientObservationRefusesWhatItCannotRecordHonestly(t *testing.T) {
 			body := oneRun(fmt.Sprintf("TT-BAD-%d", time.Now().UnixNano()))
 			tc.mutate(body)
 
-			response := pingletest.Call(t, http.MethodPost,
+			response := packetpulsetest.Call(t, http.MethodPost,
 				"/diagnostic/clientobservation", ownerToken, body)
 			// 422, as every other validated form on this API answers: the
 			// request parsed, it just described something that cannot be
@@ -195,14 +195,15 @@ func TestClientObservationRefusesWhatItCannotRecordHonestly(t *testing.T) {
 // so it is gated exactly like a submission. Running the test is not gated at
 // all and does not come through here.
 func TestClientObservationRequiresAnOrganisation(t *testing.T) {
-	pingletest.RequireServer(t)
+	packetpulsetest.RequireServer(t)
 
-	unassignedToken, _, _, _ := pingletest.SignUpUnassigned(t, "clientobs4")
+	// The console operator is signed in but belongs to no organisation.
+	noOrganisation := packetpulsetest.SuperUserToken(t)
 
-	response := pingletest.Call(t, http.MethodPost, "/diagnostic/clientobservation",
-		unassignedToken, oneRun("TT-UNASSIGNED"))
+	response := packetpulsetest.Call(t, http.MethodPost, "/diagnostic/clientobservation",
+		noOrganisation, oneRun("TT-NO-ORGANISATION"))
 	if response.Status == http.StatusCreated {
-		t.Fatal("an account in the holding organisation attached a diagnostic")
+		t.Fatal("an account with no organisation attached a diagnostic")
 	}
 	if response.Status < 400 {
 		t.Errorf("status = %d, want a refusal: %s", response.Status, response.Raw)
@@ -210,9 +211,9 @@ func TestClientObservationRequiresAnOrganisation(t *testing.T) {
 }
 
 func TestClientObservationRefusesAnAnonymousCaller(t *testing.T) {
-	pingletest.RequireServer(t)
+	packetpulsetest.RequireServer(t)
 
-	response := pingletest.Call(t, http.MethodPost, "/diagnostic/clientobservation",
+	response := packetpulsetest.Call(t, http.MethodPost, "/diagnostic/clientobservation",
 		"", oneRun("TT-ANON"))
 	if response.Status != http.StatusUnauthorized {
 		t.Errorf("status = %d, want 401: %s", response.Status, response.Raw)
@@ -221,26 +222,26 @@ func TestClientObservationRefusesAnAnonymousCaller(t *testing.T) {
 
 // A speed measured with the run is filed with it and read back with the ticket.
 func TestALineSpeedIsFiledWithTheDevicesRun(t *testing.T) {
-	pingletest.RequireServer(t)
+	packetpulsetest.RequireServer(t)
 
-	ownerToken, _ := pingletest.SignUpOrganisation(t, "clientspeed")
+	ownerToken, _ := packetpulsetest.SignUpOrganisation(t, "clientspeed")
 	ttNumber := fmt.Sprintf("TT-SPEED-%d", time.Now().UnixNano())
 	run := oneRun(ttNumber)
 	run["download_mbps"], run["upload_mbps"] = 87.4, 12.25
 
-	attached := pingletest.Call(t, http.MethodPost, "/diagnostic/clientobservation", ownerToken, run)
+	attached := packetpulsetest.Call(t, http.MethodPost, "/diagnostic/clientobservation", ownerToken, run)
 	if attached.Status != http.StatusCreated {
 		t.Fatalf("attach returned %d: %s", attached.Status, attached.Raw)
 	}
 	requestId, _ := attached.Body["request"].(map[string]any)["request_id"].(string)
-	detail := pingletest.Call(t, http.MethodGet, "/diagnostic/"+requestId, ownerToken, nil)
+	detail := packetpulsetest.Call(t, http.MethodGet, "/diagnostic/"+requestId, ownerToken, nil)
 	request, _ := detail.Body["request"].(map[string]any)
 	if request["download_mbps"] != 87.4 || request["upload_mbps"] != 12.25 {
 		t.Errorf("read back %v / %v, want 87.4 / 12.25", request["download_mbps"], request["upload_mbps"])
 	}
 
 	run["tt_number"], run["upload_mbps"] = ttNumber+"-X", -3
-	if refused := pingletest.Call(t, http.MethodPost, "/diagnostic/clientobservation", ownerToken, run); refused.Status != http.StatusUnprocessableEntity {
+	if refused := packetpulsetest.Call(t, http.MethodPost, "/diagnostic/clientobservation", ownerToken, run); refused.Status != http.StatusUnprocessableEntity {
 		t.Errorf("a negative speed answered %d, want 422", refused.Status)
 	}
 }

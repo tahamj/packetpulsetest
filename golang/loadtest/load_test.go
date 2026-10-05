@@ -3,11 +3,11 @@
 // running diagnostics side by side, a sweep of two hundred sites, and the
 // machines that pull results out of it.
 //
-// It is opt-in - `./pingletest.sh load` - and not part of the default run.
+// It is opt-in - `./packetpulsetest.sh load` - and not part of the default run.
 // It takes minutes, and its budgets describe the machine it runs on as much
 // as the code, so a slow laptop failing it says something different from a
 // regression failing it. The budgets are set from measured runs with room to
-// spare (docs/PingleTestStrategy.md §4.7 records them); what they catch is
+// spare (docs/PacketPulseTestStrategy.md §4.7 records them); what they catch is
 // the pathological - a lock held across a request, a query that scans a
 // partition per row, a sweep that drops what it measured.
 //
@@ -31,7 +31,7 @@ import (
 	"testing"
 	"time"
 
-	pingletest "github.com/tahamj/pingletest"
+	packetpulsetest "github.com/tahamj/packetpulsetest"
 )
 
 // The licence size the plan is sold at, and the inventory it allows.
@@ -93,7 +93,7 @@ func (m *meter) do(method, path, token string, payload any) reply {
 		encoded, _ := json.Marshal(payload)
 		body = bytes.NewReader(encoded)
 	}
-	request, err := http.NewRequest(method, pingletest.BaseURL()+"/api/v1"+path, body)
+	request, err := http.NewRequest(method, packetpulsetest.BaseURL()+"/api/v1"+path, body)
 	if err != nil {
 		m.record(sample{err: err})
 		return reply{}
@@ -197,15 +197,15 @@ type person struct {
 }
 
 // organisation provisions what one licensed customer has: its owner and
-// nineteen engineers, each with an authenticator set up, and two hundred
+// nineteen engineers, each signed in once already, and two hundred
 // sites. Provisioning is not measured - it is how the stage is set.
 func organisation(t *testing.T) ([]person, []string) {
 	t.Helper()
-	ownerToken, _ := pingletest.SignUpOrganisationWithSeats(t, "load", people+5)
+	ownerToken, _ := packetpulsetest.SignUpOrganisationWithSeats(t, "load", people+5)
 
-	roles := pingletest.Call(t, http.MethodGet, "/staff/role/list", ownerToken, nil)
+	roles := packetpulsetest.Call(t, http.MethodGet, "/staff/role/list", ownerToken, nil)
 	engineerRole := ""
-	for _, role := range pingletest.ListOf(t, roles, "roles") {
+	for _, role := range packetpulsetest.ListOf(t, roles, "roles") {
 		if role["role_name"] == "NOC Engineer" {
 			engineerRole, _ = role["role_id"].(string)
 		}
@@ -214,23 +214,23 @@ func organisation(t *testing.T) ([]person, []string) {
 		t.Fatal("there is no NOC Engineer role to give the engineers")
 	}
 
-	owner := pingletest.Call(t, http.MethodGet, "/user/me", ownerToken, nil)
+	owner := packetpulsetest.Call(t, http.MethodGet, "/user/me", ownerToken, nil)
 	// The harness signs every owner up with this password.
-	team := []person{{email: owner.String("email"), password: "PingleTest2026x", token: ownerToken}}
+	team := []person{{email: owner.String("email"), password: "PacketPulseTest2026x", token: ownerToken}}
 	stamp := time.Now().UnixNano()
 	for index := 1; index < people; index++ {
 		engineer := person{
-			email:    fmt.Sprintf("load-%d-%02d@pingletest.local", stamp, index),
+			email:    fmt.Sprintf("load-%d-%02d@packetpulsetest.local", stamp, index),
 			password: "LoadEngineer2026",
 		}
-		added := pingletest.Call(t, http.MethodPost, "/user/add", ownerToken, map[string]any{
+		added := packetpulsetest.Call(t, http.MethodPost, "/user/add", ownerToken, map[string]any{
 			"email": engineer.email, "password": engineer.password,
 			"full_name": fmt.Sprintf("Engineer %02d", index), "role_id": engineerRole,
 		})
 		if added.Status != http.StatusCreated {
 			t.Fatalf("adding engineer %d: %d %s", index, added.Status, added.Raw)
 		}
-		engineer.token = pingletest.SignIn(t, engineer.email, engineer.password)
+		engineer.token = packetpulsetest.SignIn(t, engineer.email, engineer.password)
 		team = append(team, engineer)
 	}
 
@@ -241,15 +241,15 @@ func organisation(t *testing.T) ([]person, []string) {
 	for index := 1; index <= sites; index++ {
 		fmt.Fprintf(&paste, "Load site %03d=203.0.113.%d\n", index, index)
 	}
-	imported := pingletest.Call(t, http.MethodPost, "/dnssite/bulkimport", ownerToken, map[string]any{
+	imported := packetpulsetest.Call(t, http.MethodPost, "/dnssite/bulkimport", ownerToken, map[string]any{
 		"entries": paste.String(), "region": "Load",
 	})
 	if imported.Status != http.StatusOK {
 		t.Fatalf("importing the sites: %d %s", imported.Status, imported.Raw)
 	}
-	listed := pingletest.Call(t, http.MethodGet, "/dnssite/list", ownerToken, nil)
+	listed := packetpulsetest.Call(t, http.MethodGet, "/dnssite/list", ownerToken, nil)
 	siteIds := make([]string, 0, sites)
-	for _, site := range pingletest.ListOf(t, listed, "dns_sites") {
+	for _, site := range packetpulsetest.ListOf(t, listed, "dns_sites") {
 		if id, ok := site["dns_site_id"].(string); ok {
 			siteIds = append(siteIds, id)
 		}
@@ -263,7 +263,7 @@ func organisation(t *testing.T) ([]person, []string) {
 // results reads a diagnostic back and answers how many results are stored.
 func storedResults(t *testing.T, token, requestId string) int {
 	t.Helper()
-	detail := pingletest.Call(t, http.MethodGet, "/diagnostic/"+requestId, token, nil)
+	detail := packetpulsetest.Call(t, http.MethodGet, "/diagnostic/"+requestId, token, nil)
 	if detail.Status != http.StatusOK {
 		t.Fatalf("reading diagnostic %s back: %d %s", requestId, detail.Status, detail.Raw)
 	}
@@ -278,14 +278,14 @@ func requestIdOf(r reply) string {
 }
 
 func TestTheLicensedLoad(t *testing.T) {
-	pingletest.RequireServer(t)
+	packetpulsetest.RequireServer(t)
 	started := time.Now().UTC().Add(-time.Minute)
 	team, siteIds := organisation(t)
 	owner := team[0]
 
 	t.Run("twenty people sign in at once", func(t *testing.T) {
 		passwordStep := &meter{name: "sign-in: password", budget: budgetPasswordStep}
-		secondStep := &meter{name: "sign-in: authenticator", budget: budgetSecondStep}
+		secondStep := &meter{name: "sign-in: code", budget: budgetSecondStep}
 		everyone := team
 		challenges := make([]string, len(everyone))
 		together(len(everyone), len(everyone), func(index int) {
@@ -293,11 +293,11 @@ func TestTheLicensedLoad(t *testing.T) {
 				"email": everyone[index].email, "password": everyone[index].password,
 			}).string("challenge_id")
 		})
-		// The code each person reads off their phone: a fresh one, read
-		// before the clock starts, as it is in life.
+		// The code each person reads from their inbox, read before the clock
+		// starts, as it is in life.
 		codes := make([]string, len(everyone))
 		for index := range everyone {
-			codes[index] = pingletest.NextCode(t, everyone[index].email)
+			codes[index] = packetpulsetest.CodeFor(t, challenges[index])
 		}
 		together(len(everyone), len(everyone), func(index int) {
 			verified := secondStep.do(http.MethodPost, "/user/signin/verify", "", map[string]any{
@@ -374,7 +374,7 @@ func TestTheLicensedLoad(t *testing.T) {
 		if sweepTicket == "" {
 			t.Skip("the sweep did not run")
 		}
-		issued := pingletest.Call(t, http.MethodPost, "/apikey/add", owner.token, map[string]any{"label": "load"})
+		issued := packetpulsetest.Call(t, http.MethodPost, "/apikey/add", owner.token, map[string]any{"label": "load"})
 		if issued.Status != http.StatusCreated {
 			t.Fatalf("issuing a key: %d %s", issued.Status, issued.Raw)
 		}

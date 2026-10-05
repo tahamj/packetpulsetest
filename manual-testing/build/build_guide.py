@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the Pingle manual-testing guide from its authored parts.
+"""Build the PacketPulse manual-testing guide from its authored parts.
 
 The guide is AUTHORED as ``parts/*.md`` and this script produces the two
 distributed forms:
@@ -8,7 +8,7 @@ distributed forms:
   * ``manual-testing-guide.html`` - the styled edition (sidebar, search,
     light/dark theme, print)
 
-Both outputs are GENERATED. Do not hand-edit them: ``./pingletest.sh docs``
+Both outputs are GENERATED. Do not hand-edit them: ``./packetpulsetest.sh docs``
 fails when either drifts from ``parts/``.
 
 Modelled on MShop's generator, for the same reason it exists there: a
@@ -35,10 +35,10 @@ try:
 except ImportError:  # pragma: no cover - actionable message beats a traceback
     sys.exit(
         "markdown-it-py is not installed.\n"
-        "It is pinned in pingletest/manual-testing/build/requirements.txt and\n"
-        "installed into pingletest/.venv by `./pingletest.sh docs`. By hand:\n"
-        "    python3 -m venv pingletest/.venv\n"
-        "    pingletest/.venv/bin/pip install -r pingletest/manual-testing/build/requirements.txt"
+        "It is pinned in packetpulsetest/manual-testing/build/requirements.txt and\n"
+        "installed into packetpulsetest/.venv by `./packetpulsetest.sh docs`. By hand:\n"
+        "    python3 -m venv packetpulsetest/.venv\n"
+        "    packetpulsetest/.venv/bin/pip install -r packetpulsetest/manual-testing/build/requirements.txt"
     )
 
 HERE = Path(__file__).resolve().parent
@@ -287,7 +287,7 @@ def main() -> int:
             print(
                 "STALE: " + ", ".join(stale) + "\n"
                 "These files are generated from parts/*.md. Re-run:\n"
-                "    pingletest/.venv/bin/python3 pingletest/manual-testing/build/build_guide.py",
+                "    packetpulsetest/.venv/bin/python3 packetpulsetest/manual-testing/build/build_guide.py",
                 file=sys.stderr,
             )
             return 1

@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	pingletest "github.com/tahamj/pingletest"
+	packetpulsetest "github.com/tahamj/packetpulsetest"
 )
 
 // contractFields are the top-level fields the Results API promises.
@@ -28,16 +28,16 @@ var resultFields = []string{
 }
 
 func TestResultsApiShapeIsStable(t *testing.T) {
-	pingletest.RequireServer(t)
+	packetpulsetest.RequireServer(t)
 
-	ownerToken, _ := pingletest.SignUpOrganisation(t, "contract")
+	ownerToken, _ := packetpulsetest.SignUpOrganisation(t, "contract")
 
-	pingletest.Call(t, http.MethodPost, "/dnssite/add", ownerToken, map[string]any{
+	packetpulsetest.Call(t, http.MethodPost, "/dnssite/add", ownerToken, map[string]any{
 		"site_name": "loopback", "ip_address": "127.0.0.1",
 	})
 
 	ttNumber := fmt.Sprintf("TT-CONTRACT-%d", time.Now().UnixNano())
-	submit := pingletest.Call(t, http.MethodPost, "/diagnostic/submit", ownerToken, map[string]any{
+	submit := packetpulsetest.Call(t, http.MethodPost, "/diagnostic/submit", ownerToken, map[string]any{
 		"customer_id": "CUST-CONTRACT", "tt_number": ttNumber,
 		"packet_count": 1, "timeout_ms": 900,
 	})
@@ -45,7 +45,7 @@ func TestResultsApiShapeIsStable(t *testing.T) {
 		t.Skipf("could not run a diagnostic: %d %s", submit.Status, submit.Raw)
 	}
 
-	issued := pingletest.Call(t, http.MethodPost, "/apikey/add", ownerToken, map[string]any{
+	issued := packetpulsetest.Call(t, http.MethodPost, "/apikey/add", ownerToken, map[string]any{
 		"label": "contract test",
 	})
 	if issued.Status != http.StatusCreated {
@@ -56,7 +56,7 @@ func TestResultsApiShapeIsStable(t *testing.T) {
 		t.Fatal("the API key must be returned in full exactly once, at creation")
 	}
 
-	response := pingletest.Call(t, http.MethodGet, "/result/bytt/"+ttNumber, apiKey, nil)
+	response := packetpulsetest.Call(t, http.MethodGet, "/result/bytt/"+ttNumber, apiKey, nil)
 	if response.Status != http.StatusOK {
 		t.Fatalf("Results API: %d %s", response.Status, response.Raw)
 	}
@@ -67,7 +67,7 @@ func TestResultsApiShapeIsStable(t *testing.T) {
 		}
 	}
 
-	rows := pingletest.ListOf(t, response, "results")
+	rows := packetpulsetest.ListOf(t, response, "results")
 	if len(rows) == 0 {
 		t.Fatal("the Results API returned no per-site results")
 	}
@@ -79,16 +79,16 @@ func TestResultsApiShapeIsStable(t *testing.T) {
 }
 
 func TestResultsApiRefusesTheWrongCredential(t *testing.T) {
-	pingletest.RequireServer(t)
+	packetpulsetest.RequireServer(t)
 
-	sessionToken, _ := pingletest.SignUpOrganisation(t, "contractauth")
+	sessionToken, _ := packetpulsetest.SignUpOrganisation(t, "contractauth")
 
 	for name, token := range map[string]string{
 		"no credential":         "",
 		"a human session token": sessionToken,
-		"a malformed API key":   "pingle_development_000000000000_nope",
+		"a malformed API key":   "packetpulse_development_000000000000_nope",
 	} {
-		response := pingletest.Call(t, http.MethodGet, "/result/bytt/anything", token, nil)
+		response := packetpulsetest.Call(t, http.MethodGet, "/result/bytt/anything", token, nil)
 		if response.Status != http.StatusUnauthorized {
 			t.Errorf("%s: expected 401, got %d", name, response.Status)
 		}

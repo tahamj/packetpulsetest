@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Pingle Testing &amp; Knowledge Manual (v2026.10)</title>
+<title>PacketPulse Testing &amp; Knowledge Manual (v2026.10)</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="The Pingle manual testing guide, sales presentation, user handbook, and developer release manual.">
+<meta name="description" content="The PacketPulse manual testing guide, sales presentation, user handbook, and developer release manual.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap">
@@ -149,12 +149,12 @@ nav.side .nohit.on{display:block}
 <body>
 <div class="shell">
   <nav class="side" aria-label="Contents">
-    <p class="sb"><span class="mk" aria-hidden="true"></span> Pingle Testing Manual</p>
+    <p class="sb"><span class="mk" aria-hidden="true"></span> PacketPulse Testing Manual</p>
     <p class="ver">v2026.10-PROD-v1 · internal</p>
     <div class="find">
       <input id="navfind" type="search" placeholder="Filter contents…" aria-label="Filter contents" autocomplete="off">
     </div>
-    <a class="n1" href="#pingle-manual-testing-guide">📡 Pingle Manual Testing Guide</a>
+    <a class="n1" href="#packetpulse-manual-testing-guide">📡 PacketPulse Manual Testing Guide</a>
     <a class="n2" href="#how-to-read-this-manual">🧭 How To Read This Manual</a>
     <a class="n2" href="#what-changed-in-v1-the-october-2026-customer-release">📋 What Changed in v1 — the October 2026 Customer Release</a>
     <a class="n1" href="#part-0-operational-prerequisites">Part 0 — Operational Prerequisites</a>
@@ -164,7 +164,7 @@ nav.side .nohit.on{display:block}
     <a class="n2" href="#04-accounts-and-authenticators">0.4 Accounts and authenticators</a>
     <a class="n2" href="#05-the-automated-gate">0.5 The automated gate</a>
     <a class="n2" href="#06-deploying">0.6 Deploying</a>
-    <a class="n1" href="#part-l-learn-pingle">Part L — Learn Pingle</a>
+    <a class="n1" href="#part-l-learn-packetpulse">Part L — Learn PacketPulse</a>
     <a class="n2" href="#l1-organisations-people-and-seats">L.1 Organisations, people and seats</a>
     <a class="n2" href="#l2-sites-tickets-and-sweeps">L.2 Sites, tickets and sweeps</a>
     <a class="n2" href="#l3-what-the-numbers-mean">L.3 What the numbers mean</a>
@@ -173,7 +173,7 @@ nav.side .nohit.on{display:block}
     <a class="n2" href="#l6-two-step-sign-in">L.6 Two-step sign-in</a>
     <a class="n2" href="#l7-location-at-sign-in">L.7 Location at sign-in</a>
     <a class="n2" href="#l8-the-activity-trail">L.8 The activity trail</a>
-    <a class="n2" href="#l9-results-leaving-pingle">L.9 Results leaving Pingle</a>
+    <a class="n2" href="#l9-results-leaving-packetpulse">L.9 Results leaving PacketPulse</a>
     <a class="n1" href="#part-ii-feature-chapters">Part II — Feature Chapters</a>
     <a class="n2" href="#group-1-access">Group 1 — Access</a>
     <a class="n2" href="#group-2-people">Group 2 — People</a>
@@ -207,15 +207,15 @@ nav.side .nohit.on{display:block}
   </nav>
   <main>
     <div class="topbar">
-      <span class="crumb">pingle / pingletest / manual-testing / <strong>guide (v2026.10-PROD-v1)</strong></span>
+      <span class="crumb">packetpulse / packetpulsetest / manual-testing / <strong>guide (v2026.10-PROD-v1)</strong></span>
       <button id="theme" type="button" aria-label="Toggle light/dark theme">🌓 Theme</button>
       <a class="btn" href="javascript:window.print()">🖨️ Print / PDF</a>
     </div>
     <article class="doc">
 <div align="center">
-<h1 id="pingle-manual-testing-guide">📡 Pingle Manual Testing Guide<a class="anchor" href="#pingle-manual-testing-guide" aria-label="Link to this section">#</a></h1>
+<h1 id="packetpulse-manual-testing-guide">📡 PacketPulse Manual Testing Guide<a class="anchor" href="#packetpulse-manual-testing-guide" aria-label="Link to this section">#</a></h1>
 <h3 id="master-knowledge-manual"><em>&amp; Master Knowledge Manual</em><a class="anchor" href="#master-knowledge-manual" aria-label="Link to this section">#</a></h3>
-<p><strong>The single source of truth for testing, understanding, selling, operating, and releasing Pingle.</strong></p>
+<p><strong>The single source of truth for testing, understanding, selling, operating, and releasing PacketPulse.</strong></p>
 <br>
 <p><code>v2026.10-PROD-v1</code>  ·  <code>Verified against source 2026-10-04</code></p>
 <br>
@@ -244,11 +244,11 @@ nav.side .nohit.on{display:block}
 </table></div>
 <br>
 <p><em>Quad-Lens Architecture — an <strong>executable QA playbook</strong>, an <strong>onboarding &amp; user manual</strong>, a <strong>commercial &amp; sales pitch</strong>, and a <strong>developer release confidence guide</strong>.</em></p>
-<p><sub>🔒 Every number above is asserted against source by <strong><code>./pingletest.sh docs</code></strong>. This guide is <strong>generated</strong> from <code>pingletest/manual-testing/parts/</code> by <code>pingletest/manual-testing/build/build_guide.py</code> — edit the parts, not the outputs.</sub></p>
+<p><sub>🔒 Every number above is asserted against source by <strong><code>./packetpulsetest.sh docs</code></strong>. This guide is <strong>generated</strong> from <code>packetpulsetest/manual-testing/parts/</code> by <code>packetpulsetest/manual-testing/build/build_guide.py</code> — edit the parts, not the outputs.</sub></p>
 </div>
 <hr>
 <h2 id="how-to-read-this-manual">🧭 How To Read This Manual<a class="anchor" href="#how-to-read-this-manual" aria-label="Link to this section">#</a></h2>
-<p>Pingle is a multi-tenant network-diagnostics service for telecom operators: a Go API, a Flutter client (web, desktop, phone) and PostgreSQL, live at <strong>https://pingle.rummaan53.com</strong>. It is structurally a server-side request forgery primitive with a user interface — an authenticated person names an address and the server sends traffic to it — so much of what follows is about what must <strong>not</strong> happen.</p>
+<p>PacketPulse is a multi-tenant network-diagnostics service for telecom operators: a Go API, a Flutter client (web, desktop, phone) and PostgreSQL, live at <strong>https://packetpulse.rummaan53.com</strong>. It is structurally a server-side request forgery primitive with a user interface — an authenticated person names an address and the server sends traffic to it — so much of what follows is about what must <strong>not</strong> happen.</p>
 <div class="tw"><table><thead>
 <tr>
 <th>If you are a…</th>
@@ -332,13 +332,13 @@ nav.side .nohit.on{display:block}
 </tr>
 </tbody>
 </table></div>
-<div class="alert a-tip"><div class="alert-h">💡 TIP</div><p>Every manual test case carries a stable <strong>Test ID</strong> (<code>AUTH-004</code>, <code>JRN-003</code>, …). Quote it in bug reports and run records. IDs are <strong>never reused</strong> — a retired case leaves its number vacant — and <code>./pingletest.sh docs</code> fails if two cases share one.</p>
+<div class="alert a-tip"><div class="alert-h">💡 TIP</div><p>Every manual test case carries a stable <strong>Test ID</strong> (<code>AUTH-004</code>, <code>JRN-003</code>, …). Quote it in bug reports and run records. IDs are <strong>never reused</strong> — a retired case leaves its number vacant — and <code>./packetpulsetest.sh docs</code> fails if two cases share one.</p>
 </div>
 <div class="alert a-caution"><div class="alert-h">🛑 CAUTION</div><p><strong>Never test against live customer data.</strong> Use a local server with a disposable database (Part 0 §0.2), or the live demo organisation for read-only walkthroughs. Tenancy, ACL and audit cases need <strong>two organisations</strong> of your own — testing them from a single account proves nothing.</p>
 </div>
 <hr>
 <h2 id="what-changed-in-v1-the-october-2026-customer-release">📋 What Changed in v1 — the October 2026 Customer Release<a class="anchor" href="#what-changed-in-v1-the-october-2026-customer-release" aria-label="Link to this section">#</a></h2>
-<div class="alert a-important"><div class="alert-h">📌 IMPORTANT</div><p><strong>Deployed to https://pingle.rummaan53.com on 2026-10-04.</strong> It answers eight requirements from Northwind Telecom plus their remark that administrator logins be tracked. Every row below must be verified before a release is signed off.</p>
+<div class="alert a-important"><div class="alert-h">📌 IMPORTANT</div><p><strong>Deployed to https://packetpulse.rummaan53.com on 2026-10-04.</strong> It answers eight requirements from Northwind Telecom plus their remark that administrator logins be tracked. Every row below must be verified before a release is signed off.</p>
 </div>
 <div class="tw"><table><thead>
 <tr>
@@ -353,61 +353,61 @@ nav.side .nohit.on{display:block}
 <td><strong>1. Show IPv6</strong></td>
 <td>Client IPs are read only from trusted proxies and shown canonically; a dual-stack site is measured over <strong>both</strong> families, the IPv6 result <strong>reported, not counted</strong>; the device test shows its IPv4 and IPv6 egress.</td>
 <td><code>V6-*</code>, <code>DEV-004</code></td>
-<td><code>pinglego/pkg/common/probeguard/ProbeGuardPolicy.go</code><br><code>pinglego/pkg/common/dbclient/migrations/0023_2026_10_04_dual_stack_results.sql</code></td>
+<td><code>packetpulsego/pkg/common/probeguard/ProbeGuardPolicy.go</code><br><code>packetpulsego/pkg/common/dbclient/migrations/0023_2026_10_04_dual_stack_results.sql</code></td>
 </tr>
 <tr>
 <td><strong>2. Two-step sign-in</strong></td>
 <td>Every sign-in has a second step: an authenticator app (TOTP) or a texted code through the organisation's <strong>own Twilio account</strong>. Owners and superusers always use an authenticator; recovery codes for a lost phone.</td>
 <td><code>AUTH-*</code>, <code>SMS-*</code></td>
-<td><code>pinglego/pkg/usermicroservice/userservice/UserSignInSteps.go</code><br><code>pinglego/pkg/common/dbclient/migrations/0019_2026_10_03_two_step_sign_in.sql</code></td>
+<td><code>packetpulsego/pkg/usermicroservice/userservice/UserSignInSteps.go</code><br><code>packetpulsego/pkg/common/dbclient/migrations/0019_2026_10_03_two_step_sign_in.sql</code></td>
 </tr>
 <tr>
 <td><strong>3. No target dropdown</strong></td>
 <td><em>Test from this device</em> tests the target the organisation chose (Cloudflare DNS by default), with one-tap presets for whoever may change it.</td>
 <td><code>DEV-*</code></td>
-<td><code>pingleflutter/lib/diagnosticmicroservice/presentation/screens/ClientProbeScreen.dart</code></td>
+<td><code>packetpulseflutter/lib/diagnosticmicroservice/presentation/screens/ClientProbeScreen.dart</code></td>
 </tr>
 <tr>
 <td><strong>4. Location at check-in</strong></td>
 <td>Sign-in and sign-out record the device's position for people set to <em>Record location</em>; field engineers on a separate <strong>Check-ins</strong> screen with address and map link; a per-organisation <em>Require location</em> rule.</td>
 <td><code>CHK-*</code>, <code>LOC-*</code></td>
-<td><code>pinglego/pkg/common/dbclient/migrations/0020_2026_10_03_session_checkin.sql</code><br><code>pinglego/pkg/common/geocode/Geocode.go</code></td>
+<td><code>packetpulsego/pkg/common/dbclient/migrations/0020_2026_10_03_session_checkin.sql</code><br><code>packetpulsego/pkg/common/geocode/Geocode.go</code></td>
 </tr>
 <tr>
 <td><strong>5. Loss and jitter</strong></td>
 <td>Loss and RFC 3550 jitter on every result, ticket, history row, dashboard row, PDF and SLA report.</td>
 <td><code>DIAG-005</code>, <code>HIST-*</code>, <code>MON-*</code></td>
-<td><code>pinglego/pkg/pingmicroservice/pingprobe/PingVoiceQuality.go</code><br><code>pinglego/pkg/common/dbclient/migrations/0022_2026_10_03_loss_and_jitter.sql</code></td>
+<td><code>packetpulsego/pkg/pingmicroservice/pingprobe/PingVoiceQuality.go</code><br><code>packetpulsego/pkg/common/dbclient/migrations/0022_2026_10_03_loss_and_jitter.sql</code></td>
 </tr>
 <tr>
 <td><strong>6. CSV, FTP and download</strong></td>
 <td><strong>Export CSV</strong> on every ticket; a Results API bulk pull; a scheduled push to the organisation's own <strong>SFTP / FTPS / FTP</strong> server with the SSH host key confirmed first.</td>
 <td><code>CSV-*</code>, <code>EXP-*</code></td>
-<td><code>pinglego/pkg/diagnosticmicroservice/diagnosticexport/DiagnosticExport.go</code><br><code>pinglego/pkg/exportmicroservice/exportservice/ExportService.go</code></td>
+<td><code>packetpulsego/pkg/diagnosticmicroservice/diagnosticexport/DiagnosticExport.go</code><br><code>packetpulsego/pkg/exportmicroservice/exportservice/ExportService.go</code></td>
 </tr>
 <tr>
 <td><strong>7. English only</strong></td>
 <td>The other 22 languages were removed; wording is still served by the server, in English.</td>
 <td><code>SET-003</code></td>
-<td><code>scripts/intellicodegen/pinglestrings.py</code></td>
+<td><code>scripts/intellicodegen/packetpulsestrings.py</code></td>
 </tr>
 <tr>
 <td><strong>8. Load testing</strong></td>
 <td>A device line-speed test (Cloudflare), and a platform load suite: 20 people at once, a traced 200-site sweep, API and CSV pulls against p95 budgets.</td>
 <td><code>DEV-005</code>, Part IV §4.5</td>
-<td><code>pingletest/golang/loadtest/load_test.go</code><br><code>.github/workflows/pingle-load.yml</code></td>
+<td><code>packetpulsetest/golang/loadtest/load_test.go</code><br><code>.github/workflows/packetpulse-load.yml</code></td>
 </tr>
 <tr>
 <td><strong>Admin logins tracked</strong></td>
 <td>Administrators' sign-ins and sign-outs in the <strong>Activity</strong> trail with device, browser, address and place; <strong>failed</strong> attempts on their accounts too, with the reason.</td>
 <td><code>AUD-*</code></td>
-<td><code>pinglego/pkg/auditlogmicroservice/auditlogconstants/AuditLogRegistry.go</code></td>
+<td><code>packetpulsego/pkg/auditlogmicroservice/auditlogconstants/AuditLogRegistry.go</code></td>
 </tr>
 </tbody>
 </table></div>
 <hr>
 <h1 id="part-0-operational-prerequisites">Part 0 — Operational Prerequisites<a class="anchor" href="#part-0-operational-prerequisites" aria-label="Link to this section">#</a></h1>
-<p>Everything you need before the first test case: where to run Pingle, how to sign in to it, and how the automated gate relates to the manual one.</p>
+<p>Everything you need before the first test case: where to run PacketPulse, how to sign in to it, and how the automated gate relates to the manual one.</p>
 <h2 id="01-environments">0.1 Environments<a class="anchor" href="#01-environments" aria-label="Link to this section">#</a></h2>
 <div class="tw"><table><thead>
 <tr>
@@ -422,27 +422,27 @@ nav.side .nohit.on{display:block}
 <tr>
 <td><strong>Local development</strong></td>
 <td><code>http://localhost:8080</code> (API) · <code>flutter run -d chrome</code> (app)</td>
-<td><code>pingledb</code> on the local PostgreSQL</td>
+<td><code>packetpulsedb</code> on the local PostgreSQL</td>
 <td>Building and trying features</td>
 <td>Destructive cases you cannot undo by hand</td>
 </tr>
 <tr>
 <td><strong>Disposable test</strong></td>
 <td>any free port, e.g. <code>http://localhost:18080</code></td>
-<td>a database you create for the run (e.g. <code>pingle_manual_test</code>)</td>
+<td>a database you create for the run (e.g. <code>packetpulse_manual_test</code>)</td>
 <td><strong>Every manual test pass</strong> and the integration suites</td>
 <td>—</td>
 </tr>
 <tr>
 <td><strong>Live</strong></td>
-<td><strong>https://pingle.rummaan53.com</strong> (site <code>/</code>, app <code>/app/</code>, API <code>/api/</code>)</td>
-<td><code>pingledb</code> on the Oracle host, behind PgBouncer</td>
+<td><strong>https://packetpulse.rummaan53.com</strong> (site <code>/</code>, app <code>/app/</code>, API <code>/api/</code>)</td>
+<td><code>packetpulsedb</code> on the Oracle host, behind PgBouncer</td>
 <td>Read-only walkthroughs in the demo organisation; the post-deploy checks of Part V §5.4</td>
 <td>Tenancy, ACL, lockout or delete cases; anything that changes a real customer's data</td>
 </tr>
 </tbody>
 </table></div>
-<div class="alert a-warning"><div class="alert-h">⚠️ WARNING</div><p>⚠️ <strong>TRAP — the <code>.env</code> fallback.</strong> The Go database tests read <code>DATABASE_URL</code>, and when it is unset they fall back to the repository's <code>.env</code> — your development database — and <strong>apply every migration to it on first connect</strong>. Always export a disposable <code>DATABASE_URL</code> before <code>go test</code>, or run tests only through <code>./pingletest.sh</code>, which does.</p>
+<div class="alert a-warning"><div class="alert-h">⚠️ WARNING</div><p>⚠️ <strong>TRAP — the <code>.env</code> fallback.</strong> The Go database tests read <code>DATABASE_URL</code>, and when it is unset they fall back to the repository's <code>.env</code> — your development database — and <strong>apply every migration to it on first connect</strong>. Always export a disposable <code>DATABASE_URL</code> before <code>go test</code>, or run tests only through <code>./packetpulsetest.sh</code>, which does.</p>
 </div>
 <h2 id="02-toolchain">0.2 Toolchain<a class="anchor" href="#02-toolchain" aria-label="Link to this section">#</a></h2>
 <div class="tw"><table><thead>
@@ -456,12 +456,12 @@ nav.side .nohit.on{display:block}
 <tr>
 <td>Go</td>
 <td>1.26</td>
-<td><code>pinglego/</code> and the integration suites in <code>pingletest/golang/</code></td>
+<td><code>packetpulsego/</code> and the integration suites in <code>packetpulsetest/golang/</code></td>
 </tr>
 <tr>
 <td>Flutter</td>
 <td>3.35</td>
-<td><code>pingleflutter/</code> — web, macOS, Windows, Android, iOS</td>
+<td><code>packetpulseflutter/</code> — web, macOS, Windows, Android, iOS</td>
 </tr>
 <tr>
 <td>PostgreSQL</td>
@@ -471,7 +471,7 @@ nav.side .nohit.on{display:block}
 <tr>
 <td>Python</td>
 <td>3.9+ (3.13 recommended)</td>
-<td><code>scripts/intellicodegen/pinglestrings.py</code>, the coverage floors, this guide's generator</td>
+<td><code>scripts/intellicodegen/packetpulsestrings.py</code>, the coverage floors, this guide's generator</td>
 </tr>
 <tr>
 <td>gpg, rsync</td>
@@ -492,16 +492,16 @@ nav.side .nohit.on{display:block}
 </table></div>
 <h2 id="03-starting-a-disposable-stack">0.3 Starting a disposable stack<a class="anchor" href="#03-starting-a-disposable-stack" aria-label="Link to this section">#</a></h2>
 <pre class="code"><code># 1. a database of your own
-createdb pingle_manual_test
+createdb packetpulse_manual_test
 
 # 2. the API, migrating that database at boot (migrations are embedded in the binary)
-cd pinglego
-DATABASE_URL=postgres://pingle:…@localhost:5432/pingle_manual_test?sslmode=disable \
-PORT=18080 APP_ENV=test REVERSE_GEOCODING=off go run ./cmd/pingleserver
+cd packetpulsego
+DATABASE_URL=postgres://packetpulse:…@localhost:5432/packetpulse_manual_test?sslmode=disable \
+PORT=18080 APP_ENV=test REVERSE_GEOCODING=off go run ./cmd/packetpulseserver
 
 # 3. the app, pointed at it
-cd ../pingleflutter
-flutter run -d chrome --dart-define=PINGLE_API_BASE_URL=http://localhost:18080
+cd ../packetpulseflutter
+flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18080
 </code></pre>
 <p><code>REVERSE_GEOCODING=off</code> stops sign-in positions being sent to a map service from a test run. Every other setting comes from <code>.env</code> (copy <code>.env.example</code>); Appendix D lists them all.</p>
 <h2 id="04-accounts-and-authenticators">0.4 Accounts and authenticators<a class="anchor" href="#04-accounts-and-authenticators" aria-label="Link to this section">#</a></h2>
@@ -531,10 +531,10 @@ flutter run -d chrome --dart-define=PINGLE_API_BASE_URL=http://localhost:18080
 </tbody>
 </table></div>
 <p>To act as a person in a manual test, add the authenticator secret shown at enrolment to any TOTP app (or <code>oathtool --totp -b &lt;secret&gt;</code>). Keep the <strong>recovery codes</strong> shown once at the end of enrolment — several cases use them.</p>
-<div class="alert a-important"><div class="alert-h">📌 IMPORTANT</div><p>🔒 <strong>INVARIANT</strong> — production refuses <code>OWNER_TOTP_SECRET</code> and <code>DEMO_TOTP_SECRET</code>: a second factor written in a configuration file is held by everyone who can read the file. <code>pinglego/pkg/common/config/Config.go</code> returns an error at boot; <code>REL-004</code> checks the live host.</p>
+<div class="alert a-important"><div class="alert-h">📌 IMPORTANT</div><p>🔒 <strong>INVARIANT</strong> — production refuses <code>OWNER_TOTP_SECRET</code> and <code>DEMO_TOTP_SECRET</code>: a second factor written in a configuration file is held by everyone who can read the file. <code>packetpulsego/pkg/common/config/Config.go</code> returns an error at boot; <code>REL-004</code> checks the live host.</p>
 </div>
 <h2 id="05-the-automated-gate">0.5 The automated gate<a class="anchor" href="#05-the-automated-gate" aria-label="Link to this section">#</a></h2>
-<p><code>./pingletest.sh</code> runs every suite; <code>./pingletest.sh unit client</code> is the fast pair. Manual testing <strong>adds to</strong> this gate — it does not replace it. A release needs both (Part V).</p>
+<p><code>./packetpulsetest.sh</code> runs every suite; <code>./packetpulsetest.sh unit client</code> is the fast pair. Manual testing <strong>adds to</strong> this gate — it does not replace it. A release needs both (Part V).</p>
 <div class="tw"><table><thead>
 <tr>
 <th>Suite</th>
@@ -605,11 +605,11 @@ flutter run -d chrome --dart-define=PINGLE_API_BASE_URL=http://localhost:18080
 </tr>
 </tbody>
 </table></div>
-<p>Integration suites read <code>PINGLE_TEST_URL</code> (default <code>http://localhost:8080</code>). <code>PINGLE_TEST_REQUIRE_SUPERUSER=1</code> turns a missing superuser into a failure rather than a skip — a skipped suite looks exactly like a passing one.</p>
+<p>Integration suites read <code>PACKETPULSE_TEST_URL</code> (default <code>http://localhost:8080</code>). <code>PACKETPULSE_TEST_REQUIRE_SUPERUSER=1</code> turns a missing superuser into a failure rather than a skip — a skipped suite looks exactly like a passing one.</p>
 <h2 id="06-deploying">0.6 Deploying<a class="anchor" href="#06-deploying" aria-label="Link to this section">#</a></h2>
-<p><code>scripts/deploy/PingleDeploy.sh --host mshop.rummaan53.com</code> builds from the working tree, runs <code>unit client backup</code> and the integration suites against <code>PINGLE_TEST_URL</code>, cross-compiles for linux/arm64, builds the web app with base href <code>/app/</code>, backs up the live database, then switches the release and restarts. <code>--api-only</code>, <code>--web-only</code> and <code>--site-only</code> ship one part; <code>--skip-guards</code> and <code>--skip-backup</code> are for a logged emergency only. Part V §5.4 is what to check afterwards.</p>
+<p><code>scripts/deploy/PacketPulseDeploy.sh --host mshop.rummaan53.com</code> builds from the working tree, runs <code>unit client backup</code> and the integration suites against <code>PACKETPULSE_TEST_URL</code>, cross-compiles for linux/arm64, builds the web app with base href <code>/app/</code>, backs up the live database, then switches the release and restarts. <code>--api-only</code>, <code>--web-only</code> and <code>--site-only</code> ship one part; <code>--skip-guards</code> and <code>--skip-backup</code> are for a logged emergency only. Part V §5.4 is what to check afterwards.</p>
 <hr>
-<h1 id="part-l-learn-pingle">Part L — Learn Pingle<a class="anchor" href="#part-l-learn-pingle" aria-label="Link to this section">#</a></h1>
+<h1 id="part-l-learn-packetpulse">Part L — Learn PacketPulse<a class="anchor" href="#part-l-learn-packetpulse" aria-label="Link to this section">#</a></h1>
 <p>The ideas every other part assumes, in plain words. Read this once, whatever your role.</p>
 <h2 id="l1-organisations-people-and-seats">L.1 Organisations, people and seats<a class="anchor" href="#l1-organisations-people-and-seats" aria-label="Link to this section">#</a></h2>
 <p>An <strong>organisation</strong> is one customer — a telecom operator such as Northwind Telecom. Everything it owns (sites, diagnostics, keys, settings, its trail) is invisible to every other organisation. 🔒 <strong>INVARIANT</strong> — every tenant query carries the caller's <code>organisation_id</code>; a request with none is refused, never answered for everyone.</p>
@@ -662,14 +662,14 @@ flutter run -d chrome --dart-define=PINGLE_API_BASE_URL=http://localhost:18080
 <h2 id="l4-ipv4-ipv6-and-not-counted">L.4 IPv4, IPv6 and &quot;not counted&quot;<a class="anchor" href="#l4-ipv4-ipv6-and-not-counted" aria-label="Link to this section">#</a></h2>
 <p>A site whose name resolves to both an IPv4 and an IPv6 address is measured over <strong>both</strong>. The IPv6 result is shown, kept and exported, but marked <strong>not counted</strong>: the site's totals, alerts and SLA availability are carried by IPv4, because the customer's agreement is for the service and IPv4 still carries it. A site that is IPv6 <em>only</em> counts over IPv6 — otherwise it could never fail. When the server itself has no IPv6 route, an IPv6 address is reported as <em>could not be tested from here</em> rather than as an outage.</p>
 <h2 id="l5-two-vantage-points">L.5 Two vantage points<a class="anchor" href="#l5-two-vantage-points" aria-label="Link to this section">#</a></h2>
-<p>A <strong>server-side diagnostic</strong> measures from Pingle's data centre. <strong>Test from this device</strong> measures from wherever the person is, over their own connection — the right tool for &quot;is it slow for me?&quot;. The two will not match, and both are correct: they measure different layers from different places. A device test can be <strong>attached</strong> to a ticket, where it sits beside the server's figures, labelled as measured on a device.</p>
+<p>A <strong>server-side diagnostic</strong> measures from PacketPulse's data centre. <strong>Test from this device</strong> measures from wherever the person is, over their own connection — the right tool for &quot;is it slow for me?&quot;. The two will not match, and both are correct: they measure different layers from different places. A device test can be <strong>attached</strong> to a ticket, where it sits beside the server's figures, labelled as measured on a device.</p>
 <h2 id="l6-two-step-sign-in">L.6 Two-step sign-in<a class="anchor" href="#l6-two-step-sign-in" aria-label="Link to this section">#</a></h2>
 <p>After the password, everyone gives a second step: a 6-digit code from an <strong>authenticator app</strong> (TOTP), or a code <strong>texted</strong> to their mobile through the organisation's own SMS gateway. Owners and the platform superuser always use an authenticator — they are the accounts that must never depend on a gateway someone else configures. Ten <strong>recovery codes</strong>, shown once at set-up, each sign in once if the phone is lost. Wrong codes count: ten across challenges lock the account for fifteen minutes. A wrong <em>password</em> never locks anything, so a stranger cannot lock someone out by typing their address.</p>
 <h2 id="l7-location-at-sign-in">L.7 Location at sign-in<a class="anchor" href="#l7-location-at-sign-in" aria-label="Link to this section">#</a></h2>
 <p>For people set to <strong>Record location</strong>, the device's position is recorded when they sign in and out — with the browser's or phone's permission, and a refusal recorded as one. A field engineer's appear on <strong>Check-ins</strong>; an administrator's beside their entries in <strong>Activity</strong>. An organisation can make sharing a position a condition of signing in. The address is looked up afterwards (Google, or OpenStreetMap when no key is set), so it may appear a moment later; the position is the record.</p>
 <h2 id="l8-the-activity-trail">L.8 The activity trail<a class="anchor" href="#l8-the-activity-trail" aria-label="Link to this section">#</a></h2>
 <p>Every successful change — who, what, from where, when — is written to a <strong>hash chain</strong>: each entry's hash covers the one before, so altering or removing any entry breaks every entry after it, and <strong>Verify</strong> names the first that does not follow. Administrators' sign-ins and sign-outs are in it, and so are <strong>failed</strong> sign-ins to administrators' accounts (at most twenty an hour per account). A position is shown beside an entry but never sealed into its hash: it is personal data that may have to be erased, and a chain entry never can be.</p>
-<h2 id="l9-results-leaving-pingle">L.9 Results leaving Pingle<a class="anchor" href="#l9-results-leaving-pingle" aria-label="Link to this section">#</a></h2>
+<h2 id="l9-results-leaving-packetpulse">L.9 Results leaving PacketPulse<a class="anchor" href="#l9-results-leaving-packetpulse" aria-label="Link to this section">#</a></h2>
 <div class="tw"><table><thead>
 <tr>
 <th>Way out</th>
@@ -695,15 +695,15 @@ flutter run -d chrome --dart-define=PINGLE_API_BASE_URL=http://localhost:18080
 </tr>
 <tr>
 <td><strong>Result export</strong></td>
-<td>Pingle, on a schedule</td>
+<td>PacketPulse, on a schedule</td>
 <td>A CSV file per period, delivered to the organisation's own SFTP, FTPS or FTP server</td>
 </tr>
 </tbody>
 </table></div>
-<p>All CSV comes from one writer with one header — the contract an IT system's importer is written against (<code>pingletest/contracts/result_export_columns.json</code>).</p>
+<p>All CSV comes from one writer with one header — the contract an IT system's importer is written against (<code>packetpulsetest/contracts/result_export_columns.json</code>).</p>
 <hr>
 <h1 id="part-ii-feature-chapters">Part II — Feature Chapters<a class="anchor" href="#part-ii-feature-chapters" aria-label="Link to this section">#</a></h1>
-<p>One chapter per area of the product, in the order a new customer meets them. Every chapter carries all four lenses — <strong>🌟 Commercial</strong>, <strong>📖 User Guide</strong>, <strong>🧪 Testing Playbook</strong> and <strong>⚙️ Developer</strong> — and <code>./pingletest.sh docs</code> fails if one is missing.</p>
+<p>One chapter per area of the product, in the order a new customer meets them. Every chapter carries all four lenses — <strong>🌟 Commercial</strong>, <strong>📖 User Guide</strong>, <strong>🧪 Testing Playbook</strong> and <strong>⚙️ Developer</strong> — and <code>./packetpulsetest.sh docs</code> fails if one is missing.</p>
 <p>Run every case on a disposable stack (Part 0 §0.3) with <strong>two organisations of your own</strong>: <code>ACME</code> (yours) and <code>RIVAL</code> (someone else's). Unless a case says otherwise, &quot;an administrator&quot; is ACME's owner and &quot;an engineer&quot; holds ACME's built-in <em>NOC Engineer</em> role.</p>
 <div class="tw"><table><thead>
 <tr>
@@ -872,7 +872,7 @@ flutter run -d chrome --dart-define=PINGLE_API_BASE_URL=http://localhost:18080
 <td>Engineer</td>
 <td>An ended session returns to sign-in once</td>
 <td>Revoke the engineer's session from another device, then use the app</td>
-<td>One clean return to the sign-in page. 🛑 <strong>Must NOT</strong> loop between sign-in and an error</td>
+<td>One clean return to the sign-in page, and one <code>POST /user/signout</code> in the browser's network panel. 🛑 <strong>Must NOT</strong> loop between sign-in and an error, or send sign-outs over and over</td>
 </tr>
 <tr>
 <td><code>AUTH-015</code></td>
@@ -886,11 +886,11 @@ flutter run -d chrome --dart-define=PINGLE_API_BASE_URL=http://localhost:18080
 </li>
 <li>⚙️ <strong>Developer Guide &amp; Release Confidence</strong>:
 <ul>
-<li>Flow: <code>pinglego/pkg/usermicroservice/userservice/UserSignInSteps.go</code> — the password step returns a challenge (<code>totp</code>, <code>totp_enrol</code> or <code>sms</code>), never a session; <code>newSession</code> runs only after verify. Challenge ids are 32 random bytes, stored as SHA-256; texted codes are keyed HMACs.</li>
+<li>Flow: <code>packetpulsego/pkg/usermicroservice/userservice/UserSignInSteps.go</code> — the password step returns a challenge (<code>totp</code>, <code>totp_enrol</code> or <code>sms</code>), never a session; <code>newSession</code> runs only after verify. Challenge ids are 32 random bytes, stored as SHA-256; texted codes are keyed HMACs.</li>
 <li>🔒 Attempts are counted <strong>before</strong> the code is checked, in one conditional <code>UPDATE … RETURNING</code>, so parallel guesses cannot slip under the limit.</li>
 <li>Limits: <code>maxAttempts = 5</code>, <code>lockAfter = 10</code>, <code>lockFor = 15m</code>, <code>resendAfter = 30s</code>, 3 sends per challenge, 5 texts per hour; a separate rate limiter for the second step (<code>SECOND_STEP_ATTEMPTS_PER_MINUTE</code>).</li>
-<li>Client IPs: <code>pinglego/pkg/common/apiratelimit/ApiRateLimit.go</code> walks <code>X-Forwarded-For</code> from the right past <code>TRUSTED_PROXIES</code> only, and returns canonical addresses (<code>::ffff:a.b.c.d</code> → <code>a.b.c.d</code>).</li>
-<li>Coverage: <code>pinglego/pkg/usermicroservice/userservice/UserSignInSteps_test.go</code>, the <code>assignment</code> and <code>audit</code> suites (every integration test signs in with a real TOTP code).</li>
+<li>Client IPs: <code>packetpulsego/pkg/common/apiratelimit/ApiRateLimit.go</code> walks <code>X-Forwarded-For</code> from the right past <code>TRUSTED_PROXIES</code> only, and returns canonical addresses (<code>::ffff:a.b.c.d</code> → <code>a.b.c.d</code>).</li>
+<li>Coverage: <code>packetpulsego/pkg/usermicroservice/userservice/UserSignInSteps_test.go</code>, the <code>assignment</code> and <code>audit</code> suites (every integration test signs in with a real TOTP code).</li>
 </ul>
 </li>
 </ul>
@@ -983,10 +983,10 @@ flutter run -d chrome --dart-define=PINGLE_API_BASE_URL=http://localhost:18080
 </li>
 <li>⚙️ <strong>Developer Guide &amp; Release Confidence</strong>:
 <ul>
-<li>Gateway: <code>pinglego/pkg/smsmicroservice/smsservice/SmsService.go</code> (token sealed with the server's secret box, keyed from <code>JWT_SECRET</code>); provider: <code>pinglego/pkg/common/smsprovider/</code> (Twilio, fixed host).</li>
-<li>Settings: <code>pinglego/pkg/staffmicroservice/staffservice/StaffCheckinService.go</code>; <code>PUT /organisation/settings</code> requires <strong>both</strong> <code>require_checkin_location</code> and <code>device_test_target</code> — a whole-row save.</li>
+<li>Gateway: <code>packetpulsego/pkg/smsmicroservice/smsservice/SmsService.go</code> (token sealed with the server's secret box, keyed from <code>JWT_SECRET</code>); provider: <code>packetpulsego/pkg/common/smsprovider/</code> (Twilio, fixed host).</li>
+<li>Settings: <code>packetpulsego/pkg/staffmicroservice/staffservice/StaffCheckinService.go</code>; <code>PUT /organisation/settings</code> requires <strong>both</strong> <code>require_checkin_location</code> and <code>device_test_target</code> — a whole-row save.</li>
 <li>Policy: superusers and owners are always asked for a position and never required to give one; no staff row means not asked; otherwise the person's <code>capture_location</code> and the organisation's rule decide. An unreadable policy fails closed.</li>
-<li>Coverage: <code>pinglego/pkg/smsmicroservice/**</code>, <code>pinglego/pkg/usermicroservice/userservice/UserCheckin_test.go</code>, <code>pingleflutter/test/sign_in_security_screen_test.dart</code>.</li>
+<li>Coverage: <code>packetpulsego/pkg/smsmicroservice/**</code>, <code>packetpulsego/pkg/usermicroservice/userservice/UserCheckin_test.go</code>, <code>packetpulseflutter/test/sign_in_security_screen_test.dart</code>.</li>
 </ul>
 </li>
 </ul>
@@ -1063,9 +1063,9 @@ flutter run -d chrome --dart-define=PINGLE_API_BASE_URL=http://localhost:18080
 </li>
 <li>⚙️ <strong>Developer Guide &amp; Release Confidence</strong>:
 <ul>
-<li><code>pinglego/pkg/staffmicroservice/staffapp/StaffRouteHandler.go</code>; the second-step settings are a <strong>separate</strong> route (<code>PUT /staff/{staffId}/secondfactor</code>) because the whole-row staff update would otherwise wipe them; it requires <code>second_factor</code>, <code>phone_number</code> and <code>capture_location</code>.</li>
+<li><code>packetpulsego/pkg/staffmicroservice/staffapp/StaffRouteHandler.go</code>; the second-step settings are a <strong>separate</strong> route (<code>PUT /staff/{staffId}/secondfactor</code>) because the whole-row staff update would otherwise wipe them; it requires <code>second_factor</code>, <code>phone_number</code> and <code>capture_location</code>.</li>
 <li>🔒 Every write is scoped by the caller's organisation; editing RIVAL's <code>staffId</code> answers 404.</li>
-<li>Coverage: <code>pinglego/pkg/staffmicroservice/**</code>, <code>pingleflutter/test/staff_screen_test.dart</code>, the <code>acl</code> and <code>tenancy</code> suites.</li>
+<li>Coverage: <code>packetpulsego/pkg/staffmicroservice/**</code>, <code>packetpulseflutter/test/staff_screen_test.dart</code>, the <code>acl</code> and <code>tenancy</code> suites.</li>
 </ul>
 </li>
 </ul>
@@ -1117,7 +1117,7 @@ flutter run -d chrome --dart-define=PINGLE_API_BASE_URL=http://localhost:18080
 <td><code>ACL-005</code></td>
 <td>Tester</td>
 <td>Every role, both directions</td>
-<td>Run <code>./pingletest.sh acl</code></td>
+<td>Run <code>./packetpulsetest.sh acl</code></td>
 <td>Passes — each role is refused what it lacks and allowed what it holds</td>
 </tr>
 </tbody>
@@ -1125,9 +1125,9 @@ flutter run -d chrome --dart-define=PINGLE_API_BASE_URL=http://localhost:18080
 </li>
 <li>⚙️ <strong>Developer Guide &amp; Release Confidence</strong>:
 <ul>
-<li>Capabilities: <code>pinglego/pkg/common/pingleaccess/PingleAccessCategory.go</code> (Appendix B); guards: <code>pingleaccess.RequireCapability</code> on each route (Appendix A).</li>
+<li>Capabilities: <code>packetpulsego/pkg/common/packetpulseaccess/PacketPulseAccessCategory.go</code> (Appendix B); guards: <code>packetpulseaccess.RequireCapability</code> on each route (Appendix A).</li>
 <li>🔒 Authority is read fresh on every request; a role change revokes the person's sessions.</li>
-<li>Coverage: <code>pingletest/golang/aclconformance/acl_conformance_test.go</code> (the full matrix), <code>pingleflutter/test/permission_matrix_screen_test.dart</code>.</li>
+<li>Coverage: <code>packetpulsetest/golang/aclconformance/acl_conformance_test.go</code> (the full matrix), <code>packetpulseflutter/test/permission_matrix_screen_test.dart</code>.</li>
 </ul>
 </li>
 </ul>
@@ -1188,7 +1188,7 @@ flutter run -d chrome --dart-define=PINGLE_API_BASE_URL=http://localhost:18080
 <li>⚙️ <strong>Developer Guide &amp; Release Confidence</strong>:
 <ul>
 <li>Seats are checked at the password step <strong>and</strong> when the session opens (<code>enforceSeatLimit</code>), counted per person over live, unrevoked sessions.</li>
-<li>Coverage: <code>pingletest/golang/tenancyassignment/</code>, <code>pingleflutter/test/session_screen_test.dart</code>.</li>
+<li>Coverage: <code>packetpulsetest/golang/tenancyassignment/</code>, <code>packetpulseflutter/test/session_screen_test.dart</code>.</li>
 </ul>
 </li>
 </ul>
@@ -1255,9 +1255,9 @@ flutter run -d chrome --dart-define=PINGLE_API_BASE_URL=http://localhost:18080
 </li>
 <li>⚙️ <strong>Developer Guide &amp; Release Confidence</strong>:
 <ul>
-<li><code>session_checkin</code>, one row per session, keyed by <code>staff_session.session_id</code> (<code>pinglego/pkg/common/dbclient/migrations/0020_2026_10_03_session_checkin.sql</code>); coordinates only with status <code>captured</code>, checked by <code>CHECK</code>s.</li>
-<li>Addresses: a background worker (<code>pinglego/pkg/common/geocode/Geocode.go</code>) — Google with <code>GOOGLE_MAPS_API_KEY</code>, else OpenStreetMap Nominatim at one request a second. <code>REVERSE_GEOCODING=off</code> disables it.</li>
-<li>Coverage: <code>pinglego/pkg/staffmicroservice/staffservice/</code>, <code>pingleflutter/test/checkin_screen_test.dart</code>, <code>pingletest/golang/tenancyisolation/</code>.</li>
+<li><code>session_checkin</code>, one row per session, keyed by <code>staff_session.session_id</code> (<code>packetpulsego/pkg/common/dbclient/migrations/0020_2026_10_03_session_checkin.sql</code>); coordinates only with status <code>captured</code>, checked by <code>CHECK</code>s.</li>
+<li>Addresses: a background worker (<code>packetpulsego/pkg/common/geocode/Geocode.go</code>) — Google with <code>GOOGLE_MAPS_API_KEY</code>, else OpenStreetMap Nominatim at one request a second. <code>REVERSE_GEOCODING=off</code> disables it.</li>
+<li>Coverage: <code>packetpulsego/pkg/staffmicroservice/staffservice/</code>, <code>packetpulseflutter/test/checkin_screen_test.dart</code>, <code>packetpulsetest/golang/tenancyisolation/</code>.</li>
 </ul>
 </li>
 </ul>
@@ -1359,10 +1359,10 @@ flutter run -d chrome --dart-define=PINGLE_API_BASE_URL=http://localhost:18080
 </li>
 <li>⚙️ <strong>Developer Guide &amp; Release Confidence</strong>:
 <ul>
-<li>Registry: <code>pinglego/pkg/auditlogmicroservice/auditlogconstants/AuditLogRegistry.go</code> — every mutating route is there or excluded with a reason, and <code>TestEveryMutationRouteIsRegistered</code> fails a route added without either.</li>
-<li>Sign-ins are recorded by UserMS itself (<code>recordSignIn</code>, <code>recordSignOut</code>, <code>recordFailedSignIn</code> in <code>pinglego/pkg/usermicroservice/userservice/UserSignInSteps.go</code>) because the routes are public; failed ones are capped by <code>maxFailedEntriesPerHour = 20</code> per account.</li>
+<li>Registry: <code>packetpulsego/pkg/auditlogmicroservice/auditlogconstants/AuditLogRegistry.go</code> — every mutating route is there or excluded with a reason, and <code>TestEveryMutationRouteIsRegistered</code> fails a route added without either.</li>
+<li>Sign-ins are recorded by UserMS itself (<code>recordSignIn</code>, <code>recordSignOut</code>, <code>recordFailedSignIn</code> in <code>packetpulsego/pkg/usermicroservice/userservice/UserSignInSteps.go</code>) because the routes are public; failed ones are capped by <code>maxFailedEntriesPerHour = 20</code> per account.</li>
 <li>🔒 The list joins positions from <code>session_checkin</code> by session id; the chain's <code>details</code> never hold coordinates.</li>
-<li>Coverage: <code>pingletest/golang/auditconformance/</code>, <code>pinglego/pkg/common/auditlog/</code>, <code>pingleflutter/test/audit_log_screen_test.dart</code>, <code>pingleflutter/test/user_agent_test.dart</code>.</li>
+<li>Coverage: <code>packetpulsetest/golang/auditconformance/</code>, <code>packetpulsego/pkg/common/auditlog/</code>, <code>packetpulseflutter/test/audit_log_screen_test.dart</code>, <code>packetpulseflutter/test/user_agent_test.dart</code>.</li>
 </ul>
 </li>
 </ul>
@@ -1373,7 +1373,7 @@ flutter run -d chrome --dart-define=PINGLE_API_BASE_URL=http://localhost:18080
 <h3 id="31-sites">3.1 🌐 Sites<a class="anchor" href="#31-sites" aria-label="Link to this section">#</a></h3>
 <p><strong>Screen:</strong> Configure → <strong>DNS sites</strong> · <strong>Routes:</strong> <code>GET /dnssite/list</code>, <code>POST /dnssite/add</code>, <code>POST /dnssite/bulkimport</code>, <code>PUT/DELETE /dnssite/{dnsSiteId}</code> · <strong>Capabilities:</strong> <code>dns_site_view</code>, <code>dns_site_manage</code></p>
 <ul>
-<li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: Paste a whole inventory in one go — one bad line never rejects the rest — and Pingle refuses to be turned against its own host: loopback, link-local and cloud-metadata addresses are never probed, whatever a site says.</li>
+<li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: Paste a whole inventory in one go — one bad line never rejects the rest — and PacketPulse refuses to be turned against its own host: loopback, link-local and cloud-metadata addresses are never probed, whatever a site says.</li>
 <li>📖 <strong>User Guide &amp; Operational Flow</strong>: <strong>Add site</strong> with a name, an IP address or hostname, an optional circuit ID and SLA policy. <strong>Bulk import</strong> takes lines, commas or spaces; <code>Branch 12=10.0.0.1</code> names a site. Each entry is reported as added, a duplicate, or invalid with the reason.</li>
 <li>🧪 <strong>Manual Testing Playbook</strong>:<div class="tw"><table><thead>
 <tr>
@@ -1425,8 +1425,8 @@ flutter run -d chrome --dart-define=PINGLE_API_BASE_URL=http://localhost:18080
 </li>
 <li>⚙️ <strong>Developer Guide &amp; Release Confidence</strong>:
 <ul>
-<li>Policy: <code>pinglego/pkg/common/probeguard/ProbeGuardPolicy.go</code> — every address a name resolves to is checked, and one refused address refuses them all; IPv4-mapped IPv6 is judged as IPv4.</li>
-<li>Coverage: <code>pinglego/pkg/dnssitemicroservice/**</code>, <code>pinglego/pkg/common/probeguard/</code>, <code>pingleflutter/test/dns_site_screen_test.dart</code>.</li>
+<li>Policy: <code>packetpulsego/pkg/common/probeguard/ProbeGuardPolicy.go</code> — every address a name resolves to is checked, and one refused address refuses them all; IPv4-mapped IPv6 is judged as IPv4.</li>
+<li>Coverage: <code>packetpulsego/pkg/dnssitemicroservice/**</code>, <code>packetpulsego/pkg/common/probeguard/</code>, <code>packetpulseflutter/test/dns_site_screen_test.dart</code>.</li>
 <li>⚠️ <strong>TRAP</strong> — a licence carries a <strong>site limit</strong> (shown on the Platform console), but adding or importing sites does not check it yet. Do not file a site count above the limit as a regression; it is a known gap.</li>
 </ul>
 </li>
@@ -1473,7 +1473,7 @@ flutter run -d chrome --dart-define=PINGLE_API_BASE_URL=http://localhost:18080
 <td>Engineer</td>
 <td>The PDF is evidence</td>
 <td><strong>Export PDF</strong></td>
-<td>Named <code>pingle-&lt;TT&gt;-&lt;UTC time&gt;.pdf</code>; Customer ID, TT, UTC timestamps, Jitter and MOS columns, average loss and jitter cards; a long IPv6 address wraps onto two lines. 🛑 <strong>Must NOT</strong> truncate an address</td>
+<td>Named <code>packetpulse-&lt;TT&gt;-&lt;UTC time&gt;.pdf</code>; Customer ID, TT, UTC timestamps, Jitter and MOS columns, average loss and jitter cards; a long IPv6 address wraps onto two lines. 🛑 <strong>Must NOT</strong> truncate an address</td>
 </tr>
 <tr>
 <td><code>DIAG-005</code></td>
@@ -1508,10 +1508,10 @@ flutter run -d chrome --dart-define=PINGLE_API_BASE_URL=http://localhost:18080
 </li>
 <li>⚙️ <strong>Developer Guide &amp; Release Confidence</strong>:
 <ul>
-<li>Engine: <code>pinglego/pkg/pingmicroservice/pingprobe/PingProbeRunner.go</code> (pro-bing, unprivileged ICMP, TCP fallback); jitter: <code>pinglego/pkg/pingmicroservice/pingprobe/PingVoiceQuality.go</code> (<code>InterarrivalJitter</code>, RFC 3550).</li>
+<li>Engine: <code>packetpulsego/pkg/pingmicroservice/pingprobe/PingProbeRunner.go</code> (pro-bing, unprivileged ICMP, TCP fallback); jitter: <code>packetpulsego/pkg/pingmicroservice/pingprobe/PingVoiceQuality.go</code> (<code>InterarrivalJitter</code>, RFC 3550).</li>
 <li>🔒 Results are saved under their <strong>own</strong> deadline, never the sweep's or the trace's: a traced sweep that runs long still stores everything it measured (<code>load</code> suite §4.5 proves it, and goes red with the old bug restored).</li>
-<li>Ticket figures (<code>avg_loss_pct</code>, <code>max_loss_pct</code>, <code>avg_jitter_ms</code>) are computed in <code>RequestFinish</code> from the run's counted results (<code>pinglego/pkg/common/dbclient/migrations/0022_2026_10_03_loss_and_jitter.sql</code>).</li>
-<li>Coverage: <code>pinglego/pkg/diagnosticmicroservice/**</code>, <code>pinglego/pkg/pingmicroservice/**</code>, <code>pingleflutter/test/diagnostic_submit_screen_test.dart</code>, the <code>tenancy</code> and <code>contract</code> suites.</li>
+<li>Ticket figures (<code>avg_loss_pct</code>, <code>max_loss_pct</code>, <code>avg_jitter_ms</code>) are computed in <code>RequestFinish</code> from the run's counted results (<code>packetpulsego/pkg/common/dbclient/migrations/0022_2026_10_03_loss_and_jitter.sql</code>).</li>
+<li>Coverage: <code>packetpulsego/pkg/diagnosticmicroservice/**</code>, <code>packetpulsego/pkg/pingmicroservice/**</code>, <code>packetpulseflutter/test/diagnostic_submit_screen_test.dart</code>, the <code>tenancy</code> and <code>contract</code> suites.</li>
 </ul>
 </li>
 </ul>
@@ -1519,7 +1519,7 @@ flutter run -d chrome --dart-define=PINGLE_API_BASE_URL=http://localhost:18080
 <h3 id="33-ipv4-and-ipv6">3.3 🌍 IPv4 and IPv6<a class="anchor" href="#33-ipv4-and-ipv6" aria-label="Link to this section">#</a></h3>
 <p><strong>Where:</strong> every result list, the PDF, the SLA report, the Results API and the CSV</p>
 <ul>
-<li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: A site healthy over IPv4 and dark over IPv6 is a real, common, hard-to-prove fault. Pingle measures both, side by side, without letting an IPv6 problem the customer did not buy an SLA for change their availability figure.</li>
+<li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: A site healthy over IPv4 and dark over IPv6 is a real, common, hard-to-prove fault. PacketPulse measures both, side by side, without letting an IPv6 problem the customer did not buy an SLA for change their availability figure.</li>
 <li>📖 <strong>User Guide &amp; Operational Flow</strong>: A dual-stack site has two rows. The IPv6 one carries a <strong>not counted</strong> tag (hover for why). The PDF marks it <code>icmp v6 *</code> with a footnote; the SLA report lists <code>(v6)</code> lines separately and <code>(v6*)</code> for report-only ones.</li>
 <li>🧪 <strong>Manual Testing Playbook</strong>:<div class="tw"><table><thead>
 <tr>
@@ -1571,9 +1571,9 @@ flutter run -d chrome --dart-define=PINGLE_API_BASE_URL=http://localhost:18080
 </li>
 <li>⚙️ <strong>Developer Guide &amp; Release Confidence</strong>:
 <ul>
-<li><code>ping_result.ip_version</code> (4, 6 or NULL when nothing was probed) and <code>report_only</code>; the daily rollup is keyed by family (<code>pinglego/pkg/common/dbclient/migrations/0023_2026_10_04_dual_stack_results.sql</code>).</li>
+<li><code>ping_result.ip_version</code> (4, 6 or NULL when nothing was probed) and <code>report_only</code>; the daily rollup is keyed by family (<code>packetpulsego/pkg/common/dbclient/migrations/0023_2026_10_04_dual_stack_results.sql</code>).</li>
 <li><code>probeguard.ResolveAllAndCheck</code> returns one checked address per family; the runner probes them in parallel and marks IPv6 report-only only when there is more than one family.</li>
-<li>ICMPv6 Time Exceeded parsing walks extension headers (<code>quotedSequenceIPv6</code> in <code>pinglego/pkg/pingmicroservice/pingprobe/PingTraceRunner.go</code>).</li>
+<li>ICMPv6 Time Exceeded parsing walks extension headers (<code>quotedSequenceIPv6</code> in <code>packetpulsego/pkg/pingmicroservice/pingprobe/PingTraceRunner.go</code>).</li>
 </ul>
 </li>
 </ul>
@@ -1582,7 +1582,7 @@ flutter run -d chrome --dart-define=PINGLE_API_BASE_URL=http://localhost:18080
 <p><strong>Where:</strong> <strong>Export CSV</strong> on every result · <strong>Route:</strong> <code>GET /diagnostic/{requestId}/report.csv</code> · <strong>Capability:</strong> <code>report_export</code></p>
 <ul>
 <li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: The same results, in the columns an IT system imports, in one click — and safe to open: a site name typed as a spreadsheet formula is written as text, so an export can never run code on someone else's desk.</li>
-<li>📖 <strong>User Guide &amp; Operational Flow</strong>: <strong>Export CSV</strong> saves <code>pingle-&lt;TT&gt;-&lt;UTC time&gt;.csv</code> beside the PDF of the same ticket. One row per site and family; empty cells (not zeros) where a probe had no reply.</li>
+<li>📖 <strong>User Guide &amp; Operational Flow</strong>: <strong>Export CSV</strong> saves <code>packetpulse-&lt;TT&gt;-&lt;UTC time&gt;.csv</code> beside the PDF of the same ticket. One row per site and family; empty cells (not zeros) where a probe had no reply.</li>
 <li>🧪 <strong>Manual Testing Playbook</strong>:<div class="tw"><table><thead>
 <tr>
 <th>ID</th>
@@ -1598,7 +1598,7 @@ flutter run -d chrome --dart-define=PINGLE_API_BASE_URL=http://localhost:18080
 <td>Engineer</td>
 <td>The file has the contracted header</td>
 <td><strong>Export CSV</strong>; open it</td>
-<td>Header exactly as in <code>pingletest/contracts/result_export_columns.json</code>, <code>result_id</code> first; times in UTC (<code>…Z</code>); an unreachable row has empty round-trip cells</td>
+<td>Header exactly as in <code>packetpulsetest/contracts/result_export_columns.json</code>, <code>result_id</code> first; times in UTC (<code>…Z</code>); an unreachable row has empty round-trip cells</td>
 </tr>
 <tr>
 <td><code>CSV-002</code></td>
@@ -1633,8 +1633,8 @@ flutter run -d chrome --dart-define=PINGLE_API_BASE_URL=http://localhost:18080
 </li>
 <li>⚙️ <strong>Developer Guide &amp; Release Confidence</strong>:
 <ul>
-<li>One writer for every CSV: <code>pinglego/pkg/diagnosticmicroservice/diagnosticexport/DiagnosticExport.go</code>; one projection and scanner: <code>pinglego/pkg/diagnosticmicroservice/diagnosticdomain/repository/DiagnosticExportPostgres.go</code> (the run's organisation must match the ticket's).</li>
-<li>The browser download is <code>text/csv</code> (<code>pingleflutter/lib/common/services/PingleFileSaverWeb.dart</code>); desktop and phone use the share sheet.</li>
+<li>One writer for every CSV: <code>packetpulsego/pkg/diagnosticmicroservice/diagnosticexport/DiagnosticExport.go</code>; one projection and scanner: <code>packetpulsego/pkg/diagnosticmicroservice/diagnosticdomain/repository/DiagnosticExportPostgres.go</code> (the run's organisation must match the ticket's).</li>
+<li>The browser download is <code>text/csv</code> (<code>packetpulseflutter/lib/common/services/PacketPulseFileSaverWeb.dart</code>); desktop and phone use the share sheet.</li>
 </ul>
 </li>
 </ul>
@@ -1687,14 +1687,14 @@ flutter run -d chrome --dart-define=PINGLE_API_BASE_URL=http://localhost:18080
 </li>
 <li>⚙️ <strong>Developer Guide &amp; Release Confidence</strong>:
 <ul>
-<li>Row figures: <code>pingleflutter/lib/diagnosticmicroservice/presentation/widgets/DiagnosticFigures.dart</code>.</li>
-<li>Coverage: <code>pingleflutter/test/diagnostic_history_screen_test.dart</code>, <code>pingleflutter/test/dashboard_screen_test.dart</code>.</li>
+<li>Row figures: <code>packetpulseflutter/lib/diagnosticmicroservice/presentation/widgets/DiagnosticFigures.dart</code>.</li>
+<li>Coverage: <code>packetpulseflutter/test/diagnostic_history_screen_test.dart</code>, <code>packetpulseflutter/test/dashboard_screen_test.dart</code>.</li>
 </ul>
 </li>
 </ul>
 <hr>
 <h2 id="group-4-the-customers-side">Group 4 — The Customer's Side<a class="anchor" href="#group-4-the-customers-side" aria-label="Link to this section">#</a></h2>
-<p>Measuring from where the person is, not from where Pingle is.</p>
+<p>Measuring from where the person is, not from where PacketPulse is.</p>
 <hr>
 <h3 id="41-test-from-this-device">4.1 📱 Test from this device<a class="anchor" href="#41-test-from-this-device" aria-label="Link to this section">#</a></h3>
 <p><strong>Screen:</strong> Operate → <strong>Test from this device</strong> · <strong>Routes:</strong> <code>GET /organisation/settings</code>, <code>PUT /organisation/settings</code> (<code>staff_manage</code>), <code>POST /diagnostic/clientobservation</code> (<code>diagnostic_run</code>, licensed)</p>
@@ -1780,9 +1780,9 @@ flutter run -d chrome --dart-define=PINGLE_API_BASE_URL=http://localhost:18080
 <li>⚙️ <strong>Developer Guide &amp; Release Confidence</strong>:
 <ul>
 <li>A browser cannot send ICMP, so the web build measures DNS-over-HTTPS (Cloudflare) or an HTTPS reach to the chosen host; the app on a desktop or phone can also ping it. Jitter is RFC 3550 with the standard deviation beside it.</li>
-<li>Target normalisation (pasted URL → host, lower case, canonical IPs, zones refused): <code>NormaliseTestTarget</code> in <code>pinglego/pkg/staffmicroservice/staffservice/StaffCheckinService.go</code>.</li>
-<li>Speed: <code>pingleflutter/lib/diagnosticmicroservice/service/ClientThroughput.dart</code> (Cloudflare <code>__down</code>/<code>__up</code>, median after a warm-up); egress: <code>pingleflutter/lib/diagnosticmicroservice/service/ClientEgress.dart</code>.</li>
-<li>Coverage: <code>pingleflutter/test/client_probe_screen_test.dart</code>, <code>pingleflutter/test/client_probe_run_test.dart</code>, <code>pingleflutter/test/client_throughput_test.dart</code>, <code>pingleflutter/test/client_egress_test.dart</code>.</li>
+<li>Target normalisation (pasted URL → host, lower case, canonical IPs, zones refused): <code>NormaliseTestTarget</code> in <code>packetpulsego/pkg/staffmicroservice/staffservice/StaffCheckinService.go</code>.</li>
+<li>Speed: <code>packetpulseflutter/lib/diagnosticmicroservice/service/ClientThroughput.dart</code> (Cloudflare <code>__down</code>/<code>__up</code>, median after a warm-up); egress: <code>packetpulseflutter/lib/diagnosticmicroservice/service/ClientEgress.dart</code>.</li>
+<li>Coverage: <code>packetpulseflutter/test/client_probe_screen_test.dart</code>, <code>packetpulseflutter/test/client_probe_run_test.dart</code>, <code>packetpulseflutter/test/client_throughput_test.dart</code>, <code>packetpulseflutter/test/client_egress_test.dart</code>.</li>
 </ul>
 </li>
 </ul>
@@ -1881,7 +1881,7 @@ flutter run -d chrome --dart-define=PINGLE_API_BASE_URL=http://localhost:18080
 <td><code>MON-010</code></td>
 <td>Tester</td>
 <td>The guard suite</td>
-<td><code>./pingletest.sh monitor</code></td>
+<td><code>./packetpulsetest.sh monitor</code></td>
 <td>Passes — grading, damping, recovery and maintenance against a live server</td>
 </tr>
 </tbody>
@@ -1889,10 +1889,10 @@ flutter run -d chrome --dart-define=PINGLE_API_BASE_URL=http://localhost:18080
 </li>
 <li>⚙️ <strong>Developer Guide &amp; Release Confidence</strong>:
 <ul>
-<li>Damping: <code>DecideAlert</code> in <code>pinglego/pkg/monitormicroservice/monitordomain/shared/</code> (consecutive breaches, cooldown, escalation); runner: <code>pinglego/pkg/monitormicroservice/monitorservice/MonitorScheduleRunner.go</code> (claims due schedules with <code>FOR UPDATE SKIP LOCKED</code>).</li>
-<li>Results are partitioned by month and rolled up daily per site <strong>and family</strong> (<code>pinglego/pkg/common/dbclient/migrations/0012_2026_10_01_result_partitioning_and_retention.sql</code>, <code>0023</code>); the retention runner keeps partitions three months ahead.</li>
+<li>Damping: <code>DecideAlert</code> in <code>packetpulsego/pkg/monitormicroservice/monitordomain/shared/</code> (consecutive breaches, cooldown, escalation); runner: <code>packetpulsego/pkg/monitormicroservice/monitorservice/MonitorScheduleRunner.go</code> (claims due schedules with <code>FOR UPDATE SKIP LOCKED</code>).</li>
+<li>Results are partitioned by month and rolled up daily per site <strong>and family</strong> (<code>packetpulsego/pkg/common/dbclient/migrations/0012_2026_10_01_result_partitioning_and_retention.sql</code>, <code>0023</code>); the retention runner keeps partitions three months ahead.</li>
 <li>🔒 Report-only IPv6 never enters availability (<code>NOT report_only</code> in the rollup and the SLA queries).</li>
-<li>Coverage: <code>pingletest/golang/monitorconformance/</code>, <code>pinglego/pkg/monitormicroservice/**</code>, <code>pingleflutter/test/monitor_screen_test.dart</code>, <code>pingleflutter/test/monitor_flows_test.dart</code>.</li>
+<li>Coverage: <code>packetpulsetest/golang/monitorconformance/</code>, <code>packetpulsego/pkg/monitormicroservice/**</code>, <code>packetpulseflutter/test/monitor_screen_test.dart</code>, <code>packetpulseflutter/test/monitor_flows_test.dart</code>.</li>
 </ul>
 </li>
 </ul>
@@ -1962,9 +1962,9 @@ flutter run -d chrome --dart-define=PINGLE_API_BASE_URL=http://localhost:18080
 </li>
 <li>⚙️ <strong>Developer Guide &amp; Release Confidence</strong>:
 <ul>
-<li><code>pinglego/pkg/common/apikeyauth/</code>; the organisation comes from the key, never from the request.</li>
+<li><code>packetpulsego/pkg/common/apikeyauth/</code>; the organisation comes from the key, never from the request.</li>
 <li>The bulk pull <strong>streams</strong>; a failure after rows have gone out aborts the response rather than ending a short file a system would take as whole.</li>
-<li>Coverage: <code>pingletest/golang/apicontract/results_api_test.go</code>, <code>pingletest/golang/apicontract/result_export_test.go</code>, <code>pinglego/pkg/diagnosticmicroservice/diagnosticapp/</code>.</li>
+<li>Coverage: <code>packetpulsetest/golang/apicontract/results_api_test.go</code>, <code>packetpulsetest/golang/apicontract/result_export_test.go</code>, <code>packetpulsego/pkg/diagnosticmicroservice/diagnosticapp/</code>.</li>
 </ul>
 </li>
 </ul>
@@ -2032,7 +2032,7 @@ flutter run -d chrome --dart-define=PINGLE_API_BASE_URL=http://localhost:18080
 <td>Administrator</td>
 <td>A delivery lands whole</td>
 <td>Switched on, every 15 minutes, a diagnostic run after saving; wait for the interval</td>
-<td><code>pingle-results-&lt;from&gt;-&lt;to&gt;.csv</code> in the folder (written as <code>.part</code>, renamed when whole); the card says <em>Sent … with N results</em></td>
+<td><code>packetpulse-results-&lt;from&gt;-&lt;to&gt;.csv</code> in the folder (written as <code>.part</code>, renamed when whole); the card says <em>Sent … with N results</em></td>
 </tr>
 <tr>
 <td><code>EXP-007</code></td>
@@ -2051,9 +2051,9 @@ flutter run -d chrome --dart-define=PINGLE_API_BASE_URL=http://localhost:18080
 <tr>
 <td><code>EXP-009</code></td>
 <td>Administrator</td>
-<td>Pingle's own host is not a destination</td>
+<td>PacketPulse's own host is not a destination</td>
 <td>Server <code>127.0.0.1</code>, <code>localhost</code>, <code>169.254.169.254</code> or <code>::1</code>; <strong>Test connection</strong></td>
-<td>Refused against <strong>Server</strong>: <em>Pingle may not connect to that address.</em></td>
+<td>Refused against <strong>Server</strong>: <em>PacketPulse may not connect to that address.</em></td>
 </tr>
 <tr>
 <td><code>EXP-010</code></td>
@@ -2081,11 +2081,11 @@ flutter run -d chrome --dart-define=PINGLE_API_BASE_URL=http://localhost:18080
 </li>
 <li>⚙️ <strong>Developer Guide &amp; Release Confidence</strong>:
 <ul>
-<li><code>pinglego/pkg/exportmicroservice/</code> (target, test, runner each minute); transport: <code>pinglego/pkg/common/filedrop/FileDrop.go</code> (SFTP via <code>pkg/sftp</code>, FTP/FTPS via <code>jlaffaye/ftp</code>).</li>
+<li><code>packetpulsego/pkg/exportmicroservice/</code> (target, test, runner each minute); transport: <code>packetpulsego/pkg/common/filedrop/FileDrop.go</code> (SFTP via <code>pkg/sftp</code>, FTP/FTPS via <code>jlaffaye/ftp</code>).</li>
 <li>🔒 Every connection — the FTP <strong>data</strong> connection included — is made by <code>probeguard.Dialer</code>, whose <code>Control</code> hook checks the resolved address before connecting. A dial <em>function</em> would have made the FTP library send FTPS data unencrypted.</li>
 <li>The watermark (<code>exported_through</code>) moves only on a delivery, and only from where the run found it; a run catches up a day per file; the last two minutes are left to settle.</li>
-<li><code>EXPORT_ALLOW_LOOPBACK</code> permits a server on Pingle's own host for development; production refuses to boot with it.</li>
-<li>Coverage: <code>pinglego/pkg/common/filedrop/</code> (in-process SFTP and FTP/FTPS servers), <code>pinglego/pkg/exportmicroservice/**</code>, <code>pingleflutter/test/result_export_screen_test.dart</code>, <code>pingletest/golang/apicontract/result_export_test.go</code>.</li>
+<li><code>EXPORT_ALLOW_LOOPBACK</code> permits a server on PacketPulse's own host for development; production refuses to boot with it.</li>
+<li>Coverage: <code>packetpulsego/pkg/common/filedrop/</code> (in-process SFTP and FTP/FTPS servers), <code>packetpulsego/pkg/exportmicroservice/**</code>, <code>packetpulseflutter/test/result_export_screen_test.dart</code>, <code>packetpulsetest/golang/apicontract/result_export_test.go</code>.</li>
 </ul>
 </li>
 </ul>
@@ -2093,7 +2093,7 @@ flutter run -d chrome --dart-define=PINGLE_API_BASE_URL=http://localhost:18080
 <h3 id="63-directory">6.3 🏢 Directory<a class="anchor" href="#63-directory" aria-label="Link to this section">#</a></h3>
 <p><strong>Screen:</strong> Configure → <strong>Directory</strong> · <strong>Routes:</strong> <code>GET/PUT /ldap/config</code>, <code>POST /ldap/config/test</code>, <code>/ldap/groupmap/*</code> · <strong>Capability:</strong> <code>ldap_manage</code></p>
 <ul>
-<li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: Staff sign in with their existing network password over LDAP or Active Directory, and their directory group decides their Pingle role — after the second step, so a directory password alone still opens nothing. The owner always keeps a local password, so a directory outage cannot lock out the person who fixes it.</li>
+<li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: Staff sign in with their existing network password over LDAP or Active Directory, and their directory group decides their PacketPulse role — after the second step, so a directory password alone still opens nothing. The owner always keeps a local password, so a directory outage cannot lock out the person who fixes it.</li>
 <li>📖 <strong>User Guide &amp; Operational Flow</strong>: Host and port (389 LDAP/StartTLS, 636 LDAPS), encryption, the CA certificate of your own authority, a read-only bind account, the base DN; then <strong>Test connection</strong> before enabling. <strong>Group mappings</strong> give each directory group a role.</li>
 <li>🧪 <strong>Manual Testing Playbook</strong>:<div class="tw"><table><thead>
 <tr>
@@ -2138,14 +2138,14 @@ flutter run -d chrome --dart-define=PINGLE_API_BASE_URL=http://localhost:18080
 </li>
 <li>⚙️ <strong>Developer Guide &amp; Release Confidence</strong>:
 <ul>
-<li><code>pinglego/pkg/common/ldapclient/</code>, <code>pinglego/pkg/ldapmicroservice/</code>; the bind password is sealed like every secret; the directory is dialled through the directory policy (private yes; loopback only with <code>LDAP_ALLOW_LOOPBACK</code>, refused in production).</li>
-<li>Coverage: <code>pinglego/pkg/common/ldaptest/</code> (an in-process directory), <code>pingleflutter/test/ldap_settings_screen_test.dart</code>.</li>
+<li><code>packetpulsego/pkg/common/ldapclient/</code>, <code>packetpulsego/pkg/ldapmicroservice/</code>; the bind password is sealed like every secret; the directory is dialled through the directory policy (private yes; loopback only with <code>LDAP_ALLOW_LOOPBACK</code>, refused in production).</li>
+<li>Coverage: <code>packetpulsego/pkg/common/ldaptest/</code> (an in-process directory), <code>packetpulseflutter/test/ldap_settings_screen_test.dart</code>.</li>
 </ul>
 </li>
 </ul>
 <hr>
 <h2 id="group-7-platform-and-settings">Group 7 — Platform and Settings<a class="anchor" href="#group-7-platform-and-settings" aria-label="Link to this section">#</a></h2>
-<p>The operator of Pingle itself, each person's own settings, and the public face.</p>
+<p>The operator of PacketPulse itself, each person's own settings, and the public face.</p>
 <hr>
 <h3 id="71-platform-console-and-licences">7.1 🏛️ Platform console and licences<a class="anchor" href="#71-platform-console-and-licences" aria-label="Link to this section">#</a></h3>
 <p><strong>Screen:</strong> Administer → <strong>Platform</strong> (superuser only) · <strong>Routes:</strong> <code>/platform/*</code> · <strong>Access:</strong> platform superuser</p>
@@ -2209,8 +2209,8 @@ flutter run -d chrome --dart-define=PINGLE_API_BASE_URL=http://localhost:18080
 </li>
 <li>⚙️ <strong>Developer Guide &amp; Release Confidence</strong>:
 <ul>
-<li><code>pinglego/pkg/platformmicroservice/</code>; <code>pingleaccess.RequireSuperUser</code> on the console group (Appendix A); licence changes recorded in the licence history and the activity trail.</li>
-<li>Coverage: <code>pingletest/golang/tenancyassignment/</code>, <code>pinglego/pkg/platformmicroservice/**</code>, <code>pingleflutter/test/platform_console_screen_test.dart</code>.</li>
+<li><code>packetpulsego/pkg/platformmicroservice/</code>; <code>packetpulseaccess.RequireSuperUser</code> on the console group (Appendix A); licence changes recorded in the licence history and the activity trail.</li>
+<li>Coverage: <code>packetpulsetest/golang/tenancyassignment/</code>, <code>packetpulsego/pkg/platformmicroservice/**</code>, <code>packetpulseflutter/test/platform_console_screen_test.dart</code>.</li>
 </ul>
 </li>
 </ul>
@@ -2219,7 +2219,7 @@ flutter run -d chrome --dart-define=PINGLE_API_BASE_URL=http://localhost:18080
 <p><strong>Screen:</strong> Administer → <strong>Settings</strong> · <strong>Routes:</strong> <code>POST /user/appearance</code>, <code>POST /user/password</code></p>
 <ul>
 <li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: Five themes in light and dark — including a warm, low-blue-light theme for night shifts and a high-contrast one — every one contrast-checked, with status colours that never change meaning. They follow the person, not the device.</li>
-<li>📖 <strong>User Guide &amp; Operational Flow</strong>: Light, dark or follow the device; theme; density; reduce motion; change password. Pingle is in English; there is no language choice.</li>
+<li>📖 <strong>User Guide &amp; Operational Flow</strong>: Light, dark or follow the device; theme; density; reduce motion; change password. PacketPulse is in English; there is no language choice. The same light / dark and appearance controls are on the sign-in screen, where they are remembered on that device until someone signs in.</li>
 <li>🧪 <strong>Manual Testing Playbook</strong>:<div class="tw"><table><thead>
 <tr>
 <th>ID</th>
@@ -2258,22 +2258,29 @@ flutter run -d chrome --dart-define=PINGLE_API_BASE_URL=http://localhost:18080
 <td>Change it; sign out; sign in with the old, then the new</td>
 <td>Old refused, new accepted (then the second step)</td>
 </tr>
+<tr>
+<td><code>SET-005</code></td>
+<td>Visitor</td>
+<td>Appearance before signing in</td>
+<td>Signed out, use the sun/moon button and the palette on the sign-in screen (desk and phone width); reload; then sign in to an account set to another mode, and sign out</td>
+<td>Each choice applies at once and survives the reload, with no request to <code>/user/appearance</code>. After sign-in the <strong>account's</strong> appearance is worn; after sign-out the sign-in screen keeps it. 🛑 <strong>Must NOT</strong> snap back to dark on sign-out, or save a signed-out choice to anyone's account</td>
+</tr>
 </tbody>
 </table></div>
 </li>
 <li>⚙️ <strong>Developer Guide &amp; Release Confidence</strong>:
 <ul>
-<li>Strings: <code>scripts/intellicodegen/pinglestrings.py</code> generates the Go catalogue and the Dart index; entries are positional, so retired ones stay in <code>DEPRECATED</code>. Help: <code>pinglego/pkg/initmicroservice/initconstants/PingleHelp.go</code>.</li>
-<li>Coverage: <code>pingleflutter/test/settings_screen_test.dart</code>, the <code>translation</code> suite.</li>
+<li>Strings: <code>scripts/intellicodegen/packetpulsestrings.py</code> generates the Go catalogue and the Dart index; entries are positional, so retired ones stay in <code>DEPRECATED</code>. Help: <code>packetpulsego/pkg/initmicroservice/initconstants/PacketPulseHelp.go</code>.</li>
+<li>Coverage: <code>packetpulseflutter/test/settings_screen_test.dart</code>, the <code>translation</code> suite. Signed-out appearance: <code>packetpulseflutter/lib/common/services/PacketPulseAppearanceStore.dart</code>, tested in <code>packetpulseflutter/test/app_test.dart</code> and <code>packetpulseflutter/test/sign_in_test.dart</code>.</li>
 </ul>
 </li>
 </ul>
 <hr>
 <h3 id="73-public-site-and-self-test">7.3 🌐 Public site and self-test<a class="anchor" href="#73-public-site-and-self-test" aria-label="Link to this section">#</a></h3>
-<p><strong>Pages:</strong> <code>https://pingle.rummaan53.com/</code> and <code>/selftest.html</code> (<code>pingleweb/</code>)</p>
+<p><strong>Pages:</strong> <code>https://packetpulse.rummaan53.com/</code> and <code>/selftest.html</code> (<code>packetpulseweb/</code>)</p>
 <ul>
 <li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: The product site says only what the product does today, and the public self-test lets a prospect measure their own connection in the browser before talking to anyone.</li>
-<li>📖 <strong>User Guide &amp; Operational Flow</strong>: <strong>Sign in</strong> opens the app at <code>/app/</code>; <strong>Test my connection</strong> opens the self-test.</li>
+<li>📖 <strong>User Guide &amp; Operational Flow</strong>: <strong>Sign in</strong> opens the app at <code>/app/</code>; <strong>Test my connection</strong> opens the self-test. The sun, moon and screen buttons in the header choose light, dark or match this device; the app's sign-in screen opens in the same choice. On a phone the header keeps the theme switch and <strong>Sign in</strong>, and <strong>Test my connection</strong> is in the footer.</li>
 <li>🧪 <strong>Manual Testing Playbook</strong>:<div class="tw"><table><thead>
 <tr>
 <th>ID</th>
@@ -2305,12 +2312,26 @@ flutter run -d chrome --dart-define=PINGLE_API_BASE_URL=http://localhost:18080
 <td><strong>Test my connection</strong> → run</td>
 <td>Round trips, jitter and loss for each resolver, measured from the visitor's connection</td>
 </tr>
+<tr>
+<td><code>WEB-004</code></td>
+<td>Visitor</td>
+<td>Light, dark or match this device</td>
+<td>Choose <strong>Light</strong> on <code>/</code>; reload; open <code>/selftest.html</code>; then <strong>Sign in</strong>. Choose <strong>Match this device</strong> and switch the computer's own mode</td>
+<td>Light at once, on both pages and on the app's sign-in screen; <em>Match this device</em> follows the computer as it changes. 🛑 <strong>Must NOT</strong> flash dark before a light page paints</td>
+</tr>
+<tr>
+<td><code>WEB-005</code></td>
+<td>Visitor</td>
+<td>The header fits a phone</td>
+<td>Open <code>/</code> at 360 px wide</td>
+<td>Logo, theme switch and <strong>Sign in</strong> on one line, no sideways scrolling</td>
+</tr>
 </tbody>
 </table></div>
 </li>
 <li>⚙️ <strong>Developer Guide &amp; Release Confidence</strong>:
 <ul>
-<li><code>pingleweb/index.html</code>, <code>pingleweb/selftest.html</code>; the probe engine's tests: <code>pingleweb/assets/pingle-probe.test.mjs</code> (part of <code>unit</code>).</li>
+<li><code>packetpulseweb/index.html</code>, <code>packetpulseweb/selftest.html</code>; the probe engine's tests: <code>packetpulseweb/assets/packetpulse-probe.test.mjs</code> (part of <code>unit</code>). The theme switch: <code>packetpulseweb/assets/packetpulse-theme.js</code>, which keeps the mode under the app's own appearance key; its tests, <code>packetpulseweb/assets/packetpulse-theme.test.mjs</code>, are part of <code>unit</code> too.</li>
 <li>The deploy asserts <code>/</code> and <code>/app/</code> differ, so the nginx misroute that once served a blank app is caught by the deploy.</li>
 </ul>
 </li>
@@ -2331,114 +2352,114 @@ flutter run -d chrome --dart-define=PINGLE_API_BASE_URL=http://localhost:18080
 <tr>
 <td>Sign-in, second step</td>
 <td><code>AUTH-*</code></td>
-<td><code>pinglego/pkg/usermicroservice/userservice/</code></td>
+<td><code>packetpulsego/pkg/usermicroservice/userservice/</code></td>
 <td><code>assignment</code>, <code>audit</code></td>
-<td><code>pingleflutter/test/sign_in_test.dart</code></td>
+<td><code>packetpulseflutter/test/sign_in_test.dart</code></td>
 </tr>
 <tr>
 <td>SMS gateway, location rule</td>
 <td><code>SMS-*</code>, <code>LOC-*</code></td>
-<td><code>pinglego/pkg/smsmicroservice/</code>, <code>pinglego/pkg/common/smsprovider/</code></td>
+<td><code>packetpulsego/pkg/smsmicroservice/</code>, <code>packetpulsego/pkg/common/smsprovider/</code></td>
 <td><code>acl</code></td>
-<td><code>pingleflutter/test/sign_in_security_screen_test.dart</code></td>
+<td><code>packetpulseflutter/test/sign_in_security_screen_test.dart</code></td>
 </tr>
 <tr>
 <td>Staff, roles</td>
 <td><code>STF-*</code>, <code>ACL-*</code></td>
-<td><code>pinglego/pkg/staffmicroservice/</code></td>
+<td><code>packetpulsego/pkg/staffmicroservice/</code></td>
 <td><code>acl</code>, <code>tenancy</code></td>
-<td><code>pingleflutter/test/staff_screen_test.dart</code></td>
+<td><code>packetpulseflutter/test/staff_screen_test.dart</code></td>
 </tr>
 <tr>
 <td>Sessions, seats</td>
 <td><code>SEAT-*</code></td>
-<td><code>pinglego/pkg/staffmicroservice/</code></td>
+<td><code>packetpulsego/pkg/staffmicroservice/</code></td>
 <td><code>assignment</code>, <code>tenancy</code></td>
-<td><code>pingleflutter/test/session_screen_test.dart</code></td>
+<td><code>packetpulseflutter/test/session_screen_test.dart</code></td>
 </tr>
 <tr>
 <td>Check-ins</td>
 <td><code>CHK-*</code></td>
-<td><code>pinglego/pkg/common/geocode/</code></td>
+<td><code>packetpulsego/pkg/common/geocode/</code></td>
 <td><code>tenancy</code>, <code>audit</code></td>
-<td><code>pingleflutter/test/checkin_screen_test.dart</code></td>
+<td><code>packetpulseflutter/test/checkin_screen_test.dart</code></td>
 </tr>
 <tr>
 <td>Activity</td>
 <td><code>AUD-*</code></td>
-<td><code>pinglego/pkg/common/auditlog/</code></td>
+<td><code>packetpulsego/pkg/common/auditlog/</code></td>
 <td><code>audit</code></td>
-<td><code>pingleflutter/test/audit_log_screen_test.dart</code></td>
+<td><code>packetpulseflutter/test/audit_log_screen_test.dart</code></td>
 </tr>
 <tr>
 <td>Sites, policy</td>
 <td><code>SITE-*</code></td>
-<td><code>pinglego/pkg/dnssitemicroservice/</code>, <code>pinglego/pkg/common/probeguard/</code></td>
+<td><code>packetpulsego/pkg/dnssitemicroservice/</code>, <code>packetpulsego/pkg/common/probeguard/</code></td>
 <td><code>tenancy</code></td>
-<td><code>pingleflutter/test/dns_site_screen_test.dart</code></td>
+<td><code>packetpulseflutter/test/dns_site_screen_test.dart</code></td>
 </tr>
 <tr>
 <td>Diagnostics, IPv6</td>
 <td><code>DIAG-*</code>, <code>V6-*</code></td>
-<td><code>pinglego/pkg/pingmicroservice/</code>, <code>pinglego/pkg/diagnosticmicroservice/</code></td>
+<td><code>packetpulsego/pkg/pingmicroservice/</code>, <code>packetpulsego/pkg/diagnosticmicroservice/</code></td>
 <td><code>contract</code>, <code>tenancy</code>, <code>load</code></td>
-<td><code>pingleflutter/test/diagnostic_submit_screen_test.dart</code></td>
+<td><code>packetpulseflutter/test/diagnostic_submit_screen_test.dart</code></td>
 </tr>
 <tr>
 <td>CSV</td>
 <td><code>CSV-*</code>, <code>API-003</code></td>
-<td><code>pinglego/pkg/diagnosticmicroservice/diagnosticexport/</code></td>
+<td><code>packetpulsego/pkg/diagnosticmicroservice/diagnosticexport/</code></td>
 <td><code>contract</code>, <code>tenancy</code>, <code>load</code></td>
-<td><code>pingleflutter/test/diagnostic_history_screen_test.dart</code></td>
+<td><code>packetpulseflutter/test/diagnostic_history_screen_test.dart</code></td>
 </tr>
 <tr>
 <td>Device test</td>
 <td><code>DEV-*</code></td>
-<td><code>pinglego/pkg/diagnosticmicroservice/diagnosticservice/</code></td>
+<td><code>packetpulsego/pkg/diagnosticmicroservice/diagnosticservice/</code></td>
 <td><code>contract</code></td>
-<td><code>pingleflutter/test/client_probe_run_test.dart</code></td>
+<td><code>packetpulseflutter/test/client_probe_run_test.dart</code></td>
 </tr>
 <tr>
 <td>Monitoring</td>
 <td><code>MON-*</code></td>
-<td><code>pinglego/pkg/monitormicroservice/</code></td>
+<td><code>packetpulsego/pkg/monitormicroservice/</code></td>
 <td><code>monitor</code></td>
-<td><code>pingleflutter/test/monitor_flows_test.dart</code></td>
+<td><code>packetpulseflutter/test/monitor_flows_test.dart</code></td>
 </tr>
 <tr>
 <td>Results API</td>
 <td><code>API-*</code></td>
-<td><code>pinglego/pkg/common/apikeyauth/</code></td>
+<td><code>packetpulsego/pkg/common/apikeyauth/</code></td>
 <td><code>contract</code>, <code>tenancy</code></td>
-<td><code>pingleflutter/test/api_key_screen_test.dart</code></td>
+<td><code>packetpulseflutter/test/api_key_screen_test.dart</code></td>
 </tr>
 <tr>
 <td>Result export</td>
 <td><code>EXP-*</code></td>
-<td><code>pinglego/pkg/common/filedrop/</code>, <code>pinglego/pkg/exportmicroservice/</code></td>
+<td><code>packetpulsego/pkg/common/filedrop/</code>, <code>packetpulsego/pkg/exportmicroservice/</code></td>
 <td><code>contract</code>, <code>acl</code>, <code>tenancy</code>, <code>audit</code></td>
-<td><code>pingleflutter/test/result_export_screen_test.dart</code></td>
+<td><code>packetpulseflutter/test/result_export_screen_test.dart</code></td>
 </tr>
 <tr>
 <td>Directory</td>
 <td><code>LDAP-*</code></td>
-<td><code>pinglego/pkg/common/ldapclient/</code>, <code>pinglego/pkg/ldapmicroservice/</code></td>
+<td><code>packetpulsego/pkg/common/ldapclient/</code>, <code>packetpulsego/pkg/ldapmicroservice/</code></td>
 <td>—</td>
-<td><code>pingleflutter/test/ldap_settings_screen_test.dart</code></td>
+<td><code>packetpulseflutter/test/ldap_settings_screen_test.dart</code></td>
 </tr>
 <tr>
 <td>Platform</td>
 <td><code>PLAT-*</code></td>
-<td><code>pinglego/pkg/platformmicroservice/</code></td>
+<td><code>packetpulsego/pkg/platformmicroservice/</code></td>
 <td><code>assignment</code></td>
-<td><code>pingleflutter/test/platform_console_screen_test.dart</code></td>
+<td><code>packetpulseflutter/test/platform_console_screen_test.dart</code></td>
 </tr>
 <tr>
 <td>Settings, catalogue</td>
 <td><code>SET-*</code></td>
-<td><code>pinglego/pkg/initmicroservice/</code></td>
+<td><code>packetpulsego/pkg/initmicroservice/</code></td>
 <td><code>translation</code></td>
-<td><code>pingleflutter/test/settings_screen_test.dart</code></td>
+<td><code>packetpulseflutter/test/settings_screen_test.dart</code></td>
 </tr>
 </tbody>
 </table></div>
@@ -2632,11 +2653,11 @@ flutter run -d chrome --dart-define=PINGLE_API_BASE_URL=http://localhost:18080
 <tr>
 <td><code>NFR-013</code></td>
 <td>Tenancy, for every id-taking route</td>
-<td>RIVAL's id answers 404 or an empty list — <code>./pingletest.sh tenancy</code></td>
+<td>RIVAL's id answers 404 or an empty list — <code>./packetpulsetest.sh tenancy</code></td>
 </tr>
 <tr>
 <td><code>NFR-014</code></td>
-<td>The destination policy, everywhere Pingle connects out</td>
+<td>The destination policy, everywhere PacketPulse connects out</td>
 <td>Sweeps, traceroutes, webhooks, the directory and the result export all refuse loopback, link-local and cloud metadata</td>
 </tr>
 <tr>
@@ -2662,7 +2683,7 @@ flutter run -d chrome --dart-define=PINGLE_API_BASE_URL=http://localhost:18080
 </tbody>
 </table></div>
 <h2 id="45-performance-the-load-suite">4.5 Performance — the load suite<a class="anchor" href="#45-performance-the-load-suite" aria-label="Link to this section">#</a></h2>
-<p><code>./pingletest.sh load</code> provisions one licensed organisation — the owner and nineteen engineers, each with an authenticator, and 200 sites on TEST-NET-3 — and measures it. It also runs nightly (<code>.github/workflows/pingle-load.yml</code>). Budgets are 95th percentiles; the measured figures are from a developer laptop against a local server.</p>
+<p><code>./packetpulsetest.sh load</code> provisions one licensed organisation — the owner and nineteen engineers, each with an authenticator, and 200 sites on TEST-NET-3 — and measures it. It also runs nightly (<code>.github/workflows/packetpulse-load.yml</code>). Budgets are 95th percentiles; the measured figures are from a developer laptop against a local server.</p>
 <div class="tw"><table><thead>
 <tr>
 <th>Scenario</th>
@@ -2714,10 +2735,10 @@ flutter run -d chrome --dart-define=PINGLE_API_BASE_URL=http://localhost:18080
 <p>How a release is judged ready, shipped, checked and — if it must be — rolled back.</p>
 <h2 id="51-the-automated-gate">5.1 The automated gate<a class="anchor" href="#51-the-automated-gate" aria-label="Link to this section">#</a></h2>
 <p>A release candidate passes all of these, with <strong>no skips</strong>, before anything ships:</p>
-<pre class="code"><code>PINGLE_TEST_URL=http://localhost:18080 PINGLE_TEST_REQUIRE_SUPERUSER=1 ./pingletest.sh
-./pingletest.sh load          # before a release that touches sweeps, sign-in or exports
+<pre class="code"><code>PACKETPULSE_TEST_URL=http://localhost:18080 PACKETPULSE_TEST_REQUIRE_SUPERUSER=1 ./packetpulsetest.sh
+./packetpulsetest.sh load          # before a release that touches sweeps, sign-in or exports
 </code></pre>
-<p><code>./pingletest.sh</code> runs <code>tenancy assignment acl audit translation contract monitor unit client backup docs</code>. Coverage floors are a ratchet (<code>scripts/PingleCoverageFloor.py</code>, <code>scripts/PingleFlutterCoverageFloor.py</code>): raised when real coverage rises, never lowered to make a build pass.</p>
+<p><code>./packetpulsetest.sh</code> runs <code>tenancy assignment acl audit translation contract monitor unit client backup docs</code>. Coverage floors are a ratchet (<code>scripts/PacketPulseCoverageFloor.py</code>, <code>scripts/PacketPulseFlutterCoverageFloor.py</code>): raised when real coverage rises, never lowered to make a build pass.</p>
 <h2 id="52-what-blocks-a-release">5.2 What blocks a release<a class="anchor" href="#52-what-blocks-a-release" aria-label="Link to this section">#</a></h2>
 <div class="tw"><table><thead>
 <tr>
@@ -2755,7 +2776,7 @@ flutter run -d chrome --dart-define=PINGLE_API_BASE_URL=http://localhost:18080
 <tbody>
 <tr>
 <td><code>REL-001</code></td>
-<td><code>./pingletest.sh</code> green with no skips, on the commit being shipped</td>
+<td><code>./packetpulsetest.sh</code> green with no skips, on the commit being shipped</td>
 <td>QA</td>
 </tr>
 <tr>
@@ -2780,15 +2801,15 @@ flutter run -d chrome --dart-define=PINGLE_API_BASE_URL=http://localhost:18080
 </tr>
 <tr>
 <td><code>REL-006</code></td>
-<td>Public documents (<code>pingleweb/index.html</code>, <code>docs/*.html</code> and their PDFs) promise nothing the release does not do</td>
+<td>Public documents (<code>packetpulseweb/index.html</code>, <code>docs/*.html</code> and their PDFs) promise nothing the release does not do</td>
 <td>Product</td>
 </tr>
 </tbody>
 </table></div>
 <h2 id="54-deploy-and-verify">5.4 Deploy and verify<a class="anchor" href="#54-deploy-and-verify" aria-label="Link to this section">#</a></h2>
-<pre class="code"><code>scripts/deploy/PingleDeploy.sh --host mshop.rummaan53.com
+<pre class="code"><code>scripts/deploy/PacketPulseDeploy.sh --host mshop.rummaan53.com
 </code></pre>
-<p>The script backs the live database up before the new release boots and migrates it. Afterwards:</p>
+<p>The script backs the live database up before the new release boots and migrates it. It does not install the nginx vhost: when <code>scripts/deploy/packetpulse-nginx.conf</code> changes, copy it to <code>/etc/nginx/conf.d/packetpulse.conf</code> on the host, run <code>sudo certbot --nginx -d packetpulse.rummaan53.com --reinstall</code> to put the TLS lines back, then <code>sudo nginx -t</code> and reload. Afterwards:</p>
 <div class="tw"><table><thead>
 <tr>
 <th>ID</th>
@@ -2799,13 +2820,13 @@ flutter run -d chrome --dart-define=PINGLE_API_BASE_URL=http://localhost:18080
 <tbody>
 <tr>
 <td><code>REL-007</code></td>
-<td><code>https://pingle.rummaan53.com/healthz</code> and <code>/readyz</code></td>
+<td><code>https://packetpulse.rummaan53.com/healthz</code> and <code>/readyz</code></td>
 <td>200</td>
 </tr>
 <tr>
 <td><code>REL-008</code></td>
 <td>The live database's newest migration</td>
-<td>The newest file in <code>pinglego/pkg/common/dbclient/migrations/</code></td>
+<td>The newest file in <code>packetpulsego/pkg/common/dbclient/migrations/</code></td>
 </tr>
 <tr>
 <td><code>REL-009</code></td>
@@ -2827,19 +2848,29 @@ flutter run -d chrome --dart-define=PINGLE_API_BASE_URL=http://localhost:18080
 <td><code>/proc/sys/net/ipv4/ping_group_range</code> on the host</td>
 <td><code>0 2147483647</code> — unprivileged ICMP, so sweeps report <code>icmp</code> rather than falling back to TCP</td>
 </tr>
+<tr>
+<td><code>REL-013</code></td>
+<td><code>curl -sI https://packetpulse.rummaan53.com/app/flutter_bootstrap.js</code>, then the <code>main.&lt;hash&gt;.dart.js</code> it names</td>
+<td>The bootstrap: <code>Cache-Control: no-cache</code> and no <code>max-age</code>. The bundle: <code>immutable</code>. 🛑 <strong>Must NOT</strong> cache anything else under <code>/app/</code> - a returning browser then keeps the old client. In October 2026 a seven-day cache kept browsers on a client from before two-step sign-in, which dropped everyone back at sign-in with no message</td>
+</tr>
+<tr>
+<td><code>REL-014</code></td>
+<td><code>curl -sI</code> on <code>/</code>, <code>/app/</code> and <code>/assets/packetpulse-site.css</code></td>
+<td><code>X-Frame-Options: SAMEORIGIN</code> and <code>X-Content-Type-Options: nosniff</code> on each. 🛑 <strong>Must NOT</strong> be missing: an <code>add_header</code> inside a location drops every header set on the server block</td>
+</tr>
 </tbody>
 </table></div>
 <h2 id="55-rollback">5.5 Rollback<a class="anchor" href="#55-rollback" aria-label="Link to this section">#</a></h2>
-<p>Releases live in <code>/opt/pingle/releases/&lt;version&gt;</code>; the last three are kept. To roll back the API, point <code>current</code> at the previous release and restart:</p>
-<pre class="code"><code>ssh mshop.rummaan53.com 'ls -1t /opt/pingle/releases'
-ssh mshop.rummaan53.com 'sudo ln -sfn /opt/pingle/releases/&lt;previous&gt; /opt/pingle/current &amp;&amp; sudo systemctl restart pingle'
+<p>Releases live in <code>/opt/packetpulse/releases/&lt;version&gt;</code>; the last three are kept. To roll back the API, point <code>current</code> at the previous release and restart:</p>
+<pre class="code"><code>ssh mshop.rummaan53.com 'ls -1t /opt/packetpulse/releases'
+ssh mshop.rummaan53.com 'sudo ln -sfn /opt/packetpulse/releases/&lt;previous&gt; /opt/packetpulse/current &amp;&amp; sudo systemctl restart packetpulse'
 </code></pre>
 <div class="alert a-warning"><div class="alert-h">⚠️ WARNING</div><p>⚠️ <strong>TRAP</strong> — migrations run forward only. Rolling the binary back does not roll the schema back; an older binary runs against a newer schema, which is safe only while every migration since added rather than removed. If a migration must be undone, restore the pre-deploy backup taken by the deploy (<code>scripts/deploy/backup/</code>), whose restore drill is part of the <code>backup</code> suite.</p>
 </div>
 <hr>
 <h1 id="appendices">Appendices<a class="anchor" href="#appendices" aria-label="Link to this section">#</a></h1>
 <h2 id="appendix-a-every-api-route">Appendix A — Every API route<a class="anchor" href="#appendix-a-every-api-route" aria-label="Link to this section">#</a></h2>
-<p>All routes are under <code>/api/v1</code>. <strong>Access</strong>: <em>public</em> (no session), <em>session</em> (signed in), <em>member</em> (signed in <strong>and</strong> in an organisation), <em>superuser</em> (the platform operator), <em>api key</em> (a Results API key with <code>read:results</code>). <strong>Licence</strong>: refused while the organisation's licence is suspended, revoked or expired. <strong>Audited</strong>: recorded by the audit middleware from <code>pinglego/pkg/auditlogmicroservice/auditlogconstants/AuditLogRegistry.go</code>; sign-in, sign-out and failed sign-ins are recorded by the user service itself (§2.5). <code>./pingletest.sh docs</code> derives this table from the route handlers and fails if it drifts.</p>
+<p>All routes are under <code>/api/v1</code>. <strong>Access</strong>: <em>public</em> (no session), <em>session</em> (signed in), <em>member</em> (signed in <strong>and</strong> in an organisation), <em>superuser</em> (the platform operator), <em>api key</em> (a Results API key with <code>read:results</code>). <strong>Licence</strong>: refused while the organisation's licence is suspended, revoked or expired. <strong>Audited</strong>: recorded by the audit middleware from <code>packetpulsego/pkg/auditlogmicroservice/auditlogconstants/AuditLogRegistry.go</code>; sign-in, sign-out and failed sign-ins are recorded by the user service itself (§2.5). <code>./packetpulsetest.sh docs</code> derives this table from the route handlers and fails if it drifts.</p>
 <div class="tw"><table><thead>
 <tr>
 <th>Method</th>
@@ -3867,7 +3898,7 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/pingle/releases/&lt;previous&gt; /opt
 </table></div>
 <p>Built-in roles are shared by every organisation and cannot be edited; an organisation adds its own (§2.2). The organisation <strong>owner</strong> and the <strong>platform superuser</strong> are not roles: the owner holds every capability in its organisation, and the superuser none — it administers the platform, not a tenant.</p>
 <h2 id="appendix-c-migrations">Appendix C — Migrations<a class="anchor" href="#appendix-c-migrations" aria-label="Link to this section">#</a></h2>
-<p>Embedded in the server binary and applied in order at boot (<code>pinglego/pkg/common/dbclient/migrations/</code>). They only ever move forward (§5.5).</p>
+<p>Embedded in the server binary and applied in order at boot (<code>packetpulsego/pkg/common/dbclient/migrations/</code>). They only ever move forward (§5.5).</p>
 <div class="tw"><table><thead>
 <tr>
 <th>File</th>
@@ -3877,7 +3908,7 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/pingle/releases/&lt;previous&gt; /opt
 <tbody>
 <tr>
 <td><code>0001_2026_09_30_initial_schema.sql</code></td>
-<td>Pingle initial schema.</td>
+<td>PacketPulse initial schema.</td>
 </tr>
 <tr>
 <td><code>0002_2026_09_30_tenancy_staff_and_access.sql</code></td>
@@ -3974,7 +4005,7 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/pingle/releases/&lt;previous&gt; /opt
 </tbody>
 </table></div>
 <h2 id="appendix-d-settings">Appendix D — Settings<a class="anchor" href="#appendix-d-settings" aria-label="Link to this section">#</a></h2>
-<p>Read from the environment, falling back to <code>.env</code> (see <code>.env.example</code>); defined in <code>pinglego/pkg/common/config/Config.go</code>.</p>
+<p>Read from the environment, falling back to <code>.env</code> (see <code>.env.example</code>); defined in <code>packetpulsego/pkg/common/config/Config.go</code>.</p>
 <div class="tw"><table><thead>
 <tr>
 <th>Setting</th>
@@ -3990,7 +4021,7 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/pingle/releases/&lt;previous&gt; /opt
 </tr>
 <tr>
 <td><code>APP_NAME</code></td>
-<td><code>Pingle</code></td>
+<td><code>PacketPulse</code></td>
 <td>The name in reports and the user agent</td>
 </tr>
 <tr>
@@ -4000,7 +4031,7 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/pingle/releases/&lt;previous&gt; /opt
 </tr>
 <tr>
 <td><code>DATABASE_URL</code></td>
-<td>local <code>pingledb</code></td>
+<td>local <code>packetpulsedb</code></td>
 <td>The database (through PgBouncer on the live host)</td>
 </tr>
 <tr>
@@ -4086,12 +4117,12 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/pingle/releases/&lt;previous&gt; /opt
 <tr>
 <td><code>LDAP_ALLOW_LOOPBACK</code></td>
 <td><code>false</code></td>
-<td>A directory on Pingle's own host (development only)</td>
+<td>A directory on PacketPulse's own host (development only)</td>
 </tr>
 <tr>
 <td><code>EXPORT_ALLOW_LOOPBACK</code></td>
 <td><code>false</code></td>
-<td>A result-export server on Pingle's own host (development only)</td>
+<td>A result-export server on PacketPulse's own host (development only)</td>
 </tr>
 <tr>
 <td><code>REVERSE_GEOCODING</code></td>
@@ -4105,7 +4136,7 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/pingle/releases/&lt;previous&gt; /opt
 </tr>
 <tr>
 <td><code>GEOCODE_CONTACT</code></td>
-<td><code>https://pingle.rummaan53.com</code></td>
+<td><code>https://packetpulse.rummaan53.com</code></td>
 <td>Sent to Nominatim, which requires a contact</td>
 </tr>
 </tbody>
@@ -4276,7 +4307,7 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/pingle/releases/&lt;previous&gt; /opt
 </tbody>
 </table></div>
 <hr>
-<p><em>Guide version <code>v2026.10-PROD-v1</code> — verified against source on 2026-10-04, and continuously re-verified by <code>./pingletest.sh docs</code>.</em></p>
+<p><em>Guide version <code>v2026.10-PROD-v1</code> — verified against source on 2026-10-04, and continuously re-verified by <code>./packetpulsetest.sh docs</code>.</em></p>
 
     </article>
   </main>
@@ -4284,7 +4315,7 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/pingle/releases/&lt;previous&gt; /opt
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.1/mermaid.min.js"></script>
 <script>
 const root=document.documentElement;
-try{const t=localStorage.getItem('pingle_guide_theme'); if(t==='dark'||t==='light') root.setAttribute('data-theme',t);}catch(e){}
+try{const t=localStorage.getItem('packetpulse_guide_theme'); if(t==='dark'||t==='light') root.setAttribute('data-theme',t);}catch(e){}
 
 // ── mermaid ───────────────────────────────────────────────────────────
 // Diagrams are emitted as pre.mermaid blocks. Without this init they render
@@ -4301,7 +4332,7 @@ document.getElementById('theme').addEventListener('click',()=>{
   const cur=root.getAttribute('data-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
   const next=cur==='dark'?'light':'dark';
   root.setAttribute('data-theme',next);
-  try{localStorage.setItem('pingle_guide_theme',next)}catch(e){}
+  try{localStorage.setItem('packetpulse_guide_theme',next)}catch(e){}
 });
 
 // ── sidebar filter ────────────────────────────────────────────────────

@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-// pullRig runs PinglePullBackups.sh against the fixture's backup root as the
+// pullRig runs PacketPulsePullBackups.sh against the fixture's backup root as the
 // "server". ssh is replaced by a stand-in that runs the remote command on
 // this machine, so rsync, the listing, the verification and the receipts all
 // take their real code paths; only the network hop is missing.
@@ -47,18 +47,18 @@ exec /bin/bash -c "$*"
 	writeEmpty(t, key)
 	local := filepath.Join(t.TempDir(), "offsite")
 	return pullRig{f: f, local: local, env: map[string]string{
-		"PINGLE_BACKUP_SSH":           fakeSSH,
-		"PINGLE_BACKUP_SSH_KEY":       key,
-		"PINGLE_BACKUP_HOST":          "backup-host.invalid",
-		"PINGLE_BACKUP_REMOTE_DIR":    f.root,
-		"PINGLE_BACKUP_LOCAL_DIR":     local,
-		"PINGLE_BACKUP_RETRY_SECONDS": "0",
+		"PACKETPULSE_BACKUP_SSH":           fakeSSH,
+		"PACKETPULSE_BACKUP_SSH_KEY":       key,
+		"PACKETPULSE_BACKUP_HOST":          "backup-host.invalid",
+		"PACKETPULSE_BACKUP_REMOTE_DIR":    f.root,
+		"PACKETPULSE_BACKUP_LOCAL_DIR":     local,
+		"PACKETPULSE_BACKUP_RETRY_SECONDS": "0",
 	}}
 }
 
 func (p pullRig) pull(t *testing.T) result {
 	t.Helper()
-	return run(t, "PinglePullBackups.sh", p.env)
+	return run(t, "PacketPulsePullBackups.sh", p.env)
 }
 
 func (p pullRig) heldLocally(name string) bool {

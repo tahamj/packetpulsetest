@@ -2,7 +2,7 @@
 
 ## Appendix A — Every API route
 
-All routes are under `/api/v1`. **Access**: *public* (no session), *session* (signed in), *member* (signed in **and** in an organisation), *superuser* (the platform operator), *api key* (a Results API key with `read:results`). **Licence**: refused while the organisation's licence is suspended, revoked or expired. **Audited**: recorded by the audit middleware from `pinglego/pkg/auditlogmicroservice/auditlogconstants/AuditLogRegistry.go`; sign-in, sign-out and failed sign-ins are recorded by the user service itself (§2.5). `./pingletest.sh docs` derives this table from the route handlers and fails if it drifts.
+All routes are under `/api/v1`. **Access**: *public* (no session), *session* (signed in), *member* (signed in **and** in an organisation), *superuser* (the platform operator), *api key* (a Results API key with `read:results`). **Licence**: refused while the organisation's licence is suspended, revoked or expired. **Audited**: recorded by the audit middleware from `packetpulsego/pkg/auditlogmicroservice/auditlogconstants/AuditLogRegistry.go`; sign-in, sign-out and failed sign-ins are recorded by the user service itself (§2.5). `./packetpulsetest.sh docs` derives this table from the route handlers and fails if it drifts.
 
 | Method | Path | Access | Capability | Licence | Audited |
 |---|---|---|---|:---:|:---:|
@@ -143,11 +143,11 @@ Built-in roles are shared by every organisation and cannot be edited; an organis
 
 ## Appendix C — Migrations
 
-Embedded in the server binary and applied in order at boot (`pinglego/pkg/common/dbclient/migrations/`). They only ever move forward (§5.5).
+Embedded in the server binary and applied in order at boot (`packetpulsego/pkg/common/dbclient/migrations/`). They only ever move forward (§5.5).
 
 | File | What it does |
 |---|---|
-| `0001_2026_09_30_initial_schema.sql` | Pingle initial schema. |
+| `0001_2026_09_30_initial_schema.sql` | PacketPulse initial schema. |
 | `0002_2026_09_30_tenancy_staff_and_access.sql` | Tenancy, staff and the permission model. |
 | `0003_2026_09_30_platform_licensing.sql` | Platform licensing: currencies, price book, licences and their evidentiary |
 | `0004_2026_09_30_diagnostics_and_api_keys.sql` | The diagnostic request: a NOC engineer investigating a trouble ticket. |
@@ -174,14 +174,14 @@ Embedded in the server binary and applied in order at boot (`pinglego/pkg/common
 
 ## Appendix D — Settings
 
-Read from the environment, falling back to `.env` (see `.env.example`); defined in `pinglego/pkg/common/config/Config.go`.
+Read from the environment, falling back to `.env` (see `.env.example`); defined in `packetpulsego/pkg/common/config/Config.go`.
 
 | Setting | Default | What it decides |
 |---|---|---|
 | `APP_ENV` | `development` | `production` refuses the settings in Part IV `NFR-018` |
-| `APP_NAME` | `Pingle` | The name in reports and the user agent |
+| `APP_NAME` | `PacketPulse` | The name in reports and the user agent |
 | `PORT` | `8080` | Where the API listens |
-| `DATABASE_URL` | local `pingledb` | The database (through PgBouncer on the live host) |
+| `DATABASE_URL` | local `packetpulsedb` | The database (through PgBouncer on the live host) |
 | `JWT_SECRET` | — (required, 32+ characters) | Signs sessions **and** seals every stored secret: rotating it signs everyone out and makes stored SMS tokens, bind passwords and export credentials unreadable until re-entered |
 | `JWT_TTL` | `12h` | How long a session lasts |
 | `CORS_ORIGINS` | `*` | Must be explicit origins in production |
@@ -198,11 +198,11 @@ Read from the environment, falling back to `.env` (see `.env.example`); defined 
 | `PING_COUNT`, `PING_TIMEOUT`, `PING_INTERVAL`, `PING_CONCURRENCY` | `4`, `5s`, `200ms`, `16` | The probe engine's defaults |
 | `PING_TCP_FALLBACK` | `true` | TCP connect where ICMP cannot be sent |
 | `PING_ALLOW_PRIVATE` | `true` | Whether RFC 1918 and unique-local addresses may be probed |
-| `LDAP_ALLOW_LOOPBACK` | `false` | A directory on Pingle's own host (development only) |
-| `EXPORT_ALLOW_LOOPBACK` | `false` | A result-export server on Pingle's own host (development only) |
+| `LDAP_ALLOW_LOOPBACK` | `false` | A directory on PacketPulse's own host (development only) |
+| `EXPORT_ALLOW_LOOPBACK` | `false` | A result-export server on PacketPulse's own host (development only) |
 | `REVERSE_GEOCODING` | `auto` | `off` stops addresses being looked up for sign-in positions |
 | `GOOGLE_MAPS_API_KEY` | — | Google Geocoding; without it, OpenStreetMap Nominatim |
-| `GEOCODE_CONTACT` | `https://pingle.rummaan53.com` | Sent to Nominatim, which requires a contact |
+| `GEOCODE_CONTACT` | `https://packetpulse.rummaan53.com` | Sent to Nominatim, which requires a contact |
 
 ## Appendix E — Response codes and actions
 
@@ -251,4 +251,4 @@ Every refusal is a JSON envelope: `{"error": {"code", "message", "request_id", "
 
 ---
 
-*Guide version `v2026.10-PROD-v1` — verified against source on 2026-10-04, and continuously re-verified by `./pingletest.sh docs`.*
+*Guide version `v2026.10-PROD-v1` — verified against source on 2026-10-04, and continuously re-verified by `./packetpulsetest.sh docs`.*

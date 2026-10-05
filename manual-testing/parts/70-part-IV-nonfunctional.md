@@ -35,8 +35,8 @@ The app runs on the web (the live build), macOS, Windows, Android and iOS from o
 
 | ID | Check | Expected |
 |---|---|---|
-| `NFR-013` | Tenancy, for every id-taking route | RIVAL's id answers 404 or an empty list — `./pingletest.sh tenancy` |
-| `NFR-014` | The destination policy, everywhere Pingle connects out | Sweeps, traceroutes, webhooks, the directory and the result export all refuse loopback, link-local and cloud metadata |
+| `NFR-013` | Tenancy, for every id-taking route | RIVAL's id answers 404 or an empty list — `./packetpulsetest.sh tenancy` |
+| `NFR-014` | The destination policy, everywhere PacketPulse connects out | Sweeps, traceroutes, webhooks, the directory and the result export all refuse loopback, link-local and cloud metadata |
 | `NFR-015` | Error responses | No SQLSTATE, driver names, file paths or a remote server's raw reply in any error envelope |
 | `NFR-016` | Secrets at rest | SMS tokens, bind passwords and export credentials sealed with the server's secret box; API keys stored as hashes; never returned |
 | `NFR-017` | CSV injection | Cells starting `=`, `+`, `-`, `@`, tab or carriage return are written as text |
@@ -44,7 +44,7 @@ The app runs on the web (the live build), macOS, Windows, Android and iOS from o
 
 ## 4.5 Performance — the load suite
 
-`./pingletest.sh load` provisions one licensed organisation — the owner and nineteen engineers, each with an authenticator, and 200 sites on TEST-NET-3 — and measures it. It also runs nightly (`.github/workflows/pingle-load.yml`). Budgets are 95th percentiles; the measured figures are from a developer laptop against a local server.
+`./packetpulsetest.sh load` provisions one licensed organisation — the owner and nineteen engineers, each with an authenticator, and 200 sites on TEST-NET-3 — and measures it. It also runs nightly (`.github/workflows/packetpulse-load.yml`). Budgets are 95th percentiles; the measured figures are from a developer laptop against a local server.
 
 | Scenario | Measured p95 | Budget |
 |---|---|---|

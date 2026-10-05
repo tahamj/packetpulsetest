@@ -13,15 +13,33 @@ import (
 	"testing"
 	"time"
 
-	pingletest "github.com/tahamj/pingletest"
+	packetpulsetest "github.com/tahamj/packetpulsetest"
 )
 
 type routeCheck struct {
-	Name       string
-	Method     string
-	Path       string
-	Payload    any
+	Name    string
+	Method  string
+	Path    string
+	Payload any
+	// Capability is what the route requires: one capability, "a|b" for
+	// either, and "a+b" for both.
 	Capability string
+}
+
+// holds reports whether a role's grants satisfy a route's Capability.
+func holds(grants map[string]any, capability string) bool {
+	for _, needed := range strings.Split(capability, "+") {
+		satisfied := false
+		for _, either := range strings.Split(needed, "|") {
+			if granted, _ := grants[either].(bool); granted {
+				satisfied = true
+			}
+		}
+		if !satisfied {
+			return false
+		}
+	}
+	return true
 }
 
 // gatedRoutes names the capability each route is supposed to require.
@@ -29,7 +47,9 @@ var gatedRoutes = []routeCheck{
 	{"list sites", http.MethodGet, "/dnssite/list", nil, "dns_site_view"},
 	{"add site", http.MethodPost, "/dnssite/add",
 		map[string]any{"site_name": "acl probe", "ip_address": "203.0.113.200"}, "dns_site_manage"},
-	{"list diagnostics", http.MethodGet, "/diagnostic/list", nil, "diagnostic_view_all"},
+	// An engineer reads the tests they ran, an administrator everyone's: the
+	// list opens to either, and what it holds is the server's to scope.
+	{"list diagnostics", http.MethodGet, "/diagnostic/list", nil, "diagnostic_view_own|diagnostic_view_all"},
 	{"list runs", http.MethodGet, "/ping/runlist", nil, "diagnostic_view_all"},
 	{"list SLA policies", http.MethodGet, "/monitor/sla/list", nil, "sla_view"},
 	{"add SLA policy", http.MethodPost, "/monitor/sla/add",
@@ -55,21 +75,23 @@ var gatedRoutes = []routeCheck{
 	{"save result export", http.MethodPut, "/export/target",
 		map[string]any{"is_enabled": false, "protocol": "sftp"}, "apikey_manage"},
 	// A ticket that does not exist: 404 to whoever may export, 403 to the rest.
-	{"download a ticket's CSV", http.MethodGet, "/diagnostic/00000000-0000-4000-8000-000000000000/report.csv", nil, "report_export"},
+	// Exporting a ticket is reading it as a file, so it needs both.
+	{"download a ticket's CSV", http.MethodGet, "/diagnostic/00000000-0000-4000-8000-000000000000/report.csv", nil,
+		"report_export+diagnostic_view_own|diagnostic_view_all"},
 	{"view licence", http.MethodGet, "/licence/my", nil, "licence_view"},
 }
 
 func TestEveryRoleGetsExactlyItsCapabilities(t *testing.T) {
-	pingletest.RequireServer(t)
+	packetpulsetest.RequireServer(t)
 
-	ownerToken, _ := pingletest.SignUpOrganisation(t, "aclmatrix")
+	ownerToken, _ := packetpulsetest.SignUpOrganisation(t, "aclmatrix")
 
-	roles := pingletest.Call(t, http.MethodGet, "/staff/role/list", ownerToken, nil)
+	roles := packetpulsetest.Call(t, http.MethodGet, "/staff/role/list", ownerToken, nil)
 	if roles.Status != http.StatusOK {
 		t.Fatalf("listing roles: %d %s", roles.Status, roles.Raw)
 	}
 
-	for _, role := range pingletest.ListOf(t, roles, "roles") {
+	for _, role := range packetpulsetest.ListOf(t, roles, "roles") {
 		roleName, _ := role["role_name"].(string)
 		roleId, _ := role["role_id"].(string)
 		grants, _ := role["grants"].(map[string]any)
@@ -84,9 +106,9 @@ func TestEveryRoleGetsExactlyItsCapabilities(t *testing.T) {
 			}
 
 			for _, route := range gatedRoutes {
-				granted, _ := grants[route.Capability].(bool)
+				granted := holds(grants, route.Capability)
 
-				response := pingletest.Call(t, route.Method, route.Path, token, route.Payload)
+				response := packetpulsetest.Call(t, route.Method, route.Path, token, route.Payload)
 				allowed := response.Status >= 200 && response.Status < 300
 				denied := response.Status == http.StatusForbidden
 
@@ -108,13 +130,13 @@ func TestEveryRoleGetsExactlyItsCapabilities(t *testing.T) {
 }
 
 func TestPermissionChangeTakesEffectImmediately(t *testing.T) {
-	pingletest.RequireServer(t)
+	packetpulsetest.RequireServer(t)
 
-	ownerToken, _ := pingletest.SignUpOrganisation(t, "aclrevoke")
-	roles := pingletest.Call(t, http.MethodGet, "/staff/role/list", ownerToken, nil)
+	ownerToken, _ := packetpulsetest.SignUpOrganisation(t, "aclrevoke")
+	roles := packetpulsetest.Call(t, http.MethodGet, "/staff/role/list", ownerToken, nil)
 
 	viewerRoleId := ""
-	for _, role := range pingletest.ListOf(t, roles, "roles") {
+	for _, role := range packetpulsetest.ListOf(t, roles, "roles") {
 		if role["role_name"] == "Viewer" {
 			viewerRoleId, _ = role["role_id"].(string)
 		}
@@ -128,7 +150,7 @@ func TestPermissionChangeTakesEffectImmediately(t *testing.T) {
 		t.Skip("could not provision a colleague")
 	}
 
-	before := pingletest.Call(t, http.MethodGet, "/dnssite/list", token, nil)
+	before := packetpulsetest.Call(t, http.MethodGet, "/dnssite/list", token, nil)
 	if before.Status != http.StatusOK {
 		t.Fatalf("a Viewer should be able to list sites, got %d", before.Status)
 	}
@@ -139,12 +161,12 @@ func TestPermissionChangeTakesEffectImmediately(t *testing.T) {
 	}
 
 	// Deny a capability the role grants.
-	pingletest.Call(t, http.MethodPut, "/staff/"+staffId+"/access", ownerToken,
+	packetpulsetest.Call(t, http.MethodPut, "/staff/"+staffId+"/access", ownerToken,
 		map[string]any{"overrides": map[string]any{"dns_site_view": false}})
 
 	// The token is still signature-valid. It must stop working anyway: a
 	// permission change that waits for expiry is not a revocation.
-	after := pingletest.Call(t, http.MethodGet, "/dnssite/list", token, nil)
+	after := packetpulsetest.Call(t, http.MethodGet, "/dnssite/list", token, nil)
 	if after.Status != http.StatusUnauthorized {
 		t.Errorf("expected 401 after a permission change revoked the session, got %d",
 			after.Status)
@@ -158,25 +180,25 @@ func colleagueWithRole(t *testing.T, ownerToken, roleId, roleName string) string
 	// Role names contain spaces ("NOC Engineer"), which are not valid in an
 	// email local part - and an invalid address made this case skip silently.
 	slug := strings.ToLower(strings.ReplaceAll(roleName, " ", "-"))
-	email := fmt.Sprintf("acl-%s-%d@pingletest.local", slug, time.Now().UnixNano())
+	email := fmt.Sprintf("acl-%s-%d@packetpulsetest.local", slug, time.Now().UnixNano())
 	password := "ColleaguePass2026"
 
-	created := pingletest.Call(t, http.MethodPost, "/user/add", ownerToken, map[string]any{
+	created := packetpulsetest.Call(t, http.MethodPost, "/user/add", ownerToken, map[string]any{
 		"email": email, "password": password,
 		"full_name": roleName + " colleague", "role_id": roleId,
 	})
 	if created.Status != http.StatusCreated {
 		return ""
 	}
-	return pingletest.SignIn(t, email, password)
+	return packetpulsetest.SignIn(t, email, password)
 }
 
 // findStaffId locates the most recently added colleague holding a role.
 func findStaffId(t *testing.T, ownerToken, roleName string) string {
 	t.Helper()
 
-	list := pingletest.Call(t, http.MethodGet, "/staff/list", ownerToken, nil)
-	for _, staff := range pingletest.ListOf(t, list, "staff") {
+	list := packetpulsetest.Call(t, http.MethodGet, "/staff/list", ownerToken, nil)
+	for _, staff := range packetpulsetest.ListOf(t, list, "staff") {
 		if staff["role_name"] == roleName {
 			if id, ok := staff["staff_id"].(string); ok {
 				return id
@@ -189,12 +211,12 @@ func findStaffId(t *testing.T, ownerToken, roleName string) string {
 // Everyone in an organisation reads its settings - they decide what its
 // sign-in asks for - and only its own.
 func TestEveryMemberReadsTheirOrganisationsSettings(t *testing.T) {
-	pingletest.RequireServer(t)
+	packetpulsetest.RequireServer(t)
 
-	ownerToken, organisationId := pingletest.SignUpOrganisation(t, "aclsettings")
-	roles := pingletest.Call(t, http.MethodGet, "/staff/role/list", ownerToken, nil)
+	ownerToken, organisationId := packetpulsetest.SignUpOrganisation(t, "aclsettings")
+	roles := packetpulsetest.Call(t, http.MethodGet, "/staff/role/list", ownerToken, nil)
 	viewerRoleId := ""
-	for _, role := range pingletest.ListOf(t, roles, "roles") {
+	for _, role := range packetpulsetest.ListOf(t, roles, "roles") {
 		if role["role_name"] == "Viewer" {
 			viewerRoleId, _ = role["role_id"].(string)
 		}
@@ -204,14 +226,14 @@ func TestEveryMemberReadsTheirOrganisationsSettings(t *testing.T) {
 		t.Fatal("could not provision a Viewer")
 	}
 
-	saved := pingletest.Call(t, http.MethodPut, "/organisation/settings", ownerToken,
+	saved := packetpulsetest.Call(t, http.MethodPut, "/organisation/settings", ownerToken,
 		map[string]any{"require_checkin_location": true, "device_test_target": "https://NOC.Example.net/health"})
 	if saved.Status != http.StatusOK || saved.Body["require_checkin_location"] != true ||
 		saved.String("device_test_target") != "noc.example.net" {
 		t.Fatalf("saving: %d %s", saved.Status, saved.Raw)
 	}
 	// Everyone reads it: the target is what their own device tests.
-	read := pingletest.Call(t, http.MethodGet, "/organisation/settings", viewer, nil)
+	read := packetpulsetest.Call(t, http.MethodGet, "/organisation/settings", viewer, nil)
 	if read.Status != http.StatusOK || read.String("organisation_id") != organisationId ||
 		read.Body["require_checkin_location"] != true || read.String("device_test_target") != "noc.example.net" {
 		t.Errorf("a Viewer reading the settings: %d %s", read.Status, read.Raw)

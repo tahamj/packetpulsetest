@@ -15,13 +15,13 @@ import (
 	"testing"
 	"time"
 
-	pingletest "github.com/tahamj/pingletest"
+	packetpulsetest "github.com/tahamj/packetpulsetest"
 )
 
 func TestOnlySuccessfulMutationsAreRecorded(t *testing.T) {
-	pingletest.RequireServer(t)
+	packetpulsetest.RequireServer(t)
 
-	ownerToken, _ := pingletest.SignUpOrganisation(t, "audit")
+	ownerToken, _ := packetpulsetest.SignUpOrganisation(t, "audit")
 
 	// The owner's own sign-in is written to the trail off the response path.
 	// Counting before it lands would count it as one of the mutations below.
@@ -29,7 +29,7 @@ func TestOnlySuccessfulMutationsAreRecorded(t *testing.T) {
 	before := countEntries(t, ownerToken)
 
 	// One that succeeds.
-	ok := pingletest.Call(t, http.MethodPost, "/dnssite/add", ownerToken, map[string]any{
+	ok := packetpulsetest.Call(t, http.MethodPost, "/dnssite/add", ownerToken, map[string]any{
 		"site_name": "audited site", "ip_address": "203.0.113.90",
 	})
 	if ok.Status != http.StatusCreated {
@@ -37,13 +37,13 @@ func TestOnlySuccessfulMutationsAreRecorded(t *testing.T) {
 	}
 
 	// Three that do not: invalid, duplicate, and unauthorised.
-	pingletest.Call(t, http.MethodPost, "/dnssite/add", ownerToken, map[string]any{
+	packetpulsetest.Call(t, http.MethodPost, "/dnssite/add", ownerToken, map[string]any{
 		"site_name": "invalid", "ip_address": "not-an-address!!",
 	})
-	pingletest.Call(t, http.MethodPost, "/dnssite/add", ownerToken, map[string]any{
+	packetpulsetest.Call(t, http.MethodPost, "/dnssite/add", ownerToken, map[string]any{
 		"site_name": "duplicate", "ip_address": "203.0.113.90",
 	})
-	pingletest.Call(t, http.MethodPost, "/dnssite/add", "", map[string]any{
+	packetpulsetest.Call(t, http.MethodPost, "/dnssite/add", "", map[string]any{
 		"site_name": "anonymous", "ip_address": "203.0.113.91",
 	})
 
@@ -57,19 +57,19 @@ func TestOnlySuccessfulMutationsAreRecorded(t *testing.T) {
 }
 
 func TestAuditChainVerifies(t *testing.T) {
-	pingletest.RequireServer(t)
+	packetpulsetest.RequireServer(t)
 
-	ownerToken, _ := pingletest.SignUpOrganisation(t, "auditchain")
+	ownerToken, _ := packetpulsetest.SignUpOrganisation(t, "auditchain")
 
 	for i := 0; i < 3; i++ {
-		pingletest.Call(t, http.MethodPost, "/dnssite/add", ownerToken, map[string]any{
+		packetpulsetest.Call(t, http.MethodPost, "/dnssite/add", ownerToken, map[string]any{
 			"site_name":  fmt.Sprintf("chain %d", i),
 			"ip_address": fmt.Sprintf("203.0.113.%d", 120+i),
 		})
 	}
 	time.Sleep(2 * time.Second)
 
-	response := pingletest.Call(t, http.MethodGet, "/auditlog/verify", ownerToken, nil)
+	response := packetpulsetest.Call(t, http.MethodGet, "/auditlog/verify", ownerToken, nil)
 	if response.Status != http.StatusOK {
 		t.Fatalf("verifying the trail: %d %s", response.Status, response.Raw)
 	}
@@ -85,17 +85,17 @@ func TestAuditChainVerifies(t *testing.T) {
 }
 
 func TestAuditEntriesNameTheActorAndOrigin(t *testing.T) {
-	pingletest.RequireServer(t)
+	packetpulsetest.RequireServer(t)
 
-	ownerToken, _ := pingletest.SignUpOrganisation(t, "auditactor")
+	ownerToken, _ := packetpulsetest.SignUpOrganisation(t, "auditactor")
 
-	pingletest.Call(t, http.MethodPost, "/dnssite/add", ownerToken, map[string]any{
+	packetpulsetest.Call(t, http.MethodPost, "/dnssite/add", ownerToken, map[string]any{
 		"site_name": "actor probe", "ip_address": "203.0.113.150",
 	})
 	time.Sleep(2 * time.Second)
 
-	list := pingletest.Call(t, http.MethodGet, "/auditlog/list?limit=1", ownerToken, nil)
-	entries := pingletest.ListOf(t, list, "entries")
+	list := packetpulsetest.Call(t, http.MethodGet, "/auditlog/list?limit=1", ownerToken, nil)
+	entries := packetpulsetest.ListOf(t, list, "entries")
 	if len(entries) == 0 {
 		t.Fatal("no audit entries were written")
 	}
@@ -117,7 +117,7 @@ func TestAuditEntriesNameTheActorAndOrigin(t *testing.T) {
 func TestEveryMutationRouteIsRegistered(t *testing.T) {
 	repoRoot := findRepoRoot(t)
 	registryPath := filepath.Join(repoRoot,
-		"pinglego/pkg/auditlogmicroservice/auditlogconstants/AuditLogRegistry.go")
+		"packetpulsego/pkg/auditlogmicroservice/auditlogconstants/AuditLogRegistry.go")
 
 	registry, err := os.ReadFile(registryPath)
 	if err != nil {
@@ -125,18 +125,17 @@ func TestEveryMutationRouteIsRegistered(t *testing.T) {
 	}
 	registryText := string(registry)
 
-	routeFiles, err := filepath.Glob(filepath.Join(repoRoot, "pinglego/pkg/*/*/*RouteHandler.go"))
+	routeFiles, err := filepath.Glob(filepath.Join(repoRoot, "packetpulsego/pkg/*/*/*RouteHandler.go"))
 	if err != nil || len(routeFiles) == 0 {
 		t.Skip("no route handlers found")
 	}
 
 	// Routes that mutate but are deliberately not audited, each with a reason.
 	excluded := map[string]string{
-		"RouteSignUp":        "creates an account in the holding organisation, which has no trail of its own",
+		"RouteSignUp":        "public, before any principal exists; the owner's sign-in is recorded at verify, with the principal it creates",
 		"RouteSignIn":        "the password step: public, and it opens no session",
 		"RouteSignInVerify":  "public; an administrator's completed sign-in is recorded by UserMS with the principal it creates",
 		"RouteSignInResend":  "public, before any principal exists; it sends a code and changes nothing",
-		"RouteSignInEnrol":   "provisional: the authenticator is confirmed, and the sign-in recorded, at verify",
 		"RouteSignOut":       "recorded by UserMS itself, administrators' only; a field engineer's is their check-out",
 		"RouteRunSweep":      "superseded by /diagnostic/submit, which is audited",
 		"RouteConfigTest":    "a read-only connection test",
@@ -210,7 +209,7 @@ func routeSuffix(t *testing.T, repoRoot, qualifier, constantName string) string 
 	if qualifier != "" {
 		packageGlob = qualifier
 	}
-	constantFiles, _ := filepath.Glob(filepath.Join(repoRoot, "pinglego/pkg/*", packageGlob, "*API.go"))
+	constantFiles, _ := filepath.Glob(filepath.Join(repoRoot, "packetpulsego/pkg/*", packageGlob, "*API.go"))
 	pattern := regexp.MustCompile(`\b` + regexp.QuoteMeta(constantName) + `\s*=\s*"([^"]+)"`)
 
 	for _, file := range constantFiles {
@@ -234,8 +233,8 @@ func waitForSignIn(t *testing.T, token string) {
 	t.Helper()
 	deadline := time.Now().Add(10 * time.Second)
 	for time.Now().Before(deadline) {
-		response := pingletest.Call(t, http.MethodGet, "/auditlog/list?limit=200", token, nil)
-		for _, entry := range pingletest.ListOf(t, response, "entries") {
+		response := packetpulsetest.Call(t, http.MethodGet, "/auditlog/list?limit=200", token, nil)
+		for _, entry := range packetpulsetest.ListOf(t, response, "entries") {
 			if entry["event_type"] == "sign_in" && entry["entity_type"] == "session" {
 				return
 			}
@@ -248,7 +247,7 @@ func waitForSignIn(t *testing.T, token string) {
 func countEntries(t *testing.T, token string) int {
 	t.Helper()
 
-	response := pingletest.Call(t, http.MethodGet, "/auditlog/list?limit=200", token, nil)
+	response := packetpulsetest.Call(t, http.MethodGet, "/auditlog/list?limit=200", token, nil)
 	if response.Status != http.StatusOK {
 		return 0
 	}
@@ -263,7 +262,7 @@ func findRepoRoot(t *testing.T) string {
 		t.Skip("cannot determine the working directory")
 	}
 	for i := 0; i < 6; i++ {
-		if _, err := os.Stat(filepath.Join(directory, "pinglego", "go.mod")); err == nil {
+		if _, err := os.Stat(filepath.Join(directory, "packetpulsego", "go.mod")); err == nil {
 			return directory
 		}
 		directory = filepath.Dir(directory)
@@ -275,15 +274,15 @@ func findRepoRoot(t *testing.T) string {
 // An administrator's sign-in is in the trail, naming who, from where, and how
 // the second step was given - and the chain still verifies with it in.
 func TestAnAdministratorsSignInIsRecordedWithItsActor(t *testing.T) {
-	pingletest.RequireServer(t)
+	packetpulsetest.RequireServer(t)
 
-	ownerToken, _ := pingletest.SignUpOrganisation(t, "auditsignin")
+	ownerToken, _ := packetpulsetest.SignUpOrganisation(t, "auditsignin")
 	waitForSignIn(t, ownerToken)
 
-	me := pingletest.Call(t, http.MethodGet, "/user/me", ownerToken, nil)
-	response := pingletest.Call(t, http.MethodGet, "/auditlog/list?limit=200", ownerToken, nil)
+	me := packetpulsetest.Call(t, http.MethodGet, "/user/me", ownerToken, nil)
+	response := packetpulsetest.Call(t, http.MethodGet, "/auditlog/list?limit=200", ownerToken, nil)
 	var signIn map[string]any
-	for _, entry := range pingletest.ListOf(t, response, "entries") {
+	for _, entry := range packetpulsetest.ListOf(t, response, "entries") {
 		if entry["event_type"] == "sign_in" {
 			signIn = entry
 		}
@@ -291,11 +290,11 @@ func TestAnAdministratorsSignInIsRecordedWithItsActor(t *testing.T) {
 	if signIn["actor_email"] != me.String("email") || signIn["actor_ip"] == "" || signIn["entity_id"] == "" {
 		t.Errorf("sign-in entry = %v, want the owner, their address and their session", signIn)
 	}
-	if details, _ := signIn["details"].(map[string]any); details["second_factor"] != "totp" {
+	if details, _ := signIn["details"].(map[string]any); details["second_factor"] != "email" {
 		t.Errorf("details = %v, want the second step named", signIn["details"])
 	}
 
-	verify := pingletest.Call(t, http.MethodGet, "/auditlog/verify", ownerToken, nil)
+	verify := packetpulsetest.Call(t, http.MethodGet, "/auditlog/verify", ownerToken, nil)
 	if verify.Status != http.StatusOK || verify.Body["intact"] != true {
 		t.Errorf("the chain does not verify with the sign-in in it: %d %s", verify.Status, verify.Raw)
 	}
@@ -305,14 +304,14 @@ func TestAnAdministratorsSignInIsRecordedWithItsActor(t *testing.T) {
 // it ended, beside entries whose hash never held the position - so the chain
 // verifies and the position can still be erased.
 func TestAnAdministratorsSignInAndOutShowWhereTheyHappened(t *testing.T) {
-	pingletest.RequireServer(t)
+	packetpulsetest.RequireServer(t)
 
-	ownerToken, _ := pingletest.SignUpOrganisation(t, "auditplace")
-	email := pingletest.Call(t, http.MethodGet, "/user/me", ownerToken, nil).String("email")
-	token := pingletest.SignInAt(t, email, "PingleTest2026x", map[string]any{
+	ownerToken, _ := packetpulsetest.SignUpOrganisation(t, "auditplace")
+	email := packetpulsetest.Call(t, http.MethodGet, "/user/me", ownerToken, nil).String("email")
+	token := packetpulsetest.SignInAt(t, email, "PacketPulseTest2026x", map[string]any{
 		"status": "captured", "latitude": 18.520430, "longitude": 73.856743, "accuracy_m": 14,
 	})
-	signOut := pingletest.Call(t, http.MethodPost, "/user/signout", token, map[string]any{
+	signOut := packetpulsetest.Call(t, http.MethodPost, "/user/signout", token, map[string]any{
 		"location": map[string]any{"status": "denied"},
 	})
 	if signOut.Status != http.StatusOK {
@@ -321,8 +320,8 @@ func TestAnAdministratorsSignInAndOutShowWhereTheyHappened(t *testing.T) {
 
 	var signIn, signedOut map[string]any
 	for deadline := time.Now().Add(10 * time.Second); time.Now().Before(deadline) && signedOut == nil; time.Sleep(200 * time.Millisecond) {
-		response := pingletest.Call(t, http.MethodGet, "/auditlog/list?entity_type=session&limit=200", ownerToken, nil)
-		entries := pingletest.ListOf(t, response, "entries")
+		response := packetpulsetest.Call(t, http.MethodGet, "/auditlog/list?entity_type=session&limit=200", ownerToken, nil)
+		entries := packetpulsetest.ListOf(t, response, "entries")
 		for _, entry := range entries {
 			if entry["entity_type"] != "session" {
 				t.Fatalf("the session filter listed %v", entry["entity_type"])
@@ -351,7 +350,7 @@ func TestAnAdministratorsSignInAndOutShowWhereTheyHappened(t *testing.T) {
 		t.Errorf("the hashed details carry %v; want whether a position was given, never the position", details)
 	}
 
-	verify := pingletest.Call(t, http.MethodGet, "/auditlog/verify", ownerToken, nil)
+	verify := packetpulsetest.Call(t, http.MethodGet, "/auditlog/verify", ownerToken, nil)
 	if verify.Status != http.StatusOK || verify.Body["intact"] != true {
 		t.Errorf("the chain does not verify: %d %s", verify.Status, verify.Raw)
 	}
@@ -362,13 +361,13 @@ func TestAnAdministratorsSignInAndOutShowWhereTheyHappened(t *testing.T) {
 // verifies with it in. Asked for by the customer: administrator logins
 // tracked in full, which includes the ones that did not get in.
 func TestAFailedAdministratorSignInIsRecorded(t *testing.T) {
-	pingletest.RequireServer(t)
+	packetpulsetest.RequireServer(t)
 
-	ownerToken, _ := pingletest.SignUpOrganisation(t, "auditfailed")
+	ownerToken, _ := packetpulsetest.SignUpOrganisation(t, "auditfailed")
 	waitForSignIn(t, ownerToken)
-	me := pingletest.Call(t, http.MethodGet, "/user/me", ownerToken, nil)
+	me := packetpulsetest.Call(t, http.MethodGet, "/user/me", ownerToken, nil)
 
-	refused := pingletest.Call(t, http.MethodPost, "/user/signin", "", map[string]any{
+	refused := packetpulsetest.Call(t, http.MethodPost, "/user/signin", "", map[string]any{
 		"email": me.String("email"), "password": "not-the-password",
 	})
 	if refused.Status != http.StatusUnauthorized {
@@ -378,8 +377,8 @@ func TestAFailedAdministratorSignInIsRecorded(t *testing.T) {
 	var failed map[string]any
 	deadline := time.Now().Add(10 * time.Second)
 	for failed == nil && time.Now().Before(deadline) {
-		response := pingletest.Call(t, http.MethodGet, "/auditlog/list?entity_type=session&limit=200", ownerToken, nil)
-		for _, entry := range pingletest.ListOf(t, response, "entries") {
+		response := packetpulsetest.Call(t, http.MethodGet, "/auditlog/list?entity_type=session&limit=200", ownerToken, nil)
+		for _, entry := range packetpulsetest.ListOf(t, response, "entries") {
 			if entry["event_type"] == "sign_in_failed" {
 				failed = entry
 			}
@@ -395,7 +394,7 @@ func TestAFailedAdministratorSignInIsRecorded(t *testing.T) {
 	if failed["actor_email"] != me.String("email") || failed["actor_ip"] == "" || details["reason"] != "wrong_password" {
 		t.Errorf("failed sign-in = %v, want the account, its address and the reason", failed)
 	}
-	verify := pingletest.Call(t, http.MethodGet, "/auditlog/verify", ownerToken, nil)
+	verify := packetpulsetest.Call(t, http.MethodGet, "/auditlog/verify", ownerToken, nil)
 	if verify.Status != http.StatusOK || verify.Body["intact"] != true {
 		t.Errorf("the chain does not verify with the failure in it: %d %s", verify.Status, verify.Raw)
 	}

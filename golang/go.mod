@@ -1,3 +1,3 @@
-module github.com/tahamj/pingletest
+module github.com/tahamj/packetpulsetest
 
 go 1.24

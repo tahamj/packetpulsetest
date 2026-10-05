@@ -1,7 +1,7 @@
 // Package tenancyisolation guards the property that must never fail: one
 // organisation can never read or change another's data.
 //
-// Everything else in Pingle is a feature. This is the promise the product is
+// Everything else in PacketPulse is a feature. This is the promise the product is
 // sold on, so it is tested by ATTACKING it: two real organisations are created,
 // and every route that takes an id is given the other tenant's id.
 package tenancyisolation
@@ -13,23 +13,23 @@ import (
 	"testing"
 	"time"
 
-	pingletest "github.com/tahamj/pingletest"
+	packetpulsetest "github.com/tahamj/packetpulsetest"
 )
 
 func testStamp() int64 { return time.Now().UnixNano() }
 
 func TestOneTenantCannotReachAnother(t *testing.T) {
-	pingletest.RequireServer(t)
+	packetpulsetest.RequireServer(t)
 
-	alphaToken, alphaOrg := pingletest.SignUpOrganisation(t, "alpha")
-	betaToken, betaOrg := pingletest.SignUpOrganisation(t, "beta")
+	alphaToken, alphaOrg := packetpulsetest.SignUpOrganisation(t, "alpha")
+	betaToken, betaOrg := packetpulsetest.SignUpOrganisation(t, "beta")
 
 	if alphaOrg == betaOrg {
 		t.Fatal("two signups produced the same organisation")
 	}
 
 	// Alpha builds something worth stealing.
-	site := pingletest.Call(t, http.MethodPost, "/dnssite/add", alphaToken, map[string]any{
+	site := packetpulsetest.Call(t, http.MethodPost, "/dnssite/add", alphaToken, map[string]any{
 		"site_name": "Alpha core router", "ip_address": "203.0.113.11",
 	})
 	if site.Status != http.StatusCreated {
@@ -38,8 +38,8 @@ func TestOneTenantCannotReachAnother(t *testing.T) {
 	alphaSiteId := site.String("dns_site_id")
 
 	t.Run("beta cannot see alpha's inventory", func(t *testing.T) {
-		list := pingletest.Call(t, http.MethodGet, "/dnssite/list", betaToken, nil)
-		for _, row := range pingletest.ListOf(t, list, "dns_sites") {
+		list := packetpulsetest.Call(t, http.MethodGet, "/dnssite/list", betaToken, nil)
+		for _, row := range packetpulsetest.ListOf(t, list, "dns_sites") {
 			if row["dns_site_id"] == alphaSiteId {
 				t.Fatal("beta can see a site belonging to alpha")
 			}
@@ -47,7 +47,7 @@ func TestOneTenantCannotReachAnother(t *testing.T) {
 	})
 
 	t.Run("beta cannot edit alpha's site", func(t *testing.T) {
-		response := pingletest.Call(t, http.MethodPut, "/dnssite/"+alphaSiteId, betaToken,
+		response := packetpulsetest.Call(t, http.MethodPut, "/dnssite/"+alphaSiteId, betaToken,
 			map[string]any{"site_name": "taken over", "ip_address": "203.0.113.11"})
 		if response.Status != http.StatusNotFound {
 			t.Errorf("expected 404, got %d: a cross-tenant id must not resolve", response.Status)
@@ -55,16 +55,16 @@ func TestOneTenantCannotReachAnother(t *testing.T) {
 	})
 
 	t.Run("beta cannot delete alpha's site", func(t *testing.T) {
-		response := pingletest.Call(t, http.MethodDelete, "/dnssite/"+alphaSiteId, betaToken, nil)
+		response := packetpulsetest.Call(t, http.MethodDelete, "/dnssite/"+alphaSiteId, betaToken, nil)
 		if response.Status != http.StatusNotFound {
 			t.Errorf("expected 404, got %d", response.Status)
 		}
 	})
 
 	t.Run("alpha's site is untouched", func(t *testing.T) {
-		list := pingletest.Call(t, http.MethodGet, "/dnssite/list", alphaToken, nil)
+		list := packetpulsetest.Call(t, http.MethodGet, "/dnssite/list", alphaToken, nil)
 		found := false
-		for _, row := range pingletest.ListOf(t, list, "dns_sites") {
+		for _, row := range packetpulsetest.ListOf(t, list, "dns_sites") {
 			if row["dns_site_id"] == alphaSiteId {
 				found = true
 				if row["site_name"] != "Alpha core router" {
@@ -79,15 +79,15 @@ func TestOneTenantCannotReachAnother(t *testing.T) {
 }
 
 func TestSameAddressIsAllowedInTwoOrganisations(t *testing.T) {
-	pingletest.RequireServer(t)
+	packetpulsetest.RequireServer(t)
 
-	alphaToken, _ := pingletest.SignUpOrganisation(t, "sharedaddr-a")
-	betaToken, _ := pingletest.SignUpOrganisation(t, "sharedaddr-b")
+	alphaToken, _ := packetpulsetest.SignUpOrganisation(t, "sharedaddr-a")
+	betaToken, _ := packetpulsetest.SignUpOrganisation(t, "sharedaddr-b")
 
 	// Two operators monitoring the same public resolver is normal, so the
 	// uniqueness constraint must be per organisation and not global.
 	for name, token := range map[string]string{"alpha": alphaToken, "beta": betaToken} {
-		response := pingletest.Call(t, http.MethodPost, "/dnssite/add", token, map[string]any{
+		response := packetpulsetest.Call(t, http.MethodPost, "/dnssite/add", token, map[string]any{
 			"site_name": name + " resolver", "ip_address": "9.9.9.9",
 		})
 		if response.Status != http.StatusCreated {
@@ -97,7 +97,7 @@ func TestSameAddressIsAllowedInTwoOrganisations(t *testing.T) {
 	}
 
 	// Within ONE organisation the same address twice is still a duplicate.
-	response := pingletest.Call(t, http.MethodPost, "/dnssite/add", alphaToken, map[string]any{
+	response := packetpulsetest.Call(t, http.MethodPost, "/dnssite/add", alphaToken, map[string]any{
 		"site_name": "duplicate", "ip_address": "9.9.9.9",
 	})
 	if response.Status != http.StatusConflict {
@@ -106,17 +106,17 @@ func TestSameAddressIsAllowedInTwoOrganisations(t *testing.T) {
 }
 
 func TestDiagnosticsAreTenantScoped(t *testing.T) {
-	pingletest.RequireServer(t)
+	packetpulsetest.RequireServer(t)
 
-	alphaToken, _ := pingletest.SignUpOrganisation(t, "diag-a")
-	betaToken, _ := pingletest.SignUpOrganisation(t, "diag-b")
+	alphaToken, _ := packetpulsetest.SignUpOrganisation(t, "diag-a")
+	betaToken, _ := packetpulsetest.SignUpOrganisation(t, "diag-b")
 
-	pingletest.Call(t, http.MethodPost, "/dnssite/add", alphaToken, map[string]any{
+	packetpulsetest.Call(t, http.MethodPost, "/dnssite/add", alphaToken, map[string]any{
 		"site_name": "loopback", "ip_address": "127.0.0.1",
 	})
 
 	ttNumber := fmt.Sprintf("TT-ISOLATION-%d", testStamp())
-	submit := pingletest.Call(t, http.MethodPost, "/diagnostic/submit", alphaToken, map[string]any{
+	submit := packetpulsetest.Call(t, http.MethodPost, "/diagnostic/submit", alphaToken, map[string]any{
 		"customer_id": "CUST-ISO", "tt_number": ttNumber,
 		"packet_count": 1, "timeout_ms": 900,
 	})
@@ -126,15 +126,15 @@ func TestDiagnosticsAreTenantScoped(t *testing.T) {
 	}
 
 	t.Run("beta cannot read alpha's ticket", func(t *testing.T) {
-		response := pingletest.Call(t, http.MethodGet, "/diagnostic/tt/"+ttNumber, betaToken, nil)
+		response := packetpulsetest.Call(t, http.MethodGet, "/diagnostic/tt/"+ttNumber, betaToken, nil)
 		if response.Status != http.StatusNotFound {
 			t.Errorf("expected 404 for another tenant's ticket, got %d", response.Status)
 		}
 	})
 
 	t.Run("beta's diagnostic list excludes alpha's", func(t *testing.T) {
-		list := pingletest.Call(t, http.MethodGet, "/diagnostic/list", betaToken, nil)
-		for _, row := range pingletest.ListOf(t, list, "diagnostics") {
+		list := packetpulsetest.Call(t, http.MethodGet, "/diagnostic/list", betaToken, nil)
+		for _, row := range packetpulsetest.ListOf(t, list, "diagnostics") {
 			if row["tt_number"] == ttNumber {
 				t.Fatal("beta can see a diagnostic belonging to alpha")
 			}
@@ -143,15 +143,15 @@ func TestDiagnosticsAreTenantScoped(t *testing.T) {
 }
 
 func TestSuperUserIsRefusedTenantRoutes(t *testing.T) {
-	pingletest.RequireServer(t)
+	packetpulsetest.RequireServer(t)
 
-	superToken := pingletest.SuperUserToken(t)
+	superToken := packetpulsetest.SuperUserToken(t)
 
 	// A superuser belongs to no organisation. Letting it through a tenant
 	// route would mean either reading across tenants or defaulting the scope,
 	// and a defaulted scope is how one tenant reads another's rows.
 	for _, path := range []string{"/dnssite/list", "/diagnostic/list", "/staff/list"} {
-		response := pingletest.Call(t, http.MethodGet, path, superToken, nil)
+		response := packetpulsetest.Call(t, http.MethodGet, path, superToken, nil)
 		if response.Status != http.StatusBadRequest {
 			t.Errorf("%s: expected 400 for an unscoped superuser, got %d", path, response.Status)
 		}
@@ -166,20 +166,21 @@ func TestSuperUserIsRefusedTenantRoutes(t *testing.T) {
 // leak here is both a data disclosure and a denial of service against another
 // operator's engineers.
 func TestSeatsAreVisibleOnlyWithinTheOrganisation(t *testing.T) {
-	pingletest.RequireServer(t)
+	packetpulsetest.RequireServer(t)
 
-	alphaToken, _ := pingletest.SignUpOrganisation(t, "seatalpha")
-	betaToken, _ := pingletest.SignUpOrganisation(t, "seatbeta")
+	alpha := packetpulsetest.NewOrganisation(t, "seatalpha", 25)
+	alphaToken := alpha.OwnerToken
+	betaToken, _ := packetpulsetest.SignUpOrganisation(t, "seatbeta")
 
 	// Each owner's own sign-in is a live session, so both organisations have
 	// exactly one seat held and the lists must not overlap.
-	alphaSessions := pingletest.Call(t, http.MethodGet, "/staff/session/organisation", alphaToken, nil)
+	alphaSessions := packetpulsetest.Call(t, http.MethodGet, "/staff/session/organisation", alphaToken, nil)
 	if alphaSessions.Status != http.StatusOK {
 		t.Fatalf("alpha could not list its own sessions: %d %s",
 			alphaSessions.Status, alphaSessions.Raw)
 	}
 
-	alphaRows := pingletest.ListOf(t, alphaSessions, "sessions")
+	alphaRows := packetpulsetest.ListOf(t, alphaSessions, "sessions")
 	if len(alphaRows) == 0 {
 		t.Fatal("alpha's own sign-in is not listed as a live session")
 	}
@@ -190,13 +191,13 @@ func TestSeatsAreVisibleOnlyWithinTheOrganisation(t *testing.T) {
 		alphaSessionIds[id] = true
 	}
 
-	betaSessions := pingletest.Call(t, http.MethodGet, "/staff/session/organisation", betaToken, nil)
+	betaSessions := packetpulsetest.Call(t, http.MethodGet, "/staff/session/organisation", betaToken, nil)
 	if betaSessions.Status != http.StatusOK {
 		t.Fatalf("beta could not list its own sessions: %d", betaSessions.Status)
 	}
 
 	t.Run("beta cannot see who is signed in at alpha", func(t *testing.T) {
-		for _, row := range pingletest.ListOf(t, betaSessions, "sessions") {
+		for _, row := range packetpulsetest.ListOf(t, betaSessions, "sessions") {
 			id, _ := row["session_id"].(string)
 			if alphaSessionIds[id] {
 				t.Fatalf("beta can see a session belonging to alpha: %s", id)
@@ -206,7 +207,7 @@ func TestSeatsAreVisibleOnlyWithinTheOrganisation(t *testing.T) {
 
 	t.Run("beta cannot sign alpha's people out", func(t *testing.T) {
 		for alphaSessionId := range alphaSessionIds {
-			response := pingletest.Call(t, http.MethodDelete,
+			response := packetpulsetest.Call(t, http.MethodDelete,
 				"/staff/session/organisation/"+alphaSessionId, betaToken, nil)
 			if response.Status != http.StatusNotFound {
 				t.Fatalf("expected 404 revoking another tenant's session, got %d: "+
@@ -218,19 +219,24 @@ func TestSeatsAreVisibleOnlyWithinTheOrganisation(t *testing.T) {
 
 	t.Run("alpha is still signed in afterwards", func(t *testing.T) {
 		// The proof that the refusals above refused rather than half-applied.
-		after := pingletest.Call(t, http.MethodGet, "/staff/session/organisation", alphaToken, nil)
+		after := packetpulsetest.Call(t, http.MethodGet, "/staff/session/organisation", alphaToken, nil)
 		if after.Status != http.StatusOK {
 			t.Fatalf("alpha lost access to its own sessions: %d", after.Status)
 		}
-		if len(pingletest.ListOf(t, after, "sessions")) == 0 {
+		if len(packetpulsetest.ListOf(t, after, "sessions")) == 0 {
 			t.Fatal("alpha's sessions were revoked by beta's attempt")
 		}
 	})
 
-	t.Run("seats in use counts people, not rows", func(t *testing.T) {
-		seats := int(alphaSessions.Float("seats_in_use"))
-		if seats != 1 {
-			t.Errorf("seats_in_use = %d for a single signed-in owner, want 1", seats)
+	t.Run("the licence counts people, not sign-ins", func(t *testing.T) {
+		// A second device is a second session, not a second person.
+		packetpulsetest.SignIn(t, alpha.OwnerEmail, alpha.OwnerPassword)
+		after := packetpulsetest.Call(t, http.MethodGet, "/staff/session/organisation", alphaToken, nil)
+		if sessions := len(packetpulsetest.ListOf(t, after, "sessions")); sessions < 2 {
+			t.Fatalf("the owner signed in twice but %d sessions are listed", sessions)
+		}
+		if users := int(after.Float("users_on_licence")); users != 1 {
+			t.Errorf("users_on_licence = %d for an organisation of one person, want 1", users)
 		}
 	})
 }
@@ -238,20 +244,20 @@ func TestSeatsAreVisibleOnlyWithinTheOrganisation(t *testing.T) {
 // TestFreeingASeatRequiresStaffManage keeps the endpoint behind a capability
 // rather than behind the client hiding a button.
 func TestFreeingASeatRequiresStaffManage(t *testing.T) {
-	pingletest.RequireServer(t)
+	packetpulsetest.RequireServer(t)
 
-	ownerToken, _ := pingletest.SignUpOrganisation(t, "seatacl")
+	ownerToken, _ := packetpulsetest.SignUpOrganisation(t, "seatacl")
 
 	// A Viewer holds no staff_manage. The role is seeded, so a missing one is
 	// a real failure rather than a reason to skip: skipping here would leave
 	// the endpoint's capability gate unverified while the board stayed green.
-	roles := pingletest.Call(t, http.MethodGet, "/staff/role/list", ownerToken, nil)
+	roles := packetpulsetest.Call(t, http.MethodGet, "/staff/role/list", ownerToken, nil)
 	if roles.Status != http.StatusOK {
 		t.Fatalf("listing roles: %d %s", roles.Status, roles.Raw)
 	}
 
 	viewerRoleId := ""
-	for _, role := range pingletest.ListOf(t, roles, "roles") {
+	for _, role := range packetpulsetest.ListOf(t, roles, "roles") {
 		if role["role_name"] == "Viewer" {
 			viewerRoleId, _ = role["role_id"].(string)
 		}
@@ -260,10 +266,10 @@ func TestFreeingASeatRequiresStaffManage(t *testing.T) {
 		t.Fatal("no seeded Viewer role: the capability gate cannot be tested")
 	}
 
-	memberEmail := fmt.Sprintf("member-%s@pingle.test", pingletest.UniqueCode("seat"))
+	memberEmail := fmt.Sprintf("member-%s@packetpulse.test", packetpulsetest.UniqueCode("seat"))
 	const memberPassword = "MemberPass2026!"
 
-	created := pingletest.Call(t, http.MethodPost, "/user/add", ownerToken, map[string]any{
+	created := packetpulsetest.Call(t, http.MethodPost, "/user/add", ownerToken, map[string]any{
 		"email": memberEmail, "password": memberPassword,
 		"display_name": "Seat Member", "role_id": viewerRoleId,
 	})
@@ -271,9 +277,9 @@ func TestFreeingASeatRequiresStaffManage(t *testing.T) {
 		t.Fatalf("could not create a member: %d %s", created.Status, created.Raw)
 	}
 
-	memberToken := pingletest.SignIn(t, memberEmail, memberPassword)
+	memberToken := packetpulsetest.SignIn(t, memberEmail, memberPassword)
 
-	list := pingletest.Call(t, http.MethodGet, "/staff/session/organisation", memberToken, nil)
+	list := packetpulsetest.Call(t, http.MethodGet, "/staff/session/organisation", memberToken, nil)
 	if list.Status != http.StatusForbidden {
 		t.Errorf("a member listing the organisation's sessions got %d, want 403", list.Status)
 	}
@@ -283,37 +289,37 @@ func TestFreeingASeatRequiresStaffManage(t *testing.T) {
 // with where each happened. Another organisation never sees them, and an
 // administrator's own sign-ins are in the activity trail instead.
 func TestCheckinsAreTheOrganisationsOwnFieldSessions(t *testing.T) {
-	pingletest.RequireServer(t)
+	packetpulsetest.RequireServer(t)
 
-	ownerA, _ := pingletest.SignUpOrganisation(t, "checkina")
-	ownerB, _ := pingletest.SignUpOrganisation(t, "checkinb")
+	ownerA, _ := packetpulsetest.SignUpOrganisation(t, "checkina")
+	ownerB, _ := packetpulsetest.SignUpOrganisation(t, "checkinb")
 
-	roles := pingletest.Call(t, http.MethodGet, "/staff/role/list", ownerA, nil)
+	roles := packetpulsetest.Call(t, http.MethodGet, "/staff/role/list", ownerA, nil)
 	engineerRoleId := ""
-	for _, role := range pingletest.ListOf(t, roles, "roles") {
+	for _, role := range packetpulsetest.ListOf(t, roles, "roles") {
 		if role["role_name"] == "NOC Engineer" {
 			engineerRoleId, _ = role["role_id"].(string)
 		}
 	}
-	email := fmt.Sprintf("engineer-%s@pingle.test", pingletest.UniqueCode("field"))
+	email := fmt.Sprintf("engineer-%s@packetpulse.test", packetpulsetest.UniqueCode("field"))
 	const password = "FieldPass2026!"
-	created := pingletest.Call(t, http.MethodPost, "/user/add", ownerA, map[string]any{
+	created := packetpulsetest.Call(t, http.MethodPost, "/user/add", ownerA, map[string]any{
 		"email": email, "password": password, "display_name": "Field Engineer", "role_id": engineerRoleId,
 	})
 	if created.Status != http.StatusCreated {
 		t.Fatalf("adding an engineer: %d %s", created.Status, created.Raw)
 	}
 
-	token := pingletest.SignInAt(t, email, password, map[string]any{
+	token := packetpulsetest.SignInAt(t, email, password, map[string]any{
 		"status": "captured", "latitude": 19.076090, "longitude": 72.877426, "accuracy_m": 9,
 	})
-	if out := pingletest.Call(t, http.MethodPost, "/user/signout", token, map[string]any{
+	if out := packetpulsetest.Call(t, http.MethodPost, "/user/signout", token, map[string]any{
 		"location": map[string]any{"status": "unavailable"},
 	}); out.Status != http.StatusOK {
 		t.Fatalf("signing out: %d %s", out.Status, out.Raw)
 	}
 
-	ours := pingletest.ListOf(t, pingletest.Call(t, http.MethodGet, "/staff/checkin/list", ownerA, nil), "checkins")
+	ours := packetpulsetest.ListOf(t, packetpulsetest.Call(t, http.MethodGet, "/staff/checkin/list", ownerA, nil), "checkins")
 	if len(ours) != 1 {
 		t.Fatalf("A lists %d check-ins, want the engineer's one - and not the owner's own sign-ins", len(ours))
 	}
@@ -328,8 +334,8 @@ func TestCheckinsAreTheOrganisationsOwnFieldSessions(t *testing.T) {
 		t.Error("a check-in carries a token id")
 	}
 
-	theirs := pingletest.Call(t, http.MethodGet, "/staff/checkin/list", ownerB, nil)
-	if list := pingletest.ListOf(t, theirs, "checkins"); theirs.Status != http.StatusOK || len(list) != 0 {
+	theirs := packetpulsetest.Call(t, http.MethodGet, "/staff/checkin/list", ownerB, nil)
+	if list := packetpulsetest.ListOf(t, theirs, "checkins"); theirs.Status != http.StatusOK || len(list) != 0 {
 		t.Errorf("B lists %d check-ins (%d), want none of A's", len(list), theirs.Status)
 	}
 }
@@ -337,15 +343,15 @@ func TestCheckinsAreTheOrganisationsOwnFieldSessions(t *testing.T) {
 // Results leave an organisation three ways - a ticket's CSV, the API key
 // pull, and the push to its own file server - and each carries only its own.
 func TestExportsCarryOnlyTheOrganisationsOwnResults(t *testing.T) {
-	pingletest.RequireServer(t)
-	alphaToken, _ := pingletest.SignUpOrganisation(t, "export-a")
-	betaToken, _ := pingletest.SignUpOrganisation(t, "export-b")
+	packetpulsetest.RequireServer(t)
+	alphaToken, _ := packetpulsetest.SignUpOrganisation(t, "export-a")
+	betaToken, _ := packetpulsetest.SignUpOrganisation(t, "export-b")
 
-	pingletest.Call(t, http.MethodPost, "/dnssite/add", alphaToken, map[string]any{
+	packetpulsetest.Call(t, http.MethodPost, "/dnssite/add", alphaToken, map[string]any{
 		"site_name": "loopback", "ip_address": "127.0.0.1",
 	})
 	ttNumber := fmt.Sprintf("TT-EXPORT-ISO-%d", testStamp())
-	submit := pingletest.Call(t, http.MethodPost, "/diagnostic/submit", alphaToken, map[string]any{
+	submit := packetpulsetest.Call(t, http.MethodPost, "/diagnostic/submit", alphaToken, map[string]any{
 		"customer_id": "CUST-ISO", "tt_number": ttNumber, "packet_count": 1, "timeout_ms": 900,
 	})
 	if submit.Status != http.StatusCreated {
@@ -355,25 +361,25 @@ func TestExportsCarryOnlyTheOrganisationsOwnResults(t *testing.T) {
 	requestId, _ := request["request_id"].(string)
 
 	t.Run("beta cannot download alpha's ticket", func(t *testing.T) {
-		response := pingletest.Call(t, http.MethodGet, "/diagnostic/"+requestId+"/report.csv", betaToken, nil)
+		response := packetpulsetest.Call(t, http.MethodGet, "/diagnostic/"+requestId+"/report.csv", betaToken, nil)
 		if response.Status != http.StatusNotFound || strings.Contains(string(response.Raw), ttNumber) {
 			t.Errorf("beta's download of alpha's ticket = %d %s", response.Status, response.Raw)
 		}
 	})
 
 	t.Run("beta's key pulls none of alpha's results", func(t *testing.T) {
-		issued := pingletest.Call(t, http.MethodPost, "/apikey/add", betaToken, map[string]any{"label": "iso"})
+		issued := packetpulsetest.Call(t, http.MethodPost, "/apikey/add", betaToken, map[string]any{"label": "iso"})
 		if issued.Status != http.StatusCreated {
 			t.Skipf("could not issue beta a key: %d", issued.Status)
 		}
-		pulled := pingletest.Call(t, http.MethodGet, "/result/export.csv", issued.String("api_key"), nil)
+		pulled := packetpulsetest.Call(t, http.MethodGet, "/result/export.csv", issued.String("api_key"), nil)
 		if pulled.Status != http.StatusOK || strings.Contains(string(pulled.Raw), ttNumber) {
 			t.Errorf("beta's pull = %d, holding alpha's ticket: %v", pulled.Status, strings.Contains(string(pulled.Raw), ttNumber))
 		}
 	})
 
 	t.Run("beta cannot see or change alpha's file server", func(t *testing.T) {
-		saved := pingletest.Call(t, http.MethodPut, "/export/target", alphaToken, map[string]any{
+		saved := packetpulsetest.Call(t, http.MethodPut, "/export/target", alphaToken, map[string]any{
 			"is_enabled": false, "protocol": "sftp", "host": "alpha-files.example.com",
 			"username": "alpha", "password": "alpha-secret",
 		})
@@ -383,14 +389,14 @@ func TestExportsCarryOnlyTheOrganisationsOwnResults(t *testing.T) {
 		if strings.Contains(string(saved.Raw), "alpha-secret") {
 			t.Error("the password came back in the response")
 		}
-		betaView := pingletest.Call(t, http.MethodGet, "/export/target", betaToken, nil)
+		betaView := packetpulsetest.Call(t, http.MethodGet, "/export/target", betaToken, nil)
 		if betaView.Status != http.StatusOK || betaView.String("host") != "" || betaView.Body["has_password"] != false {
 			t.Errorf("beta sees %d %s, want an empty target of its own", betaView.Status, betaView.Raw)
 		}
-		pingletest.Call(t, http.MethodPut, "/export/target", betaToken, map[string]any{
+		packetpulsetest.Call(t, http.MethodPut, "/export/target", betaToken, map[string]any{
 			"is_enabled": false, "protocol": "ftp", "host": "beta-files.example.com",
 		})
-		alphaView := pingletest.Call(t, http.MethodGet, "/export/target", alphaToken, nil)
+		alphaView := packetpulsetest.Call(t, http.MethodGet, "/export/target", alphaToken, nil)
 		if alphaView.String("host") != "alpha-files.example.com" || alphaView.Body["has_password"] != true {
 			t.Errorf("beta's save changed alpha's target: %s", alphaView.Raw)
 		}

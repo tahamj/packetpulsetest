@@ -1,73 +1,117 @@
-// Package tenancyassignment proves Addenda 1-3: who may create an organisation,
-// who may licence one, and how many people may be signed in at once.
+// Package tenancyassignment proves who may create an organisation, what
+// licenses a server to admit its people, and how many people a licence
+// covers.
 //
 // These are integration tests against a running server and a real database,
 // because each property is a property of the whole stack. A unit test with a
 // mocked repository would pass while a missing WHERE clause let anyone create a
 // tenant.
+//
+// The server under test is the console as well as a customer's server: the
+// suite records each organisation and issues its licence file through the
+// console, then installs the file where the server reads licences - which is
+// what a customer does with the file the vendor sends.
 package tenancyassignment
 
 import (
 	"fmt"
 	"net/http"
+	"os"
+	"regexp"
+	"strings"
 	"testing"
 	"time"
 
-	pingletest "github.com/tahamj/pingletest"
+	packetpulsetest "github.com/tahamj/packetpulsetest"
 )
 
-// --------------------------------------------------- Addendum 1: tenancy ---
+// ------------------------------------------- who creates an organisation ---
 
-// Signing up must NOT create an organisation. It creates an account in the
-// holding organisation, where it waits to be assigned.
-func TestSignUpLandsInTheHoldingOrganisation(t *testing.T) {
-	pingletest.RequireServer(t)
+// Signing up creates nothing unless an installed licence names the address
+// as its owner: a stranger cannot make themselves a tenant, and an
+// organisation's people are added by its administrator, not by signing up.
+func TestSignUpNeedsALicenceNamingTheAddress(t *testing.T) {
+	packetpulsetest.RequireServer(t)
 
-	token, _, _, _ := pingletest.SignUpUnassigned(t, "holding")
-
-	me := pingletest.Call(t, http.MethodGet, "/user/me", token, nil)
-	if me.Status != http.StatusOK {
-		t.Fatalf("a freshly signed-up account cannot read /user/me: %d %s", me.Status, me.Raw)
-	}
-
-	// It must be scoped to SOMETHING: an unscoped account would 400 on nearly
-	// every route and look like a broken server rather than one awaiting
-	// assignment.
-	if me.String("organisation_id") == "" {
-		t.Error("the account has no organisation scope at all; it should be in the holding organisation")
-	}
-	if got := me.String("organisation_name"); got != "Unassigned" {
-		t.Errorf("expected the holding organisation, got %q", got)
-	}
-	if me.Body["is_org_owner"] == true {
-		t.Error("a self-signup became an owner; only a superuser confers ownership")
+	licensed := packetpulsetest.LicensedOrganisation(t, "notowner", 5)
+	for name, email := range map[string]string{
+		"an address no licence names":  fmt.Sprintf("unlicensed-%d@packetpulsetest.local", randomStamp()),
+		"someone other than the owner": "not-" + licensed.OwnerEmail,
+	} {
+		response := packetpulsetest.Call(t, http.MethodPost, "/user/signup", "", map[string]any{
+			"email": email, "password": "PacketPulseTest2026x", "display_name": "Stranger",
+		})
+		if response.Status != http.StatusForbidden || response.String("challenge_id") != "" {
+			t.Errorf("%s: sign-up = %d %s, want a refusal and no code", name, response.Status, response.Raw)
+		}
+		// Refused before anything was stored: the address has no account.
+		signIn := packetpulsetest.Call(t, http.MethodPost, "/user/signin", "", map[string]any{
+			"email": email, "password": "PacketPulseTest2026x",
+		})
+		if signIn.Status != http.StatusUnauthorized {
+			t.Errorf("%s: a refused sign-up left an account behind (sign-in = %d)", name, signIn.Status)
+		}
 	}
 }
 
-// The organisation name is no longer part of signup, and sending one must be
-// refused rather than quietly ignored - a silently dropped field would let a
-// caller believe they had named their organisation.
+// The organisation name is not part of sign-up - the licence names the
+// organisation - and sending one must be refused rather than quietly ignored.
 func TestSignUpRejectsAnOrganisationName(t *testing.T) {
-	pingletest.RequireServer(t)
+	packetpulsetest.RequireServer(t)
 
-	response := pingletest.Call(t, http.MethodPost, "/user/signup", "", map[string]any{
+	licensed := packetpulsetest.LicensedOrganisation(t, "smuggle", 5)
+	response := packetpulsetest.Call(t, http.MethodPost, "/user/signup", "", map[string]any{
 		"organisation_name": "Smuggled In",
-		"email":             fmt.Sprintf("smuggle-%d@pingletest.local", randomStamp()),
-		"password":          "PingleTest2026x",
+		"email":             licensed.OwnerEmail,
+		"password":          licensed.OwnerPassword,
 		"display_name":      "Smuggler",
 	})
 	if response.Status == http.StatusCreated {
-		t.Error("signup accepted an organisation name; only a superuser creates organisations")
+		t.Error("sign-up accepted an organisation name; the licence names the organisation")
 	}
+	// The address could sign up: it was the extra field that was refused.
+	packetpulsetest.SignUpOwner(t, licensed.OwnerEmail, licensed.OwnerPassword, "Owner")
+}
+
+// The owner the licence names, once their emailed code is given, is the
+// Administrator of the organisation the licence was issued to.
+func TestTheLicensedOwnerBecomesTheAdministrator(t *testing.T) {
+	packetpulsetest.RequireServer(t)
+
+	organisation := packetpulsetest.NewOrganisation(t, "owner", 5)
+	me := packetpulsetest.Call(t, http.MethodGet, "/user/me", organisation.OwnerToken, nil)
+	if me.Status != http.StatusOK {
+		t.Fatalf("the owner cannot read /user/me: %d %s", me.Status, me.Raw)
+	}
+	if me.String("organisation_id") != organisation.Id || me.Body["is_org_owner"] != true ||
+		me.String("role_name") != "Administrator" {
+		t.Errorf("the owner is %s, want the Administrator and owner of %s", me.Raw, organisation.Id)
+	}
+}
+
+// Once the owner has signed in, signing up with their address again is
+// refused and changes nothing: otherwise anyone who learned the address could
+// replace the owner's password.
+func TestAFinishedOwnerSignUpCannotBeRepeated(t *testing.T) {
+	packetpulsetest.RequireServer(t)
+
+	organisation := packetpulsetest.NewOrganisation(t, "again", 5)
+	response := packetpulsetest.Call(t, http.MethodPost, "/user/signup", "", map[string]any{
+		"email": organisation.OwnerEmail, "password": "Different2026xx", "display_name": "Usurper",
+	})
+	if response.Status != http.StatusConflict || response.String("challenge_id") != "" {
+		t.Errorf("a second sign-up = %d %s, want 409 and no code", response.Status, response.Raw)
+	}
+	packetpulsetest.SignIn(t, organisation.OwnerEmail, organisation.OwnerPassword)
 }
 
 // Only a superuser creates a tenant.
 func TestOnlySuperUserCreatesAnOrganisation(t *testing.T) {
-	pingletest.RequireServer(t)
+	packetpulsetest.RequireServer(t)
 
-	ownerToken, _ := pingletest.SignUpOrganisation(t, "orgcreate")
+	ownerToken, _ := packetpulsetest.SignUpOrganisation(t, "orgcreate")
 
-	response := pingletest.Call(t, http.MethodPost, "/platform/organisation/add", ownerToken, map[string]any{
+	response := packetpulsetest.Call(t, http.MethodPost, "/platform/organisation/add", ownerToken, map[string]any{
 		"org_code": "SNEAKY", "org_name": "Sneaky Telecom",
 	})
 	if response.Status != http.StatusForbidden {
@@ -77,305 +121,338 @@ func TestOnlySuperUserCreatesAnOrganisation(t *testing.T) {
 
 	// And it is genuinely reachable by a superuser, so the test above is
 	// measuring authority rather than a route that does not exist.
-	superUser := pingletest.SuperUserToken(t)
-	stamp := randomStamp()
-	allowed := pingletest.Call(t, http.MethodPost, "/platform/organisation/add", superUser, map[string]any{
-		"org_code": pingletest.UniqueCode("OK"),
-		"org_name": fmt.Sprintf("Allowed %d", stamp),
+	superUser := packetpulsetest.SuperUserToken(t)
+	allowed := packetpulsetest.Call(t, http.MethodPost, "/platform/organisation/add", superUser, map[string]any{
+		"org_code": packetpulsetest.UniqueCode("OK"),
+		"org_name": fmt.Sprintf("Allowed %d", randomStamp()),
 	})
 	if allowed.Status != http.StatusCreated {
 		t.Errorf("a superuser could not create an organisation: %d %s", allowed.Status, allowed.Raw)
 	}
 }
 
-// Assignment moves the account, gives it a role, and invalidates the token it
-// held against the holding organisation.
-func TestSuperUserAssignsAnAccountToAnOrganisation(t *testing.T) {
-	pingletest.RequireServer(t)
+// --------------------------------------------------------- licence files ---
 
-	holdingToken, userId, email, password := pingletest.SignUpUnassigned(t, "assign")
-	superUser := pingletest.SuperUserToken(t)
-
-	stamp := randomStamp()
-	created := pingletest.Call(t, http.MethodPost, "/platform/organisation/add", superUser, map[string]any{
-		"org_code": pingletest.UniqueCode("AS"),
-		"org_name": fmt.Sprintf("Assigned %d", stamp),
-	})
-	organisationId := created.String("organisation_id")
-
-	assigned := pingletest.Call(t, http.MethodPost,
-		"/platform/organisation/"+organisationId+"/assign", superUser, map[string]any{
-			"user_id": userId, "role_name": "NOC Engineer",
-		})
-	if assigned.Status != http.StatusOK {
-		t.Fatalf("assignment failed: %d %s", assigned.Status, assigned.Raw)
-	}
-
-	// The old token was minted against the holding organisation. Leaving it live
-	// would leave a token scoped to a tenancy the account has left.
-	stale := pingletest.Call(t, http.MethodGet, "/user/me", holdingToken, nil)
-	if stale.Status == http.StatusOK {
-		t.Error("the pre-assignment token still works; it is scoped to the organisation they left")
-	}
-
-	fresh := pingletest.SignIn(t, email, password)
-	me := pingletest.Call(t, http.MethodGet, "/user/me", fresh, nil)
-	if got := me.String("organisation_id"); got != organisationId {
-		t.Errorf("after assignment the account is in %q, expected %q", got, organisationId)
-	}
-	if got := me.String("role_name"); got != "NOC Engineer" {
-		t.Errorf("expected the assigned role, got %q", got)
-	}
-}
-
-// The holding organisation is a waiting room, not a destination.
-func TestAccountsCannotBeAssignedIntoTheHoldingOrganisation(t *testing.T) {
-	pingletest.RequireServer(t)
-
-	_, userId, _, _ := pingletest.SignUpUnassigned(t, "intoholding")
-	superUser := pingletest.SuperUserToken(t)
-
-	waiting := pingletest.Call(t, http.MethodGet, "/platform/user/unassigned", superUser, nil)
-	holdingId := waiting.String("holding_organisation_id")
-	if holdingId == "" {
-		t.Fatal("the server did not report a holding organisation")
-	}
-
-	response := pingletest.Call(t, http.MethodPost,
-		"/platform/organisation/"+holdingId+"/assign", superUser, map[string]any{
-			"user_id": userId, "role_name": "Viewer",
-		})
-	if response.Status < 400 {
-		t.Errorf("an account was assigned INTO the holding organisation: %d %s",
-			response.Status, response.Raw)
-	}
-}
-
-// An account already in a real tenant is not moved by this operation: doing so
-// would carry its staff row across a tenant boundary while the previous
-// organisation's audit trail kept pointing at it.
-func TestAnAssignedAccountIsNotReassigned(t *testing.T) {
-	pingletest.RequireServer(t)
-
-	_, userId, _, _ := pingletest.SignUpUnassigned(t, "reassign")
-	superUser := pingletest.SuperUserToken(t)
-
-	first := newOrganisation(t, superUser, "first")
-	second := newOrganisation(t, superUser, "second")
-
-	if response := pingletest.Call(t, http.MethodPost,
-		"/platform/organisation/"+first+"/assign", superUser, map[string]any{
-			"user_id": userId, "role_name": "Viewer",
-		}); response.Status != http.StatusOK {
-		t.Fatalf("the first assignment failed: %d %s", response.Status, response.Raw)
-	}
-
-	response := pingletest.Call(t, http.MethodPost,
-		"/platform/organisation/"+second+"/assign", superUser, map[string]any{
-			"user_id": userId, "role_name": "Viewer",
-		})
-	if response.Status < 400 {
-		t.Errorf("an assigned account was moved between tenants: %d %s",
-			response.Status, response.Raw)
-	}
-}
-
-// -------------------------------------------------- Addendum 2: licences ---
-
-// Only a superuser issues a licence.
+// Only a superuser records a licence or signs one as a file.
 func TestOnlySuperUserIssuesALicence(t *testing.T) {
-	pingletest.RequireServer(t)
+	packetpulsetest.RequireServer(t)
 
-	ownerToken, organisationId := pingletest.SignUpOrganisation(t, "licauth")
+	organisation := packetpulsetest.NewOrganisation(t, "licauth", 5)
 
-	response := pingletest.Call(t, http.MethodPost, "/platform/licence/issue", ownerToken, map[string]any{
-		"organisation_id": organisationId, "plan_code": "trial",
+	issued := packetpulsetest.Call(t, http.MethodPost, "/platform/licence/issue", organisation.OwnerToken, map[string]any{
+		"organisation_id": organisation.Id, "plan_code": "trial",
 		"currency_code": "INR", "duration_months": 99,
 		"seat_limit": 9999, "site_limit": 9999, "is_complimentary": true,
 	})
-	if response.Status != http.StatusForbidden {
-		t.Errorf("an organisation owner could issue itself a licence: %d %s",
-			response.Status, response.Raw)
+	if issued.Status != http.StatusForbidden {
+		t.Errorf("an organisation owner could issue itself a licence: %d %s", issued.Status, issued.Raw)
+	}
+	file := packetpulsetest.Call(t, http.MethodPost, "/platform/licence/"+organisation.LicenceId+"/file",
+		organisation.OwnerToken, map[string]any{"owner_email": organisation.OwnerEmail})
+	if file.Status != http.StatusForbidden || file.String("content") != "" {
+		t.Errorf("an organisation owner could sign a licence file: %d %s", file.Status, file.Raw)
 	}
 }
 
-// Signing up must not grant its own trial: a tenant that can licence itself is
-// not one a superuser controls.
-func TestSignUpGrantsNoLicence(t *testing.T) {
-	pingletest.RequireServer(t)
+// Sign-in re-reads the licence file every time. Taken away or altered, it
+// admits nobody - with the refusal that says to renew - and the genuine file
+// put back admits them again, without a restart.
+func TestSignInNeedsAGenuineLicenceFileOnDisk(t *testing.T) {
+	packetpulsetest.RequireServer(t)
 
-	token, _, _, _ := pingletest.SignUpUnassigned(t, "nolicence")
-
-	response := pingletest.Call(t, http.MethodGet, "/licence/my", token, nil)
-	if response.Status == http.StatusOK && response.Body["has_licence"] == true {
-		t.Error("signing up granted a licence; only a superuser issues one")
+	organisation := packetpulsetest.NewOrganisation(t, "licfile", 5)
+	genuine, err := os.ReadFile(organisation.LicencePath)
+	if err != nil {
+		t.Fatalf("reading the installed licence: %v", err)
 	}
+
+	expectNoLicence := func(state string) {
+		t.Helper()
+		response := packetpulsetest.Call(t, http.MethodPost, "/user/signin", "", map[string]any{
+			"email": organisation.OwnerEmail, "password": organisation.OwnerPassword,
+		})
+		if response.Status != http.StatusForbidden || response.ErrorCode() != "licence_expired" ||
+			response.String("challenge_id") != "" {
+			t.Errorf("%s: sign-in = %d %s, want licence_expired and no code", state, response.Status, response.Raw)
+		}
+		if action, _ := response.Body["error"].(map[string]any)["action"].(string); action != "renew" {
+			t.Errorf("%s: action = %q, want renew", state, action)
+		}
+	}
+
+	if err := os.Remove(organisation.LicencePath); err != nil {
+		t.Fatal(err)
+	}
+	expectNoLicence("with the file removed")
+
+	// Five people bought, five hundred claimed: the terms no longer match the
+	// signature.
+	seats := regexp.MustCompile(`"seat_limit":\s*5\b`)
+	if !seats.Match(genuine) {
+		t.Fatalf("the licence file carries no seat_limit of 5 to alter: %s", genuine)
+	}
+	if err := os.WriteFile(organisation.LicencePath, seats.ReplaceAll(genuine, []byte(`"seat_limit": 500`)), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	expectNoLicence("with the file altered")
+
+	if err := os.WriteFile(organisation.LicencePath, genuine, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	packetpulsetest.SignIn(t, organisation.OwnerEmail, organisation.OwnerPassword)
 }
 
-// The holding organisation is not a customer and cannot hold a licence.
-func TestHoldingOrganisationCannotBeLicensed(t *testing.T) {
-	pingletest.RequireServer(t)
+// ------------------------------------------------- people on the licence ---
 
-	superUser := pingletest.SuperUserToken(t)
-	waiting := pingletest.Call(t, http.MethodGet, "/platform/user/unassigned", superUser, nil)
-	holdingId := waiting.String("holding_organisation_id")
+// A licence counts people, not sign-ins: the same person signed in on three
+// devices takes one place, and adding a person beyond the licence is refused
+// with a refusal that says what to do.
+func TestTheLicenceCountsPeopleNotSignIns(t *testing.T) {
+	packetpulsetest.RequireServer(t)
 
-	response := pingletest.Call(t, http.MethodPost, "/platform/licence/issue", superUser, map[string]any{
-		"organisation_id": holdingId, "plan_code": "trial",
-		"currency_code": "INR", "duration_months": 12,
-		"seat_limit": 5, "site_limit": 5, "is_complimentary": true,
-	})
-	if response.Status < 400 {
-		t.Errorf("the holding organisation was licensed: %d %s", response.Status, response.Raw)
-	}
-	// It must be refused as a RULE, not as a server failure: a 500 here would
-	// mean the database caught it and nobody classified it.
-	if response.Status >= 500 {
-		t.Errorf("refused with %d; a rule violation is the caller being wrong, not the server failing",
-			response.Status)
-	}
-}
-
-// ----------------------------------------------------- Addendum 3: seats ---
-
-// A licence for N people admits N signed in at once, and the (N+1)th is
-// refused with an error that says what to do about it.
-func TestSeatsAreCountedAsConcurrentSessions(t *testing.T) {
-	pingletest.RequireServer(t)
-
-	// One seat, two people.
-	ownerToken, organisationId := pingletest.SignUpOrganisationWithSeats(t, "seats", 1)
-	colleagueEmail, colleaguePassword := addColleague(t, ownerToken, organisationId)
-
-	// The owner already holds the only seat from the sign-in inside the helper.
-	response := pingletest.Call(t, http.MethodPost, "/user/signin", "", map[string]any{
-		"email": colleagueEmail, "password": colleaguePassword,
-	})
-	if response.Status != http.StatusForbidden {
-		t.Fatalf("a second person signed in against a one-seat licence: %d %s",
-			response.Status, response.Raw)
-	}
-	if got := response.ErrorCode(); got != "seat_limit_reached" {
-		t.Errorf("refused with %q; the client cannot tell seats from an expired licence", got)
-	}
-	// The remedy is a colleague signing out, not re-typing a password, so the
-	// refusal has to carry an action the interface can act on.
-	if action, _ := response.Body["error"].(map[string]any)["action"].(string); action == "" {
-		t.Error("the refusal carries no action; the client cannot offer a way forward")
-	}
-}
-
-// Signing in twice must not lock someone out of their own account.
-func TestOwnSessionsDoNotConsumeASecondSeat(t *testing.T) {
-	pingletest.RequireServer(t)
-
-	stamp := randomStamp()
-	email := fmt.Sprintf("selfseat-%d@pingletest.local", stamp)
-	const password = "PingleTest2026x"
-
-	signUp := pingletest.Call(t, http.MethodPost, "/user/signup", "", map[string]any{
-		"email": email, "password": password, "display_name": "Self Seat",
-	})
-	userId := signUp.String("user_id")
-
-	superUser := pingletest.SuperUserToken(t)
-	organisationId := newOrganisation(t, superUser, "selfseat")
-	pingletest.Call(t, http.MethodPost, "/platform/organisation/"+organisationId+"/assign",
-		superUser, map[string]any{"user_id": userId, "role_name": "Administrator", "is_org_owner": true})
-	pingletest.IssueLicence(t, superUser, organisationId, 1)
-
-	// Three sign-ins by the same person against a one-seat licence. A seat is
-	// held by a PERSON, not by a tab.
-	// Each completes both steps: a session is what holds a seat, and only the
-	// second step opens one. SignIn fails the test on any refusal.
+	organisation := packetpulsetest.NewOrganisation(t, "people", 2)
 	for attempt := 1; attempt <= 3; attempt++ {
-		if token := pingletest.SignIn(t, email, password); token == "" {
+		if token := packetpulsetest.SignIn(t, organisation.OwnerEmail, organisation.OwnerPassword); token == "" {
 			t.Fatalf("sign-in %d of the same person opened no session", attempt)
 		}
 	}
+	addColleague(t, organisation.OwnerToken)
+
+	refused, _ := tryAddColleague(t, organisation.OwnerToken)
+	expectFull(t, refused, "a third person on a licence for two")
 }
 
-// A superuser is never seat-limited: they belong to no tenant.
-func TestSuperUserIsNotSeatLimited(t *testing.T) {
-	pingletest.RequireServer(t)
+// Someone who has left is switched off, not removed: their record stays, and
+// so does their place on the licence. Deleting someone who never used the
+// product takes them off it.
+func TestAnInactivePersonStillCountsAndADeletedOneDoesNot(t *testing.T) {
+	packetpulsetest.RequireServer(t)
 
-	for attempt := 1; attempt <= 3; attempt++ {
-		if token := pingletest.SuperUserSignIn(t); token == "" {
-			t.Fatalf("the superuser was refused on attempt %d", attempt)
-		}
+	organisation := packetpulsetest.NewOrganisation(t, "leaver", 2)
+	leaver := addColleague(t, organisation.OwnerToken)
+
+	setEnabled(t, organisation.OwnerToken, leaver, false)
+	refused, _ := tryAddColleague(t, organisation.OwnerToken)
+	expectFull(t, refused, "a switched-off person freed their place")
+
+	deleted := packetpulsetest.Call(t, http.MethodDelete, "/staff/"+leaver.staffId, organisation.OwnerToken, nil)
+	if deleted.Status != http.StatusNoContent {
+		t.Fatalf("deleting a person with no records: %d %s", deleted.Status, deleted.Raw)
+	}
+	if added, _ := tryAddColleague(t, organisation.OwnerToken); added.Status != http.StatusCreated {
+		t.Errorf("a deleted person still holds their place: adding another = %d %s", added.Status, added.Raw)
 	}
 }
 
-// Seats may be set below the staff count: that is what a floating licence IS.
-func TestSeatsMayBeSetBelowTheStaffCount(t *testing.T) {
-	pingletest.RequireServer(t)
+// A person with something on record - here, a sign-in - can be switched off
+// but not deleted: deleting them would orphan what they did.
+func TestAPersonWithRecordsIsSwitchedOffNotDeleted(t *testing.T) {
+	packetpulsetest.RequireServer(t)
 
-	ownerToken, organisationId := pingletest.SignUpOrganisationWithSeats(t, "floating", 5)
-	addColleague(t, ownerToken, organisationId)
+	organisation := packetpulsetest.NewOrganisation(t, "records", 5)
+	colleague := addColleague(t, organisation.OwnerToken)
+	packetpulsetest.SignIn(t, colleague.email, colleague.password)
 
-	superUser := pingletest.SuperUserToken(t)
-	licence := pingletest.Call(t, http.MethodGet,
-		"/platform/organisation/"+organisationId+"/licence", superUser, nil)
-	licenceId := licence.String("licence_id")
-	if licenceId == "" {
-		t.Fatalf("no licence found for the organisation: %s", licence.Raw)
+	deleted := packetpulsetest.Call(t, http.MethodDelete, "/staff/"+colleague.staffId, organisation.OwnerToken, nil)
+	if deleted.Status != http.StatusConflict {
+		t.Errorf("deleting a person who has signed in = %d %s, want 409", deleted.Status, deleted.Raw)
+	}
+	listed := packetpulsetest.Call(t, http.MethodGet, "/staff/list", organisation.OwnerToken, nil)
+	if !strings.Contains(string(listed.Raw), colleague.staffId) {
+		t.Error("the refused deletion removed the person anyway")
+	}
+}
+
+// Switching someone off signs them out everywhere at once - their session
+// stops working on its next request, not when it expires - and refuses their
+// next sign-in at the password, before a code is sent. Switched back on, they
+// are admitted again.
+func TestASwitchedOffPersonIsSignedOutAndCannotSignIn(t *testing.T) {
+	packetpulsetest.RequireServer(t)
+
+	organisation := packetpulsetest.NewOrganisation(t, "switchedoff", 5)
+	colleague := addColleague(t, organisation.OwnerToken)
+	session := packetpulsetest.SignIn(t, colleague.email, colleague.password)
+
+	setEnabled(t, organisation.OwnerToken, colleague, false)
+	if me := packetpulsetest.Call(t, http.MethodGet, "/user/me", session, nil); me.Status != http.StatusUnauthorized {
+		t.Errorf("a switched-off person's session still answers %d, want 401", me.Status)
+	}
+	refused := packetpulsetest.Call(t, http.MethodPost, "/user/signin", "", map[string]any{
+		"email": colleague.email, "password": colleague.password,
+	})
+	if refused.Status != http.StatusForbidden || refused.String("challenge_id") != "" {
+		t.Errorf("a switched-off person signing in = %d %s, want 403 and no code", refused.Status, refused.Raw)
 	}
 
-	response := pingletest.Call(t, http.MethodPut,
-		"/platform/licence/"+licenceId+"/seats", superUser, map[string]any{
-			"seat_limit": 1, "site_limit": 200,
-		})
-	if response.Status != http.StatusOK {
-		t.Errorf("a floating licence below the staff count was refused: %d %s",
-			response.Status, response.Raw)
+	setEnabled(t, organisation.OwnerToken, colleague, true)
+	packetpulsetest.SignIn(t, colleague.email, colleague.password)
+}
+
+// A smaller licence installed over a bigger one - fewer places than people -
+// keeps everyone but the owner out until people are deleted or a bigger
+// licence arrives. The owner is let in because they are who can fix it.
+func TestASmallerLicenceKeepsEveryoneButTheOwnerOut(t *testing.T) {
+	packetpulsetest.RequireServer(t)
+
+	organisation := packetpulsetest.NewOrganisation(t, "smaller", 5)
+	colleague := addColleague(t, organisation.OwnerToken)
+
+	superUser := packetpulsetest.SuperUserToken(t)
+	reduced := packetpulsetest.Call(t, http.MethodPut, "/platform/licence/"+organisation.LicenceId+"/seats",
+		superUser, map[string]any{"seat_limit": 1, "site_limit": 200})
+	if reduced.Status != http.StatusOK {
+		t.Fatalf("the console refused a licence for fewer people than the organisation has: %d %s",
+			reduced.Status, reduced.Raw)
+	}
+	_, content := packetpulsetest.LicenceFile(t, superUser, organisation.LicenceId, organisation.OwnerEmail)
+	if err := os.WriteFile(organisation.LicencePath, []byte(content), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	refused := packetpulsetest.Call(t, http.MethodPost, "/user/signin", "", map[string]any{
+		"email": colleague.email, "password": colleague.password,
+	})
+	expectFull(t, refused, "two people signing in on a licence for one")
+	if refused.Status != http.StatusForbidden {
+		t.Errorf("status = %d, want 403: the credentials were right", refused.Status)
+	}
+	packetpulsetest.SignIn(t, organisation.OwnerEmail, organisation.OwnerPassword)
+}
+
+// ---------------------------------------------------------- second step ---
+
+// A password alone opens nothing. The token comes from the emailed code, a
+// wrong code says how many tries are left, and a challenge id that is not one
+// is refused outright.
+func TestSignInNeedsTheSecondFactor(t *testing.T) {
+	packetpulsetest.RequireServer(t)
+
+	organisation := packetpulsetest.NewOrganisation(t, "twostep", 5)
+
+	first := packetpulsetest.Call(t, http.MethodPost, "/user/signin", "", map[string]any{
+		"email": organisation.OwnerEmail, "password": organisation.OwnerPassword,
+	})
+	if first.Status != http.StatusOK || first.String("token") != "" || first.String("method") != "email" {
+		t.Fatalf("the password step = %d %s, want an emailed code and no token", first.Status, first.Raw)
+	}
+	// Enough to know which inbox to open; not the address itself.
+	if hint := first.String("email_hint"); hint == "" || hint == organisation.OwnerEmail {
+		t.Errorf("email_hint = %q, want the address partly hidden", hint)
+	}
+	challengeId := first.String("challenge_id")
+	code := packetpulsetest.CodeFor(t, challengeId)
+	wrongCode := "000000"
+	if code == wrongCode {
+		wrongCode = "111111"
+	}
+
+	wrong := packetpulsetest.Call(t, http.MethodPost, "/user/signin/verify", "", map[string]any{
+		"challenge_id": challengeId, "code": wrongCode,
+	})
+	if wrong.Status != http.StatusUnauthorized || wrong.ErrorCode() != "invalid_code" {
+		t.Fatalf("a wrong code = %d %s", wrong.Status, wrong.Raw)
+	}
+	if details, _ := wrong.Body["error"].(map[string]any)["details"].(map[string]any); details["attempts_left"] != "4" {
+		t.Errorf("a wrong code did not say four tries remain: %s", wrong.Raw)
+	}
+
+	malformed := packetpulsetest.Call(t, http.MethodPost, "/user/signin/verify", "", map[string]any{
+		"challenge_id": "not-a-challenge", "code": "123456",
+	})
+	if malformed.Status != http.StatusBadRequest {
+		t.Errorf("a malformed challenge = %d, want 400", malformed.Status)
+	}
+
+	right := packetpulsetest.Call(t, http.MethodPost, "/user/signin/verify", "", map[string]any{
+		"challenge_id": challengeId, "code": code,
+	})
+	token := right.String("token")
+	if right.Status != http.StatusOK || token == "" {
+		t.Fatalf("the right code = %d %s", right.Status, right.Raw)
+	}
+	if me := packetpulsetest.Call(t, http.MethodGet, "/user/me", token, nil); me.Status != http.StatusOK {
+		t.Errorf("the token from the second step does not work: %d", me.Status)
+	}
+
+	// A finished sign-in cannot be finished again.
+	again := packetpulsetest.Call(t, http.MethodPost, "/user/signin/verify", "", map[string]any{
+		"challenge_id": challengeId, "code": code,
+	})
+	if again.Status != http.StatusUnauthorized || again.ErrorCode() != "challenge_expired" {
+		t.Errorf("finishing a sign-in twice = %d %s", again.Status, again.Raw)
 	}
 }
 
 // ------------------------------------------------------------- helpers ---
 
-func newOrganisation(t *testing.T, superUserToken, prefix string) string {
-	t.Helper()
-
-	stamp := randomStamp()
-	created := pingletest.Call(t, http.MethodPost, "/platform/organisation/add", superUserToken,
-		map[string]any{
-			"org_code": pingletest.UniqueCode(prefix),
-			"org_name": fmt.Sprintf("%s %d", prefix, stamp),
-		})
-	if created.Status != http.StatusCreated {
-		t.Fatalf("creating %s: %d %s", prefix, created.Status, created.Raw)
-	}
-	return created.String("organisation_id")
+type colleague struct {
+	email, password, staffId, userId, roleId string
 }
 
-// addColleague adds a second person to an organisation and returns their
-// credentials.
-func addColleague(t *testing.T, ownerToken, organisationId string) (email, password string) {
+// setEnabled switches a person on or off as the Staff screen does: the whole
+// staff row, sent back with is_enabled changed.
+func setEnabled(t *testing.T, ownerToken string, person colleague, enabled bool) {
+	t.Helper()
+	response := packetpulsetest.Call(t, http.MethodPut, "/staff/"+person.staffId, ownerToken, map[string]any{
+		"staff_code": "", "full_name": "Colleague", "department": "", "designation": "",
+		"role_id": person.roleId, "is_enabled": enabled,
+	})
+	if response.Status != http.StatusOK {
+		t.Fatalf("setting is_enabled=%v: %d %s", enabled, response.Status, response.Raw)
+	}
+}
+
+// addColleague adds an engineer to the owner's organisation.
+func addColleague(t *testing.T, ownerToken string) colleague {
+	t.Helper()
+	response, added := tryAddColleague(t, ownerToken)
+	if response.Status != http.StatusCreated {
+		t.Fatalf("adding a colleague: %d %s", response.Status, response.Raw)
+	}
+	return added
+}
+
+// tryAddColleague asks to add an engineer and answers with the reply, for a
+// test that expects the addition to be refused.
+func tryAddColleague(t *testing.T, ownerToken string) (packetpulsetest.Response, colleague) {
 	t.Helper()
 
-	roles := pingletest.Call(t, http.MethodGet, "/staff/role/list", ownerToken, nil)
+	roles := packetpulsetest.Call(t, http.MethodGet, "/staff/role/list", ownerToken, nil)
 	roleId := ""
-	for _, role := range pingletest.ListOf(t, roles, "roles") {
+	for _, role := range packetpulsetest.ListOf(t, roles, "roles") {
 		if role["role_name"] == "NOC Engineer" {
 			roleId, _ = role["role_id"].(string)
 		}
 	}
 	if roleId == "" {
-		t.Skip("no NOC Engineer role available")
+		t.Fatalf("no NOC Engineer role: %s", roles.Raw)
 	}
 
-	stamp := randomStamp()
-	email = fmt.Sprintf("colleague-%d@pingletest.local", stamp)
-	password = "PingleTest2026x"
-
-	response := pingletest.Call(t, http.MethodPost, "/user/add", ownerToken, map[string]any{
-		"email": email, "password": password,
+	added := colleague{
+		email:    fmt.Sprintf("colleague-%d@packetpulsetest.local", randomStamp()),
+		password: "PacketPulseTest2026x",
+		roleId:   roleId,
+	}
+	response := packetpulsetest.Call(t, http.MethodPost, "/user/add", ownerToken, map[string]any{
+		"email": added.email, "password": added.password,
 		"display_name": "Colleague", "role_id": roleId,
 	})
-	if response.Status != http.StatusCreated {
-		t.Fatalf("adding a colleague: %d %s", response.Status, response.Raw)
+	added.staffId, added.userId = response.String("staff_id"), response.String("user_id")
+	return response, added
+}
+
+// expectFull asserts a refusal because the licence covers no more people,
+// carrying an action the client can offer.
+func expectFull(t *testing.T, response packetpulsetest.Response, what string) {
+	t.Helper()
+	if response.Status < 400 || response.ErrorCode() != "seat_limit_reached" {
+		t.Errorf("%s: %d %s, want seat_limit_reached", what, response.Status, response.Raw)
+		return
 	}
-	return email, password
+	if action, _ := response.Body["error"].(map[string]any)["action"].(string); action == "" {
+		t.Errorf("%s: the refusal carries no action; the client cannot offer a way forward", what)
+	}
 }
 
 // randomStamp gives each test its own names so a suite can run repeatedly
@@ -385,58 +462,5 @@ func addColleague(t *testing.T, ownerToken, organisationId string) (email, passw
 // clock advances in microseconds, so the low digits of UnixNano are always
 // zero and "stamp%100000" has a hundred outcomes, not a hundred thousand. For
 // anything that has to be unique against rows already stored - an org_code,
-// which the database declares UNIQUE - use pingletest.UniqueCode instead.
+// which the database declares UNIQUE - use packetpulsetest.UniqueCode instead.
 func randomStamp() int64 { return time.Now().UnixNano() }
-
-// A password alone opens nothing. The token comes from the second step, a
-// wrong code says how many tries are left, and a challenge id that is not one
-// is refused outright.
-func TestSignInNeedsTheSecondFactor(t *testing.T) {
-	pingletest.RequireServer(t)
-
-	_, _, email, password := pingletest.SignUpUnassigned(t, "twostep")
-
-	first := pingletest.Call(t, http.MethodPost, "/user/signin", "", map[string]any{
-		"email": email, "password": password,
-	})
-	if first.Status != http.StatusOK || first.String("token") != "" || first.String("method") != "totp" {
-		t.Fatalf("the password step = %d %s, want an authenticator challenge and no token", first.Status, first.Raw)
-	}
-	challengeId := first.String("challenge_id")
-
-	wrong := pingletest.Call(t, http.MethodPost, "/user/signin/verify", "", map[string]any{
-		"challenge_id": challengeId, "code": "000000",
-	})
-	if wrong.Status != http.StatusUnauthorized || wrong.ErrorCode() != "invalid_code" {
-		t.Fatalf("a wrong code = %d %s", wrong.Status, wrong.Raw)
-	}
-	if details, _ := wrong.Body["error"].(map[string]any)["details"].(map[string]any); details["attempts_left"] != "4" {
-		t.Errorf("a wrong code did not say four tries remain: %s", wrong.Raw)
-	}
-
-	malformed := pingletest.Call(t, http.MethodPost, "/user/signin/verify", "", map[string]any{
-		"challenge_id": "not-a-challenge", "code": "123456",
-	})
-	if malformed.Status != http.StatusBadRequest {
-		t.Errorf("a malformed challenge = %d, want 400", malformed.Status)
-	}
-
-	right := pingletest.Call(t, http.MethodPost, "/user/signin/verify", "", map[string]any{
-		"challenge_id": challengeId, "code": pingletest.NextCode(t, email),
-	})
-	token := right.String("token")
-	if right.Status != http.StatusOK || token == "" {
-		t.Fatalf("the right code = %d %s", right.Status, right.Raw)
-	}
-	if me := pingletest.Call(t, http.MethodGet, "/user/me", token, nil); me.Status != http.StatusOK {
-		t.Errorf("the token from the second step does not work: %d", me.Status)
-	}
-
-	// A finished sign-in cannot be finished again.
-	again := pingletest.Call(t, http.MethodPost, "/user/signin/verify", "", map[string]any{
-		"challenge_id": challengeId, "code": pingletest.NextCode(t, email),
-	})
-	if again.Status != http.StatusUnauthorized || again.ErrorCode() != "challenge_expired" {
-		t.Errorf("finishing a sign-in twice = %d %s", again.Status, again.Raw)
-	}
-}

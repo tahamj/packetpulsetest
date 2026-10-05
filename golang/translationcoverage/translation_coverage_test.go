@@ -1,8 +1,8 @@
 // Package translationcoverage verifies the string catalogue the client draws
 // every label from.
 //
-// Pingle is English only (customer requirement, October 2026). The suite kept
-// its name so CI and pingletest.sh need no change, but what it guards is now:
+// PacketPulse is English only (customer requirement, October 2026). The suite kept
+// its name so CI and packetpulsetest.sh need no change, but what it guards is now:
 //
 //   - The Go and Dart index constants agree, name for name and position for
 //     position. The client looks strings up BY POSITION, so a constant that
@@ -11,9 +11,9 @@
 //   - No other language's tables have been put back. A table nobody keeps
 //     translated degrades with every string added.
 //
-// When the Pingle server is running it also verifies the wire: one language
+// When the PacketPulse server is running it also verifies the wire: one language
 // offered, and a complete English catalogue served for every language id -
-// including the ids accounts chose before Pingle went English-only.
+// including the ids accounts chose before PacketPulse went English-only.
 package translationcoverage
 
 import (
@@ -25,7 +25,7 @@ import (
 	"strconv"
 	"testing"
 
-	pingletest "github.com/tahamj/pingletest"
+	packetpulsetest "github.com/tahamj/packetpulsetest"
 )
 
 func repoRoot(t *testing.T) string {
@@ -35,7 +35,7 @@ func repoRoot(t *testing.T) string {
 		t.Fatalf("working directory: %v", err)
 	}
 	for range 10 {
-		if isDir(filepath.Join(dir, "pinglego")) && isDir(filepath.Join(dir, "pingleflutter")) {
+		if isDir(filepath.Join(dir, "packetpulsego")) && isDir(filepath.Join(dir, "packetpulseflutter")) {
 			return dir
 		}
 		parent := filepath.Dir(dir)
@@ -80,19 +80,19 @@ var (
 
 func TestGoAndDartCataloguesAgreePositionally(t *testing.T) {
 	root := repoRoot(t)
-	constants := filepath.Join(root, "pinglego", "pkg", "initmicroservice", "initconstants")
+	constants := filepath.Join(root, "packetpulsego", "pkg", "initmicroservice", "initconstants")
 
-	goIndex := indexFrom(t, filepath.Join(constants, "PingleStringsIndex.go"), goIndexPattern)
-	dartIndex := indexFrom(t, filepath.Join(root, "pingleflutter", "lib", "common", "localization", "PingleStringsIndex.dart"), dartIndexPattern)
+	goIndex := indexFrom(t, filepath.Join(constants, "PacketPulseStringsIndex.go"), goIndexPattern)
+	dartIndex := indexFrom(t, filepath.Join(root, "packetpulseflutter", "lib", "common", "localization", "PacketPulseStringsIndex.dart"), dartIndexPattern)
 	delete(dartIndex, "stringcount") // the count, not a string
 
-	countSource, err := os.ReadFile(filepath.Join(constants, "PingleStringsIndex.go"))
+	countSource, err := os.ReadFile(filepath.Join(constants, "PacketPulseStringsIndex.go"))
 	if err != nil {
 		t.Fatal(err)
 	}
 	count := goCountPattern.FindStringSubmatch(string(countSource))
 	if count == nil {
-		t.Fatal("PingleStringsIndex.go declares no StringCount")
+		t.Fatal("PacketPulseStringsIndex.go declares no StringCount")
 	}
 	stringCount, _ := strconv.Atoi(count[1])
 
@@ -117,17 +117,17 @@ func TestGoAndDartCataloguesAgreePositionally(t *testing.T) {
 	}
 
 	// And the table itself is in that order, entry for entry.
-	tableSource, err := os.ReadFile(filepath.Join(constants, "PingleStrings.go"))
+	tableSource, err := os.ReadFile(filepath.Join(constants, "PacketPulseStrings.go"))
 	if err != nil {
 		t.Fatal(err)
 	}
 	entries := stringIdPattern.FindAllStringSubmatch(string(tableSource), -1)
 	if len(entries) != stringCount {
-		t.Fatalf("PingleStrings.go holds %d entries, want %d", len(entries), stringCount)
+		t.Fatalf("PacketPulseStrings.go holds %d entries, want %d", len(entries), stringCount)
 	}
 	for position, entry := range entries {
 		if entry[1] != strconv.Itoa(position) {
-			t.Fatalf("entry %d of PingleStrings.go claims id %s", position, entry[1])
+			t.Fatalf("entry %d of PacketPulseStrings.go claims id %s", position, entry[1])
 		}
 	}
 }
@@ -143,10 +143,10 @@ func toDartName(goName string) string {
 }
 
 func TestNoOtherLanguageTablesShip(t *testing.T) {
-	constants := filepath.Join(repoRoot(t), "pinglego", "pkg", "initmicroservice", "initconstants")
+	constants := filepath.Join(repoRoot(t), "packetpulsego", "pkg", "initmicroservice", "initconstants")
 	for _, retired := range []string{"langstrings", "langhelp"} {
 		if isDir(filepath.Join(constants, retired)) {
-			t.Errorf("initconstants/%s is back: Pingle is English only, and a table nobody translates degrades with every new string", retired)
+			t.Errorf("initconstants/%s is back: PacketPulse is English only, and a table nobody translates degrades with every new string", retired)
 		}
 	}
 }
@@ -154,13 +154,13 @@ func TestNoOtherLanguageTablesShip(t *testing.T) {
 // ── Against a running server ─────────────────────────────────────────────────
 
 func TestOnlyEnglishIsOffered(t *testing.T) {
-	pingletest.RequireServer(t)
+	packetpulsetest.RequireServer(t)
 
-	response := pingletest.Call(t, http.MethodGet, "/init/language/list", "", nil)
+	response := packetpulsetest.Call(t, http.MethodGet, "/init/language/list", "", nil)
 	if response.Status != http.StatusOK {
 		t.Fatalf("listing languages: %d", response.Status)
 	}
-	languages := pingletest.ListOf(t, response, "languages")
+	languages := packetpulsetest.ListOf(t, response, "languages")
 	if len(languages) != 1 {
 		t.Fatalf("%d languages offered, want English alone: %v", len(languages), languages)
 	}
@@ -173,18 +173,18 @@ func TestOnlyEnglishIsOffered(t *testing.T) {
 // "3" was Arabic and "22" Swahili. Accounts that chose them still send them,
 // and must be drawn in complete English, left to right.
 func TestEveryLanguageIdIsServedTheCompleteEnglishCatalogue(t *testing.T) {
-	pingletest.RequireServer(t)
+	packetpulsetest.RequireServer(t)
 
 	var english []map[string]any
 	for _, languageId := range []string{"0", "3", "22"} {
-		response := pingletest.Call(t, http.MethodGet, "/init?language_id="+languageId, "", nil)
+		response := packetpulsetest.Call(t, http.MethodGet, "/init?language_id="+languageId, "", nil)
 		if response.Status != http.StatusOK {
 			t.Fatalf("language %s: %d", languageId, response.Status)
 		}
 		if rtl, _ := response.Body["is_right_to_left"].(bool); rtl {
 			t.Errorf("language %s is laid out right to left", languageId)
 		}
-		served := pingletest.ListOf(t, response, "strings")
+		served := packetpulsetest.ListOf(t, response, "strings")
 		if len(served) == 0 {
 			t.Fatalf("language %s: the catalogue is empty", languageId)
 		}

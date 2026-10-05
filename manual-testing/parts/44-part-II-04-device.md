@@ -1,6 +1,6 @@
 ## Group 4 — The Customer's Side
 
-Measuring from where the person is, not from where Pingle is.
+Measuring from where the person is, not from where PacketPulse is.
 
 ---
 
@@ -24,8 +24,8 @@ Measuring from where the person is, not from where Pingle is.
   | `DEV-009` | Superuser | No organisation, still a test | Sign in as the platform superuser; open the screen | Tests Cloudflare DNS. The screen needs no organisation and no licence |
 - ⚙️ **Developer Guide & Release Confidence**:
   - A browser cannot send ICMP, so the web build measures DNS-over-HTTPS (Cloudflare) or an HTTPS reach to the chosen host; the app on a desktop or phone can also ping it. Jitter is RFC 3550 with the standard deviation beside it.
-  - Target normalisation (pasted URL → host, lower case, canonical IPs, zones refused): `NormaliseTestTarget` in `pinglego/pkg/staffmicroservice/staffservice/StaffCheckinService.go`.
-  - Speed: `pingleflutter/lib/diagnosticmicroservice/service/ClientThroughput.dart` (Cloudflare `__down`/`__up`, median after a warm-up); egress: `pingleflutter/lib/diagnosticmicroservice/service/ClientEgress.dart`.
-  - Coverage: `pingleflutter/test/client_probe_screen_test.dart`, `pingleflutter/test/client_probe_run_test.dart`, `pingleflutter/test/client_throughput_test.dart`, `pingleflutter/test/client_egress_test.dart`.
+  - Target normalisation (pasted URL → host, lower case, canonical IPs, zones refused): `NormaliseTestTarget` in `packetpulsego/pkg/staffmicroservice/staffservice/StaffCheckinService.go`.
+  - Speed: `packetpulseflutter/lib/diagnosticmicroservice/service/ClientThroughput.dart` (Cloudflare `__down`/`__up`, median after a warm-up); egress: `packetpulseflutter/lib/diagnosticmicroservice/service/ClientEgress.dart`.
+  - Coverage: `packetpulseflutter/test/client_probe_screen_test.dart`, `packetpulseflutter/test/client_probe_run_test.dart`, `packetpulseflutter/test/client_throughput_test.dart`, `packetpulseflutter/test/client_egress_test.dart`.
 
 ---

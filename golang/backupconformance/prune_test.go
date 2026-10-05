@@ -9,7 +9,7 @@ import (
 )
 
 // fakeBackup creates a backup directory under the fixture's root, named for
-// the moment it was taken, age ago, as PingleBackup.sh names them: complete
+// the moment it was taken, age ago, as PacketPulseBackup.sh names them: complete
 // (it has a manifest) unless incomplete is set, and receipted if pulled. The
 // scripts read a backup's age from that name, never from the directory's
 // mtime, which the puller's receipt resets.
@@ -63,7 +63,7 @@ func TestOnlyBackupsConfirmedOffsiteArePruned(t *testing.T) {
 	unpulledOld := f.fakeBackup(t, 61*24*time.Hour, false, false)
 	protected := f.fakeBackup(t, 60*24*time.Hour, true, false)
 
-	out := run(t, "PingleBackup.sh", f.env(map[string]string{"PINGLE_BACKUP_MIN_KEEP": "2"}))
+	out := run(t, "PacketPulseBackup.sh", f.env(map[string]string{"PACKETPULSE_BACKUP_MIN_KEEP": "2"}))
 	if out.code != 0 {
 		t.Fatalf("backup failed:\n%s", out.output)
 	}
@@ -82,7 +82,7 @@ func TestTheNewestBackupsAreKeptHoweverOld(t *testing.T) {
 	second := f.fakeBackup(t, 89*24*time.Hour, true, false)
 	third := f.fakeBackup(t, 88*24*time.Hour, true, false)
 
-	f.takeBackup(t, map[string]string{"PINGLE_BACKUP_MIN_KEEP": "3"})
+	f.takeBackup(t, map[string]string{"PACKETPULSE_BACKUP_MIN_KEEP": "3"})
 	assertPruned(t, oldest)
 	assertKept(t, second, third)
 }
@@ -94,9 +94,9 @@ func TestDiskPressureOverridesRetentionButKeepsTheMinimum(t *testing.T) {
 	first := f.fakeBackup(t, 2*24*time.Hour, false, false)
 	second := f.fakeBackup(t, 24*time.Hour, false, false)
 
-	out := run(t, "PingleBackup.sh", f.env(map[string]string{
-		"PINGLE_BACKUP_MIN_KEEP":    "2",
-		"PINGLE_BACKUP_MIN_FREE_MB": "999999999",
+	out := run(t, "PacketPulseBackup.sh", f.env(map[string]string{
+		"PACKETPULSE_BACKUP_MIN_KEEP":    "2",
+		"PACKETPULSE_BACKUP_MIN_FREE_MB": "999999999",
 	}))
 	if out.code != 0 {
 		t.Fatalf("backup failed:\n%s", out.output)
@@ -120,7 +120,7 @@ func TestAFailedBackupNeverCountsTowardTheMinimumKept(t *testing.T) {
 	recentFailure := f.fakeBackup(t, time.Hour, false, true)
 	oldFailure := f.fakeBackup(t, 63*24*time.Hour, false, true)
 
-	f.takeBackup(t, map[string]string{"PINGLE_BACKUP_MIN_KEEP": "2"})
+	f.takeBackup(t, map[string]string{"PACKETPULSE_BACKUP_MIN_KEEP": "2"})
 	assertPruned(t, older, oldFailure)
 	assertKept(t, good, recentFailure)
 }

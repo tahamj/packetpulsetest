@@ -48,9 +48,9 @@ func TestACorruptBackupFailsTheDrill(t *testing.T) {
 	dir := f.takeBackup(t, nil)
 	corrupt(t, filepath.Join(dir, "db.sql.gz"))
 
-	scratch := uniqueName("pingle_bk_drill")
+	scratch := uniqueName("packetpulse_bk_drill")
 	dropAfter(t, scratch)
-	out := run(t, "PingleRestoreDrill.sh", f.env(nil), "--into", scratch)
+	out := run(t, "PacketPulseRestoreDrill.sh", f.env(nil), "--into", scratch)
 	assertDrillFailed(t, f, out, scratch, "does not match its manifest checksum")
 }
 
@@ -89,9 +89,9 @@ func TestARestoreThatDisagreesWithTheDumpFailsTheDrill(t *testing.T) {
 	dir := f.takeBackup(t, nil)
 	actual := falsifyRowCount(t, dir)
 
-	scratch := uniqueName("pingle_bk_drill")
+	scratch := uniqueName("packetpulse_bk_drill")
 	dropAfter(t, scratch)
-	out := run(t, "PingleRestoreDrill.sh", f.env(nil), "--into", scratch)
+	out := run(t, "PacketPulseRestoreDrill.sh", f.env(nil), "--into", scratch)
 	assertDrillFailed(t, f, out, scratch, "public.schema_migrations: restored "+actual)
 }
 
@@ -102,7 +102,7 @@ func TestTheDrillNeverRestoresIntoTheLiveDatabase(t *testing.T) {
 	f := newFixture(t)
 	f.takeBackup(t, nil)
 
-	live := uniqueName("pingle_bk_live")
+	live := uniqueName("packetpulse_bk_live")
 	dropAfter(t, live)
 	sql(t, "postgres", `CREATE DATABASE "`+live+`"`)
 	sql(t, live, "CREATE TABLE still_here (id int); INSERT INTO still_here VALUES (1)")
@@ -111,7 +111,7 @@ func TestTheDrillNeverRestoresIntoTheLiveDatabase(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	out := run(t, "PingleRestoreDrill.sh", f.env(map[string]string{"PINGLE_ENV_FILE": liveEnv}), "--into", live)
+	out := run(t, "PacketPulseRestoreDrill.sh", f.env(map[string]string{"PACKETPULSE_ENV_FILE": liveEnv}), "--into", live)
 	if out.code == 0 || !strings.Contains(out.output, "refusing to restore into") {
 		t.Fatalf("the drill did not refuse the live database (exit %d):\n%s", out.code, out.output)
 	}
@@ -127,9 +127,9 @@ func TestTheDrillTestsTheNewestFinishedBackup(t *testing.T) {
 	good := f.takeBackup(t, nil)
 	f.fakeBackup(t, -time.Hour, false, true)
 
-	scratch := uniqueName("pingle_bk_drill")
+	scratch := uniqueName("packetpulse_bk_drill")
 	dropAfter(t, scratch)
-	out := run(t, "PingleRestoreDrill.sh", f.env(nil), "--into", scratch)
+	out := run(t, "PacketPulseRestoreDrill.sh", f.env(nil), "--into", scratch)
 	if out.code != 0 {
 		t.Fatalf("the drill failed:\n%s", out.output)
 	}

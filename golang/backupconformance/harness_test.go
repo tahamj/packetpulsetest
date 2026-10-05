@@ -1,4 +1,4 @@
-// Package backupconformance runs Pingle's backup scripts for real: against a
+// Package backupconformance runs PacketPulse's backup scripts for real: against a
 // real PostgreSQL, with real gpg, rsync and gzip, exactly as cron runs them on
 // the server. The scripts are shell, so the only honest test is to run them
 // and look at what they left behind: the dump, the receipts, the databases.
@@ -11,9 +11,9 @@
 // Environment:
 //
 //	DATABASE_URL                     the database to back up (else the repo's .env)
-//	PINGLE_TEST_ADMIN_DATABASE_URL   a superuser connection for the drill
+//	PACKETPULSE_TEST_ADMIN_DATABASE_URL   a superuser connection for the drill
 //	                                 (default: the local socket, as the OS user)
-//	PINGLE_TEST_REQUIRE_DATABASE=1   fail rather than skip without a database
+//	PACKETPULSE_TEST_REQUIRE_DATABASE=1   fail rather than skip without a database
 package backupconformance
 
 import (
@@ -35,12 +35,12 @@ func repoRoot(t *testing.T) string {
 		t.Fatal(err)
 	}
 	for {
-		if _, err := os.Stat(filepath.Join(dir, "pingletest.sh")); err == nil {
+		if _, err := os.Stat(filepath.Join(dir, "packetpulsetest.sh")); err == nil {
 			return dir
 		}
 		parent := filepath.Dir(dir)
 		if parent == dir {
-			t.Fatal("cannot find the repository root (no pingletest.sh above the test)")
+			t.Fatal("cannot find the repository root (no packetpulsetest.sh above the test)")
 		}
 		dir = parent
 	}
@@ -72,7 +72,7 @@ func databaseURL(t *testing.T) string {
 }
 
 func adminURL() string {
-	if value := os.Getenv("PINGLE_TEST_ADMIN_DATABASE_URL"); value != "" {
+	if value := os.Getenv("PACKETPULSE_TEST_ADMIN_DATABASE_URL"); value != "" {
 		return value
 	}
 	return "postgresql:///postgres?host=/tmp"
@@ -100,11 +100,11 @@ func liveDatabaseName(t *testing.T) string {
 }
 
 // requireDatabase skips without a usable database and superuser, unless
-// PINGLE_TEST_REQUIRE_DATABASE=1, where a skip would hide a regression.
+// PACKETPULSE_TEST_REQUIRE_DATABASE=1, where a skip would hide a regression.
 func requireDatabase(t *testing.T) {
 	t.Helper()
 	missing := func(why string) {
-		if os.Getenv("PINGLE_TEST_REQUIRE_DATABASE") == "1" {
+		if os.Getenv("PACKETPULSE_TEST_REQUIRE_DATABASE") == "1" {
 			t.Fatalf("backup suite needs a database: %s", why)
 		}
 		t.Skipf("no database for the backup suite: %s", why)
@@ -121,7 +121,7 @@ func requireDatabase(t *testing.T) {
 		missing("cannot read schema_migrations (run the unit suite first, which migrates the database): " + strings.TrimSpace(string(out)))
 	}
 	if out, err := exec.Command("psql", adminURL(), "-XtAc", "SELECT rolsuper FROM pg_roles WHERE rolname = current_user").CombinedOutput(); err != nil || strings.TrimSpace(string(out)) != "t" {
-		missing("PINGLE_TEST_ADMIN_DATABASE_URL is not a superuser connection: " + strings.TrimSpace(string(out)))
+		missing("PACKETPULSE_TEST_ADMIN_DATABASE_URL is not a superuser connection: " + strings.TrimSpace(string(out)))
 	}
 }
 
@@ -201,8 +201,8 @@ func newFixture(t *testing.T) fixture {
 	requireDatabase(t)
 	dir := t.TempDir()
 	secret := uniqueName("jwt-secret-that-must-never-appear-in-clear")
-	envFile := filepath.Join(dir, "pingle.env")
-	content := "# a Pingle .env\nDATABASE_URL=" + databaseURL(t) + "\nJWT_SECRET=" + secret + "\n"
+	envFile := filepath.Join(dir, "packetpulse.env")
+	content := "# a PacketPulse .env\nDATABASE_URL=" + databaseURL(t) + "\nJWT_SECRET=" + secret + "\n"
 	if err := os.WriteFile(envFile, []byte(content), 0o600); err != nil {
 		t.Fatal(err)
 	}
@@ -213,11 +213,11 @@ func newFixture(t *testing.T) fixture {
 // env is the environment cron gives the scripts, pointed at this fixture.
 func (f fixture) env(extra map[string]string) map[string]string {
 	env := map[string]string{
-		"PINGLE_ENV_FILE":   f.envFile,
-		"PINGLE_BACKUP_DIR": f.root,
+		"PACKETPULSE_ENV_FILE":   f.envFile,
+		"PACKETPULSE_BACKUP_DIR": f.root,
 		// No key unless a test supplies one, so most tests do not need gpg keys.
-		"PINGLE_BACKUP_KEY_FILE": filepath.Join(f.root, "no-key-configured.asc"),
-		"PINGLE_DRILL_ADMIN_URL": adminURL(),
+		"PACKETPULSE_BACKUP_KEY_FILE": filepath.Join(f.root, "no-key-configured.asc"),
+		"PACKETPULSE_DRILL_ADMIN_URL": adminURL(),
 	}
 	for key, value := range extra {
 		env[key] = value
@@ -235,7 +235,7 @@ func (f fixture) backups(t *testing.T) []string {
 	return matches
 }
 
-// takeBackup runs PingleBackup.sh and insists it succeeded, returning the
+// takeBackup runs PacketPulseBackup.sh and insists it succeeded, returning the
 // directory it created.
 func (f fixture) takeBackup(t *testing.T, extra map[string]string) string {
 	t.Helper()
@@ -243,16 +243,16 @@ func (f fixture) takeBackup(t *testing.T, extra map[string]string) string {
 	for _, dir := range f.backups(t) {
 		before[dir] = true
 	}
-	out := run(t, "PingleBackup.sh", f.env(extra))
+	out := run(t, "PacketPulseBackup.sh", f.env(extra))
 	if out.code != 0 {
-		t.Fatalf("PingleBackup.sh exited %d:\n%s", out.code, out.output)
+		t.Fatalf("PacketPulseBackup.sh exited %d:\n%s", out.code, out.output)
 	}
 	for _, dir := range f.backups(t) {
 		if !before[dir] {
 			return dir
 		}
 	}
-	t.Fatalf("PingleBackup.sh succeeded but created no backup directory:\n%s", out.output)
+	t.Fatalf("PacketPulseBackup.sh succeeded but created no backup directory:\n%s", out.output)
 	return ""
 }
 

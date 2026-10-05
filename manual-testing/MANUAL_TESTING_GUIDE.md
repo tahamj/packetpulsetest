@@ -1,10 +1,10 @@
 <div align="center">
 
-# 📡 Pingle Manual Testing Guide
+# 📡 PacketPulse Manual Testing Guide
 
 ### *& Master Knowledge Manual*
 
-**The single source of truth for testing, understanding, selling, operating, and releasing Pingle.**
+**The single source of truth for testing, understanding, selling, operating, and releasing PacketPulse.**
 
 <br>
 
@@ -20,7 +20,7 @@
 
 *Quad-Lens Architecture — an **executable QA playbook**, an **onboarding & user manual**, a **commercial & sales pitch**, and a **developer release confidence guide**.*
 
-<sub>🔒 Every number above is asserted against source by **`./pingletest.sh docs`**. This guide is **generated** from `pingletest/manual-testing/parts/` by `pingletest/manual-testing/build/build_guide.py` — edit the parts, not the outputs.</sub>
+<sub>🔒 Every number above is asserted against source by **`./packetpulsetest.sh docs`**. This guide is **generated** from `packetpulsetest/manual-testing/parts/` by `packetpulsetest/manual-testing/build/build_guide.py` — edit the parts, not the outputs.</sub>
 
 </div>
 
@@ -28,7 +28,7 @@
 
 ## 🧭 How To Read This Manual
 
-Pingle is a multi-tenant network-diagnostics service for telecom operators: a Go API, a Flutter client (web, desktop, phone) and PostgreSQL, live at **https://pingle.rummaan53.com**. It is structurally a server-side request forgery primitive with a user interface — an authenticated person names an address and the server sends traffic to it — so much of what follows is about what must **not** happen.
+PacketPulse is a multi-tenant network-diagnostics service for telecom operators: a Go API, a Flutter client (web, desktop, phone) and PostgreSQL, live at **https://packetpulse.rummaan53.com**. It is structurally a server-side request forgery primitive with a user interface — an authenticated person names an address and the server sends traffic to it — so much of what follows is about what must **not** happen.
 
 | If you are a… | Read, in this order | What you get |
 |---|---|---|
@@ -55,7 +55,7 @@ Pingle is a multi-tenant network-diagnostics service for telecom operators: a Go
 | 🛑 **MUST NOT HAPPEN** | The negative assertion each test case exists to make. |
 
 > [!TIP]
-> Every manual test case carries a stable **Test ID** (`AUTH-004`, `JRN-003`, …). Quote it in bug reports and run records. IDs are **never reused** — a retired case leaves its number vacant — and `./pingletest.sh docs` fails if two cases share one.
+> Every manual test case carries a stable **Test ID** (`AUTH-004`, `JRN-003`, …). Quote it in bug reports and run records. IDs are **never reused** — a retired case leaves its number vacant — and `./packetpulsetest.sh docs` fails if two cases share one.
 
 > [!CAUTION]
 > **Never test against live customer data.** Use a local server with a disposable database (Part 0 §0.2), or the live demo organisation for read-only walkthroughs. Tenancy, ACL and audit cases need **two organisations** of your own — testing them from a single account proves nothing.
@@ -65,44 +65,44 @@ Pingle is a multi-tenant network-diagnostics service for telecom operators: a Go
 ## 📋 What Changed in v1 — the October 2026 Customer Release
 
 > [!IMPORTANT]
-> **Deployed to https://pingle.rummaan53.com on 2026-10-04.** It answers eight requirements from Northwind Telecom plus their remark that administrator logins be tracked. Every row below must be verified before a release is signed off.
+> **Deployed to https://packetpulse.rummaan53.com on 2026-10-04.** It answers eight requirements from Northwind Telecom plus their remark that administrator logins be tracked. Every row below must be verified before a release is signed off.
 
 | Requirement | What changed | Where to test | Source of truth |
 |---|---|---|---|
-| **1. Show IPv6** | Client IPs are read only from trusted proxies and shown canonically; a dual-stack site is measured over **both** families, the IPv6 result **reported, not counted**; the device test shows its IPv4 and IPv6 egress. | `V6-*`, `DEV-004` | `pinglego/pkg/common/probeguard/ProbeGuardPolicy.go`<br>`pinglego/pkg/common/dbclient/migrations/0023_2026_10_04_dual_stack_results.sql` |
-| **2. Two-step sign-in** | Every sign-in has a second step: an authenticator app (TOTP) or a texted code through the organisation's **own Twilio account**. Owners and superusers always use an authenticator; recovery codes for a lost phone. | `AUTH-*`, `SMS-*` | `pinglego/pkg/usermicroservice/userservice/UserSignInSteps.go`<br>`pinglego/pkg/common/dbclient/migrations/0019_2026_10_03_two_step_sign_in.sql` |
-| **3. No target dropdown** | *Test from this device* tests the target the organisation chose (Cloudflare DNS by default), with one-tap presets for whoever may change it. | `DEV-*` | `pingleflutter/lib/diagnosticmicroservice/presentation/screens/ClientProbeScreen.dart` |
-| **4. Location at check-in** | Sign-in and sign-out record the device's position for people set to *Record location*; field engineers on a separate **Check-ins** screen with address and map link; a per-organisation *Require location* rule. | `CHK-*`, `LOC-*` | `pinglego/pkg/common/dbclient/migrations/0020_2026_10_03_session_checkin.sql`<br>`pinglego/pkg/common/geocode/Geocode.go` |
-| **5. Loss and jitter** | Loss and RFC 3550 jitter on every result, ticket, history row, dashboard row, PDF and SLA report. | `DIAG-005`, `HIST-*`, `MON-*` | `pinglego/pkg/pingmicroservice/pingprobe/PingVoiceQuality.go`<br>`pinglego/pkg/common/dbclient/migrations/0022_2026_10_03_loss_and_jitter.sql` |
-| **6. CSV, FTP and download** | **Export CSV** on every ticket; a Results API bulk pull; a scheduled push to the organisation's own **SFTP / FTPS / FTP** server with the SSH host key confirmed first. | `CSV-*`, `EXP-*` | `pinglego/pkg/diagnosticmicroservice/diagnosticexport/DiagnosticExport.go`<br>`pinglego/pkg/exportmicroservice/exportservice/ExportService.go` |
-| **7. English only** | The other 22 languages were removed; wording is still served by the server, in English. | `SET-003` | `scripts/intellicodegen/pinglestrings.py` |
-| **8. Load testing** | A device line-speed test (Cloudflare), and a platform load suite: 20 people at once, a traced 200-site sweep, API and CSV pulls against p95 budgets. | `DEV-005`, Part IV §4.5 | `pingletest/golang/loadtest/load_test.go`<br>`.github/workflows/pingle-load.yml` |
-| **Admin logins tracked** | Administrators' sign-ins and sign-outs in the **Activity** trail with device, browser, address and place; **failed** attempts on their accounts too, with the reason. | `AUD-*` | `pinglego/pkg/auditlogmicroservice/auditlogconstants/AuditLogRegistry.go` |
+| **1. Show IPv6** | Client IPs are read only from trusted proxies and shown canonically; a dual-stack site is measured over **both** families, the IPv6 result **reported, not counted**; the device test shows its IPv4 and IPv6 egress. | `V6-*`, `DEV-004` | `packetpulsego/pkg/common/probeguard/ProbeGuardPolicy.go`<br>`packetpulsego/pkg/common/dbclient/migrations/0023_2026_10_04_dual_stack_results.sql` |
+| **2. Two-step sign-in** | Every sign-in has a second step: an authenticator app (TOTP) or a texted code through the organisation's **own Twilio account**. Owners and superusers always use an authenticator; recovery codes for a lost phone. | `AUTH-*`, `SMS-*` | `packetpulsego/pkg/usermicroservice/userservice/UserSignInSteps.go`<br>`packetpulsego/pkg/common/dbclient/migrations/0019_2026_10_03_two_step_sign_in.sql` |
+| **3. No target dropdown** | *Test from this device* tests the target the organisation chose (Cloudflare DNS by default), with one-tap presets for whoever may change it. | `DEV-*` | `packetpulseflutter/lib/diagnosticmicroservice/presentation/screens/ClientProbeScreen.dart` |
+| **4. Location at check-in** | Sign-in and sign-out record the device's position for people set to *Record location*; field engineers on a separate **Check-ins** screen with address and map link; a per-organisation *Require location* rule. | `CHK-*`, `LOC-*` | `packetpulsego/pkg/common/dbclient/migrations/0020_2026_10_03_session_checkin.sql`<br>`packetpulsego/pkg/common/geocode/Geocode.go` |
+| **5. Loss and jitter** | Loss and RFC 3550 jitter on every result, ticket, history row, dashboard row, PDF and SLA report. | `DIAG-005`, `HIST-*`, `MON-*` | `packetpulsego/pkg/pingmicroservice/pingprobe/PingVoiceQuality.go`<br>`packetpulsego/pkg/common/dbclient/migrations/0022_2026_10_03_loss_and_jitter.sql` |
+| **6. CSV, FTP and download** | **Export CSV** on every ticket; a Results API bulk pull; a scheduled push to the organisation's own **SFTP / FTPS / FTP** server with the SSH host key confirmed first. | `CSV-*`, `EXP-*` | `packetpulsego/pkg/diagnosticmicroservice/diagnosticexport/DiagnosticExport.go`<br>`packetpulsego/pkg/exportmicroservice/exportservice/ExportService.go` |
+| **7. English only** | The other 22 languages were removed; wording is still served by the server, in English. | `SET-003` | `scripts/intellicodegen/packetpulsestrings.py` |
+| **8. Load testing** | A device line-speed test (Cloudflare), and a platform load suite: 20 people at once, a traced 200-site sweep, API and CSV pulls against p95 budgets. | `DEV-005`, Part IV §4.5 | `packetpulsetest/golang/loadtest/load_test.go`<br>`.github/workflows/packetpulse-load.yml` |
+| **Admin logins tracked** | Administrators' sign-ins and sign-outs in the **Activity** trail with device, browser, address and place; **failed** attempts on their accounts too, with the reason. | `AUD-*` | `packetpulsego/pkg/auditlogmicroservice/auditlogconstants/AuditLogRegistry.go` |
 
 ---
 # Part 0 — Operational Prerequisites
 
-Everything you need before the first test case: where to run Pingle, how to sign in to it, and how the automated gate relates to the manual one.
+Everything you need before the first test case: where to run PacketPulse, how to sign in to it, and how the automated gate relates to the manual one.
 
 ## 0.1 Environments
 
 | Environment | Address | Database | Use it for | Never use it for |
 |---|---|---|---|---|
-| **Local development** | `http://localhost:8080` (API) · `flutter run -d chrome` (app) | `pingledb` on the local PostgreSQL | Building and trying features | Destructive cases you cannot undo by hand |
-| **Disposable test** | any free port, e.g. `http://localhost:18080` | a database you create for the run (e.g. `pingle_manual_test`) | **Every manual test pass** and the integration suites | — |
-| **Live** | **https://pingle.rummaan53.com** (site `/`, app `/app/`, API `/api/`) | `pingledb` on the Oracle host, behind PgBouncer | Read-only walkthroughs in the demo organisation; the post-deploy checks of Part V §5.4 | Tenancy, ACL, lockout or delete cases; anything that changes a real customer's data |
+| **Local development** | `http://localhost:8080` (API) · `flutter run -d chrome` (app) | `packetpulsedb` on the local PostgreSQL | Building and trying features | Destructive cases you cannot undo by hand |
+| **Disposable test** | any free port, e.g. `http://localhost:18080` | a database you create for the run (e.g. `packetpulse_manual_test`) | **Every manual test pass** and the integration suites | — |
+| **Live** | **https://packetpulse.rummaan53.com** (site `/`, app `/app/`, API `/api/`) | `packetpulsedb` on the Oracle host, behind PgBouncer | Read-only walkthroughs in the demo organisation; the post-deploy checks of Part V §5.4 | Tenancy, ACL, lockout or delete cases; anything that changes a real customer's data |
 
 > [!WARNING]
-> ⚠️ **TRAP — the `.env` fallback.** The Go database tests read `DATABASE_URL`, and when it is unset they fall back to the repository's `.env` — your development database — and **apply every migration to it on first connect**. Always export a disposable `DATABASE_URL` before `go test`, or run tests only through `./pingletest.sh`, which does.
+> ⚠️ **TRAP — the `.env` fallback.** The Go database tests read `DATABASE_URL`, and when it is unset they fall back to the repository's `.env` — your development database — and **apply every migration to it on first connect**. Always export a disposable `DATABASE_URL` before `go test`, or run tests only through `./packetpulsetest.sh`, which does.
 
 ## 0.2 Toolchain
 
 | Tool | Version | Why |
 |---|---|---|
-| Go | 1.26 | `pinglego/` and the integration suites in `pingletest/golang/` |
-| Flutter | 3.35 | `pingleflutter/` — web, macOS, Windows, Android, iOS |
+| Go | 1.26 | `packetpulsego/` and the integration suites in `packetpulsetest/golang/` |
+| Flutter | 3.35 | `packetpulseflutter/` — web, macOS, Windows, Android, iOS |
 | PostgreSQL | 18 (client tools too) | The database, and `pg_dump` for the backup suite |
-| Python | 3.9+ (3.13 recommended) | `scripts/intellicodegen/pinglestrings.py`, the coverage floors, this guide's generator |
+| Python | 3.9+ (3.13 recommended) | `scripts/intellicodegen/packetpulsestrings.py`, the coverage floors, this guide's generator |
 | gpg, rsync | any recent | The backup suite (`scripts/deploy/backup/`) |
 | govulncheck | latest | Part of the `unit` suite |
 | Node | 18+ | The public self-test page's probe engine tests |
@@ -111,16 +111,16 @@ Everything you need before the first test case: where to run Pingle, how to sign
 
 ```bash
 # 1. a database of your own
-createdb pingle_manual_test
+createdb packetpulse_manual_test
 
 # 2. the API, migrating that database at boot (migrations are embedded in the binary)
-cd pinglego
-DATABASE_URL=postgres://pingle:…@localhost:5432/pingle_manual_test?sslmode=disable \
-PORT=18080 APP_ENV=test REVERSE_GEOCODING=off go run ./cmd/pingleserver
+cd packetpulsego
+DATABASE_URL=postgres://packetpulse:…@localhost:5432/packetpulse_manual_test?sslmode=disable \
+PORT=18080 APP_ENV=test REVERSE_GEOCODING=off go run ./cmd/packetpulseserver
 
 # 3. the app, pointed at it
-cd ../pingleflutter
-flutter run -d chrome --dart-define=PINGLE_API_BASE_URL=http://localhost:18080
+cd ../packetpulseflutter
+flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18080
 ```
 
 `REVERSE_GEOCODING=off` stops sign-in positions being sent to a map service from a test run. Every other setting comes from `.env` (copy `.env.example`); Appendix D lists them all.
@@ -136,11 +136,11 @@ flutter run -d chrome --dart-define=PINGLE_API_BASE_URL=http://localhost:18080
 To act as a person in a manual test, add the authenticator secret shown at enrolment to any TOTP app (or `oathtool --totp -b <secret>`). Keep the **recovery codes** shown once at the end of enrolment — several cases use them.
 
 > [!IMPORTANT]
-> 🔒 **INVARIANT** — production refuses `OWNER_TOTP_SECRET` and `DEMO_TOTP_SECRET`: a second factor written in a configuration file is held by everyone who can read the file. `pinglego/pkg/common/config/Config.go` returns an error at boot; `REL-004` checks the live host.
+> 🔒 **INVARIANT** — production refuses `OWNER_TOTP_SECRET` and `DEMO_TOTP_SECRET`: a second factor written in a configuration file is held by everyone who can read the file. `packetpulsego/pkg/common/config/Config.go` returns an error at boot; `REL-004` checks the live host.
 
 ## 0.5 The automated gate
 
-`./pingletest.sh` runs every suite; `./pingletest.sh unit client` is the fast pair. Manual testing **adds to** this gate — it does not replace it. A release needs both (Part V).
+`./packetpulsetest.sh` runs every suite; `./packetpulsetest.sh unit client` is the fast pair. Manual testing **adds to** this gate — it does not replace it. A release needs both (Part V).
 
 | Suite | What it proves | Needs |
 |---|---|---|
@@ -157,14 +157,14 @@ To act as a person in a manual test, add the authenticator secret shown at enrol
 | `docs` | This guide is current and every number, path, route and capability in it matches source | — |
 | `load` *(opt-in)* | 20 people, a traced 200-site sweep, API and CSV pulls against p95 budgets | server |
 
-Integration suites read `PINGLE_TEST_URL` (default `http://localhost:8080`). `PINGLE_TEST_REQUIRE_SUPERUSER=1` turns a missing superuser into a failure rather than a skip — a skipped suite looks exactly like a passing one.
+Integration suites read `PACKETPULSE_TEST_URL` (default `http://localhost:8080`). `PACKETPULSE_TEST_REQUIRE_SUPERUSER=1` turns a missing superuser into a failure rather than a skip — a skipped suite looks exactly like a passing one.
 
 ## 0.6 Deploying
 
-`scripts/deploy/PingleDeploy.sh --host mshop.rummaan53.com` builds from the working tree, runs `unit client backup` and the integration suites against `PINGLE_TEST_URL`, cross-compiles for linux/arm64, builds the web app with base href `/app/`, backs up the live database, then switches the release and restarts. `--api-only`, `--web-only` and `--site-only` ship one part; `--skip-guards` and `--skip-backup` are for a logged emergency only. Part V §5.4 is what to check afterwards.
+`scripts/deploy/PacketPulseDeploy.sh --host mshop.rummaan53.com` builds from the working tree, runs `unit client backup` and the integration suites against `PACKETPULSE_TEST_URL`, cross-compiles for linux/arm64, builds the web app with base href `/app/`, backs up the live database, then switches the release and restarts. `--api-only`, `--web-only` and `--site-only` ship one part; `--skip-guards` and `--skip-backup` are for a logged emergency only. Part V §5.4 is what to check afterwards.
 
 ---
-# Part L — Learn Pingle
+# Part L — Learn PacketPulse
 
 The ideas every other part assumes, in plain words. Read this once, whatever your role.
 
@@ -199,7 +199,7 @@ A site whose name resolves to both an IPv4 and an IPv6 address is measured over 
 
 ## L.5 Two vantage points
 
-A **server-side diagnostic** measures from Pingle's data centre. **Test from this device** measures from wherever the person is, over their own connection — the right tool for "is it slow for me?". The two will not match, and both are correct: they measure different layers from different places. A device test can be **attached** to a ticket, where it sits beside the server's figures, labelled as measured on a device.
+A **server-side diagnostic** measures from PacketPulse's data centre. **Test from this device** measures from wherever the person is, over their own connection — the right tool for "is it slow for me?". The two will not match, and both are correct: they measure different layers from different places. A device test can be **attached** to a ticket, where it sits beside the server's figures, labelled as measured on a device.
 
 ## L.6 Two-step sign-in
 
@@ -213,21 +213,21 @@ For people set to **Record location**, the device's position is recorded when th
 
 Every successful change — who, what, from where, when — is written to a **hash chain**: each entry's hash covers the one before, so altering or removing any entry breaks every entry after it, and **Verify** names the first that does not follow. Administrators' sign-ins and sign-outs are in it, and so are **failed** sign-ins to administrators' accounts (at most twenty an hour per account). A position is shown beside an entry but never sealed into its hash: it is personal data that may have to be erased, and a chain entry never can be.
 
-## L.9 Results leaving Pingle
+## L.9 Results leaving PacketPulse
 
 | Way out | Who uses it | What |
 |---|---|---|
 | **Export PDF** | A person, from a ticket | The evidence document for the ticket or the customer |
 | **Export CSV** | A person, from a ticket | The same results as a spreadsheet, one row per site and family |
 | **Results API** | A machine with an API key | One ticket by TT number (JSON), or every result of up to 31 days as CSV |
-| **Result export** | Pingle, on a schedule | A CSV file per period, delivered to the organisation's own SFTP, FTPS or FTP server |
+| **Result export** | PacketPulse, on a schedule | A CSV file per period, delivered to the organisation's own SFTP, FTPS or FTP server |
 
-All CSV comes from one writer with one header — the contract an IT system's importer is written against (`pingletest/contracts/result_export_columns.json`).
+All CSV comes from one writer with one header — the contract an IT system's importer is written against (`packetpulsetest/contracts/result_export_columns.json`).
 
 ---
 # Part II — Feature Chapters
 
-One chapter per area of the product, in the order a new customer meets them. Every chapter carries all four lenses — **🌟 Commercial**, **📖 User Guide**, **🧪 Testing Playbook** and **⚙️ Developer** — and `./pingletest.sh docs` fails if one is missing.
+One chapter per area of the product, in the order a new customer meets them. Every chapter carries all four lenses — **🌟 Commercial**, **📖 User Guide**, **🧪 Testing Playbook** and **⚙️ Developer** — and `./packetpulsetest.sh docs` fails if one is missing.
 
 Run every case on a disposable stack (Part 0 §0.3) with **two organisations of your own**: `ACME` (yours) and `RIVAL` (someone else's). Unless a case says otherwise, "an administrator" is ACME's owner and "an engineer" holds ACME's built-in *NOC Engineer* role.
 
@@ -274,14 +274,14 @@ Signing in, the second step, and the organisation's own rules for both.
   | `AUTH-011` | Engineer set to text | A failing gateway is said, not bypassed | Gateway on with a wrong auth token; sign in as the engineer | 503 *Your sign-in code could not be sent just now. Try again.* 🛑 **Must NOT** fall back to an authenticator the engineer never set up |
   | `AUTH-012` | Administrator | Reset authenticator for a lost phone | **Staff → (engineer) → Reset authenticator** | The engineer's sessions end at once; their next sign-in sets up a new authenticator. Activity shows the reset, by whom |
   | `AUTH-013` | Superuser | Only the platform operator resets an owner | **Platform → (organisation) → Owners → Reset**; then try `POST /user/{ownerId}/secondfactor/reset` as an organisation administrator | Superuser: reset done, audited. Administrator: 403. 🛑 **Must NOT** let anyone inside the organisation reset its owner |
-  | `AUTH-014` | Engineer | An ended session returns to sign-in once | Revoke the engineer's session from another device, then use the app | One clean return to the sign-in page. 🛑 **Must NOT** loop between sign-in and an error |
+  | `AUTH-014` | Engineer | An ended session returns to sign-in once | Revoke the engineer's session from another device, then use the app | One clean return to the sign-in page, and one `POST /user/signout` in the browser's network panel. 🛑 **Must NOT** loop between sign-in and an error, or send sign-outs over and over |
   | `AUTH-015` | Tester | A forged client address is ignored | `curl -H 'True-Client-IP: 6.6.6.6' -H 'X-Forwarded-For: 6.6.6.6'` a sign-in from a machine that is not a trusted proxy | Sessions and Activity show the real peer address. 🛑 **Must NOT** record `6.6.6.6` |
 - ⚙️ **Developer Guide & Release Confidence**:
-  - Flow: `pinglego/pkg/usermicroservice/userservice/UserSignInSteps.go` — the password step returns a challenge (`totp`, `totp_enrol` or `sms`), never a session; `newSession` runs only after verify. Challenge ids are 32 random bytes, stored as SHA-256; texted codes are keyed HMACs.
+  - Flow: `packetpulsego/pkg/usermicroservice/userservice/UserSignInSteps.go` — the password step returns a challenge (`totp`, `totp_enrol` or `sms`), never a session; `newSession` runs only after verify. Challenge ids are 32 random bytes, stored as SHA-256; texted codes are keyed HMACs.
   - 🔒 Attempts are counted **before** the code is checked, in one conditional `UPDATE … RETURNING`, so parallel guesses cannot slip under the limit.
   - Limits: `maxAttempts = 5`, `lockAfter = 10`, `lockFor = 15m`, `resendAfter = 30s`, 3 sends per challenge, 5 texts per hour; a separate rate limiter for the second step (`SECOND_STEP_ATTEMPTS_PER_MINUTE`).
-  - Client IPs: `pinglego/pkg/common/apiratelimit/ApiRateLimit.go` walks `X-Forwarded-For` from the right past `TRUSTED_PROXIES` only, and returns canonical addresses (`::ffff:a.b.c.d` → `a.b.c.d`).
-  - Coverage: `pinglego/pkg/usermicroservice/userservice/UserSignInSteps_test.go`, the `assignment` and `audit` suites (every integration test signs in with a real TOTP code).
+  - Client IPs: `packetpulsego/pkg/common/apiratelimit/ApiRateLimit.go` walks `X-Forwarded-For` from the right past `TRUSTED_PROXIES` only, and returns canonical addresses (`::ffff:a.b.c.d` → `a.b.c.d`).
+  - Coverage: `packetpulsego/pkg/usermicroservice/userservice/UserSignInSteps_test.go`, the `assignment` and `audit` suites (every integration test signs in with a real TOTP code).
 
 ---
 
@@ -306,10 +306,10 @@ Signing in, the second step, and the organisation's own rules for both.
   | `LOC-003` | Engineer | Not required means recorded as refused | Rule off; deny the prompt | Signed in; **Check-ins** shows *Location refused* for that sign-in |
   | `LOC-004` | Engineer | A garbled position is not trusted | Send `POST /user/signin/verify` with `latitude: 123` | Refused as an invalid location (422) at sign-in; at sign-out recorded as *unavailable* rather than refusing the sign-out |
 - ⚙️ **Developer Guide & Release Confidence**:
-  - Gateway: `pinglego/pkg/smsmicroservice/smsservice/SmsService.go` (token sealed with the server's secret box, keyed from `JWT_SECRET`); provider: `pinglego/pkg/common/smsprovider/` (Twilio, fixed host).
-  - Settings: `pinglego/pkg/staffmicroservice/staffservice/StaffCheckinService.go`; `PUT /organisation/settings` requires **both** `require_checkin_location` and `device_test_target` — a whole-row save.
+  - Gateway: `packetpulsego/pkg/smsmicroservice/smsservice/SmsService.go` (token sealed with the server's secret box, keyed from `JWT_SECRET`); provider: `packetpulsego/pkg/common/smsprovider/` (Twilio, fixed host).
+  - Settings: `packetpulsego/pkg/staffmicroservice/staffservice/StaffCheckinService.go`; `PUT /organisation/settings` requires **both** `require_checkin_location` and `device_test_target` — a whole-row save.
   - Policy: superusers and owners are always asked for a position and never required to give one; no staff row means not asked; otherwise the person's `capture_location` and the organisation's rule decide. An unreadable policy fails closed.
-  - Coverage: `pinglego/pkg/smsmicroservice/**`, `pinglego/pkg/usermicroservice/userservice/UserCheckin_test.go`, `pingleflutter/test/sign_in_security_screen_test.dart`.
+  - Coverage: `packetpulsego/pkg/smsmicroservice/**`, `packetpulsego/pkg/usermicroservice/userservice/UserCheckin_test.go`, `packetpulseflutter/test/sign_in_security_screen_test.dart`.
 
 ---
 ## Group 2 — People
@@ -335,9 +335,9 @@ Who is in the organisation, what each may do, who is signed in, and the record o
   | `STF-006` | Administrator | Changing a role signs the person out | Engineer signed in; change their role to *Viewer* | Their next action returns them to sign-in; signed in again, they see only Viewer's screens |
   | `STF-007` | Viewer | Without `staff_manage` there is no Staff screen | Sign in as a Viewer; call `GET /staff/list` | No **Staff** in the rail; the API answers 403 |
 - ⚙️ **Developer Guide & Release Confidence**:
-  - `pinglego/pkg/staffmicroservice/staffapp/StaffRouteHandler.go`; the second-step settings are a **separate** route (`PUT /staff/{staffId}/secondfactor`) because the whole-row staff update would otherwise wipe them; it requires `second_factor`, `phone_number` and `capture_location`.
+  - `packetpulsego/pkg/staffmicroservice/staffapp/StaffRouteHandler.go`; the second-step settings are a **separate** route (`PUT /staff/{staffId}/secondfactor`) because the whole-row staff update would otherwise wipe them; it requires `second_factor`, `phone_number` and `capture_location`.
   - 🔒 Every write is scoped by the caller's organisation; editing RIVAL's `staffId` answers 404.
-  - Coverage: `pinglego/pkg/staffmicroservice/**`, `pingleflutter/test/staff_screen_test.dart`, the `acl` and `tenancy` suites.
+  - Coverage: `packetpulsego/pkg/staffmicroservice/**`, `packetpulseflutter/test/staff_screen_test.dart`, the `acl` and `tenancy` suites.
 
 ---
 
@@ -354,11 +354,11 @@ Who is in the organisation, what each may do, who is signed in, and the record o
   | `ACL-002` | Administrator | A custom role grants exactly what is ticked | Add *Shift lead* with `diagnostic_run` and `report_view` only; give it to an engineer | They can run diagnostics and see the dashboard; **Staff**, **Monitoring** edits and **API keys** are absent. Each refused route answers 403 |
   | `ACL-003` | Administrator | A role in use cannot be deleted | Delete *Shift lead* while someone holds it | Refused, naming that people hold it |
   | `ACL-004` | Administrator | A per-person deny wins over the role | Deny `report_export` to one engineer | That engineer has no **Export PDF**/**Export CSV**; `GET /diagnostic/{id}/report.csv` answers 403. Other engineers unaffected |
-  | `ACL-005` | Tester | Every role, both directions | Run `./pingletest.sh acl` | Passes — each role is refused what it lacks and allowed what it holds |
+  | `ACL-005` | Tester | Every role, both directions | Run `./packetpulsetest.sh acl` | Passes — each role is refused what it lacks and allowed what it holds |
 - ⚙️ **Developer Guide & Release Confidence**:
-  - Capabilities: `pinglego/pkg/common/pingleaccess/PingleAccessCategory.go` (Appendix B); guards: `pingleaccess.RequireCapability` on each route (Appendix A).
+  - Capabilities: `packetpulsego/pkg/common/packetpulseaccess/PacketPulseAccessCategory.go` (Appendix B); guards: `packetpulseaccess.RequireCapability` on each route (Appendix A).
   - 🔒 Authority is read fresh on every request; a role change revokes the person's sessions.
-  - Coverage: `pingletest/golang/aclconformance/acl_conformance_test.go` (the full matrix), `pingleflutter/test/permission_matrix_screen_test.dart`.
+  - Coverage: `packetpulsetest/golang/aclconformance/acl_conformance_test.go` (the full matrix), `packetpulseflutter/test/permission_matrix_screen_test.dart`.
 
 ---
 
@@ -378,7 +378,7 @@ Who is in the organisation, what each may do, who is signed in, and the record o
   | `SEAT-005` | Engineer | An IPv6 address shows whole | Sign in over IPv6 (or seed a session with `2401:4900:1c2a:8e1f::1`) | One line, ellipsised, full address in the tooltip and selectable. 🛑 **Must NOT** wrap across lines or overflow at phone width |
 - ⚙️ **Developer Guide & Release Confidence**:
   - Seats are checked at the password step **and** when the session opens (`enforceSeatLimit`), counted per person over live, unrevoked sessions.
-  - Coverage: `pingletest/golang/tenancyassignment/`, `pingleflutter/test/session_screen_test.dart`.
+  - Coverage: `packetpulsetest/golang/tenancyassignment/`, `packetpulseflutter/test/session_screen_test.dart`.
 
 ---
 
@@ -398,9 +398,9 @@ Who is in the organisation, what each may do, who is signed in, and the record o
   | `CHK-005` | Administrator | Administrators are not on Check-ins | The owner signs in with location | No Check-ins row; the sign-in is in **Activity** (`AUD-001`) |
   | `CHK-006` | RIVAL administrator | Another organisation's check-ins are never shown | RIVAL opens Check-ins | Only RIVAL's people. 🛑 **Must NOT** show ACME's |
 - ⚙️ **Developer Guide & Release Confidence**:
-  - `session_checkin`, one row per session, keyed by `staff_session.session_id` (`pinglego/pkg/common/dbclient/migrations/0020_2026_10_03_session_checkin.sql`); coordinates only with status `captured`, checked by `CHECK`s.
-  - Addresses: a background worker (`pinglego/pkg/common/geocode/Geocode.go`) — Google with `GOOGLE_MAPS_API_KEY`, else OpenStreetMap Nominatim at one request a second. `REVERSE_GEOCODING=off` disables it.
-  - Coverage: `pinglego/pkg/staffmicroservice/staffservice/`, `pingleflutter/test/checkin_screen_test.dart`, `pingletest/golang/tenancyisolation/`.
+  - `session_checkin`, one row per session, keyed by `staff_session.session_id` (`packetpulsego/pkg/common/dbclient/migrations/0020_2026_10_03_session_checkin.sql`); coordinates only with status `captured`, checked by `CHECK`s.
+  - Addresses: a background worker (`packetpulsego/pkg/common/geocode/Geocode.go`) — Google with `GOOGLE_MAPS_API_KEY`, else OpenStreetMap Nominatim at one request a second. `REVERSE_GEOCODING=off` disables it.
+  - Coverage: `packetpulsego/pkg/staffmicroservice/staffservice/`, `packetpulseflutter/test/checkin_screen_test.dart`, `packetpulsetest/golang/tenancyisolation/`.
 
 ---
 
@@ -425,10 +425,10 @@ Who is in the organisation, what each may do, who is signed in, and the record o
   | `AUD-010` | Administrator | Exports and integrations are on the record | Download a ticket's CSV; save the result export; test its connection | Rows: *Exported* (diagnostic), *Changed* and *Tested* (result_export) |
   | `AUD-011` | RIVAL administrator | Another organisation's trail is never shown | RIVAL opens Activity | Only RIVAL's entries |
 - ⚙️ **Developer Guide & Release Confidence**:
-  - Registry: `pinglego/pkg/auditlogmicroservice/auditlogconstants/AuditLogRegistry.go` — every mutating route is there or excluded with a reason, and `TestEveryMutationRouteIsRegistered` fails a route added without either.
-  - Sign-ins are recorded by UserMS itself (`recordSignIn`, `recordSignOut`, `recordFailedSignIn` in `pinglego/pkg/usermicroservice/userservice/UserSignInSteps.go`) because the routes are public; failed ones are capped by `maxFailedEntriesPerHour = 20` per account.
+  - Registry: `packetpulsego/pkg/auditlogmicroservice/auditlogconstants/AuditLogRegistry.go` — every mutating route is there or excluded with a reason, and `TestEveryMutationRouteIsRegistered` fails a route added without either.
+  - Sign-ins are recorded by UserMS itself (`recordSignIn`, `recordSignOut`, `recordFailedSignIn` in `packetpulsego/pkg/usermicroservice/userservice/UserSignInSteps.go`) because the routes are public; failed ones are capped by `maxFailedEntriesPerHour = 20` per account.
   - 🔒 The list joins positions from `session_checkin` by session id; the chain's `details` never hold coordinates.
-  - Coverage: `pingletest/golang/auditconformance/`, `pinglego/pkg/common/auditlog/`, `pingleflutter/test/audit_log_screen_test.dart`, `pingleflutter/test/user_agent_test.dart`.
+  - Coverage: `packetpulsetest/golang/auditconformance/`, `packetpulsego/pkg/common/auditlog/`, `packetpulseflutter/test/audit_log_screen_test.dart`, `packetpulseflutter/test/user_agent_test.dart`.
 
 ---
 ## Group 3 — Diagnostics
@@ -441,7 +441,7 @@ The core of the product: what to test, testing it against a ticket, and reading 
 
 **Screen:** Configure → **DNS sites** · **Routes:** `GET /dnssite/list`, `POST /dnssite/add`, `POST /dnssite/bulkimport`, `PUT/DELETE /dnssite/{dnsSiteId}` · **Capabilities:** `dns_site_view`, `dns_site_manage`
 
-- 🌟 **Commercial Presentation & Sales Pitch**: Paste a whole inventory in one go — one bad line never rejects the rest — and Pingle refuses to be turned against its own host: loopback, link-local and cloud-metadata addresses are never probed, whatever a site says.
+- 🌟 **Commercial Presentation & Sales Pitch**: Paste a whole inventory in one go — one bad line never rejects the rest — and PacketPulse refuses to be turned against its own host: loopback, link-local and cloud-metadata addresses are never probed, whatever a site says.
 - 📖 **User Guide & Operational Flow**: **Add site** with a name, an IP address or hostname, an optional circuit ID and SLA policy. **Bulk import** takes lines, commas or spaces; `Branch 12=10.0.0.1` names a site. Each entry is reported as added, a duplicate, or invalid with the reason.
 - 🧪 **Manual Testing Playbook**:
   | ID | Persona | Scenario | Steps | Observable Expected Result |
@@ -452,8 +452,8 @@ The core of the product: what to test, testing it against a ticket, and reading 
   | `SITE-004` | Engineer | The host is never a target | Add `127.0.0.1`, `169.254.169.254` and `::1`; run a diagnostic over them | Each result is a refusal (*destination refused by probe policy*), never a measurement. 🛑 **Must NOT** send traffic to loopback or cloud metadata |
   | `SITE-005` | RIVAL administrator | The same address in two organisations | RIVAL adds `203.0.113.10` too | Allowed — the endpoint is unique per organisation, not globally |
 - ⚙️ **Developer Guide & Release Confidence**:
-  - Policy: `pinglego/pkg/common/probeguard/ProbeGuardPolicy.go` — every address a name resolves to is checked, and one refused address refuses them all; IPv4-mapped IPv6 is judged as IPv4.
-  - Coverage: `pinglego/pkg/dnssitemicroservice/**`, `pinglego/pkg/common/probeguard/`, `pingleflutter/test/dns_site_screen_test.dart`.
+  - Policy: `packetpulsego/pkg/common/probeguard/ProbeGuardPolicy.go` — every address a name resolves to is checked, and one refused address refuses them all; IPv4-mapped IPv6 is judged as IPv4.
+  - Coverage: `packetpulsego/pkg/dnssitemicroservice/**`, `packetpulsego/pkg/common/probeguard/`, `packetpulseflutter/test/dns_site_screen_test.dart`.
   - ⚠️ **TRAP** — a licence carries a **site limit** (shown on the Platform console), but adding or importing sites does not check it yet. Do not file a site count above the limit as a regression; it is a known gap.
 
 ---
@@ -470,16 +470,16 @@ The core of the product: what to test, testing it against a ticket, and reading 
   | `DIAG-001` | Engineer | A sweep files against the ticket | Run against every enabled site with TT `TT-MAN-001` | Status *Completed*; one row per site (and family); the packet line exactly as specified |
   | `DIAG-002` | Engineer | A ticket keeps every attempt | Run `TT-MAN-001` again | **History** for the ticket shows both attempts, newest first |
   | `DIAG-003` | Engineer | Tracing marks where loss begins | Include a black-holed address (`203.0.113.99`) with **Trace failures** | Its row lists hops; the first hop with loss is marked. A trace that runs out of time leaves the result intact without hops |
-  | `DIAG-004` | Engineer | The PDF is evidence | **Export PDF** | Named `pingle-<TT>-<UTC time>.pdf`; Customer ID, TT, UTC timestamps, Jitter and MOS columns, average loss and jitter cards; a long IPv6 address wraps onto two lines. 🛑 **Must NOT** truncate an address |
+  | `DIAG-004` | Engineer | The PDF is evidence | **Export PDF** | Named `packetpulse-<TT>-<UTC time>.pdf`; Customer ID, TT, UTC timestamps, Jitter and MOS columns, average loss and jitter cards; a long IPv6 address wraps onto two lines. 🛑 **Must NOT** truncate an address |
   | `DIAG-005` | Engineer | Loss and jitter on the ticket | Open the result; open **History** | Headline cards show average loss and average jitter; the history row shows the same figures |
   | `DIAG-006` | Engineer | A lapsed licence stops new runs only | Platform suspends the licence; run a diagnostic; open an old one and export it | Run refused (`licence_suspended`, who can renew named); the old result opens and exports. 🛑 **Must NOT** hide recorded evidence |
   | `DIAG-007` | RIVAL engineer | Another organisation's ticket is not found | Open `/diagnostic/<ACME request id>` as RIVAL | 404. 🛑 **Must NOT** reveal that the ticket exists |
   | `DIAG-008` | Tester | A malformed id is refused before it is looked up | `GET /diagnostic/not-a-uuid` | 400 |
 - ⚙️ **Developer Guide & Release Confidence**:
-  - Engine: `pinglego/pkg/pingmicroservice/pingprobe/PingProbeRunner.go` (pro-bing, unprivileged ICMP, TCP fallback); jitter: `pinglego/pkg/pingmicroservice/pingprobe/PingVoiceQuality.go` (`InterarrivalJitter`, RFC 3550).
+  - Engine: `packetpulsego/pkg/pingmicroservice/pingprobe/PingProbeRunner.go` (pro-bing, unprivileged ICMP, TCP fallback); jitter: `packetpulsego/pkg/pingmicroservice/pingprobe/PingVoiceQuality.go` (`InterarrivalJitter`, RFC 3550).
   - 🔒 Results are saved under their **own** deadline, never the sweep's or the trace's: a traced sweep that runs long still stores everything it measured (`load` suite §4.5 proves it, and goes red with the old bug restored).
-  - Ticket figures (`avg_loss_pct`, `max_loss_pct`, `avg_jitter_ms`) are computed in `RequestFinish` from the run's counted results (`pinglego/pkg/common/dbclient/migrations/0022_2026_10_03_loss_and_jitter.sql`).
-  - Coverage: `pinglego/pkg/diagnosticmicroservice/**`, `pinglego/pkg/pingmicroservice/**`, `pingleflutter/test/diagnostic_submit_screen_test.dart`, the `tenancy` and `contract` suites.
+  - Ticket figures (`avg_loss_pct`, `max_loss_pct`, `avg_jitter_ms`) are computed in `RequestFinish` from the run's counted results (`packetpulsego/pkg/common/dbclient/migrations/0022_2026_10_03_loss_and_jitter.sql`).
+  - Coverage: `packetpulsego/pkg/diagnosticmicroservice/**`, `packetpulsego/pkg/pingmicroservice/**`, `packetpulseflutter/test/diagnostic_submit_screen_test.dart`, the `tenancy` and `contract` suites.
 
 ---
 
@@ -487,7 +487,7 @@ The core of the product: what to test, testing it against a ticket, and reading 
 
 **Where:** every result list, the PDF, the SLA report, the Results API and the CSV
 
-- 🌟 **Commercial Presentation & Sales Pitch**: A site healthy over IPv4 and dark over IPv6 is a real, common, hard-to-prove fault. Pingle measures both, side by side, without letting an IPv6 problem the customer did not buy an SLA for change their availability figure.
+- 🌟 **Commercial Presentation & Sales Pitch**: A site healthy over IPv4 and dark over IPv6 is a real, common, hard-to-prove fault. PacketPulse measures both, side by side, without letting an IPv6 problem the customer did not buy an SLA for change their availability figure.
 - 📖 **User Guide & Operational Flow**: A dual-stack site has two rows. The IPv6 one carries a **not counted** tag (hover for why). The PDF marks it `icmp v6 *` with a footnote; the SLA report lists `(v6)` lines separately and `(v6*)` for report-only ones.
 - 🧪 **Manual Testing Playbook**:
   | ID | Persona | Scenario | Steps | Observable Expected Result |
@@ -498,9 +498,9 @@ The core of the product: what to test, testing it against a ticket, and reading 
   | `V6-004` | Engineer | No IPv6 route is said plainly | On a server without IPv6, a dual-stack site | The IPv6 row reads *There is no IPv6 route from this vantage point, so this IPv6 address could not be tested from here.* 🛑 **Must NOT** report it as the site being down |
   | `V6-005` | Engineer | Traceroute over IPv6 shows its hops | Trace a failing IPv6 address on a host with IPv6 | Intermediate hops listed (not only the destination) |
 - ⚙️ **Developer Guide & Release Confidence**:
-  - `ping_result.ip_version` (4, 6 or NULL when nothing was probed) and `report_only`; the daily rollup is keyed by family (`pinglego/pkg/common/dbclient/migrations/0023_2026_10_04_dual_stack_results.sql`).
+  - `ping_result.ip_version` (4, 6 or NULL when nothing was probed) and `report_only`; the daily rollup is keyed by family (`packetpulsego/pkg/common/dbclient/migrations/0023_2026_10_04_dual_stack_results.sql`).
   - `probeguard.ResolveAllAndCheck` returns one checked address per family; the runner probes them in parallel and marks IPv6 report-only only when there is more than one family.
-  - ICMPv6 Time Exceeded parsing walks extension headers (`quotedSequenceIPv6` in `pinglego/pkg/pingmicroservice/pingprobe/PingTraceRunner.go`).
+  - ICMPv6 Time Exceeded parsing walks extension headers (`quotedSequenceIPv6` in `packetpulsego/pkg/pingmicroservice/pingprobe/PingTraceRunner.go`).
 
 ---
 
@@ -509,18 +509,18 @@ The core of the product: what to test, testing it against a ticket, and reading 
 **Where:** **Export CSV** on every result · **Route:** `GET /diagnostic/{requestId}/report.csv` · **Capability:** `report_export`
 
 - 🌟 **Commercial Presentation & Sales Pitch**: The same results, in the columns an IT system imports, in one click — and safe to open: a site name typed as a spreadsheet formula is written as text, so an export can never run code on someone else's desk.
-- 📖 **User Guide & Operational Flow**: **Export CSV** saves `pingle-<TT>-<UTC time>.csv` beside the PDF of the same ticket. One row per site and family; empty cells (not zeros) where a probe had no reply.
+- 📖 **User Guide & Operational Flow**: **Export CSV** saves `packetpulse-<TT>-<UTC time>.csv` beside the PDF of the same ticket. One row per site and family; empty cells (not zeros) where a probe had no reply.
 - 🧪 **Manual Testing Playbook**:
   | ID | Persona | Scenario | Steps | Observable Expected Result |
   |---|---|---|---|---|
-  | `CSV-001` | Engineer | The file has the contracted header | **Export CSV**; open it | Header exactly as in `pingletest/contracts/result_export_columns.json`, `result_id` first; times in UTC (`…Z`); an unreachable row has empty round-trip cells |
+  | `CSV-001` | Engineer | The file has the contracted header | **Export CSV**; open it | Header exactly as in `packetpulsetest/contracts/result_export_columns.json`, `result_id` first; times in UTC (`…Z`); an unreachable row has empty round-trip cells |
   | `CSV-002` | Engineer | A formula is written as text | Name a site `=HYPERLINK("http://x","y")`; run; export; open in Excel or Sheets | The cell shows the text starting `'=`. 🛑 **Must NOT** become a live formula or link |
   | `CSV-003` | Engineer | Names in any script survive | Name a site `पुणे केंद्र`; export | The name intact (UTF-8). 🛑 **Must NOT** show mojibake |
   | `CSV-004` | Viewer | No export without `report_export` | Open a result as a Viewer | No **Export CSV** or **Export PDF**; the route answers 403 |
   | `CSV-005` | Tester | The download is on the record | Export a CSV; open **Activity** | An *Exported* entry naming the diagnostic |
 - ⚙️ **Developer Guide & Release Confidence**:
-  - One writer for every CSV: `pinglego/pkg/diagnosticmicroservice/diagnosticexport/DiagnosticExport.go`; one projection and scanner: `pinglego/pkg/diagnosticmicroservice/diagnosticdomain/repository/DiagnosticExportPostgres.go` (the run's organisation must match the ticket's).
-  - The browser download is `text/csv` (`pingleflutter/lib/common/services/PingleFileSaverWeb.dart`); desktop and phone use the share sheet.
+  - One writer for every CSV: `packetpulsego/pkg/diagnosticmicroservice/diagnosticexport/DiagnosticExport.go`; one projection and scanner: `packetpulsego/pkg/diagnosticmicroservice/diagnosticdomain/repository/DiagnosticExportPostgres.go` (the run's organisation must match the ticket's).
+  - The browser download is `text/csv` (`packetpulseflutter/lib/common/services/PacketPulseFileSaverWeb.dart`); desktop and phone use the share sheet.
 
 ---
 
@@ -538,13 +538,13 @@ The core of the product: what to test, testing it against a ticket, and reading 
   | `HIST-003` | Engineer | A device run reads as one | Attach a device test (§4.1); find it in History | Marked as measured on a device; its loss is *query* loss |
   | `HIST-004` | Engineer | A quiet day is a gap | A schedule paused for a day; open **Dashboard** | The availability line has a gap. 🛑 **Must NOT** plot 0% for a day with nothing measured |
 - ⚙️ **Developer Guide & Release Confidence**:
-  - Row figures: `pingleflutter/lib/diagnosticmicroservice/presentation/widgets/DiagnosticFigures.dart`.
-  - Coverage: `pingleflutter/test/diagnostic_history_screen_test.dart`, `pingleflutter/test/dashboard_screen_test.dart`.
+  - Row figures: `packetpulseflutter/lib/diagnosticmicroservice/presentation/widgets/DiagnosticFigures.dart`.
+  - Coverage: `packetpulseflutter/test/diagnostic_history_screen_test.dart`, `packetpulseflutter/test/dashboard_screen_test.dart`.
 
 ---
 ## Group 4 — The Customer's Side
 
-Measuring from where the person is, not from where Pingle is.
+Measuring from where the person is, not from where PacketPulse is.
 
 ---
 
@@ -568,9 +568,9 @@ Measuring from where the person is, not from where Pingle is.
   | `DEV-009` | Superuser | No organisation, still a test | Sign in as the platform superuser; open the screen | Tests Cloudflare DNS. The screen needs no organisation and no licence |
 - ⚙️ **Developer Guide & Release Confidence**:
   - A browser cannot send ICMP, so the web build measures DNS-over-HTTPS (Cloudflare) or an HTTPS reach to the chosen host; the app on a desktop or phone can also ping it. Jitter is RFC 3550 with the standard deviation beside it.
-  - Target normalisation (pasted URL → host, lower case, canonical IPs, zones refused): `NormaliseTestTarget` in `pinglego/pkg/staffmicroservice/staffservice/StaffCheckinService.go`.
-  - Speed: `pingleflutter/lib/diagnosticmicroservice/service/ClientThroughput.dart` (Cloudflare `__down`/`__up`, median after a warm-up); egress: `pingleflutter/lib/diagnosticmicroservice/service/ClientEgress.dart`.
-  - Coverage: `pingleflutter/test/client_probe_screen_test.dart`, `pingleflutter/test/client_probe_run_test.dart`, `pingleflutter/test/client_throughput_test.dart`, `pingleflutter/test/client_egress_test.dart`.
+  - Target normalisation (pasted URL → host, lower case, canonical IPs, zones refused): `NormaliseTestTarget` in `packetpulsego/pkg/staffmicroservice/staffservice/StaffCheckinService.go`.
+  - Speed: `packetpulseflutter/lib/diagnosticmicroservice/service/ClientThroughput.dart` (Cloudflare `__down`/`__up`, median after a warm-up); egress: `packetpulseflutter/lib/diagnosticmicroservice/service/ClientEgress.dart`.
+  - Coverage: `packetpulseflutter/test/client_probe_screen_test.dart`, `packetpulseflutter/test/client_probe_run_test.dart`, `packetpulseflutter/test/client_throughput_test.dart`, `packetpulseflutter/test/client_egress_test.dart`.
 
 ---
 ## Group 5 — Monitoring
@@ -603,12 +603,12 @@ Turning on-demand testing into a continuous watch, with alerts that mean somethi
   | `MON-007` | Administrator | Maintenance excludes and silences | A window over a failing site, in `Asia/Kolkata`, viewed from a device in another timezone | Results inside are *excluded*: no alert, availability unaffected; the window's hours are Kolkata wall-clock hours |
   | `MON-008` | Engineer | The SLA report says what it measured | Open a month with data and one without | With data: availability, loss, jitter and MOS per site, IPv6 lines marked `(v6)`; without: no figure. 🛑 **Must NOT** show 100% for an unmeasured month |
   | `MON-009` | Engineer | The report exports | **Export PDF** on the SLA report | The month's document, with the Loss column and the `(v6*)` footnote where report-only lines appear |
-  | `MON-010` | Tester | The guard suite | `./pingletest.sh monitor` | Passes — grading, damping, recovery and maintenance against a live server |
+  | `MON-010` | Tester | The guard suite | `./packetpulsetest.sh monitor` | Passes — grading, damping, recovery and maintenance against a live server |
 - ⚙️ **Developer Guide & Release Confidence**:
-  - Damping: `DecideAlert` in `pinglego/pkg/monitormicroservice/monitordomain/shared/` (consecutive breaches, cooldown, escalation); runner: `pinglego/pkg/monitormicroservice/monitorservice/MonitorScheduleRunner.go` (claims due schedules with `FOR UPDATE SKIP LOCKED`).
-  - Results are partitioned by month and rolled up daily per site **and family** (`pinglego/pkg/common/dbclient/migrations/0012_2026_10_01_result_partitioning_and_retention.sql`, `0023`); the retention runner keeps partitions three months ahead.
+  - Damping: `DecideAlert` in `packetpulsego/pkg/monitormicroservice/monitordomain/shared/` (consecutive breaches, cooldown, escalation); runner: `packetpulsego/pkg/monitormicroservice/monitorservice/MonitorScheduleRunner.go` (claims due schedules with `FOR UPDATE SKIP LOCKED`).
+  - Results are partitioned by month and rolled up daily per site **and family** (`packetpulsego/pkg/common/dbclient/migrations/0012_2026_10_01_result_partitioning_and_retention.sql`, `0023`); the retention runner keeps partitions three months ahead.
   - 🔒 Report-only IPv6 never enters availability (`NOT report_only` in the rollup and the SLA queries).
-  - Coverage: `pingletest/golang/monitorconformance/`, `pinglego/pkg/monitormicroservice/**`, `pingleflutter/test/monitor_screen_test.dart`, `pingleflutter/test/monitor_flows_test.dart`.
+  - Coverage: `packetpulsetest/golang/monitorconformance/`, `packetpulsego/pkg/monitormicroservice/**`, `packetpulseflutter/test/monitor_screen_test.dart`, `packetpulseflutter/test/monitor_flows_test.dart`.
 
 ---
 ## Group 6 — Integrations
@@ -633,9 +633,9 @@ How results reach the operator's own systems, and how its directory signs people
   | `API-005` | Integrator | The wrong credential is refused | No header; a person's session token; a revoked key | 401 each |
   | `API-006` | RIVAL integrator | A key reads only its own organisation | RIVAL's key for ACME's TT, and a period covering ACME's tickets | 404; a CSV with none of ACME's rows |
 - ⚙️ **Developer Guide & Release Confidence**:
-  - `pinglego/pkg/common/apikeyauth/`; the organisation comes from the key, never from the request.
+  - `packetpulsego/pkg/common/apikeyauth/`; the organisation comes from the key, never from the request.
   - The bulk pull **streams**; a failure after rows have gone out aborts the response rather than ending a short file a system would take as whole.
-  - Coverage: `pingletest/golang/apicontract/results_api_test.go`, `pingletest/golang/apicontract/result_export_test.go`, `pinglego/pkg/diagnosticmicroservice/diagnosticapp/`.
+  - Coverage: `packetpulsetest/golang/apicontract/results_api_test.go`, `packetpulsetest/golang/apicontract/result_export_test.go`, `packetpulsego/pkg/diagnosticmicroservice/diagnosticapp/`.
 
 ---
 
@@ -658,19 +658,19 @@ How results reach the operator's own systems, and how its directory signs people
   | `EXP-003` | Administrator | Switching on needs everything a delivery needs | Switch on with no server, no username, no password and no trusted key | Refused against each field |
   | `EXP-004` | Administrator | A changed key is a warning, not a detail | Re-key the SFTP server (or point the name at another); **Test connection** | *The server's key has changed* with the new key to check; the trusted key stays until you trust the new one. 🛑 **Must NOT** deliver to a server showing a different key |
   | `EXP-005` | Administrator | A saved password goes nowhere new | With a saved password, change the server (or port, username or protocol) and test or save | The password field becomes required again (*Enter the password again…*). 🛑 **Must NOT** sign in to the new server with the saved password |
-  | `EXP-006` | Administrator | A delivery lands whole | Switched on, every 15 minutes, a diagnostic run after saving; wait for the interval | `pingle-results-<from>-<to>.csv` in the folder (written as `.part`, renamed when whole); the card says *Sent … with N results* |
+  | `EXP-006` | Administrator | A delivery lands whole | Switched on, every 15 minutes, a diagnostic run after saving; wait for the interval | `packetpulse-results-<from>-<to>.csv` in the folder (written as `.part`, renamed when whole); the card says *Sent … with N results* |
   | `EXP-007` | Administrator | A quiet period sends nothing | No diagnostics in an interval | No file; *Nothing new to send* |
   | `EXP-008` | Administrator | A failure is retried, nothing lost | Change the server's password; wait for a delivery; restore it; wait again | First: *Not delivered: The server refused the sign-in…*; the next delivery covers the same results. 🛑 **Must NOT** skip the failed period |
-  | `EXP-009` | Administrator | Pingle's own host is not a destination | Server `127.0.0.1`, `localhost`, `169.254.169.254` or `::1`; **Test connection** | Refused against **Server**: *Pingle may not connect to that address.* |
+  | `EXP-009` | Administrator | PacketPulse's own host is not a destination | Server `127.0.0.1`, `localhost`, `169.254.169.254` or `::1`; **Test connection** | Refused against **Server**: *PacketPulse may not connect to that address.* |
   | `EXP-010` | Administrator | Plain FTP is warned about | Choose FTP | The unencrypted warning; port moves to 21; the private key and server key disappear |
   | `EXP-011` | Administrator | FTPS with a private authority | FTPS to a server whose certificate your own CA signed, without and then with that CA | Without: *certificate is not trusted*; with it pasted: test passes |
   | `EXP-012` | Tester | Credentials never come back | `GET /api/v1/export/target` | `has_password`, `has_private_key` — never the password, key or sealed text |
 - ⚙️ **Developer Guide & Release Confidence**:
-  - `pinglego/pkg/exportmicroservice/` (target, test, runner each minute); transport: `pinglego/pkg/common/filedrop/FileDrop.go` (SFTP via `pkg/sftp`, FTP/FTPS via `jlaffaye/ftp`).
+  - `packetpulsego/pkg/exportmicroservice/` (target, test, runner each minute); transport: `packetpulsego/pkg/common/filedrop/FileDrop.go` (SFTP via `pkg/sftp`, FTP/FTPS via `jlaffaye/ftp`).
   - 🔒 Every connection — the FTP **data** connection included — is made by `probeguard.Dialer`, whose `Control` hook checks the resolved address before connecting. A dial *function* would have made the FTP library send FTPS data unencrypted.
   - The watermark (`exported_through`) moves only on a delivery, and only from where the run found it; a run catches up a day per file; the last two minutes are left to settle.
-  - `EXPORT_ALLOW_LOOPBACK` permits a server on Pingle's own host for development; production refuses to boot with it.
-  - Coverage: `pinglego/pkg/common/filedrop/` (in-process SFTP and FTP/FTPS servers), `pinglego/pkg/exportmicroservice/**`, `pingleflutter/test/result_export_screen_test.dart`, `pingletest/golang/apicontract/result_export_test.go`.
+  - `EXPORT_ALLOW_LOOPBACK` permits a server on PacketPulse's own host for development; production refuses to boot with it.
+  - Coverage: `packetpulsego/pkg/common/filedrop/` (in-process SFTP and FTP/FTPS servers), `packetpulsego/pkg/exportmicroservice/**`, `packetpulseflutter/test/result_export_screen_test.dart`, `packetpulsetest/golang/apicontract/result_export_test.go`.
 
 ---
 
@@ -678,7 +678,7 @@ How results reach the operator's own systems, and how its directory signs people
 
 **Screen:** Configure → **Directory** · **Routes:** `GET/PUT /ldap/config`, `POST /ldap/config/test`, `/ldap/groupmap/*` · **Capability:** `ldap_manage`
 
-- 🌟 **Commercial Presentation & Sales Pitch**: Staff sign in with their existing network password over LDAP or Active Directory, and their directory group decides their Pingle role — after the second step, so a directory password alone still opens nothing. The owner always keeps a local password, so a directory outage cannot lock out the person who fixes it.
+- 🌟 **Commercial Presentation & Sales Pitch**: Staff sign in with their existing network password over LDAP or Active Directory, and their directory group decides their PacketPulse role — after the second step, so a directory password alone still opens nothing. The owner always keeps a local password, so a directory outage cannot lock out the person who fixes it.
 - 📖 **User Guide & Operational Flow**: Host and port (389 LDAP/StartTLS, 636 LDAPS), encryption, the CA certificate of your own authority, a read-only bind account, the base DN; then **Test connection** before enabling. **Group mappings** give each directory group a role.
 - 🧪 **Manual Testing Playbook**:
   | ID | Persona | Scenario | Steps | Observable Expected Result |
@@ -688,13 +688,13 @@ How results reach the operator's own systems, and how its directory signs people
   | `LDAP-003` | Owner | The owner keeps a local password | Directory switched on and unreachable; owner signs in with their local password | Signed in. Others: *Your organisation's directory server could not be reached. Please retry.* |
   | `LDAP-004` | Tester | An outage is not a failed sign-in | Directory down; an administrator signs in | No *Sign-in failed* entry in Activity — nobody got the password wrong |
 - ⚙️ **Developer Guide & Release Confidence**:
-  - `pinglego/pkg/common/ldapclient/`, `pinglego/pkg/ldapmicroservice/`; the bind password is sealed like every secret; the directory is dialled through the directory policy (private yes; loopback only with `LDAP_ALLOW_LOOPBACK`, refused in production).
-  - Coverage: `pinglego/pkg/common/ldaptest/` (an in-process directory), `pingleflutter/test/ldap_settings_screen_test.dart`.
+  - `packetpulsego/pkg/common/ldapclient/`, `packetpulsego/pkg/ldapmicroservice/`; the bind password is sealed like every secret; the directory is dialled through the directory policy (private yes; loopback only with `LDAP_ALLOW_LOOPBACK`, refused in production).
+  - Coverage: `packetpulsego/pkg/common/ldaptest/` (an in-process directory), `packetpulseflutter/test/ldap_settings_screen_test.dart`.
 
 ---
 ## Group 7 — Platform and Settings
 
-The operator of Pingle itself, each person's own settings, and the public face.
+The operator of PacketPulse itself, each person's own settings, and the public face.
 
 ---
 
@@ -714,8 +714,8 @@ The operator of Pingle itself, each person's own settings, and the public face.
   | `PLAT-005` | Superuser | A superuser is not a tenant | Call `GET /dnssite/list` as the superuser | 400 — no organisation. 🛑 **Must NOT** answer with every organisation's sites |
   | `PLAT-006` | Organisation owner | Signing up never joins an organisation | Sign up with an address at ACME's domain | The account waits unassigned; it sees only **Test from this device** and **Settings** |
 - ⚙️ **Developer Guide & Release Confidence**:
-  - `pinglego/pkg/platformmicroservice/`; `pingleaccess.RequireSuperUser` on the console group (Appendix A); licence changes recorded in the licence history and the activity trail.
-  - Coverage: `pingletest/golang/tenancyassignment/`, `pinglego/pkg/platformmicroservice/**`, `pingleflutter/test/platform_console_screen_test.dart`.
+  - `packetpulsego/pkg/platformmicroservice/`; `packetpulseaccess.RequireSuperUser` on the console group (Appendix A); licence changes recorded in the licence history and the activity trail.
+  - Coverage: `packetpulsetest/golang/tenancyassignment/`, `packetpulsego/pkg/platformmicroservice/**`, `packetpulseflutter/test/platform_console_screen_test.dart`.
 
 ---
 
@@ -724,7 +724,7 @@ The operator of Pingle itself, each person's own settings, and the public face.
 **Screen:** Administer → **Settings** · **Routes:** `POST /user/appearance`, `POST /user/password`
 
 - 🌟 **Commercial Presentation & Sales Pitch**: Five themes in light and dark — including a warm, low-blue-light theme for night shifts and a high-contrast one — every one contrast-checked, with status colours that never change meaning. They follow the person, not the device.
-- 📖 **User Guide & Operational Flow**: Light, dark or follow the device; theme; density; reduce motion; change password. Pingle is in English; there is no language choice.
+- 📖 **User Guide & Operational Flow**: Light, dark or follow the device; theme; density; reduce motion; change password. PacketPulse is in English; there is no language choice. The same light / dark and appearance controls are on the sign-in screen, where they are remembered on that device until someone signs in.
 - 🧪 **Manual Testing Playbook**:
   | ID | Persona | Scenario | Steps | Observable Expected Result |
   |---|---|---|---|---|
@@ -732,26 +732,29 @@ The operator of Pingle itself, each person's own settings, and the public face.
   | `SET-002` | Engineer | Status colours keep their meaning | Switch through every theme on a result with OK, Degraded and Breached rows | Green, amber and red in every theme, each with its icon |
   | `SET-003` | Engineer | English only | Look for a language picker in the bar and in Settings | None. Every label is English, served by the server. 🛑 **Must NOT** show a key such as `s812` in place of a label |
   | `SET-004` | Engineer | Change password | Change it; sign out; sign in with the old, then the new | Old refused, new accepted (then the second step) |
+  | `SET-005` | Visitor | Appearance before signing in | Signed out, use the sun/moon button and the palette on the sign-in screen (desk and phone width); reload; then sign in to an account set to another mode, and sign out | Each choice applies at once and survives the reload, with no request to `/user/appearance`. After sign-in the **account's** appearance is worn; after sign-out the sign-in screen keeps it. 🛑 **Must NOT** snap back to dark on sign-out, or save a signed-out choice to anyone's account |
 - ⚙️ **Developer Guide & Release Confidence**:
-  - Strings: `scripts/intellicodegen/pinglestrings.py` generates the Go catalogue and the Dart index; entries are positional, so retired ones stay in `DEPRECATED`. Help: `pinglego/pkg/initmicroservice/initconstants/PingleHelp.go`.
-  - Coverage: `pingleflutter/test/settings_screen_test.dart`, the `translation` suite.
+  - Strings: `scripts/intellicodegen/packetpulsestrings.py` generates the Go catalogue and the Dart index; entries are positional, so retired ones stay in `DEPRECATED`. Help: `packetpulsego/pkg/initmicroservice/initconstants/PacketPulseHelp.go`.
+  - Coverage: `packetpulseflutter/test/settings_screen_test.dart`, the `translation` suite. Signed-out appearance: `packetpulseflutter/lib/common/services/PacketPulseAppearanceStore.dart`, tested in `packetpulseflutter/test/app_test.dart` and `packetpulseflutter/test/sign_in_test.dart`.
 
 ---
 
 ### 7.3 🌐 Public site and self-test
 
-**Pages:** `https://pingle.rummaan53.com/` and `/selftest.html` (`pingleweb/`)
+**Pages:** `https://packetpulse.rummaan53.com/` and `/selftest.html` (`packetpulseweb/`)
 
 - 🌟 **Commercial Presentation & Sales Pitch**: The product site says only what the product does today, and the public self-test lets a prospect measure their own connection in the browser before talking to anyone.
-- 📖 **User Guide & Operational Flow**: **Sign in** opens the app at `/app/`; **Test my connection** opens the self-test.
+- 📖 **User Guide & Operational Flow**: **Sign in** opens the app at `/app/`; **Test my connection** opens the self-test. The sun, moon and screen buttons in the header choose light, dark or match this device; the app's sign-in screen opens in the same choice. On a phone the header keeps the theme switch and **Sign in**, and **Test my connection** is in the footer.
 - 🧪 **Manual Testing Playbook**:
   | ID | Persona | Scenario | Steps | Observable Expected Result |
   |---|---|---|---|---|
   | `WEB-001` | Visitor | The site is current | Read the capabilities | Two-step sign-in, IPv4 and IPv6, CSV into your systems, check-ins, the device test with line speed. 🛑 **Must NOT** promise 23 languages |
   | `WEB-002` | Visitor | Site and app are different documents | Open `/` and `/app/` | The marketing page and the app respectively — never the same document |
   | `WEB-003` | Visitor | The self-test runs in the browser | **Test my connection** → run | Round trips, jitter and loss for each resolver, measured from the visitor's connection |
+  | `WEB-004` | Visitor | Light, dark or match this device | Choose **Light** on `/`; reload; open `/selftest.html`; then **Sign in**. Choose **Match this device** and switch the computer's own mode | Light at once, on both pages and on the app's sign-in screen; *Match this device* follows the computer as it changes. 🛑 **Must NOT** flash dark before a light page paints |
+  | `WEB-005` | Visitor | The header fits a phone | Open `/` at 360 px wide | Logo, theme switch and **Sign in** on one line, no sideways scrolling |
 - ⚙️ **Developer Guide & Release Confidence**:
-  - `pingleweb/index.html`, `pingleweb/selftest.html`; the probe engine's tests: `pingleweb/assets/pingle-probe.test.mjs` (part of `unit`).
+  - `packetpulseweb/index.html`, `packetpulseweb/selftest.html`; the probe engine's tests: `packetpulseweb/assets/packetpulse-probe.test.mjs` (part of `unit`). The theme switch: `packetpulseweb/assets/packetpulse-theme.js`, which keeps the mode under the app's own appearance key; its tests, `packetpulseweb/assets/packetpulse-theme.test.mjs`, are part of `unit` too.
   - The deploy asserts `/` and `/app/` differ, so the nginx misroute that once served a blank app is caught by the deploy.
 
 ---
@@ -761,22 +764,22 @@ What guards each area automatically, so a manual pass can spend its time where a
 
 | Area | Manual IDs | Go unit and repository | Integration suites | Flutter |
 |---|---|---|---|---|
-| Sign-in, second step | `AUTH-*` | `pinglego/pkg/usermicroservice/userservice/` | `assignment`, `audit` | `pingleflutter/test/sign_in_test.dart` |
-| SMS gateway, location rule | `SMS-*`, `LOC-*` | `pinglego/pkg/smsmicroservice/`, `pinglego/pkg/common/smsprovider/` | `acl` | `pingleflutter/test/sign_in_security_screen_test.dart` |
-| Staff, roles | `STF-*`, `ACL-*` | `pinglego/pkg/staffmicroservice/` | `acl`, `tenancy` | `pingleflutter/test/staff_screen_test.dart` |
-| Sessions, seats | `SEAT-*` | `pinglego/pkg/staffmicroservice/` | `assignment`, `tenancy` | `pingleflutter/test/session_screen_test.dart` |
-| Check-ins | `CHK-*` | `pinglego/pkg/common/geocode/` | `tenancy`, `audit` | `pingleflutter/test/checkin_screen_test.dart` |
-| Activity | `AUD-*` | `pinglego/pkg/common/auditlog/` | `audit` | `pingleflutter/test/audit_log_screen_test.dart` |
-| Sites, policy | `SITE-*` | `pinglego/pkg/dnssitemicroservice/`, `pinglego/pkg/common/probeguard/` | `tenancy` | `pingleflutter/test/dns_site_screen_test.dart` |
-| Diagnostics, IPv6 | `DIAG-*`, `V6-*` | `pinglego/pkg/pingmicroservice/`, `pinglego/pkg/diagnosticmicroservice/` | `contract`, `tenancy`, `load` | `pingleflutter/test/diagnostic_submit_screen_test.dart` |
-| CSV | `CSV-*`, `API-003` | `pinglego/pkg/diagnosticmicroservice/diagnosticexport/` | `contract`, `tenancy`, `load` | `pingleflutter/test/diagnostic_history_screen_test.dart` |
-| Device test | `DEV-*` | `pinglego/pkg/diagnosticmicroservice/diagnosticservice/` | `contract` | `pingleflutter/test/client_probe_run_test.dart` |
-| Monitoring | `MON-*` | `pinglego/pkg/monitormicroservice/` | `monitor` | `pingleflutter/test/monitor_flows_test.dart` |
-| Results API | `API-*` | `pinglego/pkg/common/apikeyauth/` | `contract`, `tenancy` | `pingleflutter/test/api_key_screen_test.dart` |
-| Result export | `EXP-*` | `pinglego/pkg/common/filedrop/`, `pinglego/pkg/exportmicroservice/` | `contract`, `acl`, `tenancy`, `audit` | `pingleflutter/test/result_export_screen_test.dart` |
-| Directory | `LDAP-*` | `pinglego/pkg/common/ldapclient/`, `pinglego/pkg/ldapmicroservice/` | — | `pingleflutter/test/ldap_settings_screen_test.dart` |
-| Platform | `PLAT-*` | `pinglego/pkg/platformmicroservice/` | `assignment` | `pingleflutter/test/platform_console_screen_test.dart` |
-| Settings, catalogue | `SET-*` | `pinglego/pkg/initmicroservice/` | `translation` | `pingleflutter/test/settings_screen_test.dart` |
+| Sign-in, second step | `AUTH-*` | `packetpulsego/pkg/usermicroservice/userservice/` | `assignment`, `audit` | `packetpulseflutter/test/sign_in_test.dart` |
+| SMS gateway, location rule | `SMS-*`, `LOC-*` | `packetpulsego/pkg/smsmicroservice/`, `packetpulsego/pkg/common/smsprovider/` | `acl` | `packetpulseflutter/test/sign_in_security_screen_test.dart` |
+| Staff, roles | `STF-*`, `ACL-*` | `packetpulsego/pkg/staffmicroservice/` | `acl`, `tenancy` | `packetpulseflutter/test/staff_screen_test.dart` |
+| Sessions, seats | `SEAT-*` | `packetpulsego/pkg/staffmicroservice/` | `assignment`, `tenancy` | `packetpulseflutter/test/session_screen_test.dart` |
+| Check-ins | `CHK-*` | `packetpulsego/pkg/common/geocode/` | `tenancy`, `audit` | `packetpulseflutter/test/checkin_screen_test.dart` |
+| Activity | `AUD-*` | `packetpulsego/pkg/common/auditlog/` | `audit` | `packetpulseflutter/test/audit_log_screen_test.dart` |
+| Sites, policy | `SITE-*` | `packetpulsego/pkg/dnssitemicroservice/`, `packetpulsego/pkg/common/probeguard/` | `tenancy` | `packetpulseflutter/test/dns_site_screen_test.dart` |
+| Diagnostics, IPv6 | `DIAG-*`, `V6-*` | `packetpulsego/pkg/pingmicroservice/`, `packetpulsego/pkg/diagnosticmicroservice/` | `contract`, `tenancy`, `load` | `packetpulseflutter/test/diagnostic_submit_screen_test.dart` |
+| CSV | `CSV-*`, `API-003` | `packetpulsego/pkg/diagnosticmicroservice/diagnosticexport/` | `contract`, `tenancy`, `load` | `packetpulseflutter/test/diagnostic_history_screen_test.dart` |
+| Device test | `DEV-*` | `packetpulsego/pkg/diagnosticmicroservice/diagnosticservice/` | `contract` | `packetpulseflutter/test/client_probe_run_test.dart` |
+| Monitoring | `MON-*` | `packetpulsego/pkg/monitormicroservice/` | `monitor` | `packetpulseflutter/test/monitor_flows_test.dart` |
+| Results API | `API-*` | `packetpulsego/pkg/common/apikeyauth/` | `contract`, `tenancy` | `packetpulseflutter/test/api_key_screen_test.dart` |
+| Result export | `EXP-*` | `packetpulsego/pkg/common/filedrop/`, `packetpulsego/pkg/exportmicroservice/` | `contract`, `acl`, `tenancy`, `audit` | `packetpulseflutter/test/result_export_screen_test.dart` |
+| Directory | `LDAP-*` | `packetpulsego/pkg/common/ldapclient/`, `packetpulsego/pkg/ldapmicroservice/` | — | `packetpulseflutter/test/ldap_settings_screen_test.dart` |
+| Platform | `PLAT-*` | `packetpulsego/pkg/platformmicroservice/` | `assignment` | `packetpulseflutter/test/platform_console_screen_test.dart` |
+| Settings, catalogue | `SET-*` | `packetpulsego/pkg/initmicroservice/` | `translation` | `packetpulseflutter/test/settings_screen_test.dart` |
 
 > [!NOTE]
 > What no suite covers, and why manual cases exist for it: a **real SMS** arriving on a phone (`AUTH-009`), a **real authenticator app** (`AUTH-001`), **browser location prompts** (`CHK-001`, `LOC-002`), **real SFTP and FTPS servers** (`EXP-006`, `EXP-011`), **spreadsheet applications** opening the CSV (`CSV-002`), and **IPv6 on the live host** (`V6-001`).
@@ -924,8 +927,8 @@ The app runs on the web (the live build), macOS, Windows, Android and iOS from o
 
 | ID | Check | Expected |
 |---|---|---|
-| `NFR-013` | Tenancy, for every id-taking route | RIVAL's id answers 404 or an empty list — `./pingletest.sh tenancy` |
-| `NFR-014` | The destination policy, everywhere Pingle connects out | Sweeps, traceroutes, webhooks, the directory and the result export all refuse loopback, link-local and cloud metadata |
+| `NFR-013` | Tenancy, for every id-taking route | RIVAL's id answers 404 or an empty list — `./packetpulsetest.sh tenancy` |
+| `NFR-014` | The destination policy, everywhere PacketPulse connects out | Sweeps, traceroutes, webhooks, the directory and the result export all refuse loopback, link-local and cloud metadata |
 | `NFR-015` | Error responses | No SQLSTATE, driver names, file paths or a remote server's raw reply in any error envelope |
 | `NFR-016` | Secrets at rest | SMS tokens, bind passwords and export credentials sealed with the server's secret box; API keys stored as hashes; never returned |
 | `NFR-017` | CSV injection | Cells starting `=`, `+`, `-`, `@`, tab or carriage return are written as text |
@@ -933,7 +936,7 @@ The app runs on the web (the live build), macOS, Windows, Android and iOS from o
 
 ## 4.5 Performance — the load suite
 
-`./pingletest.sh load` provisions one licensed organisation — the owner and nineteen engineers, each with an authenticator, and 200 sites on TEST-NET-3 — and measures it. It also runs nightly (`.github/workflows/pingle-load.yml`). Budgets are 95th percentiles; the measured figures are from a developer laptop against a local server.
+`./packetpulsetest.sh load` provisions one licensed organisation — the owner and nineteen engineers, each with an authenticator, and 200 sites on TEST-NET-3 — and measures it. It also runs nightly (`.github/workflows/packetpulse-load.yml`). Budgets are 95th percentiles; the measured figures are from a developer laptop against a local server.
 
 | Scenario | Measured p95 | Budget |
 |---|---|---|
@@ -957,11 +960,11 @@ How a release is judged ready, shipped, checked and — if it must be — rolled
 A release candidate passes all of these, with **no skips**, before anything ships:
 
 ```bash
-PINGLE_TEST_URL=http://localhost:18080 PINGLE_TEST_REQUIRE_SUPERUSER=1 ./pingletest.sh
-./pingletest.sh load          # before a release that touches sweeps, sign-in or exports
+PACKETPULSE_TEST_URL=http://localhost:18080 PACKETPULSE_TEST_REQUIRE_SUPERUSER=1 ./packetpulsetest.sh
+./packetpulsetest.sh load          # before a release that touches sweeps, sign-in or exports
 ```
 
-`./pingletest.sh` runs `tenancy assignment acl audit translation contract monitor unit client backup docs`. Coverage floors are a ratchet (`scripts/PingleCoverageFloor.py`, `scripts/PingleFlutterCoverageFloor.py`): raised when real coverage rises, never lowered to make a build pass.
+`./packetpulsetest.sh` runs `tenancy assignment acl audit translation contract monitor unit client backup docs`. Coverage floors are a ratchet (`scripts/PacketPulseCoverageFloor.py`, `scripts/PacketPulseFlutterCoverageFloor.py`): raised when real coverage rises, never lowered to make a build pass.
 
 ## 5.2 What blocks a release
 
@@ -975,37 +978,39 @@ PINGLE_TEST_URL=http://localhost:18080 PINGLE_TEST_REQUIRE_SUPERUSER=1 ./pinglet
 
 | ID | Check | Owner |
 |---|---|---|
-| `REL-001` | `./pingletest.sh` green with no skips, on the commit being shipped | QA |
+| `REL-001` | `./packetpulsetest.sh` green with no skips, on the commit being shipped | QA |
 | `REL-002` | Every row of *What changed* (front matter) manually verified: `AUTH-001`, `AUTH-009`, `CHK-001`, `DEV-002`, `DEV-005`, `V6-001`, `CSV-001`, `EXP-006`, `AUD-003` | QA |
 | `REL-003` | Journeys `JRN-001`, `JRN-003`, `JRN-004`, `JRN-006` on a disposable stack | QA |
 | `REL-004` | The live `.env` has `APP_ENV=production` and none of `OWNER_TOTP_SECRET`, `DEMO_TOTP_SECRET`, `EXPORT_ALLOW_LOOPBACK=true`, `LDAP_ALLOW_LOOPBACK=true` | Release owner |
 | `REL-005` | New migrations read for what they change on live data (a migration that revokes sessions, rewrites figures or changes a key is announced to users) | Backend |
-| `REL-006` | Public documents (`pingleweb/index.html`, `docs/*.html` and their PDFs) promise nothing the release does not do | Product |
+| `REL-006` | Public documents (`packetpulseweb/index.html`, `docs/*.html` and their PDFs) promise nothing the release does not do | Product |
 
 ## 5.4 Deploy and verify
 
 ```bash
-scripts/deploy/PingleDeploy.sh --host mshop.rummaan53.com
+scripts/deploy/PacketPulseDeploy.sh --host mshop.rummaan53.com
 ```
 
-The script backs the live database up before the new release boots and migrates it. Afterwards:
+The script backs the live database up before the new release boots and migrates it. It does not install the nginx vhost: when `scripts/deploy/packetpulse-nginx.conf` changes, copy it to `/etc/nginx/conf.d/packetpulse.conf` on the host, run `sudo certbot --nginx -d packetpulse.rummaan53.com --reinstall` to put the TLS lines back, then `sudo nginx -t` and reload. Afterwards:
 
 | ID | Check | Expected |
 |---|---|---|
-| `REL-007` | `https://pingle.rummaan53.com/healthz` and `/readyz` | 200 |
-| `REL-008` | The live database's newest migration | The newest file in `pinglego/pkg/common/dbclient/migrations/` |
+| `REL-007` | `https://packetpulse.rummaan53.com/healthz` and `/readyz` | 200 |
+| `REL-008` | The live database's newest migration | The newest file in `packetpulsego/pkg/common/dbclient/migrations/` |
 | `REL-009` | A new route answers an anonymous caller | 401, not 404 (e.g. `GET /api/v1/export/target`) |
 | `REL-010` | `/` and `/app/` | Different documents; the app loads and signs in (`AUTH-002`) |
 | `REL-011` | The server log since boot | No `level=ERROR` |
 | `REL-012` | `/proc/sys/net/ipv4/ping_group_range` on the host | `0 2147483647` — unprivileged ICMP, so sweeps report `icmp` rather than falling back to TCP |
+| `REL-013` | `curl -sI https://packetpulse.rummaan53.com/app/flutter_bootstrap.js`, then the `main.<hash>.dart.js` it names | The bootstrap: `Cache-Control: no-cache` and no `max-age`. The bundle: `immutable`. 🛑 **Must NOT** cache anything else under `/app/` - a returning browser then keeps the old client. In October 2026 a seven-day cache kept browsers on a client from before two-step sign-in, which dropped everyone back at sign-in with no message |
+| `REL-014` | `curl -sI` on `/`, `/app/` and `/assets/packetpulse-site.css` | `X-Frame-Options: SAMEORIGIN` and `X-Content-Type-Options: nosniff` on each. 🛑 **Must NOT** be missing: an `add_header` inside a location drops every header set on the server block |
 
 ## 5.5 Rollback
 
-Releases live in `/opt/pingle/releases/<version>`; the last three are kept. To roll back the API, point `current` at the previous release and restart:
+Releases live in `/opt/packetpulse/releases/<version>`; the last three are kept. To roll back the API, point `current` at the previous release and restart:
 
 ```bash
-ssh mshop.rummaan53.com 'ls -1t /opt/pingle/releases'
-ssh mshop.rummaan53.com 'sudo ln -sfn /opt/pingle/releases/<previous> /opt/pingle/current && sudo systemctl restart pingle'
+ssh mshop.rummaan53.com 'ls -1t /opt/packetpulse/releases'
+ssh mshop.rummaan53.com 'sudo ln -sfn /opt/packetpulse/releases/<previous> /opt/packetpulse/current && sudo systemctl restart packetpulse'
 ```
 
 > [!WARNING]
@@ -1016,7 +1021,7 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/pingle/releases/<previous> /opt/pingl
 
 ## Appendix A — Every API route
 
-All routes are under `/api/v1`. **Access**: *public* (no session), *session* (signed in), *member* (signed in **and** in an organisation), *superuser* (the platform operator), *api key* (a Results API key with `read:results`). **Licence**: refused while the organisation's licence is suspended, revoked or expired. **Audited**: recorded by the audit middleware from `pinglego/pkg/auditlogmicroservice/auditlogconstants/AuditLogRegistry.go`; sign-in, sign-out and failed sign-ins are recorded by the user service itself (§2.5). `./pingletest.sh docs` derives this table from the route handlers and fails if it drifts.
+All routes are under `/api/v1`. **Access**: *public* (no session), *session* (signed in), *member* (signed in **and** in an organisation), *superuser* (the platform operator), *api key* (a Results API key with `read:results`). **Licence**: refused while the organisation's licence is suspended, revoked or expired. **Audited**: recorded by the audit middleware from `packetpulsego/pkg/auditlogmicroservice/auditlogconstants/AuditLogRegistry.go`; sign-in, sign-out and failed sign-ins are recorded by the user service itself (§2.5). `./packetpulsetest.sh docs` derives this table from the route handlers and fails if it drifts.
 
 | Method | Path | Access | Capability | Licence | Audited |
 |---|---|---|---|:---:|:---:|
@@ -1157,11 +1162,11 @@ Built-in roles are shared by every organisation and cannot be edited; an organis
 
 ## Appendix C — Migrations
 
-Embedded in the server binary and applied in order at boot (`pinglego/pkg/common/dbclient/migrations/`). They only ever move forward (§5.5).
+Embedded in the server binary and applied in order at boot (`packetpulsego/pkg/common/dbclient/migrations/`). They only ever move forward (§5.5).
 
 | File | What it does |
 |---|---|
-| `0001_2026_09_30_initial_schema.sql` | Pingle initial schema. |
+| `0001_2026_09_30_initial_schema.sql` | PacketPulse initial schema. |
 | `0002_2026_09_30_tenancy_staff_and_access.sql` | Tenancy, staff and the permission model. |
 | `0003_2026_09_30_platform_licensing.sql` | Platform licensing: currencies, price book, licences and their evidentiary |
 | `0004_2026_09_30_diagnostics_and_api_keys.sql` | The diagnostic request: a NOC engineer investigating a trouble ticket. |
@@ -1188,14 +1193,14 @@ Embedded in the server binary and applied in order at boot (`pinglego/pkg/common
 
 ## Appendix D — Settings
 
-Read from the environment, falling back to `.env` (see `.env.example`); defined in `pinglego/pkg/common/config/Config.go`.
+Read from the environment, falling back to `.env` (see `.env.example`); defined in `packetpulsego/pkg/common/config/Config.go`.
 
 | Setting | Default | What it decides |
 |---|---|---|
 | `APP_ENV` | `development` | `production` refuses the settings in Part IV `NFR-018` |
-| `APP_NAME` | `Pingle` | The name in reports and the user agent |
+| `APP_NAME` | `PacketPulse` | The name in reports and the user agent |
 | `PORT` | `8080` | Where the API listens |
-| `DATABASE_URL` | local `pingledb` | The database (through PgBouncer on the live host) |
+| `DATABASE_URL` | local `packetpulsedb` | The database (through PgBouncer on the live host) |
 | `JWT_SECRET` | — (required, 32+ characters) | Signs sessions **and** seals every stored secret: rotating it signs everyone out and makes stored SMS tokens, bind passwords and export credentials unreadable until re-entered |
 | `JWT_TTL` | `12h` | How long a session lasts |
 | `CORS_ORIGINS` | `*` | Must be explicit origins in production |
@@ -1212,11 +1217,11 @@ Read from the environment, falling back to `.env` (see `.env.example`); defined 
 | `PING_COUNT`, `PING_TIMEOUT`, `PING_INTERVAL`, `PING_CONCURRENCY` | `4`, `5s`, `200ms`, `16` | The probe engine's defaults |
 | `PING_TCP_FALLBACK` | `true` | TCP connect where ICMP cannot be sent |
 | `PING_ALLOW_PRIVATE` | `true` | Whether RFC 1918 and unique-local addresses may be probed |
-| `LDAP_ALLOW_LOOPBACK` | `false` | A directory on Pingle's own host (development only) |
-| `EXPORT_ALLOW_LOOPBACK` | `false` | A result-export server on Pingle's own host (development only) |
+| `LDAP_ALLOW_LOOPBACK` | `false` | A directory on PacketPulse's own host (development only) |
+| `EXPORT_ALLOW_LOOPBACK` | `false` | A result-export server on PacketPulse's own host (development only) |
 | `REVERSE_GEOCODING` | `auto` | `off` stops addresses being looked up for sign-in positions |
 | `GOOGLE_MAPS_API_KEY` | — | Google Geocoding; without it, OpenStreetMap Nominatim |
-| `GEOCODE_CONTACT` | `https://pingle.rummaan53.com` | Sent to Nominatim, which requires a contact |
+| `GEOCODE_CONTACT` | `https://packetpulse.rummaan53.com` | Sent to Nominatim, which requires a contact |
 
 ## Appendix E — Response codes and actions
 
@@ -1265,4 +1270,4 @@ Every refusal is a JSON envelope: `{"error": {"code", "message", "request_id", "
 
 ---
 
-*Guide version `v2026.10-PROD-v1` — verified against source on 2026-10-04, and continuously re-verified by `./pingletest.sh docs`.*
+*Guide version `v2026.10-PROD-v1` — verified against source on 2026-10-04, and continuously re-verified by `./packetpulsetest.sh docs`.*

@@ -4,6 +4,6 @@
 .idea/
 .vscode/
 
-# The docs suite's Python environment (markdown-it-py), made by pingletest.sh.
+# The docs suite's Python environment (markdown-it-py), made by packetpulsetest.sh.
 .venv/
 __pycache__/

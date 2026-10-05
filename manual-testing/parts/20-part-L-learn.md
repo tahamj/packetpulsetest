@@ -1,4 +1,4 @@
-# Part L — Learn Pingle
+# Part L — Learn PacketPulse
 
 The ideas every other part assumes, in plain words. Read this once, whatever your role.
 
@@ -33,7 +33,7 @@ A site whose name resolves to both an IPv4 and an IPv6 address is measured over 
 
 ## L.5 Two vantage points
 
-A **server-side diagnostic** measures from Pingle's data centre. **Test from this device** measures from wherever the person is, over their own connection — the right tool for "is it slow for me?". The two will not match, and both are correct: they measure different layers from different places. A device test can be **attached** to a ticket, where it sits beside the server's figures, labelled as measured on a device.
+A **server-side diagnostic** measures from PacketPulse's data centre. **Test from this device** measures from wherever the person is, over their own connection — the right tool for "is it slow for me?". The two will not match, and both are correct: they measure different layers from different places. A device test can be **attached** to a ticket, where it sits beside the server's figures, labelled as measured on a device.
 
 ## L.6 Two-step sign-in
 
@@ -47,15 +47,15 @@ For people set to **Record location**, the device's position is recorded when th
 
 Every successful change — who, what, from where, when — is written to a **hash chain**: each entry's hash covers the one before, so altering or removing any entry breaks every entry after it, and **Verify** names the first that does not follow. Administrators' sign-ins and sign-outs are in it, and so are **failed** sign-ins to administrators' accounts (at most twenty an hour per account). A position is shown beside an entry but never sealed into its hash: it is personal data that may have to be erased, and a chain entry never can be.
 
-## L.9 Results leaving Pingle
+## L.9 Results leaving PacketPulse
 
 | Way out | Who uses it | What |
 |---|---|---|
 | **Export PDF** | A person, from a ticket | The evidence document for the ticket or the customer |
 | **Export CSV** | A person, from a ticket | The same results as a spreadsheet, one row per site and family |
 | **Results API** | A machine with an API key | One ticket by TT number (JSON), or every result of up to 31 days as CSV |
-| **Result export** | Pingle, on a schedule | A CSV file per period, delivered to the organisation's own SFTP, FTPS or FTP server |
+| **Result export** | PacketPulse, on a schedule | A CSV file per period, delivered to the organisation's own SFTP, FTPS or FTP server |
 
-All CSV comes from one writer with one header — the contract an IT system's importer is written against (`pingletest/contracts/result_export_columns.json`).
+All CSV comes from one writer with one header — the contract an IT system's importer is written against (`packetpulsetest/contracts/result_export_columns.json`).
 
 ---

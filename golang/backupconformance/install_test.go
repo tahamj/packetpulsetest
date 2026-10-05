@@ -57,13 +57,13 @@ func TestTheShippedBackupKeyIsPublicAndCanEncrypt(t *testing.T) {
 	if _, err := exec.LookPath("gpg"); err != nil {
 		t.Skip("gpg is not installed")
 	}
-	out, err := exec.Command("gpg", "--show-keys", "--with-colons", scriptPath(t, "pingle-backup-pub.asc")).Output()
+	out, err := exec.Command("gpg", "--show-keys", "--with-colons", scriptPath(t, "packetpulse-backup-pub.asc")).Output()
 	if err != nil {
 		t.Fatalf("gpg cannot read the shipped key: %v", err)
 	}
 	listing := string(out)
 	if regexp.MustCompile(`(?m)^(sec|ssb):`).MatchString(listing) {
-		t.Fatal("pingle-backup-pub.asc contains SECRET key material")
+		t.Fatal("packetpulse-backup-pub.asc contains SECRET key material")
 	}
 	// Field 12 of a colon listing holds a key's capabilities; e is encrypt.
 	canEncrypt := false
@@ -80,7 +80,7 @@ func TestTheShippedBackupKeyIsPublicAndCanEncrypt(t *testing.T) {
 	if primary == nil {
 		t.Fatal("no fingerprint in the key listing")
 	}
-	record := readFile(t, filepath.Join(repoRoot(t), "docs", "PingleDeploymentRecord.md"))
+	record := readFile(t, filepath.Join(repoRoot(t), "docs", "PacketPulseDeploymentRecord.md"))
 	if !strings.Contains(record, primary[1]) {
 		t.Errorf("the deployment record does not state the backup key's fingerprint %s", primary[1])
 	}
@@ -90,8 +90,8 @@ func TestTheShippedBackupKeyIsPublicAndCanEncrypt(t *testing.T) {
 // names the .env explicitly, and the two jobs keep their cadence: a backup
 // every night, a drill every week.
 func TestTheScheduleRunsWhatTheInstallerInstalls(t *testing.T) {
-	cron := readFile(t, scriptPath(t, "pingle-backup.cron"))
-	installer := readFile(t, scriptPath(t, "PingleBackupInstall.sh"))
+	cron := readFile(t, scriptPath(t, "packetpulse-backup.cron"))
+	installer := readFile(t, scriptPath(t, "PacketPulseBackupInstall.sh"))
 	job := regexp.MustCompile(`(?m)^(\S+ \S+ \S+ \S+ \S+)\s+root\s+(.*)$`)
 	jobs := job.FindAllStringSubmatch(cron, -1)
 	if len(jobs) != 2 {
@@ -100,12 +100,12 @@ func TestTheScheduleRunsWhatTheInstallerInstalls(t *testing.T) {
 	schedules := map[string]string{}
 	for _, entry := range jobs {
 		command := entry[2]
-		if !strings.Contains(command, "PINGLE_ENV_FILE=/opt/pingle/.env ") {
+		if !strings.Contains(command, "PACKETPULSE_ENV_FILE=/opt/packetpulse/.env ") {
 			t.Errorf("job does not name the .env explicitly: %s", command)
 		}
-		script := regexp.MustCompile(`/opt/pingle/backup/(\S+\.sh)`).FindStringSubmatch(command)
+		script := regexp.MustCompile(`/opt/packetpulse/backup/(\S+\.sh)`).FindStringSubmatch(command)
 		if script == nil {
-			t.Errorf("job runs nothing from /opt/pingle/backup: %s", command)
+			t.Errorf("job runs nothing from /opt/packetpulse/backup: %s", command)
 			continue
 		}
 		if !exists(scriptPath(t, script[1])) {
@@ -116,10 +116,10 @@ func TestTheScheduleRunsWhatTheInstallerInstalls(t *testing.T) {
 		}
 		schedules[script[1]] = entry[1]
 	}
-	if fields := strings.Fields(schedules["PingleBackup.sh"]); len(fields) != 5 || fields[2] != "*" || fields[4] != "*" {
-		t.Errorf("the backup does not run every night: %q", schedules["PingleBackup.sh"])
+	if fields := strings.Fields(schedules["PacketPulseBackup.sh"]); len(fields) != 5 || fields[2] != "*" || fields[4] != "*" {
+		t.Errorf("the backup does not run every night: %q", schedules["PacketPulseBackup.sh"])
 	}
-	if fields := strings.Fields(schedules["PingleRestoreDrill.sh"]); len(fields) != 5 || fields[4] == "*" {
-		t.Errorf("the drill does not run weekly: %q", schedules["PingleRestoreDrill.sh"])
+	if fields := strings.Fields(schedules["PacketPulseRestoreDrill.sh"]); len(fields) != 5 || fields[4] == "*" {
+		t.Errorf("the drill does not run weekly: %q", schedules["PacketPulseRestoreDrill.sh"])
 	}
 }

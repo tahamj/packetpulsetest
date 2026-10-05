@@ -38,7 +38,7 @@ func newTestKey(t *testing.T) testKey {
 		}
 		return out
 	}
-	gpg("--quick-gen-key", "Pingle Backup Test <backup-test@example.invalid>", "default", "default", "never")
+	gpg("--quick-gen-key", "PacketPulse Backup Test <backup-test@example.invalid>", "default", "default", "never")
 	publicKey := filepath.Join(home, "public.asc")
 	if err := os.WriteFile(publicKey, gpg("--armor", "--export"), 0o644); err != nil {
 		t.Fatal(err)
