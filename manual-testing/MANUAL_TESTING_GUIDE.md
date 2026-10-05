@@ -8,13 +8,13 @@
 
 <br>
 
-`v2026.10-PROD-v1`  ·  `Verified against source 2026-10-04`
+`v2026.10-PROD-v2`  ·  `Verified against source 2026-10-05`
 
 <br>
 
 | 🧭 Screens | 🔌 API routes | 🔐 Capabilities | 🗄️ Migrations | 💬 Catalogue strings | ❓ Help topics | 🧪 Guard suites |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| **17** <br><sub>in the navigation rail</sub> | **110** <br><sub>under `/api/v1`</sub> | **17** <br><sub>3 built-in roles</sub> | **24** <br><sub>applied at boot</sub> | **835** <br><sub>English, server-served</sub> | **18** <br><sub>one per screen</sub> | **11** <br><sub>+ `load`, opt-in</sub> |
+| **16** <br><sub>in the navigation rail</sub> | **104** <br><sub>under `/api/v1`</sub> | **17** <br><sub>3 built-in roles</sub> | **27** <br><sub>applied at boot</sub> | **881** <br><sub>English, server-served</sub> | **18** <br><sub>one per screen</sub> | **11** <br><sub>+ `load`, opt-in</sub> |
 
 <br>
 
@@ -62,6 +62,23 @@ PacketPulse is a multi-tenant network-diagnostics service for telecom operators:
 
 ---
 
+## 📋 What Changed in v2 — Licence Files, Emailed Codes and One Run Screen
+
+> [!IMPORTANT]
+> **Built 2026-10-05; not yet deployed.** The release waits for the `packetpulse.rummaan53.com` DNS record (Part V). Every row below must be verified before it is signed off. Where v2 and v1 disagree, v2 is the product.
+
+| Change | What changed | Where to test | Source of truth |
+|---|---|---|---|
+| **Codes, not an authenticator** | The second step is a 6-digit code, **emailed**, or **texted** through the organisation's own SMS gateway. There is no authenticator app and there are no recovery codes. An owner's code is always emailed. | `AUTH-*`, `SMS-*` | `packetpulsego/pkg/usermicroservice/userservice/UserSignInSteps.go`<br>`packetpulsego/pkg/common/dbclient/migrations/0025_2026_10_05_otp_only_and_licence_files.sql` |
+| **Signed licence files** | An organisation signs in only under a licence file signed by PacketPulse, in the server's `LICENCE_DIR` and checked at every sign-in. The superuser exists only on PacketPulse's own console. The first sign-up with the licence's owner address becomes the Administrator. | `PLAT-*`, `AUTH-*` | `packetpulsego/pkg/common/licence/Store.go` |
+| **People, not sign-ins** | The licence counts the people on the books, switched on or off. Someone who leaves is switched off; someone with no records can be deleted, and stops counting. | `STF-*`, `WHO-*` | `packetpulsego/pkg/staffmicroservice/staffservice/StaffService.go` |
+| **Own tests, and everyone's** | An engineer sees the tests they ran. An administrator sees everyone's, narrowed by person, place, status and dates. Each test records who ran it and where. | `HIST-*` | `packetpulsego/pkg/common/dbclient/migrations/0026_2026_10_05_own_results_places_and_indexes.sql` |
+| **Path analysis removed** | No traceroute, no fault verdict, and no *Where the faults lay* card. Paths stored before stay in the database, unshown; the CSV keeps its `fault_class` column. | `DIAG-*` | `packetpulsego/pkg/common/dbclient/migrations/0027_2026_10_05_path_analysis_removed.sql` |
+| **Speed test hidden** | **Measure speed** is no longer offered. A speed filed with a run before still shows with it. | `DEV-*` | `packetpulseflutter/lib/common/config/PacketPulseConfig.dart` |
+| **One Run diagnostic screen** | *Run diagnostic* and *Test from this device* are one destination with two modes: **From the server** and **From this device**. Someone without the right to run a sweep gets the device mode alone. | `DEV-*`, `DIAG-*` | `packetpulseflutter/lib/diagnosticmicroservice/presentation/screens/RunDiagnosticScreen.dart` |
+
+---
+
 ## 📋 What Changed in v1 — the October 2026 Customer Release
 
 > [!IMPORTANT]
@@ -70,13 +87,13 @@ PacketPulse is a multi-tenant network-diagnostics service for telecom operators:
 | Requirement | What changed | Where to test | Source of truth |
 |---|---|---|---|
 | **1. Show IPv6** | Client IPs are read only from trusted proxies and shown canonically; a dual-stack site is measured over **both** families, the IPv6 result **reported, not counted**; the device test shows its IPv4 and IPv6 egress. | `V6-*`, `DEV-004` | `packetpulsego/pkg/common/probeguard/ProbeGuardPolicy.go`<br>`packetpulsego/pkg/common/dbclient/migrations/0023_2026_10_04_dual_stack_results.sql` |
-| **2. Two-step sign-in** | Every sign-in has a second step: an authenticator app (TOTP) or a texted code through the organisation's **own Twilio account**. Owners and superusers always use an authenticator; recovery codes for a lost phone. | `AUTH-*`, `SMS-*` | `packetpulsego/pkg/usermicroservice/userservice/UserSignInSteps.go`<br>`packetpulsego/pkg/common/dbclient/migrations/0019_2026_10_03_two_step_sign_in.sql` |
-| **3. No target dropdown** | *Test from this device* tests the target the organisation chose (Cloudflare DNS by default), with one-tap presets for whoever may change it. | `DEV-*` | `packetpulseflutter/lib/diagnosticmicroservice/presentation/screens/ClientProbeScreen.dart` |
+| **2. Two-step sign-in** | Every sign-in has a second step. *v2 replaced the authenticator app and recovery codes with an emailed or texted code.* | `AUTH-*`, `SMS-*` | `packetpulsego/pkg/usermicroservice/userservice/UserSignInSteps.go`<br>`packetpulsego/pkg/common/dbclient/migrations/0019_2026_10_03_two_step_sign_in.sql` |
+| **3. No target dropdown** | The device test measures the target the organisation chose (Cloudflare DNS by default), with one-tap presets for whoever may change it. *In v2 it is the From this device mode of Run diagnostic.* | `DEV-*` | `packetpulseflutter/lib/diagnosticmicroservice/presentation/screens/ClientProbeScreen.dart` |
 | **4. Location at check-in** | Sign-in and sign-out record the device's position for people set to *Record location*; field engineers on a separate **Check-ins** screen with address and map link; a per-organisation *Require location* rule. | `CHK-*`, `LOC-*` | `packetpulsego/pkg/common/dbclient/migrations/0020_2026_10_03_session_checkin.sql`<br>`packetpulsego/pkg/common/geocode/Geocode.go` |
 | **5. Loss and jitter** | Loss and RFC 3550 jitter on every result, ticket, history row, dashboard row, PDF and SLA report. | `DIAG-005`, `HIST-*`, `MON-*` | `packetpulsego/pkg/pingmicroservice/pingprobe/PingVoiceQuality.go`<br>`packetpulsego/pkg/common/dbclient/migrations/0022_2026_10_03_loss_and_jitter.sql` |
 | **6. CSV, FTP and download** | **Export CSV** on every ticket; a Results API bulk pull; a scheduled push to the organisation's own **SFTP / FTPS / FTP** server with the SSH host key confirmed first. | `CSV-*`, `EXP-*` | `packetpulsego/pkg/diagnosticmicroservice/diagnosticexport/DiagnosticExport.go`<br>`packetpulsego/pkg/exportmicroservice/exportservice/ExportService.go` |
 | **7. English only** | The other 22 languages were removed; wording is still served by the server, in English. | `SET-003` | `scripts/intellicodegen/packetpulsestrings.py` |
-| **8. Load testing** | A device line-speed test (Cloudflare), and a platform load suite: 20 people at once, a traced 200-site sweep, API and CSV pulls against p95 budgets. | `DEV-005`, Part IV §4.5 | `packetpulsetest/golang/loadtest/load_test.go`<br>`.github/workflows/packetpulse-load.yml` |
+| **8. Load testing** | A platform load suite: 20 people at once, a 200-site sweep, API and CSV pulls against p95 budgets. *The device line-speed test of v1 is hidden in v2.* | Part IV §4.5 | `packetpulsetest/golang/loadtest/load_test.go`<br>`.github/workflows/packetpulse-load.yml` |
 | **Admin logins tracked** | Administrators' sign-ins and sign-outs in the **Activity** trail with device, browser, address and place; **failed** attempts on their accounts too, with the reason. | `AUD-*` | `packetpulsego/pkg/auditlogmicroservice/auditlogconstants/AuditLogRegistry.go` |
 
 ---
@@ -125,18 +142,21 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 
 `REVERSE_GEOCODING=off` stops sign-in positions being sent to a map service from a test run. Every other setting comes from `.env` (copy `.env.example`); Appendix D lists them all.
 
-## 0.4 Accounts and authenticators
+With the development key pair in `.env` (`LICENCE_PUBLIC_KEY` and `LICENCE_SIGNING_KEY`), the stack is a **console**: the superuser can sign in and issue licence files (**Platform → Download licence file**). Copy a file into `LICENCE_DIR` and its organisation can sign in; the server verifies it at every sign-in. Only the demo's own licence is written there for you. A customer's server has no signing key, only the licence files copied into its `LICENCE_DIR`.
+
+## 0.4 Accounts and sign-in codes
 
 | Account | How it exists | Second step |
 |---|---|---|
-| **Platform superuser** | `OWNER_EMAIL` / `OWNER_PASSWORD` in `.env`, created at boot | Authenticator. Outside production, `OWNER_TOTP_SECRET` pre-enrols it so scripts can sign in; production refuses to boot with that set. |
-| **Demo owner** (`SEED_DEMO=true`) | `DEMO_EMAIL` / `DEMO_PASSWORD`, with an organisation, sites and a licence | Authenticator; `DEMO_TOTP_SECRET` likewise, outside production only. |
-| **Anyone else** | Sign up (lands in the holding organisation) or **Staff → Add** by an administrator | Sets up an authenticator at first sign-in, unless set to text and a gateway is on. |
+| **Platform superuser** | `superuser@rummaan53.com` (fixed in code) with `OWNER_PASSWORD`, created at boot **on the console only** | A code emailed to that address. |
+| **Organisation owner** | The first sign-up with the address named in the organisation's licence file becomes its Administrator | A code emailed to the owner, always. |
+| **Anyone else** | **Staff → Add** by an administrator, who shares the sign-in with them | A code emailed to their sign-in address, or texted when they are set to text and the organisation's SMS gateway is on. |
+| **Demo logins** (`SEED_DEMO=true`, console only) | `DEMO_EMAIL` / `DEMO_PASSWORD` (owner), plus `demo-engineer@…` and `demo-viewer@…` | The texted-code step, with the code (`DEMO_SMS_CODE`) shown on screen instead of sent. At most `DEMO_SEATS` walkthroughs at once. |
 
-To act as a person in a manual test, add the authenticator secret shown at enrolment to any TOTP app (or `oathtool --totp -b <secret>`). Keep the **recovery codes** shown once at the end of enrolment — several cases use them.
+To act as a person in a manual test, read their code from the **code outbox**: when `OTP_OUTBOX_FILE` is set, every code is appended to that file as one JSON line (`challenge_id`, `channel`, `to`, `code`, `at`) instead of being emailed or texted. Without it, codes go to real mailboxes through the Gmail accounts in `SMTP_FROM_n` / `SMTP_PASSWORD_n`.
 
 > [!IMPORTANT]
-> 🔒 **INVARIANT** — production refuses `OWNER_TOTP_SECRET` and `DEMO_TOTP_SECRET`: a second factor written in a configuration file is held by everyone who can read the file. `packetpulsego/pkg/common/config/Config.go` returns an error at boot; `REL-004` checks the live host.
+> 🔒 **INVARIANT** — production refuses `OTP_OUTBOX_FILE`, because a file of live sign-in codes is a second factor held by everyone who can read the file. It also refuses to boot with no SMTP account, since email is everyone's fallback, and refuses a `LICENCE_PUBLIC_KEY` that would replace the vendor's key. `packetpulsego/pkg/common/config/Config.go` returns an error at boot; `REL-004` checks the live host.
 
 ## 0.5 The automated gate
 
@@ -145,7 +165,7 @@ To act as a person in a manual test, add the authenticator secret shown at enrol
 | Suite | What it proves | Needs |
 |---|---|---|
 | `tenancy` | One organisation can never read or change another's data | server |
-| `assignment` | Sign-up lands in the holding organisation; assignment and seats | server |
+| `assignment` | Licence files: owner sign-up, sign-in only under a genuine licence, people counted, switched off and deleted | server |
 | `acl` | Every role gets exactly its capabilities, both ways | server |
 | `audit` | The registry covers every mutation; the chain verifies; sign-ins (and failed ones) are recorded | server |
 | `translation` | The catalogue is complete and served | server |
@@ -155,7 +175,7 @@ To act as a person in a manual test, add the authenticator secret shown at enrol
 | `client` | Every Flutter screen, `flutter analyze`, the client coverage floor | — |
 | `backup` | The backup, drill and restore scripts, for real | database |
 | `docs` | This guide is current and every number, path, route and capability in it matches source | — |
-| `load` *(opt-in)* | 20 people, a traced 200-site sweep, API and CSV pulls against p95 budgets | server |
+| `load` *(opt-in)* | 20 people, a 200-site sweep, API and CSV pulls against p95 budgets | server |
 
 Integration suites read `PACKETPULSE_TEST_URL` (default `http://localhost:8080`). `PACKETPULSE_TEST_REQUIRE_SUPERUSER=1` turns a missing superuser into a failure rather than a skip — a skipped suite looks exactly like a passing one.
 
@@ -168,11 +188,11 @@ Integration suites read `PACKETPULSE_TEST_URL` (default `http://localhost:8080`)
 
 The ideas every other part assumes, in plain words. Read this once, whatever your role.
 
-## L.1 Organisations, people and seats
+## L.1 Organisations, people and the licence
 
 An **organisation** is one customer — a telecom operator such as Northwind Telecom. Everything it owns (sites, diagnostics, keys, settings, its trail) is invisible to every other organisation. 🔒 **INVARIANT** — every tenant query carries the caller's `organisation_id`; a request with none is refused, never answered for everyone.
 
-Signing up does **not** create an organisation. A new account waits in the **holding organisation** until the platform operator creates a tenant, places the account in it and issues a **licence**. The licence sets **seats** — how many people may be signed in *at once* — and how many sites may be tested. Forty engineers can share twenty seats across shifts; a person on a laptop and a phone holds one seat, not two.
+Each organisation runs on a **licence file** signed by PacketPulse and copied onto its server. The server checks it at **every sign-in**: without a genuine licence in force, nobody in that organisation signs in. The licence names the owner's address and how many **people** it covers. Everyone on the books counts, switched on or switched off, because a person who leaves is switched off rather than erased. Someone who never ran a test or signed in can be **deleted**, and then no longer counts. Signing up does not create an organisation: the first person to sign up with the owner's address, proved by an emailed code, becomes its Administrator and adds everyone else.
 
 People hold a **role** (Administrator, NOC Engineer, Viewer, or one of the organisation's own) made of **capabilities** such as `diagnostic_run` or `staff_manage` (Appendix B). A person can be given an individual *allow* or *deny* on top. Changing someone's authority signs them out at once.
 
@@ -180,7 +200,7 @@ People hold a **role** (Administrator, NOC Engineer, Viewer, or one of the organ
 
 A **site** is an address worth testing: a customer router, a point of presence, a resolver. It may be an IP address or a hostname (resolved at test time, so a name that stops resolving is itself a fault).
 
-A **diagnostic** tests sites and files the result against a **TT number** — a trouble ticket in the operator's own system — and a **Customer ID**. A ticket can be tested many times; the attempts together show how the fault was worked. The engine sends ICMP echoes (or TCP connects where ICMP is unavailable), in parallel, and when **Trace failures** is on, walks the path to each failing site hop by hop.
+A **diagnostic** tests sites and files the result against a **TT number** — a trouble ticket in the operator's own system — and a **Customer ID**. A ticket can be tested many times; the attempts together show how the fault was worked. The engine sends ICMP echoes (or TCP connects where ICMP is unavailable), in parallel.
 
 ## L.3 What the numbers mean
 
@@ -191,7 +211,6 @@ A **diagnostic** tests sites and files the result against a **TT number** — a 
 | **Jitter** | RFC 3550 interarrival jitter — how much *consecutive* round trips differ. Voice cares about this more than raw latency. | Low single digits of ms |
 | **MOS** | Mean Opinion Score (ITU-T G.107 E-model): how a phone call would sound over this path, 1–5. | Above 4.0; below 3.6 is noticed on a call |
 | **SLA** | **OK**, **Degraded** (within 80% of a threshold) or **Breached**, against the site's targets. | OK |
-| **Verdict** | Where the fault most likely lies — the customer's network, the access circuit, the carrier — with confidence and evidence. | "clean" |
 
 ## L.4 IPv4, IPv6 and "not counted"
 
@@ -199,11 +218,11 @@ A site whose name resolves to both an IPv4 and an IPv6 address is measured over 
 
 ## L.5 Two vantage points
 
-A **server-side diagnostic** measures from PacketPulse's data centre. **Test from this device** measures from wherever the person is, over their own connection — the right tool for "is it slow for me?". The two will not match, and both are correct: they measure different layers from different places. A device test can be **attached** to a ticket, where it sits beside the server's figures, labelled as measured on a device.
+**Run diagnostic** has two modes. **From the server** measures from PacketPulse's data centre. **From this device** measures from wherever the person is, over their own connection — the right tool for "is it slow for me?". The two will not match, and both are correct: they measure different layers from different places. A device test can be **attached** to a ticket, where it sits beside the server's figures, labelled as measured on a device.
 
 ## L.6 Two-step sign-in
 
-After the password, everyone gives a second step: a 6-digit code from an **authenticator app** (TOTP), or a code **texted** to their mobile through the organisation's own SMS gateway. Owners and the platform superuser always use an authenticator — they are the accounts that must never depend on a gateway someone else configures. Ten **recovery codes**, shown once at set-up, each sign in once if the phone is lost. Wrong codes count: ten across challenges lock the account for fifteen minutes. A wrong *password* never locks anything, so a stranger cannot lock someone out by typing their address.
+After the password, everyone enters a one-time **6-digit code**. It is **emailed** to their sign-in address, or **texted** to their mobile when an administrator chose text for them and the organisation's own SMS gateway is on. An owner's code is always emailed, so the account that runs the organisation never depends on a gateway. A code is good for ten minutes and five tries; ten wrong codes in all lock the account for fifteen minutes, and nobody is sent more than ten codes an hour. A wrong *password* never locks anything, so a stranger cannot lock someone out by typing their address. A lost phone is handled by an administrator, who signs that device out and switches the person to email.
 
 ## L.7 Location at sign-in
 
@@ -234,9 +253,9 @@ Run every case on a disposable stack (Part 0 §0.3) with **two organisations of 
 | Group | Chapters | Test IDs |
 |---|---|---|
 | 1 · Access | Sign-in and the second step · Sign-in security | `AUTH-*`, `SMS-*`, `LOC-*` |
-| 2 · People | Staff · Roles and permissions · Sessions and seats · Check-ins · Activity | `STF-*`, `ACL-*`, `SEAT-*`, `CHK-*`, `AUD-*` |
+| 2 · People | Staff · Roles and permissions · Sessions and licence · Check-ins · Activity | `STF-*`, `ACL-*`, `WHO-*`, `CHK-*`, `AUD-*` |
 | 3 · Diagnostics | Sites · Diagnostics and results · IPv6 · CSV · History and dashboard | `SITE-*`, `DIAG-*`, `V6-*`, `CSV-*`, `HIST-*` |
-| 4 · The customer's side | Test from this device | `DEV-*` |
+| 4 · The customer's side | Run diagnostic, from this device | `DEV-*` |
 | 5 · Monitoring | SLA targets, schedules, alerts, maintenance, SLA report | `MON-*` |
 | 6 · Integrations | Results API keys · Result export · Directory | `API-*`, `EXP-*`, `LDAP-*` |
 | 7 · Platform and settings | Platform console · Settings · Public site | `PLAT-*`, `SET-*`, `WEB-*` |
@@ -250,38 +269,43 @@ Signing in, the second step, and the organisation's own rules for both.
 
 ### 1.1 🔑 Sign-in and the second step
 
-**Screen:** the sign-in page at `/app/` · **Routes:** `POST /user/signin`, `/user/signin/verify`, `/user/signin/resend`, `/user/signin/enrol`, `/user/signout`
+**Screen:** the sign-in page at `/app/` · **Routes:** `POST /user/signin`, `/user/signin/verify`, `/user/signin/resend`, `/user/signout`
 
-- 🌟 **Commercial Presentation & Sales Pitch**: Two-step sign-in for *everyone*, not a premium add-on. A stolen password alone opens nothing. Field staff can get codes by text through **the operator's own Twilio account** — their sender, their DLT registration, their bill — while owners and the platform operator always use an authenticator app, so the accounts that matter most never depend on a gateway someone else configures. Recovery codes mean a lost phone is an inconvenience, not a helpdesk ticket.
+- 🌟 **Commercial Presentation & Sales Pitch**: Two-step sign-in for *everyone*, not a premium add-on. A stolen password alone opens nothing: after it comes a one-time code, emailed to the person's sign-in address or — for field staff the administrator chooses — texted through **the operator's own Twilio account** (their sender, their DLT registration, their bill). Owners always get theirs by email, so the account that matters most never depends on a gateway someone else configures. There is no app to install and nothing to recover: a lost phone is one action for an administrator.
 - 📖 **User Guide & Operational Flow**:
-  - **First sign-in:** email and password → scan the QR code with any authenticator app (or type the key shown beneath it) → enter one code → **save the ten recovery codes** shown once → you are in.
-  - **Every sign-in after:** email and password → the 6-digit code from the app (or texted to •••• 1234 if your administrator set you up for text; *Resend* after 30 seconds).
-  - **Lost phone:** *Lost your phone? Use a recovery code* on the code screen. Each works once. No codes left? Your administrator uses **Staff → Reset authenticator**; an owner asks the platform operator.
+  - **Every sign-in:** email and password → *We emailed a 6-digit code to a•••@acme.example* (or *We texted a 6-digit code to •••• 1234* when your administrator set you up for text) → enter it → you are in. A code is good for 10 minutes; *Resend* after 30 seconds.
+  - **The owner's first sign-in:** *First time here? Set up the owner's account* — only the address named in this server's licence can do this (§7.1). The emailed code finishes it, and the owner arrives as the Administrator.
+  - **Lost phone:** your administrator signs that device out under **Who is signed in** (§2.3) and changes your number or switches you to email under **Staff → How they sign in**.
   - **Location:** if you are asked to share your location, the browser or phone asks your permission. See §1.2 for when sharing is required.
 - 🧪 **Manual Testing Playbook**:
   | ID | Persona | Scenario | Steps | Observable Expected Result |
   |---|---|---|---|---|
-  | `AUTH-001` | New engineer | First sign-in sets up the authenticator | Administrator adds the engineer (**Staff → Add**). Engineer signs in with email and password | QR code and key shown; one correct code opens the app **after** the ten recovery codes are shown. 🛑 **Must NOT** reach the app before the codes are shown, or show them again later |
-  | `AUTH-002` | Engineer | Normal sign-in | Sign out; sign in; enter the current code | Signed in. The **Sessions and seats** row shows this device |
-  | `AUTH-003` | Engineer | A wrong code says how many tries are left | Enter `000000` | Refused (`invalid_code`) with attempts left; after **5** wrong codes on one challenge it is spent (`challenge_expired`, *Start again*). 🛑 **Must NOT** accept a 6th guess on the same challenge |
-  | `AUTH-004` | Engineer | A code cannot be used twice | Sign in with a code; sign out; sign in again within the same 30 seconds with the **same** code | Second use refused; the next code (30 s later) works. 🛑 **Must NOT** accept a replayed code |
-  | `AUTH-005` | Engineer | A recovery code works once | On the code screen choose *Lost your phone? Use a recovery code*, enter one; sign out; try the same one again | First signs in; second refused. 🛑 **Must NOT** accept a spent recovery code |
-  | `AUTH-006` | Tester | Ten wrong codes lock the account, a wrong password never does | Give 10 wrong codes across fresh challenges; then the right password and right code. Separately, 15 wrong **passwords** on another account | First account: *Locked — try again later* (`locked_out`, 15 min) even with the right code. Second account: still signs in with the right password. 🛑 **Must NOT** lock an account by wrong passwords — a stranger could lock anyone out |
-  | `AUTH-007` | Tester | Sign-in does not reveal which addresses exist | Sign in with an unknown email; then a known email with a wrong password | The same message and a similar response time. 🛑 **Must NOT** say "no such user" or answer the unknown address noticeably faster |
-  | `AUTH-008` | Owner | Owners always use an authenticator | Set the owner to *Text message* in **Staff → How they sign in** with a gateway on; sign in as the owner | Authenticator code asked, not a text. 🛑 **Must NOT** text an owner's code |
-  | `AUTH-009` | Engineer set to text | A texted code, with resend limits | Gateway on (§1.2), engineer has a mobile number and *Text message*. Sign in; wait; *Resend* | Code arrives; hint shows the last four digits; *Resend* unavailable for 30 s; at most 3 sends per sign-in and 5 per hour (`rate_limited`) |
-  | `AUTH-010` | Engineer set to text | No gateway means the authenticator, not a lock-out | Switch the gateway **off**; sign in as the engineer | Authenticator set-up (or code) asked instead. 🛑 **Must NOT** refuse the sign-in for want of a gateway |
-  | `AUTH-011` | Engineer set to text | A failing gateway is said, not bypassed | Gateway on with a wrong auth token; sign in as the engineer | 503 *Your sign-in code could not be sent just now. Try again.* 🛑 **Must NOT** fall back to an authenticator the engineer never set up |
-  | `AUTH-012` | Administrator | Reset authenticator for a lost phone | **Staff → (engineer) → Reset authenticator** | The engineer's sessions end at once; their next sign-in sets up a new authenticator. Activity shows the reset, by whom |
-  | `AUTH-013` | Superuser | Only the platform operator resets an owner | **Platform → (organisation) → Owners → Reset**; then try `POST /user/{ownerId}/secondfactor/reset` as an organisation administrator | Superuser: reset done, audited. Administrator: 403. 🛑 **Must NOT** let anyone inside the organisation reset its owner |
+  | `AUTH-001` | New engineer | The first sign-in is the same as every other | Administrator adds the engineer (**Staff → Add**). Engineer signs in with email and password | The code step names their inbox, partly hidden; the emailed code opens the app. 🛑 **Must NOT** reach the app on the password alone, or show the whole address in the hint |
+  | `AUTH-002` | Engineer | Normal sign-in | Sign out; sign in; enter the emailed code | Signed in. **Who is signed in** shows this device |
+  | `AUTH-003` | Engineer | A wrong code says how many tries are left | Enter `000000` | Refused (`invalid_code`) with attempts left; after **5** wrong codes on one sign-in it is spent (`challenge_expired`, *Start again*). 🛑 **Must NOT** accept a 6th guess on the same sign-in |
+  | `AUTH-004` | Engineer | A code belongs to its own sign-in | Sign in with a code; sign out; start another sign-in and enter the first code | Refused; the code emailed for this sign-in works. 🛑 **Must NOT** accept a code from an earlier sign-in |
+  | `AUTH-005` | Tester | Codes cannot be pumped | *Resend* repeatedly; then sign in over and over within the hour | *Resend* unavailable for 30 s and at most 3 sends per sign-in; the 11th code to one person in an hour is refused (`rate_limited`). 🛑 **Must NOT** send email or texts without limit |
+  | `AUTH-006` | Tester | Ten wrong codes lock the account, a wrong password never does | Give 10 wrong codes across fresh sign-ins; then the right password and right code. Separately, 15 wrong **passwords** on another account | First account: *Locked — try again later* (`locked_out`, 15 min) even with the right code. Second account: still signs in with the right password. 🛑 **Must NOT** lock an account by wrong passwords — a stranger could lock anyone out |
+  | `AUTH-007` | Tester | Sign-in does not reveal which addresses exist | Sign in with an unknown email; then a known email with a wrong password | The same message and a similar response time, and no code sent. 🛑 **Must NOT** say "no such user" or answer the unknown address noticeably faster |
+  | `AUTH-008` | Owner | An owner's code is always emailed | Set the owner to *Text message* in **Staff → How they sign in** with a gateway on; sign in as the owner | Code emailed, not texted. 🛑 **Must NOT** text an owner's code |
+  | `AUTH-009` | Engineer set to text | A texted code, with resend limits | Gateway on (§1.2), engineer has a mobile number and *Text message*. Sign in; wait; *Resend* | Code arrives; the hint shows the last four digits; *Resend* unavailable for 30 s; at most 3 sends per sign-in and 10 codes an hour (`rate_limited`) |
+  | `AUTH-010` | Engineer set to text | No gateway means email, not a lock-out | Switch the gateway **off**; sign in as the engineer | The code is emailed instead. 🛑 **Must NOT** refuse the sign-in for want of a gateway |
+  | `AUTH-011` | Engineer set to text | A failing gateway is said, not hidden | Gateway on with a wrong auth token; sign in as the engineer | 503 *Your sign-in code could not be sent just now. Try again.* 🛑 **Must NOT** claim a code was sent |
+  | `AUTH-012` | Administrator | A lost phone | **Who is signed in → Sign this device out** on the engineer's phone; **Staff → How they sign in → Email** | The phone's session ends at once; the engineer's next sign-in emails the code. Activity records who signed the device out |
+  | `AUTH-013` | Tester | The superuser exists only on the console | On a customer's server (no `LICENCE_SIGNING_KEY`), sign in as `superuser@rummaan53.com` — or as any account flagged superuser in its database | Refused (*This account has been deactivated*). On the console the code is emailed to `superuser@rummaan53.com`. 🛑 **Must NOT** admit a superuser on a customer's server |
   | `AUTH-014` | Engineer | An ended session returns to sign-in once | Revoke the engineer's session from another device, then use the app | One clean return to the sign-in page, and one `POST /user/signout` in the browser's network panel. 🛑 **Must NOT** loop between sign-in and an error, or send sign-outs over and over |
   | `AUTH-015` | Tester | A forged client address is ignored | `curl -H 'True-Client-IP: 6.6.6.6' -H 'X-Forwarded-For: 6.6.6.6'` a sign-in from a machine that is not a trusted proxy | Sessions and Activity show the real peer address. 🛑 **Must NOT** record `6.6.6.6` |
+  | `DEMO-001` | Visitor | The public demo signs in through the real two-step flow | On the console with `SEED_DEMO` on, sign in as `demo-engineer@<domain>` with the shared demo password | The real SMS step appears with the code **shown on screen** and filled in; one tap opens the app. 🛑 **Must NOT** text or email anything |
+  | `DEMO-002` | Tester | The demo code is not a master key | Use the demo code (`DEMO_SMS_CODE`, default `111111`) as the second-step code for a **non-demo** account | Refused as a wrong code. 🛑 **Must NOT** admit any account outside the demo organisation |
+  | `DEMO-003` | Tester | The demo is capped | Open `DEMO_SEATS` (default 3) concurrent demo sessions, then sign in once more | The extra sign-in is refused with *the demo is busy* (`demo_busy`). 🛑 **Must NOT** let shared demo accounts open unlimited sessions |
+  | `DEMO-004` | Tester | The shared demo cannot be hijacked or turned on the network | As a demo account try **Change password**; then run a diagnostic against a private/internal address added to the demo inventory | Password change refused (`demo_read_only`); the private target is refused by the probe policy. 🛑 **Must NOT** let a visitor change a shared credential or probe `10.x`/internal space |
 - ⚙️ **Developer Guide & Release Confidence**:
-  - Flow: `packetpulsego/pkg/usermicroservice/userservice/UserSignInSteps.go` — the password step returns a challenge (`totp`, `totp_enrol` or `sms`), never a session; `newSession` runs only after verify. Challenge ids are 32 random bytes, stored as SHA-256; texted codes are keyed HMACs.
+  - Flow: `packetpulsego/pkg/usermicroservice/userservice/UserSignInSteps.go` — the password step returns a challenge (`email` or `sms`), never a session; `newSession` runs only after verify, and checks the licence again (§7.1). Challenge ids are 32 random bytes, stored as SHA-256; codes are stored as keyed hashes bound to their challenge.
   - 🔒 Attempts are counted **before** the code is checked, in one conditional `UPDATE … RETURNING`, so parallel guesses cannot slip under the limit.
-  - Limits: `maxAttempts = 5`, `lockAfter = 10`, `lockFor = 15m`, `resendAfter = 30s`, 3 sends per challenge, 5 texts per hour; a separate rate limiter for the second step (`SECOND_STEP_ATTEMPTS_PER_MINUTE`).
+  - Limits: `maxAttempts = 5`, `lockAfter = 10`, `lockFor = 15m`, `resendAfter = 30s`, `maxSendsPerChallenge = 3`, `maxCodesPerHour = 10` by either channel; a separate rate limiter for the second step (`SECOND_STEP_ATTEMPTS_PER_MINUTE`).
+  - Email: `packetpulsego/pkg/common/mailer/Mailer.go` — STARTTLS with a verified certificate (credentials are never sent otherwise), header injection refused, the load spread over up to four sending accounts (`SMTP_FROM_0…3`, `SMTP_PASSWORD_0…3`). A development or test server writes codes to `OTP_OUTBOX_FILE` instead (`packetpulsego/pkg/common/mailer/Outbox.go`); production refuses it.
   - Client IPs: `packetpulsego/pkg/common/apiratelimit/ApiRateLimit.go` walks `X-Forwarded-For` from the right past `TRUSTED_PROXIES` only, and returns canonical addresses (`::ffff:a.b.c.d` → `a.b.c.d`).
-  - Coverage: `packetpulsego/pkg/usermicroservice/userservice/UserSignInSteps_test.go`, the `assignment` and `audit` suites (every integration test signs in with a real TOTP code).
+  - Coverage: `packetpulsego/pkg/usermicroservice/userservice/UserSignInSteps_test.go`, `packetpulsego/pkg/common/mailer/Mailer_test.go`, the `assignment` and `audit` suites (every integration test finishes its sign-in with the code from the outbox).
 
 ---
 
@@ -320,24 +344,28 @@ Who is in the organisation, what each may do, who is signed in, and the record o
 
 ### 2.1 👥 Staff
 
-**Screen:** Administer → **Staff** · **Routes:** `GET /staff/list`, `PUT/DELETE /staff/{staffId}`, `PUT /staff/{staffId}/secondfactor`, `POST /staff/{staffId}/secondfactor/reset`, `POST /user/add` · **Capability:** `staff_manage` (adding people: `user_manage`)
+**Screen:** Administer → **Staff** · **Routes:** `GET /staff/list`, `PUT/DELETE /staff/{staffId}`, `PUT /staff/{staffId}/secondfactor`, `POST /user/add` · **Capability:** `staff_manage` (adding people: `user_manage`)
 
-- 🌟 **Commercial Presentation & Sales Pitch**: One screen to add a colleague, give them a role, decide how they sign in and whether their position is recorded — and to stop them instantly. Disabling someone signs them out at once, not when a token happens to expire, which is the property an auditor asks about first.
-- 📖 **User Guide & Operational Flow**: **Add** a person with email, a starting password and a role. Edit to change their role, staff code (unique in the organisation), department and designation (labels only — authority comes from the role). **How they sign in** sets the second step (authenticator or text, with their mobile number) and **Record location at sign-in and sign-out**. **Reset authenticator** is for a lost phone. Turning **Enabled** off signs them out and blocks sign-in.
+- 🌟 **Commercial Presentation & Sales Pitch**: One screen to add a colleague, give them a role, decide how they sign in and whether their position is recorded — and to stop them the moment they leave. Switching someone off signs them out at once, not when a token happens to expire, which is the property an auditor asks about first; every test they ran stays on the record. Someone added by mistake can be deleted, which frees their place on the licence.
+- 📖 **User Guide & Operational Flow**: **Add** a person with email, a starting password and a role, and give them the password yourself: staff do not sign themselves up. Edit to change their role, staff code (unique in the organisation), department and designation (labels only — authority comes from the role). **How they sign in** sets where their code goes — email, the default, or text with their mobile number — and **Record location at sign-in and sign-out**. **Disable** switches off someone who has left: they are signed out everywhere and cannot sign in, their tests stay, and they still count on the licence. **Delete** is only for someone added by mistake who has never signed in or run a test, and frees their place.
 - 🧪 **Manual Testing Playbook**:
   | ID | Persona | Scenario | Steps | Observable Expected Result |
   |---|---|---|---|---|
-  | `STF-001` | Administrator | Add a colleague | **Add** with role *NOC Engineer* | They appear with the role; their first sign-in sets up an authenticator (`AUTH-001`) |
+  | `STF-001` | Administrator | Add a colleague | **Add** with role *NOC Engineer* | They appear with the role; their first sign-in emails a code (`AUTH-001`); **People on the licence** (§2.3) rises by one |
   | `STF-002` | Administrator | Staff codes are unique inside the organisation | Give two people the same staff code; then give RIVAL's person the same code | First: refused (`conflict`). RIVAL: allowed — uniqueness is per organisation |
-  | `STF-003` | Administrator | Disabling signs out at once | Engineer signed in on another browser; untick **Enabled** and save | The engineer's next action returns them to sign-in; signing in is refused. 🛑 **Must NOT** leave the session working until it expires |
+  | `STF-003` | Administrator | Disabling signs out at once | Engineer signed in on another browser; **Disable** them | The engineer's next action returns them to sign-in; signing in is refused before any code is sent; they still count on the licence. 🛑 **Must NOT** leave the session working until it expires |
   | `STF-004` | Administrator | How they sign in, saved whole | Set *Text message* with mobile `+919876543210` and *Record location* off; save. Then edit only the department and save | Second save keeps the method, number and location setting. 🛑 **Must NOT** reset what the department edit did not show |
   | `STF-005` | Administrator | A bad mobile number is refused | Set *Text message* with `98765 43210` | Refused: international form needed (E.164) |
   | `STF-006` | Administrator | Changing a role signs the person out | Engineer signed in; change their role to *Viewer* | Their next action returns them to sign-in; signed in again, they see only Viewer's screens |
   | `STF-007` | Viewer | Without `staff_manage` there is no Staff screen | Sign in as a Viewer; call `GET /staff/list` | No **Staff** in the rail; the API answers 403 |
+  | `STF-008` | Administrator | Only someone with no records can be deleted | Add a person and **Delete** them. Add another, let them sign in once, and **Delete** them | First: gone, and **People on the licence** falls by one. Second: refused (409) — *switch them off instead*. 🛑 **Must NOT** delete a person who has signed in or run a test |
+  | `STF-009` | Administrator | A full licence refuses the next person, and says why | Licence for 3 people; 3 on it, one of them disabled; **Add** a fourth | Refused (`seat_limit_reached`): *Your licence covers no more users. Delete someone added by mistake, or ask for a licence for more users.* 🛑 **Must NOT** add the fourth, or count only those switched on |
+  | `STF-010` | Administrator | Someone deleted by mistake can be added back | Delete a person who never signed in; **Add** the same address again | They are back with the new password and role, and counted again. 🛑 **Must NOT** refuse the address as taken |
 - ⚙️ **Developer Guide & Release Confidence**:
   - `packetpulsego/pkg/staffmicroservice/staffapp/StaffRouteHandler.go`; the second-step settings are a **separate** route (`PUT /staff/{staffId}/secondfactor`) because the whole-row staff update would otherwise wipe them; it requires `second_factor`, `phone_number` and `capture_location`.
+  - Delete is a soft delete (`deleted_on`), refused while the person has records — any diagnostic submitted, any session ever opened — so no test or trail entry points at a removed person; the account is switched off in the same statement. Adding the address again revives the row (`StaffReviveWithCredential`).
   - 🔒 Every write is scoped by the caller's organisation; editing RIVAL's `staffId` answers 404.
-  - Coverage: `packetpulsego/pkg/staffmicroservice/**`, `packetpulseflutter/test/staff_screen_test.dart`, the `acl` and `tenancy` suites.
+  - Coverage: `packetpulsego/pkg/staffmicroservice/**`, `packetpulseflutter/test/staff_screen_test.dart`, the `acl`, `tenancy` and `assignment` suites.
 
 ---
 
@@ -345,8 +373,8 @@ Who is in the organisation, what each may do, who is signed in, and the record o
 
 **Screen:** Administer → **Permission matrix** · **Routes:** `GET/POST /staff/role/*`, `PUT /staff/{staffId}/access`, `GET /user/capability/list` · **Capability:** `acl_manage`
 
-- 🌟 **Commercial Presentation & Sales Pitch**: Seventeen plain-language capabilities, three built-in roles (Administrator 17, NOC Engineer 8, Viewer 5) and as many of the operator's own as it likes — plus a per-person *allow* or *deny* for the exception that does not deserve a role. Changes take effect on the next request, not the next sign-in.
-- 📖 **User Guide & Operational Flow**: The matrix lists roles across and capabilities down. **Add a role**, tick what it may do, save — the whole set is saved, so nothing is left to an invisible default. Built-in roles are read-only. A role somebody holds cannot be deleted. Per person: *Inherit*, *Allow* or *Deny* each capability.
+- 🌟 **Commercial Presentation & Sales Pitch**: Seventeen plain-language capabilities, three built-in roles (Administrator 17, NOC Engineer 7, Viewer 5) and as many of the operator's own as it likes — plus a per-person *allow* or *deny* for the exception that does not deserve a role. Changes take effect on the next request, not the next sign-in.
+- 📖 **User Guide & Operational Flow**: The matrix lists roles across and capabilities down. **Add a role**, tick what it may do, save — the whole set is saved, so nothing is left to an invisible default. Built-in roles are read-only: an engineer reads the tests they ran (`diagnostic_view_own`), while Administrator and Viewer read everyone's (`diagnostic_view_all`). A role somebody holds cannot be deleted. Per person: *Inherit*, *Allow* or *Deny* each capability.
 - 🧪 **Manual Testing Playbook**:
   | ID | Persona | Scenario | Steps | Observable Expected Result |
   |---|---|---|---|---|
@@ -355,30 +383,31 @@ Who is in the organisation, what each may do, who is signed in, and the record o
   | `ACL-003` | Administrator | A role in use cannot be deleted | Delete *Shift lead* while someone holds it | Refused, naming that people hold it |
   | `ACL-004` | Administrator | A per-person deny wins over the role | Deny `report_export` to one engineer | That engineer has no **Export PDF**/**Export CSV**; `GET /diagnostic/{id}/report.csv` answers 403. Other engineers unaffected |
   | `ACL-005` | Tester | Every role, both directions | Run `./packetpulsetest.sh acl` | Passes — each role is refused what it lacks and allowed what it holds |
+  | `ACL-006` | Administrator | An engineer reads their own tests; an administrator everyone's | Two engineers each run a diagnostic; each opens **History**; then the administrator does | Each engineer sees only their own, with *These are the tests you ran*; the administrator sees both (`HIST-005`). 🛑 **Must NOT** show an engineer a colleague's test, in the list, by its id or by its ticket |
 - ⚙️ **Developer Guide & Release Confidence**:
-  - Capabilities: `packetpulsego/pkg/common/packetpulseaccess/PacketPulseAccessCategory.go` (Appendix B); guards: `packetpulseaccess.RequireCapability` on each route (Appendix A).
+  - Capabilities: `packetpulsego/pkg/common/packetpulseaccess/PacketPulseAccessCategory.go` (Appendix B); guards: `packetpulseaccess.RequireCapability` on each route, or `RequireAnyCapability` where either of two will do — reading diagnostics opens to `diagnostic_view_own` or `diagnostic_view_all`, and the server decides whose rows come back (Appendix A).
   - 🔒 Authority is read fresh on every request; a role change revokes the person's sessions.
   - Coverage: `packetpulsetest/golang/aclconformance/acl_conformance_test.go` (the full matrix), `packetpulseflutter/test/permission_matrix_screen_test.dart`.
 
 ---
 
-### 2.3 💺 Sessions and seats
+### 2.3 🪪 Who is signed in, and the licence
 
-**Screen:** Administer → **Sessions and seats** · **Routes:** `GET /staff/session/list`, `DELETE /staff/session/{sessionId}`, `GET /staff/session/organisation`, `DELETE /staff/session/organisation/{sessionId}`
+**Screen:** Administer → **Who is signed in** · **Routes:** `GET /staff/session/list`, `DELETE /staff/session/{sessionId}`, `GET /staff/session/organisation`, `DELETE /staff/session/organisation/{sessionId}`
 
-- 🌟 **Commercial Presentation & Sales Pitch**: Floating licences: seats count people signed in *now*, not accounts. Forty engineers share twenty seats across shifts, and an administrator can free a seat left signed in on a desk without disabling anyone.
-- 📖 **User Guide & Operational Flow**: Your own sessions list every device you are signed in on, with its address (IPv4 or IPv6, in full in the tooltip). Administrators also see everyone signed in, and **Free this seat** ends one session.
+- 🌟 **Commercial Presentation & Sales Pitch**: A licence covers a number of **people** — everyone on the books, working or switched off — not sign-ins. One engineer on a laptop and a phone is one person. An administrator sees at a glance how many places are used and who is signed in where, and signs a lost phone out in one action.
+- 📖 **User Guide & Operational Flow**: Three figures: **People on the licence**, **People licensed** and **Live sessions**. When every place is taken a warning says so, before the next person is refused. Your own sessions list every device you are signed in on, with its address (IPv4 or IPv6, in full in the tooltip). Administrators also see everyone signed in, and **Sign this device out** ends one session — for a lost phone, or a machine somebody walked away from. Signing a device out frees no place: the licence counts people.
 - 🧪 **Manual Testing Playbook**:
   | ID | Persona | Scenario | Steps | Observable Expected Result |
   |---|---|---|---|---|
-  | `SEAT-001` | Engineer | The next person over the limit is refused | Licence of 2 seats (Platform → seats); two people signed in; a third signs in | Third refused (`seat_limit_reached`) with guidance to ask an administrator. 🛑 **Must NOT** sign the third person in |
-  | `SEAT-002` | Engineer | One person, two devices, one seat | Sign in on a laptop and a phone | Seat count rises by one |
-  | `SEAT-003` | Engineer | A second tab never locks you out | All seats full; open a second tab and sign in as yourself | Allowed. 🛑 **Must NOT** refuse you for your own seat |
-  | `SEAT-004` | Administrator | Free a seat | **Free this seat** on a colleague's session | Their next action returns them to sign-in; Activity records who freed whose seat |
-  | `SEAT-005` | Engineer | An IPv6 address shows whole | Sign in over IPv6 (or seed a session with `2401:4900:1c2a:8e1f::1`) | One line, ellipsised, full address in the tooltip and selectable. 🛑 **Must NOT** wrap across lines or overflow at phone width |
+  | `WHO-001` | Owner | The licence counts people, not sign-ins | Sign in on a laptop and a phone | **People on the licence** 1, **Live sessions** 2. 🛑 **Must NOT** count the second device as a second person |
+  | `WHO-002` | Administrator | Switched-off people still count; deleted ones do not | Licence for 2: the owner and an engineer who never signed in. **Disable** the engineer; then **Delete** them | Disabled: still 2, and adding a person is refused (`STF-009`). Deleted: 1, and adding a person succeeds |
+  | `WHO-003` | Administrator | Sign a device out | **Sign this device out** on a colleague's session | Their next action on that device returns them to sign-in; Activity records who signed out whose device; **People on the licence** unchanged |
+  | `WHO-004` | Engineer | An IPv6 address shows whole | Sign in over IPv6 (or seed a session with `2401:4900:1c2a:8e1f::1`) | One line, ellipsised, full address in the tooltip and selectable. 🛑 **Must NOT** wrap across lines or overflow at phone width |
+  | `WHO-005` | Administrator | A licence figure that cannot be read is not a number | Give a custom role `staff_manage` but not `licence_view`; open the screen as someone holding it | **People licensed** shows `–`; the sessions still list. 🛑 **Must NOT** show 0 or "unlimited" |
 - ⚙️ **Developer Guide & Release Confidence**:
-  - Seats are checked at the password step **and** when the session opens (`enforceSeatLimit`), counted per person over live, unrevoked sessions.
-  - Coverage: `packetpulsetest/golang/tenancyassignment/`, `packetpulseflutter/test/session_screen_test.dart`.
+  - The count is `StaffCountUsers` — staff rows not deleted, switched on or off (`packetpulsego/pkg/staffmicroservice/staffdomain/repository/StaffRepositoryPostgres.go`). It is checked when a person is added or revived (`ensureRoomForAnotherUser` in `packetpulsego/pkg/staffmicroservice/staffservice/StaffService.go`) and at every sign-in against the installed licence file (`enforceUserLimit`, the owner excepted, §7.1).
+  - Coverage: `packetpulsetest/golang/tenancyassignment/`, `packetpulsetest/golang/tenancyisolation/`, `packetpulseflutter/test/session_screen_test.dart`.
 
 ---
 
@@ -416,7 +445,7 @@ Who is in the organisation, what each may do, who is signed in, and the record o
   | `AUD-001` | Administrator | An administrator's sign-in is recorded in full | Sign in as the owner from Chrome, allowing location; open **Activity** | *Signed in* by the owner: role, second step, device, *Chrome NN on <system>*, the IP (v4 or v6), the place with a map link, the session id |
   | `AUD-002` | Administrator | And their sign-out | Sign out with location; sign back in | A *Signed out* row with its own place |
   | `AUD-003` | Tester | A wrong password on an administrator's account is recorded | From another browser, sign in as the owner with a wrong password | *Sign-in failed* — Why: *Wrong password*, from that address. 🛑 **Must NOT** carry a position in the entry |
-  | `AUD-004` | Tester | A wrong code, and the lock | Owner's right password, then wrong codes until locked | *Sign-in failed* rows: *Wrong code* (naming the authenticator) until the 10th, which says *Locked after too many wrong codes*; the next right password is recorded as locked too |
+  | `AUD-004` | Tester | A wrong code, and the lock | Owner's right password, then wrong codes until locked | *Sign-in failed* rows: *Wrong code* (naming how the code was sent) until the 10th, which says *Locked after too many wrong codes*; the next right password is recorded as locked too |
   | `AUD-005` | Tester | Not everyone's failures are activity | An engineer's wrong code; an unknown email's wrong password | Neither appears. 🛑 **Must NOT** record a field engineer's mistype, or list addresses people guessed |
   | `AUD-006` | Tester | The record cannot be flooded | 25 wrong passwords at the owner's address within an hour | At most **20** *Sign-in failed* rows for that account in the hour; the rest go to the server log |
   | `AUD-007` | Administrator | Verify the chain | *Verify chain* | *Intact*, with how many entries were checked and the head hash |
@@ -460,26 +489,32 @@ The core of the product: what to test, testing it against a ticket, and reading 
 
 ### 3.2 🩺 Diagnostics and results
 
-**Screen:** Operate → **Run diagnostic** · **Routes:** `POST /diagnostic/submit`, `GET /diagnostic/{requestId}`, `GET /diagnostic/{requestId}/report.pdf` · **Capabilities:** `diagnostic_run`, `diagnostic_view_all`, `report_export` · **Licence:** required to run
+**Screen:** Operate → **Run diagnostic** → **From the server** · **Routes:** `POST /diagnostic/submit`, `GET /diagnostic/{requestId}`, `GET /diagnostic/{requestId}/report.pdf` · **Capabilities:** `diagnostic_run`, `diagnostic_view_own` or `diagnostic_view_all`, `report_export` · **Licence:** required to run
 
-- 🌟 **Commercial Presentation & Sales Pitch**: One form, one sweep, one report against the ticket. Every figure a NOC argues about — loss, latency, RFC 3550 jitter, MOS — and a verdict on *where* the fault lies, with the evidence. A lapsed licence stops new tests but never takes away the evidence already gathered.
-- 📖 **User Guide & Operational Flow**: Enter **Customer ID** and **TT number**, pick sites (or leave empty for every enabled site), choose packet count and timeout, tick **Trace failures** for the path to anything that fails. The result shows headline cards (sites reachable, average loss, average jitter), then a row per site and family: reachable, the packet line verbatim (*Sent = 4, Received = 4, Lost = 0*), round trips, jitter, MOS with its band, SLA grade, verdict, and — for a failure — the hops with the first lossy one marked. **Export PDF** and **Export CSV** sit at the top.
+- 🌟 **Commercial Presentation & Sales Pitch**: One form, one sweep, one report against the ticket. Every figure a NOC argues about — loss, latency, RFC 3550 jitter, MOS — from the server and, in the same screen, from the engineer's own device. A lapsed licence stops new tests but never takes away the evidence already gathered.
+- 📖 **User Guide & Operational Flow**: **Run diagnostic** opens on **From the server** for anyone who may run a sweep; **From this device** beside it is the device test (§4.1), and switching between them keeps what each holds. Enter **Customer ID** and **TT number**, pick sites (or leave empty for every enabled site), and choose packet count and timeout. The result shows headline cards (sites reachable, average loss, average jitter), then a row per site and family: reachable, the packet line verbatim (*Sent = 4, Received = 4, Lost = 0*), round trips, jitter, MOS with its band and SLA grade. **Export PDF** and **Export CSV** sit at the top.
 - 🧪 **Manual Testing Playbook**:
   | ID | Persona | Scenario | Steps | Observable Expected Result |
   |---|---|---|---|---|
   | `DIAG-001` | Engineer | A sweep files against the ticket | Run against every enabled site with TT `TT-MAN-001` | Status *Completed*; one row per site (and family); the packet line exactly as specified |
   | `DIAG-002` | Engineer | A ticket keeps every attempt | Run `TT-MAN-001` again | **History** for the ticket shows both attempts, newest first |
-  | `DIAG-003` | Engineer | Tracing marks where loss begins | Include a black-holed address (`203.0.113.99`) with **Trace failures** | Its row lists hops; the first hop with loss is marked. A trace that runs out of time leaves the result intact without hops |
-  | `DIAG-004` | Engineer | The PDF is evidence | **Export PDF** | Named `packetpulse-<TT>-<UTC time>.pdf`; Customer ID, TT, UTC timestamps, Jitter and MOS columns, average loss and jitter cards; a long IPv6 address wraps onto two lines. 🛑 **Must NOT** truncate an address |
+  | `DIAG-003` | Engineer | A failure is reported, not traced | Include a black-holed address (`203.0.113.99`); run; open the result, its PDF and the **Dashboard** | The row shows the failure and its packet line. No path, hops or fault verdict anywhere, and no *Where the faults lay* card. 🛑 **Must NOT** offer a *Trace failures* switch |
+  | `DIAG-004` | Engineer | The PDF is evidence | **Export PDF** | Named `packetpulse-<TT>-<UTC time>.pdf`; Customer ID, TT, UTC timestamps, Jitter and MOS columns, average loss and jitter cards; a long IPv6 address wraps onto two lines; the foot names who ran it and where — *Triggered by Asha Rao  -  at MG Road, Pune*. 🛑 **Must NOT** truncate an address |
   | `DIAG-005` | Engineer | Loss and jitter on the ticket | Open the result; open **History** | Headline cards show average loss and average jitter; the history row shows the same figures |
   | `DIAG-006` | Engineer | A lapsed licence stops new runs only | Platform suspends the licence; run a diagnostic; open an old one and export it | Run refused (`licence_suspended`, who can renew named); the old result opens and exports. 🛑 **Must NOT** hide recorded evidence |
   | `DIAG-007` | RIVAL engineer | Another organisation's ticket is not found | Open `/diagnostic/<ACME request id>` as RIVAL | 404. 🛑 **Must NOT** reveal that the ticket exists |
   | `DIAG-008` | Tester | A malformed id is refused before it is looked up | `GET /diagnostic/not-a-uuid` | 400 |
+  | `DIAG-009` | Engineer | The PDF is made from the record when it is asked for | Export a ticket's PDF twice, a minute apart; look for a stored copy on the server | Both carry the same measurements, drawn from the stored results at the moment each was asked for; no PDF is kept on the server. 🛑 **Must NOT** depend on a file kept on disk |
+  | `DIAG-010` | Engineer | A colleague's test cannot be exported | As an engineer, `GET /diagnostic/<colleague's request id>/report.pdf` (and `.csv`) | 404, as though it did not exist. 🛑 **Must NOT** hand an engineer someone else's evidence |
+  | `DIAG-011` | Engineer, then Viewer | One screen, two modes | As an engineer: open **Run diagnostic**, type a Customer ID, switch to **From this device** and back. As a Viewer: open **Run diagnostic** | The engineer starts on **From the server**, and the Customer ID is still there after switching back. The Viewer gets the device test with no switch. 🛑 **Must NOT** offer a separate *Test from this device* entry in the rail |
 - ⚙️ **Developer Guide & Release Confidence**:
   - Engine: `packetpulsego/pkg/pingmicroservice/pingprobe/PingProbeRunner.go` (pro-bing, unprivileged ICMP, TCP fallback); jitter: `packetpulsego/pkg/pingmicroservice/pingprobe/PingVoiceQuality.go` (`InterarrivalJitter`, RFC 3550).
-  - 🔒 Results are saved under their **own** deadline, never the sweep's or the trace's: a traced sweep that runs long still stores everything it measured (`load` suite §4.5 proves it, and goes red with the old bug restored).
+  - 🔒 Results are saved under their **own** deadline, never the sweep's: a sweep that runs long still stores everything it measured (`load` suite §4.5 proves it, and goes red with the old bug restored).
+  - The screen is `packetpulseflutter/lib/diagnosticmicroservice/presentation/screens/RunDiagnosticScreen.dart`. A mode is built when first shown and kept, so switching never loses a half-filled form or a finished device run. The server mode needs an organisation and `diagnostic_run`, as its own destination used to.
+  - Path analysis was removed in `packetpulsego/pkg/common/dbclient/migrations/0027_2026_10_05_path_analysis_removed.sql`: `ping_hop` and the fault verdict columns are no longer written, and the rows already stored stay. A client built before then still sends `trace_failures`; the server accepts and ignores it, because decoding is strict and refusing it would fail every run that client made.
   - Ticket figures (`avg_loss_pct`, `max_loss_pct`, `avg_jitter_ms`) are computed in `RequestFinish` from the run's counted results (`packetpulsego/pkg/common/dbclient/migrations/0022_2026_10_03_loss_and_jitter.sql`).
-  - Coverage: `packetpulsego/pkg/diagnosticmicroservice/**`, `packetpulsego/pkg/pingmicroservice/**`, `packetpulseflutter/test/diagnostic_submit_screen_test.dart`, the `tenancy` and `contract` suites.
+  - The PDF is built on the fly from the database each time it is asked for (`packetpulsego/pkg/pingmicroservice/pingreport/PingReportPdfBuilder.go`); nothing is written to disk. Its foot names the person who ran the test and the place their session checked in from.
+  - Coverage: `packetpulsego/pkg/diagnosticmicroservice/**`, `packetpulsego/pkg/pingmicroservice/**`, `packetpulseflutter/test/diagnostic_submit_screen_test.dart`, `packetpulseflutter/test/run_diagnostic_screen_test.dart`, the `tenancy` and `contract` suites.
 
 ---
 
@@ -496,11 +531,9 @@ The core of the product: what to test, testing it against a ticket, and reading 
   | `V6-002` | Engineer | An IPv6 failure does not breach the site | A dual-stack site whose IPv6 fails while IPv4 answers | No alert; the site counts as reachable; availability unchanged. 🛑 **Must NOT** raise an alert for report-only IPv6 |
   | `V6-003` | Engineer | IPv6-only counts | A site with only an IPv6 address that fails | Counted as a failure, alerting and grading as usual |
   | `V6-004` | Engineer | No IPv6 route is said plainly | On a server without IPv6, a dual-stack site | The IPv6 row reads *There is no IPv6 route from this vantage point, so this IPv6 address could not be tested from here.* 🛑 **Must NOT** report it as the site being down |
-  | `V6-005` | Engineer | Traceroute over IPv6 shows its hops | Trace a failing IPv6 address on a host with IPv6 | Intermediate hops listed (not only the destination) |
 - ⚙️ **Developer Guide & Release Confidence**:
   - `ping_result.ip_version` (4, 6 or NULL when nothing was probed) and `report_only`; the daily rollup is keyed by family (`packetpulsego/pkg/common/dbclient/migrations/0023_2026_10_04_dual_stack_results.sql`).
   - `probeguard.ResolveAllAndCheck` returns one checked address per family; the runner probes them in parallel and marks IPv6 report-only only when there is more than one family.
-  - ICMPv6 Time Exceeded parsing walks extension headers (`quotedSequenceIPv6` in `packetpulsego/pkg/pingmicroservice/pingprobe/PingTraceRunner.go`).
 
 ---
 
@@ -526,10 +559,10 @@ The core of the product: what to test, testing it against a ticket, and reading 
 
 ### 3.5 🗂️ History and dashboard
 
-**Screens:** Operate → **History**, **Dashboard** · **Routes:** `GET /diagnostic/list`, `GET /diagnostic/tt/{ttNumber}`, `GET /ping/dashboard`, `GET /diagnostic/faults`
+**Screens:** Operate → **History**, **Dashboard** · **Routes:** `GET /diagnostic/list`, `GET /diagnostic/tt/{ttNumber}`, `GET /ping/dashboard`
 
-- 🌟 **Commercial Presentation & Sales Pitch**: Every ticket investigated, with its loss and jitter on the row, and a management view of where faults lay over the last 90 days — the customer's own network, the access circuit or the carrier — for the supplier review.
-- 📖 **User Guide & Operational Flow**: **History** searches by TT number or Customer ID; each row shows reachable/total, breaches, loss and jitter. **Dashboard** shows sites, the last sweep, the licence, 30 days of availability (a day with nothing measured is a gap, never zero) and the fault breakdown.
+- 🌟 **Commercial Presentation & Sales Pitch**: Every ticket investigated, with its loss and jitter on the row, who ran it and where — and 30 days of availability on the dashboard for the supplier review.
+- 📖 **User Guide & Operational Flow**: An engineer's **History** is the tests they ran, with the note *These are the tests you ran. Administrators see everyone's.* An administrator's is everyone's, and narrows by **Person**, **Place** (*Where it was run, or a site or region*), **Status**, **From** and **To**; **Clear filters** puts them back. Both search by TT number or Customer ID. Each row shows reachable/total, breaches, loss and jitter, and who ran it and where: *Customer CUST-1 · Asha Rao · at MG Road, Pune*. **Dashboard** shows sites, the last sweep, the licence, 30 days of availability (a day with nothing measured is a gap, never zero).
 - 🧪 **Manual Testing Playbook**:
   | ID | Persona | Scenario | Steps | Observable Expected Result |
   |---|---|---|---|---|
@@ -537,9 +570,15 @@ The core of the product: what to test, testing it against a ticket, and reading 
   | `HIST-002` | Engineer | A failed search is not an empty result | Stop the API; search | The failure, with *Try again*. 🛑 **Must NOT** show *No diagnostics yet* |
   | `HIST-003` | Engineer | A device run reads as one | Attach a device test (§4.1); find it in History | Marked as measured on a device; its loss is *query* loss |
   | `HIST-004` | Engineer | A quiet day is a gap | A schedule paused for a day; open **Dashboard** | The availability line has a gap. 🛑 **Must NOT** plot 0% for a day with nothing measured |
+  | `HIST-005` | Engineer | An engineer reads only the tests they ran | Two engineers each run a test; each opens **History**; then one opens the other's by id (`GET /diagnostic/<id>`) and by ticket (`GET /diagnostic/tt/<TT>`) | Each sees only their own, with the note; by id: 404; by ticket: nothing. 🛑 **Must NOT** show an engineer a colleague's test by any route |
+  | `HIST-006` | Administrator | The filters narrow | **Person** = one engineer; then **Place** = `Pune`; then **Status** = *Failed*; then **From** and **To** the same day; then **Clear filters** | Each narrows to what it names — *Place* matches the address the test was run from, or a site or region it probed; a *To* date includes the whole of that day — and **Clear filters** shows everything again |
+  | `HIST-007` | Tester | A filter that cannot be read is refused | `GET /diagnostic/list?staff_id=nope`, then `?status=lost`, then `?from=yesterday` | 422, naming the field. 🛑 **Must NOT** ignore the filter and answer with everything |
+  | `HIST-008` | Engineer | Who and where, on the row and the PDF | Sign in sharing your location; run a test; open **History** and the test's PDF | The row reads *· <your name> · at <the address you signed in from>*; the PDF's foot says the same. A test run without a position names the person only |
 - ⚙️ **Developer Guide & Release Confidence**:
   - Row figures: `packetpulseflutter/lib/diagnosticmicroservice/presentation/widgets/DiagnosticFigures.dart`.
-  - Coverage: `packetpulseflutter/test/diagnostic_history_screen_test.dart`, `packetpulseflutter/test/dashboard_screen_test.dart`.
+  - 🔒 Whose tests come back is the server's decision, made in SQL: `readerOf` (`packetpulsego/pkg/diagnosticmicroservice/diagnosticapp/DiagnosticHandlers.go`) gives an engineer `OwnOnly` and anyone with `diagnostic_view_all` `WholeOrganisation`, and every read — list, detail, ticket, PDF, CSV — passes it to the repository's `submitted_by_user_id` predicate. The Results API reads the whole organisation, as its key does.
+  - Place is the check-in address of the session the test was run from (`diagnostic_request.session_id`, `packetpulsego/pkg/common/dbclient/migrations/0026_2026_10_05_own_results_places_and_indexes.sql`) or, matched by the filter, a probed site's region or name. The same migration indexes a person's own tests and the administrator's filters.
+  - Coverage: `packetpulseflutter/test/diagnostic_history_screen_test.dart`, `packetpulseflutter/test/dashboard_screen_test.dart`, `packetpulsego/pkg/diagnosticmicroservice/diagnosticdomain/repository/DiagnosticRepositoryPostgres_test.go` (scope, who and where, every filter), `packetpulsego/pkg/diagnosticmicroservice/diagnosticapp/DiagnosticRouteHandler_test.go`.
 
 ---
 ## Group 4 — The Customer's Side
@@ -548,12 +587,12 @@ Measuring from where the person is, not from where PacketPulse is.
 
 ---
 
-### 4.1 📱 Test from this device
+### 4.1 📱 From this device
 
-**Screen:** Operate → **Test from this device** · **Routes:** `GET /organisation/settings`, `PUT /organisation/settings` (`staff_manage`), `POST /diagnostic/clientobservation` (`diagnostic_run`, licensed)
+**Screen:** Operate → **Run diagnostic** → **From this device** · **Routes:** `GET /organisation/settings`, `PUT /organisation/settings` (`staff_manage`), `POST /diagnostic/clientobservation` (`diagnostic_run`, licensed)
 
-- 🌟 **Commercial Presentation & Sales Pitch**: "Is it slow for me?" answered from the customer's own connection, in one tap, with no target to choose: everyone in the organisation measures the same host, so results compare. It shows the device's IPv4 **and** IPv6 addresses and its download and upload speed, then files the run against the ticket beside the server's figures — labelled as measured on a device.
-- 📖 **User Guide & Operational Flow**: The screen names what it is **Testing against** — the organisation's host, or *Cloudflare DNS (1.1.1.1)* with a note when none is chosen. **Start test** runs it. Whoever manages people sees **Change target**: one tap for *Cloudflare DNS* or *Google DNS (dns.google)*, or *Your own host* to type one. **Measure speed** is a separate button because it moves about 12 MB each way. A finished run can be attached to a TT number.
+- 🌟 **Commercial Presentation & Sales Pitch**: "Is it slow for me?" answered from the customer's own connection, in one tap, with no target to choose: everyone in the organisation measures the same host, so results compare. It shows the device's IPv4 **and** IPv6 addresses, then files the run against the ticket beside the server's figures — labelled as measured on a device.
+- 📖 **User Guide & Operational Flow**: Open **Run diagnostic** and choose **From this device**; someone who may not run a sweep, or has no organisation, gets this mode alone, with no switch. It names what it is **Testing against** — the organisation's host, or *Cloudflare DNS (1.1.1.1)* with a note when none is chosen. **Start test** runs it. Whoever manages people sees **Change target**: one tap for *Cloudflare DNS* or *Google DNS (dns.google)*, or *Your own host* to type one. A finished run can be attached to a TT number. The line-speed test is hidden.
 - 🧪 **Manual Testing Playbook**:
   | ID | Persona | Scenario | Steps | Observable Expected Result |
   |---|---|---|---|---|
@@ -561,16 +600,16 @@ Measuring from where the person is, not from where PacketPulse is.
   | `DEV-002` | Administrator | Presets, and your own host | **Change target** → *Google DNS*; save. Reopen → *Your own host* → type `noc.northwind.example`; save | First saves `dns.google`; second saves the typed host. While *Your own host* is chosen with the field still empty, that chip — not Cloudflare — is lit |
   | `DEV-003` | Administrator | The target saves alone | Change the target | The *Require location* rule (§1.2) is unchanged. 🛑 **Must NOT** reset another setting |
   | `DEV-004` | Engineer | Both addresses | Run from a dual-stack connection; then from one without IPv6 | *IPv4 a.b.c.d · IPv6 2401:…*; then *No IPv6 connectivity* |
-  | `DEV-005` | Engineer | Line speed | **Measure speed** | Download and upload in Mbit/s (median, warm-up excluded); the ~12 MB note shown before it runs |
-  | `DEV-006` | Engineer | Attach to a ticket | Run, measure speed, attach to `TT-MAN-002` | The ticket shows the device run with its line speed and *measured on a device*; loss is *query* loss |
+  | `DEV-005` | Engineer | The speed test is hidden | Open **From this device**; then open a ticket that had a speed filed before the test was hidden | No **Measure speed** button and no ~12 MB note. The older ticket still shows its line speed. 🛑 **Must NOT** move any data to the speed-test endpoints |
+  | `DEV-006` | Engineer | Attach to a ticket | Run, then attach to `TT-MAN-002` | The ticket shows the device run, *measured on a device*, with no line speed; loss is *query* loss |
   | `DEV-007` | Viewer | Only people managers change the target | Open as a Viewer | No **Change target**. `PUT /organisation/settings` answers 403 |
   | `DEV-008` | Engineer | An unreadable setting does not block the test | Stop the API after the screen loads; reopen it | *Your organisation's target could not be read, so this tests Cloudflare DNS*; the test still runs |
-  | `DEV-009` | Superuser | No organisation, still a test | Sign in as the platform superuser; open the screen | Tests Cloudflare DNS. The screen needs no organisation and no licence |
+  | `DEV-009` | Superuser | No organisation, still a test | Sign in as the platform superuser; open **Run diagnostic** | The device test alone, with no mode switch, testing Cloudflare DNS. It needs no organisation and no licence |
 - ⚙️ **Developer Guide & Release Confidence**:
   - A browser cannot send ICMP, so the web build measures DNS-over-HTTPS (Cloudflare) or an HTTPS reach to the chosen host; the app on a desktop or phone can also ping it. Jitter is RFC 3550 with the standard deviation beside it.
   - Target normalisation (pasted URL → host, lower case, canonical IPs, zones refused): `NormaliseTestTarget` in `packetpulsego/pkg/staffmicroservice/staffservice/StaffCheckinService.go`.
-  - Speed: `packetpulseflutter/lib/diagnosticmicroservice/service/ClientThroughput.dart` (Cloudflare `__down`/`__up`, median after a warm-up); egress: `packetpulseflutter/lib/diagnosticmicroservice/service/ClientEgress.dart`.
-  - Coverage: `packetpulseflutter/test/client_probe_screen_test.dart`, `packetpulseflutter/test/client_probe_run_test.dart`, `packetpulseflutter/test/client_throughput_test.dart`, `packetpulseflutter/test/client_egress_test.dart`.
+  - Speed, hidden: `packetpulseflutter/lib/diagnosticmicroservice/service/ClientThroughput.dart` (Cloudflare `__down`/`__up`, median after a warm-up) is kept and tested behind `speedTestEnabled = false` in `packetpulseflutter/lib/common/config/PacketPulseConfig.dart`; turning it back on is that one line. Egress: `packetpulseflutter/lib/diagnosticmicroservice/service/ClientEgress.dart`.
+  - Coverage: `packetpulseflutter/test/client_probe_screen_test.dart`, `packetpulseflutter/test/client_probe_run_test.dart`, `packetpulseflutter/test/run_diagnostic_screen_test.dart`, `packetpulseflutter/test/client_throughput_test.dart`, `packetpulseflutter/test/client_egress_test.dart`.
 
 ---
 ## Group 5 — Monitoring
@@ -702,19 +741,20 @@ The operator of PacketPulse itself, each person's own settings, and the public f
 
 **Screen:** Administer → **Platform** (superuser only) · **Routes:** `/platform/*` · **Access:** platform superuser
 
-- 🌟 **Commercial Presentation & Sales Pitch**: Tenants are created deliberately, never self-asserted: signing up cannot make an organisation or join one. Licences carry seats, sites, a period and a price, scale in proportion when sold for an unusual term, and keep a history of every change with who made it and why.
-- 📖 **User Guide & Operational Flow**: **Organisations → Add**; place an unassigned account in it (as owner, or with a role); **Issue licence** with plan, seats, sites, months and currency. Per licence: **Suspend**, **Resume**, **Revoke**, **Renew**, change seats. **Owners** lists an organisation's owners and resets one's authenticator.
+- 🌟 **Commercial Presentation & Sales Pitch**: Every customer runs on a licence PacketPulse signs, so nobody can grant themselves an organisation, more people or a longer term. Licences carry the people covered, sites, a period and a price, scale in proportion when sold for an unusual term, and keep a history of every change with who made it and why. A customer's server needs nothing from PacketPulse to check one: the signature is checked against a key built into the server.
+- 📖 **User Guide & Operational Flow**: The console is PacketPulse's own server; a customer's server has none. **Organisations → Add**; **Issue licence** with plan, people, sites, months and currency. Per licence: **Suspend**, **Resume**, **Revoke**, **Renew**, change the people and sites it covers. **Download licence file** asks for the **Owner's email** and saves the signed file; copy it into `LICENCE_DIR` on the customer's server. It is read at every sign-in, so no restart is needed. The first person to sign up there with that address, proved by an emailed code, becomes the Administrator.
 - 🧪 **Manual Testing Playbook**:
   | ID | Persona | Scenario | Steps | Observable Expected Result |
   |---|---|---|---|---|
-  | `PLAT-001` | Superuser | Onboard a customer | Create `ACME`; assign a signed-up account as owner; issue a 12-month, 10-seat licence | The owner's next sign-in lands in ACME with every Administrator capability |
-  | `PLAT-002` | Superuser | Suspend and resume | Suspend ACME's licence with a reason; resume it | While suspended: running a diagnostic is refused, reading is not. History shows both, with the reason |
-  | `PLAT-003` | Superuser | Seats cannot drop below who is signed in | Four people signed in; set seats to 3 | Refused, naming the people signed in |
+  | `PLAT-001` | Superuser | Onboard a customer | Create `ACME`; issue a 12-month licence for 10 people; **Download licence file** naming `owner@acme.example`; copy it into a test server's `LICENCE_DIR`; sign up there with that address | The emailed code completes the sign-up, and the owner lands in ACME with every Administrator capability |
+  | `PLAT-002` | Superuser | Suspend and resume | Suspend ACME's licence with a reason; download its file again; resume | While suspended: running a diagnostic is refused, reading is not. History shows both, with the reason |
+  | `PLAT-003` | Superuser | A smaller licence keeps everyone but the owner out | ACME has 4 people; change the licence to 3; replace the file; an engineer signs in, then the owner | The engineer is refused (403, *Your organisation has more users than its licence covers…*). The owner signs in, because the owner is who can fix it |
   | `PLAT-004` | Superuser | Renewal scales the price | Renew a 12-month licence for 36 months | Three times the period price; the new end runs from the current end (or today if lapsed) |
   | `PLAT-005` | Superuser | A superuser is not a tenant | Call `GET /dnssite/list` as the superuser | 400 — no organisation. 🛑 **Must NOT** answer with every organisation's sites |
-  | `PLAT-006` | Organisation owner | Signing up never joins an organisation | Sign up with an address at ACME's domain | The account waits unassigned; it sees only **Test from this device** and **Settings** |
+  | `PLAT-006` | Stranger | Signing up never makes or joins an organisation | On a customer's server, sign up with an address its licence does not name | Refused: *Only the owner named in this server's licence can sign up. Ask your administrator to add you.* 🛑 **Must NOT** create an account |
 - ⚙️ **Developer Guide & Release Confidence**:
   - `packetpulsego/pkg/platformmicroservice/`; `packetpulseaccess.RequireSuperUser` on the console group (Appendix A); licence changes recorded in the licence history and the activity trail.
+  - 🔒 Licence files are Ed25519-signed and verified by `packetpulsego/pkg/common/licence/Store.go` at every sign-in, against a key compiled into the server. `LICENCE_PUBLIC_KEY` may replace it only on a development build outside production, so a customer cannot swap in a key of their own.
   - Coverage: `packetpulsetest/golang/tenancyassignment/`, `packetpulsego/pkg/platformmicroservice/**`, `packetpulseflutter/test/platform_console_screen_test.dart`.
 
 ---
@@ -748,7 +788,7 @@ The operator of PacketPulse itself, each person's own settings, and the public f
 - 🧪 **Manual Testing Playbook**:
   | ID | Persona | Scenario | Steps | Observable Expected Result |
   |---|---|---|---|---|
-  | `WEB-001` | Visitor | The site is current | Read the capabilities | Two-step sign-in, IPv4 and IPv6, CSV into your systems, check-ins, the device test with line speed. 🛑 **Must NOT** promise 23 languages |
+  | `WEB-001` | Visitor | The site is current | Read the capabilities | Emailed or texted sign-in codes, IPv4 and IPv6, CSV into your systems, check-ins, testing from the engineer's own device. 🛑 **Must NOT** promise 23 languages, a hop-by-hop path or a line-speed test |
   | `WEB-002` | Visitor | Site and app are different documents | Open `/` and `/app/` | The marketing page and the app respectively — never the same document |
   | `WEB-003` | Visitor | The self-test runs in the browser | **Test my connection** → run | Round trips, jitter and loss for each resolver, measured from the visitor's connection |
   | `WEB-004` | Visitor | Light, dark or match this device | Choose **Light** on `/`; reload; open `/selftest.html`; then **Sign in**. Choose **Match this device** and switch the computer's own mode | Light at once, on both pages and on the app's sign-in screen; *Match this device* follows the computer as it changes. 🛑 **Must NOT** flash dark before a light page paints |
@@ -767,13 +807,13 @@ What guards each area automatically, so a manual pass can spend its time where a
 | Sign-in, second step | `AUTH-*` | `packetpulsego/pkg/usermicroservice/userservice/` | `assignment`, `audit` | `packetpulseflutter/test/sign_in_test.dart` |
 | SMS gateway, location rule | `SMS-*`, `LOC-*` | `packetpulsego/pkg/smsmicroservice/`, `packetpulsego/pkg/common/smsprovider/` | `acl` | `packetpulseflutter/test/sign_in_security_screen_test.dart` |
 | Staff, roles | `STF-*`, `ACL-*` | `packetpulsego/pkg/staffmicroservice/` | `acl`, `tenancy` | `packetpulseflutter/test/staff_screen_test.dart` |
-| Sessions, seats | `SEAT-*` | `packetpulsego/pkg/staffmicroservice/` | `assignment`, `tenancy` | `packetpulseflutter/test/session_screen_test.dart` |
+| Sessions and licence | `WHO-*` | `packetpulsego/pkg/staffmicroservice/` | `assignment`, `tenancy` | `packetpulseflutter/test/session_screen_test.dart` |
 | Check-ins | `CHK-*` | `packetpulsego/pkg/common/geocode/` | `tenancy`, `audit` | `packetpulseflutter/test/checkin_screen_test.dart` |
 | Activity | `AUD-*` | `packetpulsego/pkg/common/auditlog/` | `audit` | `packetpulseflutter/test/audit_log_screen_test.dart` |
 | Sites, policy | `SITE-*` | `packetpulsego/pkg/dnssitemicroservice/`, `packetpulsego/pkg/common/probeguard/` | `tenancy` | `packetpulseflutter/test/dns_site_screen_test.dart` |
 | Diagnostics, IPv6 | `DIAG-*`, `V6-*` | `packetpulsego/pkg/pingmicroservice/`, `packetpulsego/pkg/diagnosticmicroservice/` | `contract`, `tenancy`, `load` | `packetpulseflutter/test/diagnostic_submit_screen_test.dart` |
 | CSV | `CSV-*`, `API-003` | `packetpulsego/pkg/diagnosticmicroservice/diagnosticexport/` | `contract`, `tenancy`, `load` | `packetpulseflutter/test/diagnostic_history_screen_test.dart` |
-| Device test | `DEV-*` | `packetpulsego/pkg/diagnosticmicroservice/diagnosticservice/` | `contract` | `packetpulseflutter/test/client_probe_run_test.dart` |
+| Run diagnostic, device test | `DEV-*` | `packetpulsego/pkg/diagnosticmicroservice/diagnosticservice/` | `contract` | `packetpulseflutter/test/client_probe_run_test.dart`, `packetpulseflutter/test/run_diagnostic_screen_test.dart` |
 | Monitoring | `MON-*` | `packetpulsego/pkg/monitormicroservice/` | `monitor` | `packetpulseflutter/test/monitor_flows_test.dart` |
 | Results API | `API-*` | `packetpulsego/pkg/common/apikeyauth/` | `contract`, `tenancy` | `packetpulseflutter/test/api_key_screen_test.dart` |
 | Result export | `EXP-*` | `packetpulsego/pkg/common/filedrop/`, `packetpulsego/pkg/exportmicroservice/` | `contract`, `acl`, `tenancy`, `audit` | `packetpulseflutter/test/result_export_screen_test.dart` |
@@ -782,7 +822,7 @@ What guards each area automatically, so a manual pass can spend its time where a
 | Settings, catalogue | `SET-*` | `packetpulsego/pkg/initmicroservice/` | `translation` | `packetpulseflutter/test/settings_screen_test.dart` |
 
 > [!NOTE]
-> What no suite covers, and why manual cases exist for it: a **real SMS** arriving on a phone (`AUTH-009`), a **real authenticator app** (`AUTH-001`), **browser location prompts** (`CHK-001`, `LOC-002`), **real SFTP and FTPS servers** (`EXP-006`, `EXP-011`), **spreadsheet applications** opening the CSV (`CSV-002`), and **IPv6 on the live host** (`V6-001`).
+> What no suite covers, and why manual cases exist for it: a **real SMS** arriving on a phone (`AUTH-009`), a **real emailed code** arriving in an inbox (`AUTH-001`), **browser location prompts** (`CHK-001`, `LOC-002`), **real SFTP and FTPS servers** (`EXP-006`, `EXP-011`), **spreadsheet applications** opening the CSV (`CSV-002`), and **IPv6 on the live host** (`V6-001`).
 
 ---
 # Part III — End-to-End Journeys
@@ -793,12 +833,12 @@ Each journey crosses several chapters the way a real customer does. Run them on 
 
 ### JRN-001 · A new customer, from contract to first evidence
 
-**Personas:** platform superuser, ACME owner, NOC engineer · **Covers:** `PLAT-001`, `AUTH-001`, `STF-001`, `SITE-002`, `DIAG-001`, `DIAG-004`, `CSV-001`
+**Personas:** platform superuser, ACME owner, NOC engineer · **Covers:** `PLAT-001`, `AUTH-008`, `AUTH-001`, `STF-001`, `SITE-002`, `DIAG-001`, `DIAG-004`, `CSV-001`
 
-1. The owner signs up; the superuser creates **ACME**, assigns the owner and issues a 10-seat licence.
-2. The owner signs in, sets up an authenticator and saves the recovery codes.
+1. On the console, the superuser creates **ACME**, issues a licence for 10 people and downloads its licence file, naming the owner's address.
+2. The file goes into `LICENCE_DIR` on ACME's server. The owner signs up there with that address and enters the emailed code.
 3. The owner adds an engineer (*NOC Engineer*) and pastes twenty sites with **Bulk import**.
-4. The engineer signs in (sets up an authenticator), runs a diagnostic with TT `TT-JRN-001`, **Trace failures** on.
+4. The engineer signs in with their emailed code and runs a diagnostic **from the server** with TT `TT-JRN-001`.
 5. The engineer exports the **PDF** and the **CSV**.
 
 **Expected:** the PDF and CSV carry `TT-JRN-001`; Activity shows the owner's sign-in, the staff and site changes, both exports. 🛑 The engineer's sign-in is **not** in Activity.
@@ -810,7 +850,7 @@ Each journey crosses several chapters the way a real customer does. Run them on 
 **Covers:** `DIAG-001`–`DIAG-005`, `HIST-001`, `V6-001`
 
 1. Ticket `TT-JRN-002` arrives: Customer `CUST-88412`, slow calls.
-2. Run against the customer's sites. Read loss, jitter and MOS; open the failing site's hops.
+2. Run against the customer's sites. Read loss, jitter and MOS on each row.
 3. Re-run after the carrier's fix.
 4. In **History**, compare both attempts.
 
@@ -824,10 +864,10 @@ Each journey crosses several chapters the way a real customer does. Run them on 
 
 1. The administrator sets the engineer to **Record location** and turns on **Require location to sign in**.
 2. On a phone, the engineer signs in, allowing location.
-3. At the customer's site: **Test from this device**, **Measure speed**, attach to `TT-JRN-003`.
+3. At the customer's site: **Run diagnostic → From this device**, then attach the run to `TT-JRN-003`.
 4. Signs out, allowing location.
 
-**Expected:** **Check-ins** shows the sign-in and sign-out with places and a map link; the ticket shows the device run with its line speed; the administrator's Activity shows no entry for the engineer's sign-in.
+**Expected:** **Check-ins** shows the sign-in and sign-out with places and a map link; the ticket shows the device run, *measured on a device*; the administrator's Activity shows no entry for the engineer's sign-in.
 
 ---
 
@@ -863,19 +903,19 @@ Each journey crosses several chapters the way a real customer does. Run them on 
 1. From an unfamiliar browser, try the owner's address with ten wrong passwords.
 2. Then, with the right password (a leaked one), ten wrong codes.
 
-**Expected:** Activity shows the wrong passwords and wrong codes as *Sign-in failed* with the address and browser, ending in *Locked after too many wrong codes*; the owner, from their own browser with their authenticator, is locked for 15 minutes and then signs in. 🛑 The wrong passwords alone did not lock the account.
+**Expected:** Activity shows the wrong passwords and wrong codes as *Sign-in failed* with the address and browser, ending in *Locked after too many wrong codes*; the owner, from their own browser with an emailed code, is locked for 15 minutes and then signs in. 🛑 The wrong passwords alone did not lock the account.
 
 ---
 
 ### JRN-007 · A lost phone
 
-**Covers:** `AUTH-005`, `AUTH-012`, `AUTH-013`
+**Covers:** `AUTH-012`, `WHO-003`, `STF-004`
 
-1. An engineer loses their phone: signs in with a recovery code.
-2. Their administrator resets their authenticator; they set up a new one.
-3. The owner loses theirs with no codes left: the platform superuser resets it.
+1. An engineer set to text loses their phone, still signed in to the app on it.
+2. Their administrator signs that device out (**Who is signed in → Sign device out**) and switches them to **Email**.
+3. The engineer signs in on a laptop with the code emailed to them.
 
-**Expected:** each reset signs the person out and is in Activity, naming who reset whom; nobody inside ACME could reset the owner.
+**Expected:** the lost phone's next request returns it to sign-in; the sign-out and the change of method are in Activity, naming who made them; the engineer's code arrives by email, not by text.
 
 ---
 
@@ -928,27 +968,27 @@ The app runs on the web (the live build), macOS, Windows, Android and iOS from o
 | ID | Check | Expected |
 |---|---|---|
 | `NFR-013` | Tenancy, for every id-taking route | RIVAL's id answers 404 or an empty list — `./packetpulsetest.sh tenancy` |
-| `NFR-014` | The destination policy, everywhere PacketPulse connects out | Sweeps, traceroutes, webhooks, the directory and the result export all refuse loopback, link-local and cloud metadata |
+| `NFR-014` | The destination policy, everywhere PacketPulse connects out | Sweeps, webhooks, the directory and the result export all refuse loopback, link-local and cloud metadata |
 | `NFR-015` | Error responses | No SQLSTATE, driver names, file paths or a remote server's raw reply in any error envelope |
 | `NFR-016` | Secrets at rest | SMS tokens, bind passwords and export credentials sealed with the server's secret box; API keys stored as hashes; never returned |
 | `NFR-017` | CSV injection | Cells starting `=`, `+`, `-`, `@`, tab or carriage return are written as text |
-| `NFR-018` | Production configuration | Production refuses `OWNER_TOTP_SECRET`, `DEMO_TOTP_SECRET`, `LDAP_ALLOW_LOOPBACK`, `EXPORT_ALLOW_LOOPBACK` and open CORS |
+| `NFR-018` | Production configuration | Production refuses `OTP_OUTBOX_FILE`, a `LICENCE_PUBLIC_KEY` override, `LDAP_ALLOW_LOOPBACK`, `EXPORT_ALLOW_LOOPBACK` and open CORS, and will not boot without an SMTP account |
 
 ## 4.5 Performance — the load suite
 
-`./packetpulsetest.sh load` provisions one licensed organisation — the owner and nineteen engineers, each with an authenticator, and 200 sites on TEST-NET-3 — and measures it. It also runs nightly (`.github/workflows/packetpulse-load.yml`). Budgets are 95th percentiles; the measured figures are from a developer laptop against a local server.
+`./packetpulsetest.sh load` provisions one licensed organisation — the owner and nineteen engineers, each signing in with a code read from the server's outbox, and 200 sites on TEST-NET-3 — and measures it. It also runs nightly (`.github/workflows/packetpulse-load.yml`). Budgets are 95th percentiles; the measured figures are from a developer laptop against a local server.
 
 | Scenario | Measured p95 | Budget |
 |---|---|---|
 | Sign-in, password step — all 20 at once | 750 ms | 3 s |
-| Sign-in, authenticator step — all 20 at once | 16 ms | 1 s |
+| Sign-in, code step — all 20 at once | 16 ms | 1 s |
 | Reads — list, sites, dashboard, me; 20 people × 10 | 9 ms | 750 ms |
-| Sweep of 200 sites, failures traced | 91 s | 120 s |
+| Sweep of 200 sites (measured when failures were also traced, before path analysis was removed) | 91 s | 120 s |
 | Diagnostic of 5 sites — 10 people at once | 4.1 s | 20 s |
 | Results API by ticket (200 results) — 200 pulls, 10 at a time | 16 ms | 1 s |
 | CSV export of the whole run (250 rows) | 2 ms | 10 s |
 
-🔒 Absolute whatever the machine: no 5xx; the traced 200-site sweep stores all 200 results; the CSV holds every stored result once. With the old bug restored (saving under the sweep's deadline) the sweep answers 500 and the suite goes red.
+🔒 Absolute whatever the machine: no 5xx; the 200-site sweep stores all 200 results; the CSV holds every stored result once. With the old bug restored (saving under the sweep's deadline) the sweep answers 500 and the suite goes red.
 
 ---
 # Part V — Release Governance
@@ -981,7 +1021,7 @@ PACKETPULSE_TEST_URL=http://localhost:18080 PACKETPULSE_TEST_REQUIRE_SUPERUSER=1
 | `REL-001` | `./packetpulsetest.sh` green with no skips, on the commit being shipped | QA |
 | `REL-002` | Every row of *What changed* (front matter) manually verified: `AUTH-001`, `AUTH-009`, `CHK-001`, `DEV-002`, `DEV-005`, `V6-001`, `CSV-001`, `EXP-006`, `AUD-003` | QA |
 | `REL-003` | Journeys `JRN-001`, `JRN-003`, `JRN-004`, `JRN-006` on a disposable stack | QA |
-| `REL-004` | The live `.env` has `APP_ENV=production` and none of `OWNER_TOTP_SECRET`, `DEMO_TOTP_SECRET`, `EXPORT_ALLOW_LOOPBACK=true`, `LDAP_ALLOW_LOOPBACK=true` | Release owner |
+| `REL-004` | The live `.env` has `APP_ENV=production`, an `SMTP_FROM_0` / `SMTP_PASSWORD_0` pair, and none of `OTP_OUTBOX_FILE`, `LICENCE_PUBLIC_KEY`, `EXPORT_ALLOW_LOOPBACK=true`, `LDAP_ALLOW_LOOPBACK=true` | Release owner |
 | `REL-005` | New migrations read for what they change on live data (a migration that revokes sessions, rewrites figures or changes a key is announced to users) | Backend |
 | `REL-006` | Public documents (`packetpulseweb/index.html`, `docs/*.html` and their PDFs) promise nothing the release does not do | Product |
 
@@ -1031,13 +1071,12 @@ All routes are under `/api/v1`. **Access**: *public* (no session), *session* (si
 | `GET` | `/auditlog/list` | session | `auditlog_view` | — | — |
 | `GET` | `/auditlog/verify` | session | `auditlog_view` | — | — |
 | `POST` | `/diagnostic/clientobservation` | member | `diagnostic_run` | required | ✅ |
-| `GET` | `/diagnostic/faults` | member | `report_view` | — | — |
-| `GET` | `/diagnostic/list` | member | `diagnostic_view_all` | — | — |
+| `GET` | `/diagnostic/list` | member | `diagnostic_view_own` or `diagnostic_view_all` | — | — |
 | `POST` | `/diagnostic/submit` | member | `diagnostic_run` | required | ✅ |
-| `GET` | `/diagnostic/tt/{ttNumber}` | member | `diagnostic_view_all` | — | — |
-| `GET` | `/diagnostic/{requestId}` | member | `diagnostic_view_all` | — | — |
-| `GET` | `/diagnostic/{requestId}/report.csv` | member | `report_export` | — | ✅ |
-| `GET` | `/diagnostic/{requestId}/report.pdf` | member | `report_export` | — | ✅ |
+| `GET` | `/diagnostic/tt/{ttNumber}` | member | `diagnostic_view_own` or `diagnostic_view_all` | — | — |
+| `GET` | `/diagnostic/{requestId}` | member | `diagnostic_view_own` or `diagnostic_view_all` | — | — |
+| `GET` | `/diagnostic/{requestId}/report.csv` | member | `diagnostic_view_own` or `diagnostic_view_all` and `report_export` | — | ✅ |
+| `GET` | `/diagnostic/{requestId}/report.pdf` | member | `diagnostic_view_own` or `diagnostic_view_all` and `report_export` | — | ✅ |
 | `POST` | `/dnssite/add` | member | `dns_site_manage` | required | ✅ |
 | `POST` | `/dnssite/bulkimport` | member | `dns_site_manage` | required | ✅ |
 | `GET` | `/dnssite/list` | member | `dns_site_view` | — | — |
@@ -1088,6 +1127,7 @@ All routes are under `/api/v1`. **Access**: *public* (no session), *session* (si
 | `POST` | `/platform/licence/issue` | superuser | — | — | ✅ |
 | `GET` | `/platform/licence/list` | superuser | — | — | — |
 | `GET` | `/platform/licence/{licenceId}/event/list` | superuser | — | — | — |
+| `POST` | `/platform/licence/{licenceId}/file` | superuser | — | — | ✅ |
 | `POST` | `/platform/licence/{licenceId}/renew` | superuser | — | — | ✅ |
 | `POST` | `/platform/licence/{licenceId}/resume` | superuser | — | — | ✅ |
 | `POST` | `/platform/licence/{licenceId}/revoke` | superuser | — | — | ✅ |
@@ -1095,11 +1135,8 @@ All routes are under `/api/v1`. **Access**: *public* (no session), *session* (si
 | `POST` | `/platform/licence/{licenceId}/suspend` | superuser | — | — | ✅ |
 | `POST` | `/platform/organisation/add` | superuser | — | — | ✅ |
 | `GET` | `/platform/organisation/list` | superuser | — | — | — |
-| `POST` | `/platform/organisation/{organisationId}/assign` | superuser | — | — | ✅ |
 | `GET` | `/platform/organisation/{organisationId}/licence` | superuser | — | — | — |
-| `GET` | `/platform/organisation/{organisationId}/owners` | superuser | — | — | — |
 | `GET` | `/platform/plan/list` | superuser | — | — | — |
-| `GET` | `/platform/user/unassigned` | superuser | — | — | — |
 | `GET` | `/result/bytt/{ttNumber}` | api key | — | — | — |
 | `GET` | `/result/export.csv` | api key | — | — | — |
 | `GET` | `/sms/gateway` | member | `staff_manage` | — | — |
@@ -1119,7 +1156,6 @@ All routes are under `/api/v1`. **Access**: *public* (no session), *session* (si
 | `PUT` | `/staff/{staffId}` | member | `staff_manage` | — | ✅ |
 | `PUT` | `/staff/{staffId}/access` | member | `acl_manage` | — | ✅ |
 | `PUT` | `/staff/{staffId}/secondfactor` | member | `staff_manage` | — | ✅ |
-| `POST` | `/staff/{staffId}/secondfactor/reset` | member | `staff_manage` | — | ✅ |
 | `POST` | `/user/add` | member | `user_manage` | required | ✅ |
 | `POST` | `/user/appearance` | session | — | — | — |
 | `GET` | `/user/capability/list` | session | — | — | — |
@@ -1128,13 +1164,11 @@ All routes are under `/api/v1`. **Access**: *public* (no session), *session* (si
 | `GET` | `/user/me` | session | — | — | — |
 | `POST` | `/user/password` | session | — | — | ✅ |
 | `POST` | `/user/signin` | public | — | — | — |
-| `POST` | `/user/signin/enrol` | public | — | — | — |
 | `POST` | `/user/signin/resend` | public | — | — | — |
 | `POST` | `/user/signin/verify` | public | — | — | — |
 | `POST` | `/user/signout` | session | — | — | — |
 | `POST` | `/user/signup` | public | — | — | — |
 | `PATCH` | `/user/{userId}` | member | `user_manage` | — | ✅ |
-| `POST` | `/user/{userId}/secondfactor/reset` | superuser | — | — | ✅ |
 
 ## Appendix B — Capabilities and the built-in roles
 
@@ -1144,7 +1178,7 @@ All routes are under `/api/v1`. **Access**: *public* (no session), *session* (si
 | `dns_site_manage` | Add, edit and remove DNS sites. | ✅ | — | — |
 | `diagnostic_run` | Submit a diagnostic against a TT number. | ✅ | ✅ | — |
 | `diagnostic_view_own` | View diagnostics this person submitted. | ✅ | ✅ | ✅ |
-| `diagnostic_view_all` | View every diagnostic in the organisation. | ✅ | ✅ | ✅ |
+| `diagnostic_view_all` | View every diagnostic in the organisation. | ✅ | — | ✅ |
 | `sla_view` | View SLA policies and breach status. | ✅ | ✅ | ✅ |
 | `sla_manage` | Create and edit SLA policies and alert channels. | ✅ | — | — |
 | `schedule_manage` | Create and edit scheduled monitoring. | ✅ | ✅ | — |
@@ -1186,10 +1220,13 @@ Embedded in the server binary and applied in order at boot (`packetpulsego/pkg/c
 | `0018_2026_10_02_ldap_ca_certificate.sql` | The authority an organisation's directory certificate is checked against. |
 | `0019_2026_10_03_two_step_sign_in.sql` | Two-step sign-in. |
 | `0020_2026_10_03_session_checkin.sql` | Where people sign in and out. |
-| `0021_2026_10_03_device_test.sql` | Test from this device: what it tests against, and how fast the line was. |
+| `0021_2026_10_03_device_test.sql` | The device test: what it tests against, and how fast the line was. |
 | `0022_2026_10_03_loss_and_jitter.sql` | Loss and jitter on the ticket, not only on each site. |
 | `0023_2026_10_04_dual_stack_results.sql` | Dual-stack sites, measured on both families and reported separately. |
 | `0024_2026_10_04_result_export.sql` | Results delivered to an organisation's own server, on a schedule, and |
+| `0025_2026_10_05_otp_only_and_licence_files.sql` | Sign-in by one-time code only, and licences from signed files. |
+| `0026_2026_10_05_own_results_places_and_indexes.sql` | Whose tests a person reads, where each test was run, and the indexes the busiest reads need. |
+| `0027_2026_10_05_path_analysis_removed.sql` | Path analysis is removed: hops and fault verdicts are no longer written. |
 
 ## Appendix D — Settings
 
@@ -1207,12 +1244,16 @@ Read from the environment, falling back to `.env` (see `.env.example`); defined 
 | `TRUSTED_PROXIES` | `127.0.0.0/8, ::1/128` | Whose `X-Forwarded-For` is believed — the client address in sessions, limits and the trail |
 | `AUTH_ATTEMPTS_PER_MINUTE` | `10` | Password-step requests per client address |
 | `SECOND_STEP_ATTEMPTS_PER_MINUTE` | `30` | Second-step requests per client address |
-| `ALLOW_SIGNUP` | `true` | Whether anyone may sign up (into the holding organisation) |
-| `OWNER_EMAIL`, `OWNER_PASSWORD`, `OWNER_NAME` | — | The platform superuser, created at boot |
-| `OWNER_TOTP_SECRET` | — | Pre-enrols the superuser's authenticator — **outside production only** |
-| `OWNER_RESET_SECOND_FACTOR` | `false` | Break-glass: clears the superuser's authenticator at boot |
-| `SEED_DEMO`, `DEMO_EMAIL`, `DEMO_PASSWORD`, `DEMO_NAME`, `DEMO_ORGANISATION_NAME` | `false`, … | A demo organisation with sites and a licence |
-| `DEMO_TOTP_SECRET` | — | Pre-enrols the demo owner — **outside production only** |
+| `ALLOW_SIGNUP` | `true` | Whether the owner named in a licence may sign up on this server |
+| `OWNER_PASSWORD`, `OWNER_NAME` | — | The platform superuser (`superuser@rummaan53.com`, fixed in code), created at boot on the console only |
+| `LICENCE_DIR` | — | The folder of licence files this server signs organisations in under, read at every sign-in |
+| `LICENCE_SIGNING_KEY` | — | Makes this server the PacketPulse console, which issues licences. Only the vendor's own server has it |
+| `LICENCE_PUBLIC_KEY` | — | Replaces the vendor key licences are checked against — **development builds outside production only** |
+| `SMTP_HOST`, `SMTP_PORT` | `smtp.gmail.com`, `587` | Where sign-in codes are emailed from |
+| `SMTP_FROM_n`, `SMTP_PASSWORD_n` (n = 0–3) | — | Gmail accounts (with app passwords) that send codes, spread across to stay inside Gmail's daily cap. Production needs at least one |
+| `OTP_OUTBOX_FILE` | — | Writes codes to a file instead of sending them, for tests — **refused in production** |
+| `SEED_DEMO`, `DEMO_EMAIL`, `DEMO_PASSWORD`, `DEMO_NAME`, `DEMO_ORGANISATION_NAME` | `false`, … | The demo organisation, its logins, sites and licence — **console only** |
+| `DEMO_SMS_CODE`, `DEMO_SEATS` | `111111`, `3` | The demo's on-screen code, and how many demo walkthroughs may run at once |
 | `TRIAL_DAYS`, `TRIAL_SEATS`, `TRIAL_SITES` | `14`, `5`, `25` | A trial licence's terms |
 | `PING_COUNT`, `PING_TIMEOUT`, `PING_INTERVAL`, `PING_CONCURRENCY` | `4`, `5s`, `200ms`, `16` | The probe engine's defaults |
 | `PING_TCP_FALLBACK` | `true` | TCP connect where ICMP cannot be sent |
@@ -1238,7 +1279,7 @@ Every refusal is a JSON envelope: `{"error": {"code", "message", "request_id", "
 | `rate_limited` | 429 | Too many attempts from this address, or texts for this person |
 | `internal_error` | 500 | Logged with the `request_id`; never carries the cause |
 | `licence_expired`, `licence_suspended` | 403 | The organisation's licence stops this |
-| `seat_limit_reached` | 403 | Every seat is taken |
+| `seat_limit_reached` | 403 / 409 | The licence covers no more people (adding someone), or fewer than are on it (signing in) |
 | `invalid_code` | 401 | A wrong second-step code, with attempts left |
 | `challenge_expired` | 401 | The sign-in must start again |
 | `locked_out` | 429 | Too many wrong codes; wait |
@@ -1258,16 +1299,15 @@ Every refusal is a JSON envelope: `{"error": {"code", "message", "request_id", "
 | Term | Meaning |
 |---|---|
 | **Dual-stack** | A site reachable over both IPv4 and IPv6 |
-| **Holding organisation** | Where a signed-up account waits until the platform operator places it |
+| **Licence file** | The signed file in `LICENCE_DIR` that lets an organisation sign in on a server |
 | **MOS** | Mean Opinion Score — estimated call quality, 1–5 (ITU-T G.107 E-model) |
 | **Report only** | A result shown and kept but not counted: the IPv6 half of a dual-stack site |
 | **RFC 3550 jitter** | Interarrival jitter: the smoothed difference between consecutive round trips |
-| **Seat** | One person signed in, however many devices |
 | **Sweep** | One run of probes over a set of sites |
-| **TOTP** | Time-based one-time password — the 6-digit code an authenticator app shows |
+| **Sign-in code** | The 6-digit, ten-minute code emailed or texted for the second step |
 | **TT number** | A trouble ticket number from the operator's own ticketing system |
 | **Watermark** | How far the result export has delivered: results of diagnostics finished after it are still to send |
 
 ---
 
-*Guide version `v2026.10-PROD-v1` — verified against source on 2026-10-04, and continuously re-verified by `./packetpulsetest.sh docs`.*
+*Guide version `v2026.10-PROD-v2` — verified against source on 2026-10-05, and continuously re-verified by `./packetpulsetest.sh docs`.*

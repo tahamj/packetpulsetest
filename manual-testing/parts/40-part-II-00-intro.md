@@ -7,9 +7,9 @@ Run every case on a disposable stack (Part 0 §0.3) with **two organisations of 
 | Group | Chapters | Test IDs |
 |---|---|---|
 | 1 · Access | Sign-in and the second step · Sign-in security | `AUTH-*`, `SMS-*`, `LOC-*` |
-| 2 · People | Staff · Roles and permissions · Sessions and seats · Check-ins · Activity | `STF-*`, `ACL-*`, `SEAT-*`, `CHK-*`, `AUD-*` |
+| 2 · People | Staff · Roles and permissions · Sessions and licence · Check-ins · Activity | `STF-*`, `ACL-*`, `WHO-*`, `CHK-*`, `AUD-*` |
 | 3 · Diagnostics | Sites · Diagnostics and results · IPv6 · CSV · History and dashboard | `SITE-*`, `DIAG-*`, `V6-*`, `CSV-*`, `HIST-*` |
-| 4 · The customer's side | Test from this device | `DEV-*` |
+| 4 · The customer's side | Run diagnostic, from this device | `DEV-*` |
 | 5 · Monitoring | SLA targets, schedules, alerts, maintenance, SLA report | `MON-*` |
 | 6 · Integrations | Results API keys · Result export · Directory | `API-*`, `EXP-*`, `LDAP-*` |
 | 7 · Platform and settings | Platform console · Settings · Public site | `PLAT-*`, `SET-*`, `WEB-*` |

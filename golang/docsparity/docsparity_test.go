@@ -218,10 +218,17 @@ func TestAppendixBIsEveryCapabilityAndBuiltInGrant(t *testing.T) {
 			}
 		}
 	}
-	// The counts quoted in the roles chapter.
+	// The counts quoted in the roles chapter: what each role holds. A grant a
+	// later migration took away is in the map as false, and is not held.
 	text := guide(t, root)
 	for _, role := range roles {
-		want := fmt.Sprintf("%s %d", role, len(grants[role]))
+		held := 0
+		for _, granted := range grants[role] {
+			if granted {
+				held++
+			}
+		}
+		want := fmt.Sprintf("%s %d", role, held)
 		if !strings.Contains(text, want) {
 			t.Errorf("the guide does not say %q", want)
 		}

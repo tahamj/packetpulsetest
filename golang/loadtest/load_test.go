@@ -234,9 +234,9 @@ func organisation(t *testing.T) ([]person, []string) {
 		team = append(team, engineer)
 	}
 
-	// Two hundred black-holed addresses (TEST-NET-3): every probe times out
-	// and every failure is traced, which is the load that once lost a
-	// sweep's results when tracing ran past the sweep's deadline.
+	// Two hundred black-holed addresses (TEST-NET-3): every probe times out,
+	// the slowest sweep there is - and the load that once lost a sweep's
+	// results when the work after probing ran past the sweep's deadline.
 	var paste strings.Builder
 	for index := 1; index <= sites; index++ {
 		fmt.Fprintf(&paste, "Load site %03d=203.0.113.%d\n", index, index)
@@ -323,11 +323,11 @@ func TestTheLicensedLoad(t *testing.T) {
 
 	var sweepTicket, sweepId string
 	t.Run("a sweep of two hundred sites keeps every result", func(t *testing.T) {
-		sweep := &meter{name: "sweep: 200 sites, traced", budget: budgetSweep}
+		sweep := &meter{name: "sweep: 200 sites", budget: budgetSweep}
 		sweepTicket = fmt.Sprintf("TT-LOAD-%d", time.Now().UnixNano())
 		submitted := sweep.do(http.MethodPost, "/diagnostic/submit", owner.token, map[string]any{
 			"customer_id": "CUST-LOAD", "tt_number": sweepTicket,
-			"packet_count": 1, "timeout_ms": 1000, "trace_failures": true,
+			"packet_count": 1, "timeout_ms": 1000,
 		})
 		sweep.judge(t)
 		if submitted.status != http.StatusCreated {

@@ -12,13 +12,12 @@ All routes are under `/api/v1`. **Access**: *public* (no session), *session* (si
 | `GET` | `/auditlog/list` | session | `auditlog_view` | — | — |
 | `GET` | `/auditlog/verify` | session | `auditlog_view` | — | — |
 | `POST` | `/diagnostic/clientobservation` | member | `diagnostic_run` | required | ✅ |
-| `GET` | `/diagnostic/faults` | member | `report_view` | — | — |
-| `GET` | `/diagnostic/list` | member | `diagnostic_view_all` | — | — |
+| `GET` | `/diagnostic/list` | member | `diagnostic_view_own` or `diagnostic_view_all` | — | — |
 | `POST` | `/diagnostic/submit` | member | `diagnostic_run` | required | ✅ |
-| `GET` | `/diagnostic/tt/{ttNumber}` | member | `diagnostic_view_all` | — | — |
-| `GET` | `/diagnostic/{requestId}` | member | `diagnostic_view_all` | — | — |
-| `GET` | `/diagnostic/{requestId}/report.csv` | member | `report_export` | — | ✅ |
-| `GET` | `/diagnostic/{requestId}/report.pdf` | member | `report_export` | — | ✅ |
+| `GET` | `/diagnostic/tt/{ttNumber}` | member | `diagnostic_view_own` or `diagnostic_view_all` | — | — |
+| `GET` | `/diagnostic/{requestId}` | member | `diagnostic_view_own` or `diagnostic_view_all` | — | — |
+| `GET` | `/diagnostic/{requestId}/report.csv` | member | `diagnostic_view_own` or `diagnostic_view_all` and `report_export` | — | ✅ |
+| `GET` | `/diagnostic/{requestId}/report.pdf` | member | `diagnostic_view_own` or `diagnostic_view_all` and `report_export` | — | ✅ |
 | `POST` | `/dnssite/add` | member | `dns_site_manage` | required | ✅ |
 | `POST` | `/dnssite/bulkimport` | member | `dns_site_manage` | required | ✅ |
 | `GET` | `/dnssite/list` | member | `dns_site_view` | — | — |
@@ -69,6 +68,7 @@ All routes are under `/api/v1`. **Access**: *public* (no session), *session* (si
 | `POST` | `/platform/licence/issue` | superuser | — | — | ✅ |
 | `GET` | `/platform/licence/list` | superuser | — | — | — |
 | `GET` | `/platform/licence/{licenceId}/event/list` | superuser | — | — | — |
+| `POST` | `/platform/licence/{licenceId}/file` | superuser | — | — | ✅ |
 | `POST` | `/platform/licence/{licenceId}/renew` | superuser | — | — | ✅ |
 | `POST` | `/platform/licence/{licenceId}/resume` | superuser | — | — | ✅ |
 | `POST` | `/platform/licence/{licenceId}/revoke` | superuser | — | — | ✅ |
@@ -76,11 +76,8 @@ All routes are under `/api/v1`. **Access**: *public* (no session), *session* (si
 | `POST` | `/platform/licence/{licenceId}/suspend` | superuser | — | — | ✅ |
 | `POST` | `/platform/organisation/add` | superuser | — | — | ✅ |
 | `GET` | `/platform/organisation/list` | superuser | — | — | — |
-| `POST` | `/platform/organisation/{organisationId}/assign` | superuser | — | — | ✅ |
 | `GET` | `/platform/organisation/{organisationId}/licence` | superuser | — | — | — |
-| `GET` | `/platform/organisation/{organisationId}/owners` | superuser | — | — | — |
 | `GET` | `/platform/plan/list` | superuser | — | — | — |
-| `GET` | `/platform/user/unassigned` | superuser | — | — | — |
 | `GET` | `/result/bytt/{ttNumber}` | api key | — | — | — |
 | `GET` | `/result/export.csv` | api key | — | — | — |
 | `GET` | `/sms/gateway` | member | `staff_manage` | — | — |
@@ -100,7 +97,6 @@ All routes are under `/api/v1`. **Access**: *public* (no session), *session* (si
 | `PUT` | `/staff/{staffId}` | member | `staff_manage` | — | ✅ |
 | `PUT` | `/staff/{staffId}/access` | member | `acl_manage` | — | ✅ |
 | `PUT` | `/staff/{staffId}/secondfactor` | member | `staff_manage` | — | ✅ |
-| `POST` | `/staff/{staffId}/secondfactor/reset` | member | `staff_manage` | — | ✅ |
 | `POST` | `/user/add` | member | `user_manage` | required | ✅ |
 | `POST` | `/user/appearance` | session | — | — | — |
 | `GET` | `/user/capability/list` | session | — | — | — |
@@ -109,13 +105,11 @@ All routes are under `/api/v1`. **Access**: *public* (no session), *session* (si
 | `GET` | `/user/me` | session | — | — | — |
 | `POST` | `/user/password` | session | — | — | ✅ |
 | `POST` | `/user/signin` | public | — | — | — |
-| `POST` | `/user/signin/enrol` | public | — | — | — |
 | `POST` | `/user/signin/resend` | public | — | — | — |
 | `POST` | `/user/signin/verify` | public | — | — | — |
 | `POST` | `/user/signout` | session | — | — | — |
 | `POST` | `/user/signup` | public | — | — | — |
 | `PATCH` | `/user/{userId}` | member | `user_manage` | — | ✅ |
-| `POST` | `/user/{userId}/secondfactor/reset` | superuser | — | — | ✅ |
 
 ## Appendix B — Capabilities and the built-in roles
 
@@ -125,7 +119,7 @@ All routes are under `/api/v1`. **Access**: *public* (no session), *session* (si
 | `dns_site_manage` | Add, edit and remove DNS sites. | ✅ | — | — |
 | `diagnostic_run` | Submit a diagnostic against a TT number. | ✅ | ✅ | — |
 | `diagnostic_view_own` | View diagnostics this person submitted. | ✅ | ✅ | ✅ |
-| `diagnostic_view_all` | View every diagnostic in the organisation. | ✅ | ✅ | ✅ |
+| `diagnostic_view_all` | View every diagnostic in the organisation. | ✅ | — | ✅ |
 | `sla_view` | View SLA policies and breach status. | ✅ | ✅ | ✅ |
 | `sla_manage` | Create and edit SLA policies and alert channels. | ✅ | — | — |
 | `schedule_manage` | Create and edit scheduled monitoring. | ✅ | ✅ | — |
@@ -167,10 +161,13 @@ Embedded in the server binary and applied in order at boot (`packetpulsego/pkg/c
 | `0018_2026_10_02_ldap_ca_certificate.sql` | The authority an organisation's directory certificate is checked against. |
 | `0019_2026_10_03_two_step_sign_in.sql` | Two-step sign-in. |
 | `0020_2026_10_03_session_checkin.sql` | Where people sign in and out. |
-| `0021_2026_10_03_device_test.sql` | Test from this device: what it tests against, and how fast the line was. |
+| `0021_2026_10_03_device_test.sql` | The device test: what it tests against, and how fast the line was. |
 | `0022_2026_10_03_loss_and_jitter.sql` | Loss and jitter on the ticket, not only on each site. |
 | `0023_2026_10_04_dual_stack_results.sql` | Dual-stack sites, measured on both families and reported separately. |
 | `0024_2026_10_04_result_export.sql` | Results delivered to an organisation's own server, on a schedule, and |
+| `0025_2026_10_05_otp_only_and_licence_files.sql` | Sign-in by one-time code only, and licences from signed files. |
+| `0026_2026_10_05_own_results_places_and_indexes.sql` | Whose tests a person reads, where each test was run, and the indexes the busiest reads need. |
+| `0027_2026_10_05_path_analysis_removed.sql` | Path analysis is removed: hops and fault verdicts are no longer written. |
 
 ## Appendix D — Settings
 
@@ -188,12 +185,16 @@ Read from the environment, falling back to `.env` (see `.env.example`); defined 
 | `TRUSTED_PROXIES` | `127.0.0.0/8, ::1/128` | Whose `X-Forwarded-For` is believed — the client address in sessions, limits and the trail |
 | `AUTH_ATTEMPTS_PER_MINUTE` | `10` | Password-step requests per client address |
 | `SECOND_STEP_ATTEMPTS_PER_MINUTE` | `30` | Second-step requests per client address |
-| `ALLOW_SIGNUP` | `true` | Whether anyone may sign up (into the holding organisation) |
-| `OWNER_EMAIL`, `OWNER_PASSWORD`, `OWNER_NAME` | — | The platform superuser, created at boot |
-| `OWNER_TOTP_SECRET` | — | Pre-enrols the superuser's authenticator — **outside production only** |
-| `OWNER_RESET_SECOND_FACTOR` | `false` | Break-glass: clears the superuser's authenticator at boot |
-| `SEED_DEMO`, `DEMO_EMAIL`, `DEMO_PASSWORD`, `DEMO_NAME`, `DEMO_ORGANISATION_NAME` | `false`, … | A demo organisation with sites and a licence |
-| `DEMO_TOTP_SECRET` | — | Pre-enrols the demo owner — **outside production only** |
+| `ALLOW_SIGNUP` | `true` | Whether the owner named in a licence may sign up on this server |
+| `OWNER_PASSWORD`, `OWNER_NAME` | — | The platform superuser (`superuser@rummaan53.com`, fixed in code), created at boot on the console only |
+| `LICENCE_DIR` | — | The folder of licence files this server signs organisations in under, read at every sign-in |
+| `LICENCE_SIGNING_KEY` | — | Makes this server the PacketPulse console, which issues licences. Only the vendor's own server has it |
+| `LICENCE_PUBLIC_KEY` | — | Replaces the vendor key licences are checked against — **development builds outside production only** |
+| `SMTP_HOST`, `SMTP_PORT` | `smtp.gmail.com`, `587` | Where sign-in codes are emailed from |
+| `SMTP_FROM_n`, `SMTP_PASSWORD_n` (n = 0–3) | — | Gmail accounts (with app passwords) that send codes, spread across to stay inside Gmail's daily cap. Production needs at least one |
+| `OTP_OUTBOX_FILE` | — | Writes codes to a file instead of sending them, for tests — **refused in production** |
+| `SEED_DEMO`, `DEMO_EMAIL`, `DEMO_PASSWORD`, `DEMO_NAME`, `DEMO_ORGANISATION_NAME` | `false`, … | The demo organisation, its logins, sites and licence — **console only** |
+| `DEMO_SMS_CODE`, `DEMO_SEATS` | `111111`, `3` | The demo's on-screen code, and how many demo walkthroughs may run at once |
 | `TRIAL_DAYS`, `TRIAL_SEATS`, `TRIAL_SITES` | `14`, `5`, `25` | A trial licence's terms |
 | `PING_COUNT`, `PING_TIMEOUT`, `PING_INTERVAL`, `PING_CONCURRENCY` | `4`, `5s`, `200ms`, `16` | The probe engine's defaults |
 | `PING_TCP_FALLBACK` | `true` | TCP connect where ICMP cannot be sent |
@@ -219,7 +220,7 @@ Every refusal is a JSON envelope: `{"error": {"code", "message", "request_id", "
 | `rate_limited` | 429 | Too many attempts from this address, or texts for this person |
 | `internal_error` | 500 | Logged with the `request_id`; never carries the cause |
 | `licence_expired`, `licence_suspended` | 403 | The organisation's licence stops this |
-| `seat_limit_reached` | 403 | Every seat is taken |
+| `seat_limit_reached` | 403 / 409 | The licence covers no more people (adding someone), or fewer than are on it (signing in) |
 | `invalid_code` | 401 | A wrong second-step code, with attempts left |
 | `challenge_expired` | 401 | The sign-in must start again |
 | `locked_out` | 429 | Too many wrong codes; wait |
@@ -239,16 +240,15 @@ Every refusal is a JSON envelope: `{"error": {"code", "message", "request_id", "
 | Term | Meaning |
 |---|---|
 | **Dual-stack** | A site reachable over both IPv4 and IPv6 |
-| **Holding organisation** | Where a signed-up account waits until the platform operator places it |
+| **Licence file** | The signed file in `LICENCE_DIR` that lets an organisation sign in on a server |
 | **MOS** | Mean Opinion Score — estimated call quality, 1–5 (ITU-T G.107 E-model) |
 | **Report only** | A result shown and kept but not counted: the IPv6 half of a dual-stack site |
 | **RFC 3550 jitter** | Interarrival jitter: the smoothed difference between consecutive round trips |
-| **Seat** | One person signed in, however many devices |
 | **Sweep** | One run of probes over a set of sites |
-| **TOTP** | Time-based one-time password — the 6-digit code an authenticator app shows |
+| **Sign-in code** | The 6-digit, ten-minute code emailed or texted for the second step |
 | **TT number** | A trouble ticket number from the operator's own ticketing system |
 | **Watermark** | How far the result export has delivered: results of diagnostics finished after it are still to send |
 
 ---
 
-*Guide version `v2026.10-PROD-v1` — verified against source on 2026-10-04, and continuously re-verified by `./packetpulsetest.sh docs`.*
+*Guide version `v2026.10-PROD-v2` — verified against source on 2026-10-05, and continuously re-verified by `./packetpulsetest.sh docs`.*

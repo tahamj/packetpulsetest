@@ -43,18 +43,21 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 
 `REVERSE_GEOCODING=off` stops sign-in positions being sent to a map service from a test run. Every other setting comes from `.env` (copy `.env.example`); Appendix D lists them all.
 
-## 0.4 Accounts and authenticators
+With the development key pair in `.env` (`LICENCE_PUBLIC_KEY` and `LICENCE_SIGNING_KEY`), the stack is a **console**: the superuser can sign in and issue licence files (**Platform → Download licence file**). Copy a file into `LICENCE_DIR` and its organisation can sign in; the server verifies it at every sign-in. Only the demo's own licence is written there for you. A customer's server has no signing key, only the licence files copied into its `LICENCE_DIR`.
+
+## 0.4 Accounts and sign-in codes
 
 | Account | How it exists | Second step |
 |---|---|---|
-| **Platform superuser** | `OWNER_EMAIL` / `OWNER_PASSWORD` in `.env`, created at boot | Authenticator. Outside production, `OWNER_TOTP_SECRET` pre-enrols it so scripts can sign in; production refuses to boot with that set. |
-| **Demo owner** (`SEED_DEMO=true`) | `DEMO_EMAIL` / `DEMO_PASSWORD`, with an organisation, sites and a licence | Authenticator; `DEMO_TOTP_SECRET` likewise, outside production only. |
-| **Anyone else** | Sign up (lands in the holding organisation) or **Staff → Add** by an administrator | Sets up an authenticator at first sign-in, unless set to text and a gateway is on. |
+| **Platform superuser** | `superuser@rummaan53.com` (fixed in code) with `OWNER_PASSWORD`, created at boot **on the console only** | A code emailed to that address. |
+| **Organisation owner** | The first sign-up with the address named in the organisation's licence file becomes its Administrator | A code emailed to the owner, always. |
+| **Anyone else** | **Staff → Add** by an administrator, who shares the sign-in with them | A code emailed to their sign-in address, or texted when they are set to text and the organisation's SMS gateway is on. |
+| **Demo logins** (`SEED_DEMO=true`, console only) | `DEMO_EMAIL` / `DEMO_PASSWORD` (owner), plus `demo-engineer@…` and `demo-viewer@…` | The texted-code step, with the code (`DEMO_SMS_CODE`) shown on screen instead of sent. At most `DEMO_SEATS` walkthroughs at once. |
 
-To act as a person in a manual test, add the authenticator secret shown at enrolment to any TOTP app (or `oathtool --totp -b <secret>`). Keep the **recovery codes** shown once at the end of enrolment — several cases use them.
+To act as a person in a manual test, read their code from the **code outbox**: when `OTP_OUTBOX_FILE` is set, every code is appended to that file as one JSON line (`challenge_id`, `channel`, `to`, `code`, `at`) instead of being emailed or texted. Without it, codes go to real mailboxes through the Gmail accounts in `SMTP_FROM_n` / `SMTP_PASSWORD_n`.
 
 > [!IMPORTANT]
-> 🔒 **INVARIANT** — production refuses `OWNER_TOTP_SECRET` and `DEMO_TOTP_SECRET`: a second factor written in a configuration file is held by everyone who can read the file. `packetpulsego/pkg/common/config/Config.go` returns an error at boot; `REL-004` checks the live host.
+> 🔒 **INVARIANT** — production refuses `OTP_OUTBOX_FILE`, because a file of live sign-in codes is a second factor held by everyone who can read the file. It also refuses to boot with no SMTP account, since email is everyone's fallback, and refuses a `LICENCE_PUBLIC_KEY` that would replace the vendor's key. `packetpulsego/pkg/common/config/Config.go` returns an error at boot; `REL-004` checks the live host.
 
 ## 0.5 The automated gate
 
@@ -63,7 +66,7 @@ To act as a person in a manual test, add the authenticator secret shown at enrol
 | Suite | What it proves | Needs |
 |---|---|---|
 | `tenancy` | One organisation can never read or change another's data | server |
-| `assignment` | Sign-up lands in the holding organisation; assignment and seats | server |
+| `assignment` | Licence files: owner sign-up, sign-in only under a genuine licence, people counted, switched off and deleted | server |
 | `acl` | Every role gets exactly its capabilities, both ways | server |
 | `audit` | The registry covers every mutation; the chain verifies; sign-ins (and failed ones) are recorded | server |
 | `translation` | The catalogue is complete and served | server |
@@ -73,7 +76,7 @@ To act as a person in a manual test, add the authenticator secret shown at enrol
 | `client` | Every Flutter screen, `flutter analyze`, the client coverage floor | — |
 | `backup` | The backup, drill and restore scripts, for real | database |
 | `docs` | This guide is current and every number, path, route and capability in it matches source | — |
-| `load` *(opt-in)* | 20 people, a traced 200-site sweep, API and CSV pulls against p95 budgets | server |
+| `load` *(opt-in)* | 20 people, a 200-site sweep, API and CSV pulls against p95 budgets | server |
 
 Integration suites read `PACKETPULSE_TEST_URL` (default `http://localhost:8080`). `PACKETPULSE_TEST_REQUIRE_SUPERUSER=1` turns a missing superuser into a failure rather than a skip — a skipped suite looks exactly like a passing one.
 

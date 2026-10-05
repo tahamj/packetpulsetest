@@ -36,26 +36,26 @@ The app runs on the web (the live build), macOS, Windows, Android and iOS from o
 | ID | Check | Expected |
 |---|---|---|
 | `NFR-013` | Tenancy, for every id-taking route | RIVAL's id answers 404 or an empty list — `./packetpulsetest.sh tenancy` |
-| `NFR-014` | The destination policy, everywhere PacketPulse connects out | Sweeps, traceroutes, webhooks, the directory and the result export all refuse loopback, link-local and cloud metadata |
+| `NFR-014` | The destination policy, everywhere PacketPulse connects out | Sweeps, webhooks, the directory and the result export all refuse loopback, link-local and cloud metadata |
 | `NFR-015` | Error responses | No SQLSTATE, driver names, file paths or a remote server's raw reply in any error envelope |
 | `NFR-016` | Secrets at rest | SMS tokens, bind passwords and export credentials sealed with the server's secret box; API keys stored as hashes; never returned |
 | `NFR-017` | CSV injection | Cells starting `=`, `+`, `-`, `@`, tab or carriage return are written as text |
-| `NFR-018` | Production configuration | Production refuses `OWNER_TOTP_SECRET`, `DEMO_TOTP_SECRET`, `LDAP_ALLOW_LOOPBACK`, `EXPORT_ALLOW_LOOPBACK` and open CORS |
+| `NFR-018` | Production configuration | Production refuses `OTP_OUTBOX_FILE`, a `LICENCE_PUBLIC_KEY` override, `LDAP_ALLOW_LOOPBACK`, `EXPORT_ALLOW_LOOPBACK` and open CORS, and will not boot without an SMTP account |
 
 ## 4.5 Performance — the load suite
 
-`./packetpulsetest.sh load` provisions one licensed organisation — the owner and nineteen engineers, each with an authenticator, and 200 sites on TEST-NET-3 — and measures it. It also runs nightly (`.github/workflows/packetpulse-load.yml`). Budgets are 95th percentiles; the measured figures are from a developer laptop against a local server.
+`./packetpulsetest.sh load` provisions one licensed organisation — the owner and nineteen engineers, each signing in with a code read from the server's outbox, and 200 sites on TEST-NET-3 — and measures it. It also runs nightly (`.github/workflows/packetpulse-load.yml`). Budgets are 95th percentiles; the measured figures are from a developer laptop against a local server.
 
 | Scenario | Measured p95 | Budget |
 |---|---|---|
 | Sign-in, password step — all 20 at once | 750 ms | 3 s |
-| Sign-in, authenticator step — all 20 at once | 16 ms | 1 s |
+| Sign-in, code step — all 20 at once | 16 ms | 1 s |
 | Reads — list, sites, dashboard, me; 20 people × 10 | 9 ms | 750 ms |
-| Sweep of 200 sites, failures traced | 91 s | 120 s |
+| Sweep of 200 sites (measured when failures were also traced, before path analysis was removed) | 91 s | 120 s |
 | Diagnostic of 5 sites — 10 people at once | 4.1 s | 20 s |
 | Results API by ticket (200 results) — 200 pulls, 10 at a time | 16 ms | 1 s |
 | CSV export of the whole run (250 rows) | 2 ms | 10 s |
 
-🔒 Absolute whatever the machine: no 5xx; the traced 200-site sweep stores all 200 results; the CSV holds every stored result once. With the old bug restored (saving under the sweep's deadline) the sweep answers 500 and the suite goes red.
+🔒 Absolute whatever the machine: no 5xx; the 200-site sweep stores all 200 results; the CSV holds every stored result once. With the old bug restored (saving under the sweep's deadline) the sweep answers 500 and the suite goes red.
 
 ---

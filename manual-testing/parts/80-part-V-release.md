@@ -28,7 +28,7 @@ PACKETPULSE_TEST_URL=http://localhost:18080 PACKETPULSE_TEST_REQUIRE_SUPERUSER=1
 | `REL-001` | `./packetpulsetest.sh` green with no skips, on the commit being shipped | QA |
 | `REL-002` | Every row of *What changed* (front matter) manually verified: `AUTH-001`, `AUTH-009`, `CHK-001`, `DEV-002`, `DEV-005`, `V6-001`, `CSV-001`, `EXP-006`, `AUD-003` | QA |
 | `REL-003` | Journeys `JRN-001`, `JRN-003`, `JRN-004`, `JRN-006` on a disposable stack | QA |
-| `REL-004` | The live `.env` has `APP_ENV=production` and none of `OWNER_TOTP_SECRET`, `DEMO_TOTP_SECRET`, `EXPORT_ALLOW_LOOPBACK=true`, `LDAP_ALLOW_LOOPBACK=true` | Release owner |
+| `REL-004` | The live `.env` has `APP_ENV=production`, an `SMTP_FROM_0` / `SMTP_PASSWORD_0` pair, and none of `OTP_OUTBOX_FILE`, `LICENCE_PUBLIC_KEY`, `EXPORT_ALLOW_LOOPBACK=true`, `LDAP_ALLOW_LOOPBACK=true` | Release owner |
 | `REL-005` | New migrations read for what they change on live data (a migration that revokes sessions, rewrites figures or changes a key is announced to users) | Backend |
 | `REL-006` | Public documents (`packetpulseweb/index.html`, `docs/*.html` and their PDFs) promise nothing the release does not do | Product |
 

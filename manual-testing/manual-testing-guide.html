@@ -150,22 +150,23 @@ nav.side .nohit.on{display:block}
 <div class="shell">
   <nav class="side" aria-label="Contents">
     <p class="sb"><span class="mk" aria-hidden="true"></span> PacketPulse Testing Manual</p>
-    <p class="ver">v2026.10-PROD-v1 · internal</p>
+    <p class="ver">v2026.10-PROD-v2 · internal</p>
     <div class="find">
       <input id="navfind" type="search" placeholder="Filter contents…" aria-label="Filter contents" autocomplete="off">
     </div>
     <a class="n1" href="#packetpulse-manual-testing-guide">📡 PacketPulse Manual Testing Guide</a>
     <a class="n2" href="#how-to-read-this-manual">🧭 How To Read This Manual</a>
+    <a class="n2" href="#what-changed-in-v2-licence-files-emailed-codes-and-one-run-screen">📋 What Changed in v2 — Licence Files, Emailed Codes and One Run Screen</a>
     <a class="n2" href="#what-changed-in-v1-the-october-2026-customer-release">📋 What Changed in v1 — the October 2026 Customer Release</a>
     <a class="n1" href="#part-0-operational-prerequisites">Part 0 — Operational Prerequisites</a>
     <a class="n2" href="#01-environments">0.1 Environments</a>
     <a class="n2" href="#02-toolchain">0.2 Toolchain</a>
     <a class="n2" href="#03-starting-a-disposable-stack">0.3 Starting a disposable stack</a>
-    <a class="n2" href="#04-accounts-and-authenticators">0.4 Accounts and authenticators</a>
+    <a class="n2" href="#04-accounts-and-sign-in-codes">0.4 Accounts and sign-in codes</a>
     <a class="n2" href="#05-the-automated-gate">0.5 The automated gate</a>
     <a class="n2" href="#06-deploying">0.6 Deploying</a>
     <a class="n1" href="#part-l-learn-packetpulse">Part L — Learn PacketPulse</a>
-    <a class="n2" href="#l1-organisations-people-and-seats">L.1 Organisations, people and seats</a>
+    <a class="n2" href="#l1-organisations-people-and-the-licence">L.1 Organisations, people and the licence</a>
     <a class="n2" href="#l2-sites-tickets-and-sweeps">L.2 Sites, tickets and sweeps</a>
     <a class="n2" href="#l3-what-the-numbers-mean">L.3 What the numbers mean</a>
     <a class="n2" href="#l4-ipv4-ipv6-and-not-counted">L.4 IPv4, IPv6 and &quot;not counted&quot;</a>
@@ -207,7 +208,7 @@ nav.side .nohit.on{display:block}
   </nav>
   <main>
     <div class="topbar">
-      <span class="crumb">packetpulse / packetpulsetest / manual-testing / <strong>guide (v2026.10-PROD-v1)</strong></span>
+      <span class="crumb">packetpulse / packetpulsetest / manual-testing / <strong>guide (v2026.10-PROD-v2)</strong></span>
       <button id="theme" type="button" aria-label="Toggle light/dark theme">🌓 Theme</button>
       <a class="btn" href="javascript:window.print()">🖨️ Print / PDF</a>
     </div>
@@ -217,7 +218,7 @@ nav.side .nohit.on{display:block}
 <h3 id="master-knowledge-manual"><em>&amp; Master Knowledge Manual</em><a class="anchor" href="#master-knowledge-manual" aria-label="Link to this section">#</a></h3>
 <p><strong>The single source of truth for testing, understanding, selling, operating, and releasing PacketPulse.</strong></p>
 <br>
-<p><code>v2026.10-PROD-v1</code>  ·  <code>Verified against source 2026-10-04</code></p>
+<p><code>v2026.10-PROD-v2</code>  ·  <code>Verified against source 2026-10-05</code></p>
 <br>
 <div class="tw"><table><thead>
 <tr>
@@ -232,11 +233,11 @@ nav.side .nohit.on{display:block}
 </thead>
 <tbody>
 <tr>
-<td style="text-align:center"><strong>17</strong> <br><sub>in the navigation rail</sub></td>
-<td style="text-align:center"><strong>110</strong> <br><sub>under <code>/api/v1</code></sub></td>
+<td style="text-align:center"><strong>16</strong> <br><sub>in the navigation rail</sub></td>
+<td style="text-align:center"><strong>104</strong> <br><sub>under <code>/api/v1</code></sub></td>
 <td style="text-align:center"><strong>17</strong> <br><sub>3 built-in roles</sub></td>
-<td style="text-align:center"><strong>24</strong> <br><sub>applied at boot</sub></td>
-<td style="text-align:center"><strong>835</strong> <br><sub>English, server-served</sub></td>
+<td style="text-align:center"><strong>27</strong> <br><sub>applied at boot</sub></td>
+<td style="text-align:center"><strong>881</strong> <br><sub>English, server-served</sub></td>
 <td style="text-align:center"><strong>18</strong> <br><sub>one per screen</sub></td>
 <td style="text-align:center"><strong>11</strong> <br><sub>+ <code>load</code>, opt-in</sub></td>
 </tr>
@@ -337,6 +338,63 @@ nav.side .nohit.on{display:block}
 <div class="alert a-caution"><div class="alert-h">🛑 CAUTION</div><p><strong>Never test against live customer data.</strong> Use a local server with a disposable database (Part 0 §0.2), or the live demo organisation for read-only walkthroughs. Tenancy, ACL and audit cases need <strong>two organisations</strong> of your own — testing them from a single account proves nothing.</p>
 </div>
 <hr>
+<h2 id="what-changed-in-v2-licence-files-emailed-codes-and-one-run-screen">📋 What Changed in v2 — Licence Files, Emailed Codes and One Run Screen<a class="anchor" href="#what-changed-in-v2-licence-files-emailed-codes-and-one-run-screen" aria-label="Link to this section">#</a></h2>
+<div class="alert a-important"><div class="alert-h">📌 IMPORTANT</div><p><strong>Built 2026-10-05; not yet deployed.</strong> The release waits for the <code>packetpulse.rummaan53.com</code> DNS record (Part V). Every row below must be verified before it is signed off. Where v2 and v1 disagree, v2 is the product.</p>
+</div>
+<div class="tw"><table><thead>
+<tr>
+<th>Change</th>
+<th>What changed</th>
+<th>Where to test</th>
+<th>Source of truth</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Codes, not an authenticator</strong></td>
+<td>The second step is a 6-digit code, <strong>emailed</strong>, or <strong>texted</strong> through the organisation's own SMS gateway. There is no authenticator app and there are no recovery codes. An owner's code is always emailed.</td>
+<td><code>AUTH-*</code>, <code>SMS-*</code></td>
+<td><code>packetpulsego/pkg/usermicroservice/userservice/UserSignInSteps.go</code><br><code>packetpulsego/pkg/common/dbclient/migrations/0025_2026_10_05_otp_only_and_licence_files.sql</code></td>
+</tr>
+<tr>
+<td><strong>Signed licence files</strong></td>
+<td>An organisation signs in only under a licence file signed by PacketPulse, in the server's <code>LICENCE_DIR</code> and checked at every sign-in. The superuser exists only on PacketPulse's own console. The first sign-up with the licence's owner address becomes the Administrator.</td>
+<td><code>PLAT-*</code>, <code>AUTH-*</code></td>
+<td><code>packetpulsego/pkg/common/licence/Store.go</code></td>
+</tr>
+<tr>
+<td><strong>People, not sign-ins</strong></td>
+<td>The licence counts the people on the books, switched on or off. Someone who leaves is switched off; someone with no records can be deleted, and stops counting.</td>
+<td><code>STF-*</code>, <code>WHO-*</code></td>
+<td><code>packetpulsego/pkg/staffmicroservice/staffservice/StaffService.go</code></td>
+</tr>
+<tr>
+<td><strong>Own tests, and everyone's</strong></td>
+<td>An engineer sees the tests they ran. An administrator sees everyone's, narrowed by person, place, status and dates. Each test records who ran it and where.</td>
+<td><code>HIST-*</code></td>
+<td><code>packetpulsego/pkg/common/dbclient/migrations/0026_2026_10_05_own_results_places_and_indexes.sql</code></td>
+</tr>
+<tr>
+<td><strong>Path analysis removed</strong></td>
+<td>No traceroute, no fault verdict, and no <em>Where the faults lay</em> card. Paths stored before stay in the database, unshown; the CSV keeps its <code>fault_class</code> column.</td>
+<td><code>DIAG-*</code></td>
+<td><code>packetpulsego/pkg/common/dbclient/migrations/0027_2026_10_05_path_analysis_removed.sql</code></td>
+</tr>
+<tr>
+<td><strong>Speed test hidden</strong></td>
+<td><strong>Measure speed</strong> is no longer offered. A speed filed with a run before still shows with it.</td>
+<td><code>DEV-*</code></td>
+<td><code>packetpulseflutter/lib/common/config/PacketPulseConfig.dart</code></td>
+</tr>
+<tr>
+<td><strong>One Run diagnostic screen</strong></td>
+<td><em>Run diagnostic</em> and <em>Test from this device</em> are one destination with two modes: <strong>From the server</strong> and <strong>From this device</strong>. Someone without the right to run a sweep gets the device mode alone.</td>
+<td><code>DEV-*</code>, <code>DIAG-*</code></td>
+<td><code>packetpulseflutter/lib/diagnosticmicroservice/presentation/screens/RunDiagnosticScreen.dart</code></td>
+</tr>
+</tbody>
+</table></div>
+<hr>
 <h2 id="what-changed-in-v1-the-october-2026-customer-release">📋 What Changed in v1 — the October 2026 Customer Release<a class="anchor" href="#what-changed-in-v1-the-october-2026-customer-release" aria-label="Link to this section">#</a></h2>
 <div class="alert a-important"><div class="alert-h">📌 IMPORTANT</div><p><strong>Deployed to https://packetpulse.rummaan53.com on 2026-10-04.</strong> It answers eight requirements from Northwind Telecom plus their remark that administrator logins be tracked. Every row below must be verified before a release is signed off.</p>
 </div>
@@ -357,13 +415,13 @@ nav.side .nohit.on{display:block}
 </tr>
 <tr>
 <td><strong>2. Two-step sign-in</strong></td>
-<td>Every sign-in has a second step: an authenticator app (TOTP) or a texted code through the organisation's <strong>own Twilio account</strong>. Owners and superusers always use an authenticator; recovery codes for a lost phone.</td>
+<td>Every sign-in has a second step. <em>v2 replaced the authenticator app and recovery codes with an emailed or texted code.</em></td>
 <td><code>AUTH-*</code>, <code>SMS-*</code></td>
 <td><code>packetpulsego/pkg/usermicroservice/userservice/UserSignInSteps.go</code><br><code>packetpulsego/pkg/common/dbclient/migrations/0019_2026_10_03_two_step_sign_in.sql</code></td>
 </tr>
 <tr>
 <td><strong>3. No target dropdown</strong></td>
-<td><em>Test from this device</em> tests the target the organisation chose (Cloudflare DNS by default), with one-tap presets for whoever may change it.</td>
+<td>The device test measures the target the organisation chose (Cloudflare DNS by default), with one-tap presets for whoever may change it. <em>In v2 it is the From this device mode of Run diagnostic.</em></td>
 <td><code>DEV-*</code></td>
 <td><code>packetpulseflutter/lib/diagnosticmicroservice/presentation/screens/ClientProbeScreen.dart</code></td>
 </tr>
@@ -393,8 +451,8 @@ nav.side .nohit.on{display:block}
 </tr>
 <tr>
 <td><strong>8. Load testing</strong></td>
-<td>A device line-speed test (Cloudflare), and a platform load suite: 20 people at once, a traced 200-site sweep, API and CSV pulls against p95 budgets.</td>
-<td><code>DEV-005</code>, Part IV §4.5</td>
+<td>A platform load suite: 20 people at once, a 200-site sweep, API and CSV pulls against p95 budgets. <em>The device line-speed test of v1 is hidden in v2.</em></td>
+<td>Part IV §4.5</td>
 <td><code>packetpulsetest/golang/loadtest/load_test.go</code><br><code>.github/workflows/packetpulse-load.yml</code></td>
 </tr>
 <tr>
@@ -504,7 +562,8 @@ cd ../packetpulseflutter
 flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18080
 </code></pre>
 <p><code>REVERSE_GEOCODING=off</code> stops sign-in positions being sent to a map service from a test run. Every other setting comes from <code>.env</code> (copy <code>.env.example</code>); Appendix D lists them all.</p>
-<h2 id="04-accounts-and-authenticators">0.4 Accounts and authenticators<a class="anchor" href="#04-accounts-and-authenticators" aria-label="Link to this section">#</a></h2>
+<p>With the development key pair in <code>.env</code> (<code>LICENCE_PUBLIC_KEY</code> and <code>LICENCE_SIGNING_KEY</code>), the stack is a <strong>console</strong>: the superuser can sign in and issue licence files (<strong>Platform → Download licence file</strong>). Copy a file into <code>LICENCE_DIR</code> and its organisation can sign in; the server verifies it at every sign-in. Only the demo's own licence is written there for you. A customer's server has no signing key, only the licence files copied into its <code>LICENCE_DIR</code>.</p>
+<h2 id="04-accounts-and-sign-in-codes">0.4 Accounts and sign-in codes<a class="anchor" href="#04-accounts-and-sign-in-codes" aria-label="Link to this section">#</a></h2>
 <div class="tw"><table><thead>
 <tr>
 <th>Account</th>
@@ -515,23 +574,28 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <tbody>
 <tr>
 <td><strong>Platform superuser</strong></td>
-<td><code>OWNER_EMAIL</code> / <code>OWNER_PASSWORD</code> in <code>.env</code>, created at boot</td>
-<td>Authenticator. Outside production, <code>OWNER_TOTP_SECRET</code> pre-enrols it so scripts can sign in; production refuses to boot with that set.</td>
+<td><code>superuser@rummaan53.com</code> (fixed in code) with <code>OWNER_PASSWORD</code>, created at boot <strong>on the console only</strong></td>
+<td>A code emailed to that address.</td>
 </tr>
 <tr>
-<td><strong>Demo owner</strong> (<code>SEED_DEMO=true</code>)</td>
-<td><code>DEMO_EMAIL</code> / <code>DEMO_PASSWORD</code>, with an organisation, sites and a licence</td>
-<td>Authenticator; <code>DEMO_TOTP_SECRET</code> likewise, outside production only.</td>
+<td><strong>Organisation owner</strong></td>
+<td>The first sign-up with the address named in the organisation's licence file becomes its Administrator</td>
+<td>A code emailed to the owner, always.</td>
 </tr>
 <tr>
 <td><strong>Anyone else</strong></td>
-<td>Sign up (lands in the holding organisation) or <strong>Staff → Add</strong> by an administrator</td>
-<td>Sets up an authenticator at first sign-in, unless set to text and a gateway is on.</td>
+<td><strong>Staff → Add</strong> by an administrator, who shares the sign-in with them</td>
+<td>A code emailed to their sign-in address, or texted when they are set to text and the organisation's SMS gateway is on.</td>
+</tr>
+<tr>
+<td><strong>Demo logins</strong> (<code>SEED_DEMO=true</code>, console only)</td>
+<td><code>DEMO_EMAIL</code> / <code>DEMO_PASSWORD</code> (owner), plus <code>demo-engineer@…</code> and <code>demo-viewer@…</code></td>
+<td>The texted-code step, with the code (<code>DEMO_SMS_CODE</code>) shown on screen instead of sent. At most <code>DEMO_SEATS</code> walkthroughs at once.</td>
 </tr>
 </tbody>
 </table></div>
-<p>To act as a person in a manual test, add the authenticator secret shown at enrolment to any TOTP app (or <code>oathtool --totp -b &lt;secret&gt;</code>). Keep the <strong>recovery codes</strong> shown once at the end of enrolment — several cases use them.</p>
-<div class="alert a-important"><div class="alert-h">📌 IMPORTANT</div><p>🔒 <strong>INVARIANT</strong> — production refuses <code>OWNER_TOTP_SECRET</code> and <code>DEMO_TOTP_SECRET</code>: a second factor written in a configuration file is held by everyone who can read the file. <code>packetpulsego/pkg/common/config/Config.go</code> returns an error at boot; <code>REL-004</code> checks the live host.</p>
+<p>To act as a person in a manual test, read their code from the <strong>code outbox</strong>: when <code>OTP_OUTBOX_FILE</code> is set, every code is appended to that file as one JSON line (<code>challenge_id</code>, <code>channel</code>, <code>to</code>, <code>code</code>, <code>at</code>) instead of being emailed or texted. Without it, codes go to real mailboxes through the Gmail accounts in <code>SMTP_FROM_n</code> / <code>SMTP_PASSWORD_n</code>.</p>
+<div class="alert a-important"><div class="alert-h">📌 IMPORTANT</div><p>🔒 <strong>INVARIANT</strong> — production refuses <code>OTP_OUTBOX_FILE</code>, because a file of live sign-in codes is a second factor held by everyone who can read the file. It also refuses to boot with no SMTP account, since email is everyone's fallback, and refuses a <code>LICENCE_PUBLIC_KEY</code> that would replace the vendor's key. <code>packetpulsego/pkg/common/config/Config.go</code> returns an error at boot; <code>REL-004</code> checks the live host.</p>
 </div>
 <h2 id="05-the-automated-gate">0.5 The automated gate<a class="anchor" href="#05-the-automated-gate" aria-label="Link to this section">#</a></h2>
 <p><code>./packetpulsetest.sh</code> runs every suite; <code>./packetpulsetest.sh unit client</code> is the fast pair. Manual testing <strong>adds to</strong> this gate — it does not replace it. A release needs both (Part V).</p>
@@ -550,7 +614,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 </tr>
 <tr>
 <td><code>assignment</code></td>
-<td>Sign-up lands in the holding organisation; assignment and seats</td>
+<td>Licence files: owner sign-up, sign-in only under a genuine licence, people counted, switched off and deleted</td>
 <td>server</td>
 </tr>
 <tr>
@@ -600,7 +664,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 </tr>
 <tr>
 <td><code>load</code> <em>(opt-in)</em></td>
-<td>20 people, a traced 200-site sweep, API and CSV pulls against p95 budgets</td>
+<td>20 people, a 200-site sweep, API and CSV pulls against p95 budgets</td>
 <td>server</td>
 </tr>
 </tbody>
@@ -611,13 +675,13 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <hr>
 <h1 id="part-l-learn-packetpulse">Part L — Learn PacketPulse<a class="anchor" href="#part-l-learn-packetpulse" aria-label="Link to this section">#</a></h1>
 <p>The ideas every other part assumes, in plain words. Read this once, whatever your role.</p>
-<h2 id="l1-organisations-people-and-seats">L.1 Organisations, people and seats<a class="anchor" href="#l1-organisations-people-and-seats" aria-label="Link to this section">#</a></h2>
+<h2 id="l1-organisations-people-and-the-licence">L.1 Organisations, people and the licence<a class="anchor" href="#l1-organisations-people-and-the-licence" aria-label="Link to this section">#</a></h2>
 <p>An <strong>organisation</strong> is one customer — a telecom operator such as Northwind Telecom. Everything it owns (sites, diagnostics, keys, settings, its trail) is invisible to every other organisation. 🔒 <strong>INVARIANT</strong> — every tenant query carries the caller's <code>organisation_id</code>; a request with none is refused, never answered for everyone.</p>
-<p>Signing up does <strong>not</strong> create an organisation. A new account waits in the <strong>holding organisation</strong> until the platform operator creates a tenant, places the account in it and issues a <strong>licence</strong>. The licence sets <strong>seats</strong> — how many people may be signed in <em>at once</em> — and how many sites may be tested. Forty engineers can share twenty seats across shifts; a person on a laptop and a phone holds one seat, not two.</p>
+<p>Each organisation runs on a <strong>licence file</strong> signed by PacketPulse and copied onto its server. The server checks it at <strong>every sign-in</strong>: without a genuine licence in force, nobody in that organisation signs in. The licence names the owner's address and how many <strong>people</strong> it covers. Everyone on the books counts, switched on or switched off, because a person who leaves is switched off rather than erased. Someone who never ran a test or signed in can be <strong>deleted</strong>, and then no longer counts. Signing up does not create an organisation: the first person to sign up with the owner's address, proved by an emailed code, becomes its Administrator and adds everyone else.</p>
 <p>People hold a <strong>role</strong> (Administrator, NOC Engineer, Viewer, or one of the organisation's own) made of <strong>capabilities</strong> such as <code>diagnostic_run</code> or <code>staff_manage</code> (Appendix B). A person can be given an individual <em>allow</em> or <em>deny</em> on top. Changing someone's authority signs them out at once.</p>
 <h2 id="l2-sites-tickets-and-sweeps">L.2 Sites, tickets and sweeps<a class="anchor" href="#l2-sites-tickets-and-sweeps" aria-label="Link to this section">#</a></h2>
 <p>A <strong>site</strong> is an address worth testing: a customer router, a point of presence, a resolver. It may be an IP address or a hostname (resolved at test time, so a name that stops resolving is itself a fault).</p>
-<p>A <strong>diagnostic</strong> tests sites and files the result against a <strong>TT number</strong> — a trouble ticket in the operator's own system — and a <strong>Customer ID</strong>. A ticket can be tested many times; the attempts together show how the fault was worked. The engine sends ICMP echoes (or TCP connects where ICMP is unavailable), in parallel, and when <strong>Trace failures</strong> is on, walks the path to each failing site hop by hop.</p>
+<p>A <strong>diagnostic</strong> tests sites and files the result against a <strong>TT number</strong> — a trouble ticket in the operator's own system — and a <strong>Customer ID</strong>. A ticket can be tested many times; the attempts together show how the fault was worked. The engine sends ICMP echoes (or TCP connects where ICMP is unavailable), in parallel.</p>
 <h2 id="l3-what-the-numbers-mean">L.3 What the numbers mean<a class="anchor" href="#l3-what-the-numbers-mean" aria-label="Link to this section">#</a></h2>
 <div class="tw"><table><thead>
 <tr>
@@ -652,19 +716,14 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td><strong>OK</strong>, <strong>Degraded</strong> (within 80% of a threshold) or <strong>Breached</strong>, against the site's targets.</td>
 <td>OK</td>
 </tr>
-<tr>
-<td><strong>Verdict</strong></td>
-<td>Where the fault most likely lies — the customer's network, the access circuit, the carrier — with confidence and evidence.</td>
-<td>&quot;clean&quot;</td>
-</tr>
 </tbody>
 </table></div>
 <h2 id="l4-ipv4-ipv6-and-not-counted">L.4 IPv4, IPv6 and &quot;not counted&quot;<a class="anchor" href="#l4-ipv4-ipv6-and-not-counted" aria-label="Link to this section">#</a></h2>
 <p>A site whose name resolves to both an IPv4 and an IPv6 address is measured over <strong>both</strong>. The IPv6 result is shown, kept and exported, but marked <strong>not counted</strong>: the site's totals, alerts and SLA availability are carried by IPv4, because the customer's agreement is for the service and IPv4 still carries it. A site that is IPv6 <em>only</em> counts over IPv6 — otherwise it could never fail. When the server itself has no IPv6 route, an IPv6 address is reported as <em>could not be tested from here</em> rather than as an outage.</p>
 <h2 id="l5-two-vantage-points">L.5 Two vantage points<a class="anchor" href="#l5-two-vantage-points" aria-label="Link to this section">#</a></h2>
-<p>A <strong>server-side diagnostic</strong> measures from PacketPulse's data centre. <strong>Test from this device</strong> measures from wherever the person is, over their own connection — the right tool for &quot;is it slow for me?&quot;. The two will not match, and both are correct: they measure different layers from different places. A device test can be <strong>attached</strong> to a ticket, where it sits beside the server's figures, labelled as measured on a device.</p>
+<p><strong>Run diagnostic</strong> has two modes. <strong>From the server</strong> measures from PacketPulse's data centre. <strong>From this device</strong> measures from wherever the person is, over their own connection — the right tool for &quot;is it slow for me?&quot;. The two will not match, and both are correct: they measure different layers from different places. A device test can be <strong>attached</strong> to a ticket, where it sits beside the server's figures, labelled as measured on a device.</p>
 <h2 id="l6-two-step-sign-in">L.6 Two-step sign-in<a class="anchor" href="#l6-two-step-sign-in" aria-label="Link to this section">#</a></h2>
-<p>After the password, everyone gives a second step: a 6-digit code from an <strong>authenticator app</strong> (TOTP), or a code <strong>texted</strong> to their mobile through the organisation's own SMS gateway. Owners and the platform superuser always use an authenticator — they are the accounts that must never depend on a gateway someone else configures. Ten <strong>recovery codes</strong>, shown once at set-up, each sign in once if the phone is lost. Wrong codes count: ten across challenges lock the account for fifteen minutes. A wrong <em>password</em> never locks anything, so a stranger cannot lock someone out by typing their address.</p>
+<p>After the password, everyone enters a one-time <strong>6-digit code</strong>. It is <strong>emailed</strong> to their sign-in address, or <strong>texted</strong> to their mobile when an administrator chose text for them and the organisation's own SMS gateway is on. An owner's code is always emailed, so the account that runs the organisation never depends on a gateway. A code is good for ten minutes and five tries; ten wrong codes in all lock the account for fifteen minutes, and nobody is sent more than ten codes an hour. A wrong <em>password</em> never locks anything, so a stranger cannot lock someone out by typing their address. A lost phone is handled by an administrator, who signs that device out and switches the person to email.</p>
 <h2 id="l7-location-at-sign-in">L.7 Location at sign-in<a class="anchor" href="#l7-location-at-sign-in" aria-label="Link to this section">#</a></h2>
 <p>For people set to <strong>Record location</strong>, the device's position is recorded when they sign in and out — with the browser's or phone's permission, and a refusal recorded as one. A field engineer's appear on <strong>Check-ins</strong>; an administrator's beside their entries in <strong>Activity</strong>. An organisation can make sharing a position a condition of signing in. The address is looked up afterwards (Google, or OpenStreetMap when no key is set), so it may appear a moment later; the position is the record.</p>
 <h2 id="l8-the-activity-trail">L.8 The activity trail<a class="anchor" href="#l8-the-activity-trail" aria-label="Link to this section">#</a></h2>
@@ -720,8 +779,8 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 </tr>
 <tr>
 <td>2 · People</td>
-<td>Staff · Roles and permissions · Sessions and seats · Check-ins · Activity</td>
-<td><code>STF-*</code>, <code>ACL-*</code>, <code>SEAT-*</code>, <code>CHK-*</code>, <code>AUD-*</code></td>
+<td>Staff · Roles and permissions · Sessions and licence · Check-ins · Activity</td>
+<td><code>STF-*</code>, <code>ACL-*</code>, <code>WHO-*</code>, <code>CHK-*</code>, <code>AUD-*</code></td>
 </tr>
 <tr>
 <td>3 · Diagnostics</td>
@@ -730,7 +789,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 </tr>
 <tr>
 <td>4 · The customer's side</td>
-<td>Test from this device</td>
+<td>Run diagnostic, from this device</td>
 <td><code>DEV-*</code></td>
 </tr>
 <tr>
@@ -755,14 +814,14 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <p>Signing in, the second step, and the organisation's own rules for both.</p>
 <hr>
 <h3 id="11-sign-in-and-the-second-step">1.1 🔑 Sign-in and the second step<a class="anchor" href="#11-sign-in-and-the-second-step" aria-label="Link to this section">#</a></h3>
-<p><strong>Screen:</strong> the sign-in page at <code>/app/</code> · <strong>Routes:</strong> <code>POST /user/signin</code>, <code>/user/signin/verify</code>, <code>/user/signin/resend</code>, <code>/user/signin/enrol</code>, <code>/user/signout</code></p>
+<p><strong>Screen:</strong> the sign-in page at <code>/app/</code> · <strong>Routes:</strong> <code>POST /user/signin</code>, <code>/user/signin/verify</code>, <code>/user/signin/resend</code>, <code>/user/signout</code></p>
 <ul>
-<li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: Two-step sign-in for <em>everyone</em>, not a premium add-on. A stolen password alone opens nothing. Field staff can get codes by text through <strong>the operator's own Twilio account</strong> — their sender, their DLT registration, their bill — while owners and the platform operator always use an authenticator app, so the accounts that matter most never depend on a gateway someone else configures. Recovery codes mean a lost phone is an inconvenience, not a helpdesk ticket.</li>
+<li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: Two-step sign-in for <em>everyone</em>, not a premium add-on. A stolen password alone opens nothing: after it comes a one-time code, emailed to the person's sign-in address or — for field staff the administrator chooses — texted through <strong>the operator's own Twilio account</strong> (their sender, their DLT registration, their bill). Owners always get theirs by email, so the account that matters most never depends on a gateway someone else configures. There is no app to install and nothing to recover: a lost phone is one action for an administrator.</li>
 <li>📖 <strong>User Guide &amp; Operational Flow</strong>:
 <ul>
-<li><strong>First sign-in:</strong> email and password → scan the QR code with any authenticator app (or type the key shown beneath it) → enter one code → <strong>save the ten recovery codes</strong> shown once → you are in.</li>
-<li><strong>Every sign-in after:</strong> email and password → the 6-digit code from the app (or texted to •••• 1234 if your administrator set you up for text; <em>Resend</em> after 30 seconds).</li>
-<li><strong>Lost phone:</strong> <em>Lost your phone? Use a recovery code</em> on the code screen. Each works once. No codes left? Your administrator uses <strong>Staff → Reset authenticator</strong>; an owner asks the platform operator.</li>
+<li><strong>Every sign-in:</strong> email and password → <em>We emailed a 6-digit code to a•••@acme.example</em> (or <em>We texted a 6-digit code to •••• 1234</em> when your administrator set you up for text) → enter it → you are in. A code is good for 10 minutes; <em>Resend</em> after 30 seconds.</li>
+<li><strong>The owner's first sign-in:</strong> <em>First time here? Set up the owner's account</em> — only the address named in this server's licence can do this (§7.1). The emailed code finishes it, and the owner arrives as the Administrator.</li>
+<li><strong>Lost phone:</strong> your administrator signs that device out under <strong>Who is signed in</strong> (§2.3) and changes your number or switches you to email under <strong>Staff → How they sign in</strong>.</li>
 <li><strong>Location:</strong> if you are asked to share your location, the browser or phone asks your permission. See §1.2 for when sharing is required.</li>
 </ul>
 </li>
@@ -779,43 +838,43 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <tr>
 <td><code>AUTH-001</code></td>
 <td>New engineer</td>
-<td>First sign-in sets up the authenticator</td>
+<td>The first sign-in is the same as every other</td>
 <td>Administrator adds the engineer (<strong>Staff → Add</strong>). Engineer signs in with email and password</td>
-<td>QR code and key shown; one correct code opens the app <strong>after</strong> the ten recovery codes are shown. 🛑 <strong>Must NOT</strong> reach the app before the codes are shown, or show them again later</td>
+<td>The code step names their inbox, partly hidden; the emailed code opens the app. 🛑 <strong>Must NOT</strong> reach the app on the password alone, or show the whole address in the hint</td>
 </tr>
 <tr>
 <td><code>AUTH-002</code></td>
 <td>Engineer</td>
 <td>Normal sign-in</td>
-<td>Sign out; sign in; enter the current code</td>
-<td>Signed in. The <strong>Sessions and seats</strong> row shows this device</td>
+<td>Sign out; sign in; enter the emailed code</td>
+<td>Signed in. <strong>Who is signed in</strong> shows this device</td>
 </tr>
 <tr>
 <td><code>AUTH-003</code></td>
 <td>Engineer</td>
 <td>A wrong code says how many tries are left</td>
 <td>Enter <code>000000</code></td>
-<td>Refused (<code>invalid_code</code>) with attempts left; after <strong>5</strong> wrong codes on one challenge it is spent (<code>challenge_expired</code>, <em>Start again</em>). 🛑 <strong>Must NOT</strong> accept a 6th guess on the same challenge</td>
+<td>Refused (<code>invalid_code</code>) with attempts left; after <strong>5</strong> wrong codes on one sign-in it is spent (<code>challenge_expired</code>, <em>Start again</em>). 🛑 <strong>Must NOT</strong> accept a 6th guess on the same sign-in</td>
 </tr>
 <tr>
 <td><code>AUTH-004</code></td>
 <td>Engineer</td>
-<td>A code cannot be used twice</td>
-<td>Sign in with a code; sign out; sign in again within the same 30 seconds with the <strong>same</strong> code</td>
-<td>Second use refused; the next code (30 s later) works. 🛑 <strong>Must NOT</strong> accept a replayed code</td>
+<td>A code belongs to its own sign-in</td>
+<td>Sign in with a code; sign out; start another sign-in and enter the first code</td>
+<td>Refused; the code emailed for this sign-in works. 🛑 <strong>Must NOT</strong> accept a code from an earlier sign-in</td>
 </tr>
 <tr>
 <td><code>AUTH-005</code></td>
-<td>Engineer</td>
-<td>A recovery code works once</td>
-<td>On the code screen choose <em>Lost your phone? Use a recovery code</em>, enter one; sign out; try the same one again</td>
-<td>First signs in; second refused. 🛑 <strong>Must NOT</strong> accept a spent recovery code</td>
+<td>Tester</td>
+<td>Codes cannot be pumped</td>
+<td><em>Resend</em> repeatedly; then sign in over and over within the hour</td>
+<td><em>Resend</em> unavailable for 30 s and at most 3 sends per sign-in; the 11th code to one person in an hour is refused (<code>rate_limited</code>). 🛑 <strong>Must NOT</strong> send email or texts without limit</td>
 </tr>
 <tr>
 <td><code>AUTH-006</code></td>
 <td>Tester</td>
 <td>Ten wrong codes lock the account, a wrong password never does</td>
-<td>Give 10 wrong codes across fresh challenges; then the right password and right code. Separately, 15 wrong <strong>passwords</strong> on another account</td>
+<td>Give 10 wrong codes across fresh sign-ins; then the right password and right code. Separately, 15 wrong <strong>passwords</strong> on another account</td>
 <td>First account: <em>Locked — try again later</em> (<code>locked_out</code>, 15 min) even with the right code. Second account: still signs in with the right password. 🛑 <strong>Must NOT</strong> lock an account by wrong passwords — a stranger could lock anyone out</td>
 </tr>
 <tr>
@@ -823,49 +882,49 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>Tester</td>
 <td>Sign-in does not reveal which addresses exist</td>
 <td>Sign in with an unknown email; then a known email with a wrong password</td>
-<td>The same message and a similar response time. 🛑 <strong>Must NOT</strong> say &quot;no such user&quot; or answer the unknown address noticeably faster</td>
+<td>The same message and a similar response time, and no code sent. 🛑 <strong>Must NOT</strong> say &quot;no such user&quot; or answer the unknown address noticeably faster</td>
 </tr>
 <tr>
 <td><code>AUTH-008</code></td>
 <td>Owner</td>
-<td>Owners always use an authenticator</td>
+<td>An owner's code is always emailed</td>
 <td>Set the owner to <em>Text message</em> in <strong>Staff → How they sign in</strong> with a gateway on; sign in as the owner</td>
-<td>Authenticator code asked, not a text. 🛑 <strong>Must NOT</strong> text an owner's code</td>
+<td>Code emailed, not texted. 🛑 <strong>Must NOT</strong> text an owner's code</td>
 </tr>
 <tr>
 <td><code>AUTH-009</code></td>
 <td>Engineer set to text</td>
 <td>A texted code, with resend limits</td>
 <td>Gateway on (§1.2), engineer has a mobile number and <em>Text message</em>. Sign in; wait; <em>Resend</em></td>
-<td>Code arrives; hint shows the last four digits; <em>Resend</em> unavailable for 30 s; at most 3 sends per sign-in and 5 per hour (<code>rate_limited</code>)</td>
+<td>Code arrives; the hint shows the last four digits; <em>Resend</em> unavailable for 30 s; at most 3 sends per sign-in and 10 codes an hour (<code>rate_limited</code>)</td>
 </tr>
 <tr>
 <td><code>AUTH-010</code></td>
 <td>Engineer set to text</td>
-<td>No gateway means the authenticator, not a lock-out</td>
+<td>No gateway means email, not a lock-out</td>
 <td>Switch the gateway <strong>off</strong>; sign in as the engineer</td>
-<td>Authenticator set-up (or code) asked instead. 🛑 <strong>Must NOT</strong> refuse the sign-in for want of a gateway</td>
+<td>The code is emailed instead. 🛑 <strong>Must NOT</strong> refuse the sign-in for want of a gateway</td>
 </tr>
 <tr>
 <td><code>AUTH-011</code></td>
 <td>Engineer set to text</td>
-<td>A failing gateway is said, not bypassed</td>
+<td>A failing gateway is said, not hidden</td>
 <td>Gateway on with a wrong auth token; sign in as the engineer</td>
-<td>503 <em>Your sign-in code could not be sent just now. Try again.</em> 🛑 <strong>Must NOT</strong> fall back to an authenticator the engineer never set up</td>
+<td>503 <em>Your sign-in code could not be sent just now. Try again.</em> 🛑 <strong>Must NOT</strong> claim a code was sent</td>
 </tr>
 <tr>
 <td><code>AUTH-012</code></td>
 <td>Administrator</td>
-<td>Reset authenticator for a lost phone</td>
-<td><strong>Staff → (engineer) → Reset authenticator</strong></td>
-<td>The engineer's sessions end at once; their next sign-in sets up a new authenticator. Activity shows the reset, by whom</td>
+<td>A lost phone</td>
+<td><strong>Who is signed in → Sign this device out</strong> on the engineer's phone; <strong>Staff → How they sign in → Email</strong></td>
+<td>The phone's session ends at once; the engineer's next sign-in emails the code. Activity records who signed the device out</td>
 </tr>
 <tr>
 <td><code>AUTH-013</code></td>
-<td>Superuser</td>
-<td>Only the platform operator resets an owner</td>
-<td><strong>Platform → (organisation) → Owners → Reset</strong>; then try <code>POST /user/{ownerId}/secondfactor/reset</code> as an organisation administrator</td>
-<td>Superuser: reset done, audited. Administrator: 403. 🛑 <strong>Must NOT</strong> let anyone inside the organisation reset its owner</td>
+<td>Tester</td>
+<td>The superuser exists only on the console</td>
+<td>On a customer's server (no <code>LICENCE_SIGNING_KEY</code>), sign in as <code>superuser@rummaan53.com</code> — or as any account flagged superuser in its database</td>
+<td>Refused (<em>This account has been deactivated</em>). On the console the code is emailed to <code>superuser@rummaan53.com</code>. 🛑 <strong>Must NOT</strong> admit a superuser on a customer's server</td>
 </tr>
 <tr>
 <td><code>AUTH-014</code></td>
@@ -881,16 +940,45 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td><code>curl -H 'True-Client-IP: 6.6.6.6' -H 'X-Forwarded-For: 6.6.6.6'</code> a sign-in from a machine that is not a trusted proxy</td>
 <td>Sessions and Activity show the real peer address. 🛑 <strong>Must NOT</strong> record <code>6.6.6.6</code></td>
 </tr>
+<tr>
+<td><code>DEMO-001</code></td>
+<td>Visitor</td>
+<td>The public demo signs in through the real two-step flow</td>
+<td>On the console with <code>SEED_DEMO</code> on, sign in as <code>demo-engineer@&lt;domain&gt;</code> with the shared demo password</td>
+<td>The real SMS step appears with the code <strong>shown on screen</strong> and filled in; one tap opens the app. 🛑 <strong>Must NOT</strong> text or email anything</td>
+</tr>
+<tr>
+<td><code>DEMO-002</code></td>
+<td>Tester</td>
+<td>The demo code is not a master key</td>
+<td>Use the demo code (<code>DEMO_SMS_CODE</code>, default <code>111111</code>) as the second-step code for a <strong>non-demo</strong> account</td>
+<td>Refused as a wrong code. 🛑 <strong>Must NOT</strong> admit any account outside the demo organisation</td>
+</tr>
+<tr>
+<td><code>DEMO-003</code></td>
+<td>Tester</td>
+<td>The demo is capped</td>
+<td>Open <code>DEMO_SEATS</code> (default 3) concurrent demo sessions, then sign in once more</td>
+<td>The extra sign-in is refused with <em>the demo is busy</em> (<code>demo_busy</code>). 🛑 <strong>Must NOT</strong> let shared demo accounts open unlimited sessions</td>
+</tr>
+<tr>
+<td><code>DEMO-004</code></td>
+<td>Tester</td>
+<td>The shared demo cannot be hijacked or turned on the network</td>
+<td>As a demo account try <strong>Change password</strong>; then run a diagnostic against a private/internal address added to the demo inventory</td>
+<td>Password change refused (<code>demo_read_only</code>); the private target is refused by the probe policy. 🛑 <strong>Must NOT</strong> let a visitor change a shared credential or probe <code>10.x</code>/internal space</td>
+</tr>
 </tbody>
 </table></div>
 </li>
 <li>⚙️ <strong>Developer Guide &amp; Release Confidence</strong>:
 <ul>
-<li>Flow: <code>packetpulsego/pkg/usermicroservice/userservice/UserSignInSteps.go</code> — the password step returns a challenge (<code>totp</code>, <code>totp_enrol</code> or <code>sms</code>), never a session; <code>newSession</code> runs only after verify. Challenge ids are 32 random bytes, stored as SHA-256; texted codes are keyed HMACs.</li>
+<li>Flow: <code>packetpulsego/pkg/usermicroservice/userservice/UserSignInSteps.go</code> — the password step returns a challenge (<code>email</code> or <code>sms</code>), never a session; <code>newSession</code> runs only after verify, and checks the licence again (§7.1). Challenge ids are 32 random bytes, stored as SHA-256; codes are stored as keyed hashes bound to their challenge.</li>
 <li>🔒 Attempts are counted <strong>before</strong> the code is checked, in one conditional <code>UPDATE … RETURNING</code>, so parallel guesses cannot slip under the limit.</li>
-<li>Limits: <code>maxAttempts = 5</code>, <code>lockAfter = 10</code>, <code>lockFor = 15m</code>, <code>resendAfter = 30s</code>, 3 sends per challenge, 5 texts per hour; a separate rate limiter for the second step (<code>SECOND_STEP_ATTEMPTS_PER_MINUTE</code>).</li>
+<li>Limits: <code>maxAttempts = 5</code>, <code>lockAfter = 10</code>, <code>lockFor = 15m</code>, <code>resendAfter = 30s</code>, <code>maxSendsPerChallenge = 3</code>, <code>maxCodesPerHour = 10</code> by either channel; a separate rate limiter for the second step (<code>SECOND_STEP_ATTEMPTS_PER_MINUTE</code>).</li>
+<li>Email: <code>packetpulsego/pkg/common/mailer/Mailer.go</code> — STARTTLS with a verified certificate (credentials are never sent otherwise), header injection refused, the load spread over up to four sending accounts (<code>SMTP_FROM_0…3</code>, <code>SMTP_PASSWORD_0…3</code>). A development or test server writes codes to <code>OTP_OUTBOX_FILE</code> instead (<code>packetpulsego/pkg/common/mailer/Outbox.go</code>); production refuses it.</li>
 <li>Client IPs: <code>packetpulsego/pkg/common/apiratelimit/ApiRateLimit.go</code> walks <code>X-Forwarded-For</code> from the right past <code>TRUSTED_PROXIES</code> only, and returns canonical addresses (<code>::ffff:a.b.c.d</code> → <code>a.b.c.d</code>).</li>
-<li>Coverage: <code>packetpulsego/pkg/usermicroservice/userservice/UserSignInSteps_test.go</code>, the <code>assignment</code> and <code>audit</code> suites (every integration test signs in with a real TOTP code).</li>
+<li>Coverage: <code>packetpulsego/pkg/usermicroservice/userservice/UserSignInSteps_test.go</code>, <code>packetpulsego/pkg/common/mailer/Mailer_test.go</code>, the <code>assignment</code> and <code>audit</code> suites (every integration test finishes its sign-in with the code from the outbox).</li>
 </ul>
 </li>
 </ul>
@@ -995,10 +1083,10 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <p>Who is in the organisation, what each may do, who is signed in, and the record of what they did.</p>
 <hr>
 <h3 id="21-staff">2.1 👥 Staff<a class="anchor" href="#21-staff" aria-label="Link to this section">#</a></h3>
-<p><strong>Screen:</strong> Administer → <strong>Staff</strong> · <strong>Routes:</strong> <code>GET /staff/list</code>, <code>PUT/DELETE /staff/{staffId}</code>, <code>PUT /staff/{staffId}/secondfactor</code>, <code>POST /staff/{staffId}/secondfactor/reset</code>, <code>POST /user/add</code> · <strong>Capability:</strong> <code>staff_manage</code> (adding people: <code>user_manage</code>)</p>
+<p><strong>Screen:</strong> Administer → <strong>Staff</strong> · <strong>Routes:</strong> <code>GET /staff/list</code>, <code>PUT/DELETE /staff/{staffId}</code>, <code>PUT /staff/{staffId}/secondfactor</code>, <code>POST /user/add</code> · <strong>Capability:</strong> <code>staff_manage</code> (adding people: <code>user_manage</code>)</p>
 <ul>
-<li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: One screen to add a colleague, give them a role, decide how they sign in and whether their position is recorded — and to stop them instantly. Disabling someone signs them out at once, not when a token happens to expire, which is the property an auditor asks about first.</li>
-<li>📖 <strong>User Guide &amp; Operational Flow</strong>: <strong>Add</strong> a person with email, a starting password and a role. Edit to change their role, staff code (unique in the organisation), department and designation (labels only — authority comes from the role). <strong>How they sign in</strong> sets the second step (authenticator or text, with their mobile number) and <strong>Record location at sign-in and sign-out</strong>. <strong>Reset authenticator</strong> is for a lost phone. Turning <strong>Enabled</strong> off signs them out and blocks sign-in.</li>
+<li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: One screen to add a colleague, give them a role, decide how they sign in and whether their position is recorded — and to stop them the moment they leave. Switching someone off signs them out at once, not when a token happens to expire, which is the property an auditor asks about first; every test they ran stays on the record. Someone added by mistake can be deleted, which frees their place on the licence.</li>
+<li>📖 <strong>User Guide &amp; Operational Flow</strong>: <strong>Add</strong> a person with email, a starting password and a role, and give them the password yourself: staff do not sign themselves up. Edit to change their role, staff code (unique in the organisation), department and designation (labels only — authority comes from the role). <strong>How they sign in</strong> sets where their code goes — email, the default, or text with their mobile number — and <strong>Record location at sign-in and sign-out</strong>. <strong>Disable</strong> switches off someone who has left: they are signed out everywhere and cannot sign in, their tests stay, and they still count on the licence. <strong>Delete</strong> is only for someone added by mistake who has never signed in or run a test, and frees their place.</li>
 <li>🧪 <strong>Manual Testing Playbook</strong>:<div class="tw"><table><thead>
 <tr>
 <th>ID</th>
@@ -1014,7 +1102,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>Administrator</td>
 <td>Add a colleague</td>
 <td><strong>Add</strong> with role <em>NOC Engineer</em></td>
-<td>They appear with the role; their first sign-in sets up an authenticator (<code>AUTH-001</code>)</td>
+<td>They appear with the role; their first sign-in emails a code (<code>AUTH-001</code>); <strong>People on the licence</strong> (§2.3) rises by one</td>
 </tr>
 <tr>
 <td><code>STF-002</code></td>
@@ -1027,8 +1115,8 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td><code>STF-003</code></td>
 <td>Administrator</td>
 <td>Disabling signs out at once</td>
-<td>Engineer signed in on another browser; untick <strong>Enabled</strong> and save</td>
-<td>The engineer's next action returns them to sign-in; signing in is refused. 🛑 <strong>Must NOT</strong> leave the session working until it expires</td>
+<td>Engineer signed in on another browser; <strong>Disable</strong> them</td>
+<td>The engineer's next action returns them to sign-in; signing in is refused before any code is sent; they still count on the licence. 🛑 <strong>Must NOT</strong> leave the session working until it expires</td>
 </tr>
 <tr>
 <td><code>STF-004</code></td>
@@ -1058,14 +1146,36 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>Sign in as a Viewer; call <code>GET /staff/list</code></td>
 <td>No <strong>Staff</strong> in the rail; the API answers 403</td>
 </tr>
+<tr>
+<td><code>STF-008</code></td>
+<td>Administrator</td>
+<td>Only someone with no records can be deleted</td>
+<td>Add a person and <strong>Delete</strong> them. Add another, let them sign in once, and <strong>Delete</strong> them</td>
+<td>First: gone, and <strong>People on the licence</strong> falls by one. Second: refused (409) — <em>switch them off instead</em>. 🛑 <strong>Must NOT</strong> delete a person who has signed in or run a test</td>
+</tr>
+<tr>
+<td><code>STF-009</code></td>
+<td>Administrator</td>
+<td>A full licence refuses the next person, and says why</td>
+<td>Licence for 3 people; 3 on it, one of them disabled; <strong>Add</strong> a fourth</td>
+<td>Refused (<code>seat_limit_reached</code>): <em>Your licence covers no more users. Delete someone added by mistake, or ask for a licence for more users.</em> 🛑 <strong>Must NOT</strong> add the fourth, or count only those switched on</td>
+</tr>
+<tr>
+<td><code>STF-010</code></td>
+<td>Administrator</td>
+<td>Someone deleted by mistake can be added back</td>
+<td>Delete a person who never signed in; <strong>Add</strong> the same address again</td>
+<td>They are back with the new password and role, and counted again. 🛑 <strong>Must NOT</strong> refuse the address as taken</td>
+</tr>
 </tbody>
 </table></div>
 </li>
 <li>⚙️ <strong>Developer Guide &amp; Release Confidence</strong>:
 <ul>
 <li><code>packetpulsego/pkg/staffmicroservice/staffapp/StaffRouteHandler.go</code>; the second-step settings are a <strong>separate</strong> route (<code>PUT /staff/{staffId}/secondfactor</code>) because the whole-row staff update would otherwise wipe them; it requires <code>second_factor</code>, <code>phone_number</code> and <code>capture_location</code>.</li>
+<li>Delete is a soft delete (<code>deleted_on</code>), refused while the person has records — any diagnostic submitted, any session ever opened — so no test or trail entry points at a removed person; the account is switched off in the same statement. Adding the address again revives the row (<code>StaffReviveWithCredential</code>).</li>
 <li>🔒 Every write is scoped by the caller's organisation; editing RIVAL's <code>staffId</code> answers 404.</li>
-<li>Coverage: <code>packetpulsego/pkg/staffmicroservice/**</code>, <code>packetpulseflutter/test/staff_screen_test.dart</code>, the <code>acl</code> and <code>tenancy</code> suites.</li>
+<li>Coverage: <code>packetpulsego/pkg/staffmicroservice/**</code>, <code>packetpulseflutter/test/staff_screen_test.dart</code>, the <code>acl</code>, <code>tenancy</code> and <code>assignment</code> suites.</li>
 </ul>
 </li>
 </ul>
@@ -1073,8 +1183,8 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <h3 id="22-roles-and-permissions">2.2 🧩 Roles and permissions<a class="anchor" href="#22-roles-and-permissions" aria-label="Link to this section">#</a></h3>
 <p><strong>Screen:</strong> Administer → <strong>Permission matrix</strong> · <strong>Routes:</strong> <code>GET/POST /staff/role/*</code>, <code>PUT /staff/{staffId}/access</code>, <code>GET /user/capability/list</code> · <strong>Capability:</strong> <code>acl_manage</code></p>
 <ul>
-<li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: Seventeen plain-language capabilities, three built-in roles (Administrator 17, NOC Engineer 8, Viewer 5) and as many of the operator's own as it likes — plus a per-person <em>allow</em> or <em>deny</em> for the exception that does not deserve a role. Changes take effect on the next request, not the next sign-in.</li>
-<li>📖 <strong>User Guide &amp; Operational Flow</strong>: The matrix lists roles across and capabilities down. <strong>Add a role</strong>, tick what it may do, save — the whole set is saved, so nothing is left to an invisible default. Built-in roles are read-only. A role somebody holds cannot be deleted. Per person: <em>Inherit</em>, <em>Allow</em> or <em>Deny</em> each capability.</li>
+<li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: Seventeen plain-language capabilities, three built-in roles (Administrator 17, NOC Engineer 7, Viewer 5) and as many of the operator's own as it likes — plus a per-person <em>allow</em> or <em>deny</em> for the exception that does not deserve a role. Changes take effect on the next request, not the next sign-in.</li>
+<li>📖 <strong>User Guide &amp; Operational Flow</strong>: The matrix lists roles across and capabilities down. <strong>Add a role</strong>, tick what it may do, save — the whole set is saved, so nothing is left to an invisible default. Built-in roles are read-only: an engineer reads the tests they ran (<code>diagnostic_view_own</code>), while Administrator and Viewer read everyone's (<code>diagnostic_view_all</code>). A role somebody holds cannot be deleted. Per person: <em>Inherit</em>, <em>Allow</em> or <em>Deny</em> each capability.</li>
 <li>🧪 <strong>Manual Testing Playbook</strong>:<div class="tw"><table><thead>
 <tr>
 <th>ID</th>
@@ -1120,23 +1230,30 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>Run <code>./packetpulsetest.sh acl</code></td>
 <td>Passes — each role is refused what it lacks and allowed what it holds</td>
 </tr>
+<tr>
+<td><code>ACL-006</code></td>
+<td>Administrator</td>
+<td>An engineer reads their own tests; an administrator everyone's</td>
+<td>Two engineers each run a diagnostic; each opens <strong>History</strong>; then the administrator does</td>
+<td>Each engineer sees only their own, with <em>These are the tests you ran</em>; the administrator sees both (<code>HIST-005</code>). 🛑 <strong>Must NOT</strong> show an engineer a colleague's test, in the list, by its id or by its ticket</td>
+</tr>
 </tbody>
 </table></div>
 </li>
 <li>⚙️ <strong>Developer Guide &amp; Release Confidence</strong>:
 <ul>
-<li>Capabilities: <code>packetpulsego/pkg/common/packetpulseaccess/PacketPulseAccessCategory.go</code> (Appendix B); guards: <code>packetpulseaccess.RequireCapability</code> on each route (Appendix A).</li>
+<li>Capabilities: <code>packetpulsego/pkg/common/packetpulseaccess/PacketPulseAccessCategory.go</code> (Appendix B); guards: <code>packetpulseaccess.RequireCapability</code> on each route, or <code>RequireAnyCapability</code> where either of two will do — reading diagnostics opens to <code>diagnostic_view_own</code> or <code>diagnostic_view_all</code>, and the server decides whose rows come back (Appendix A).</li>
 <li>🔒 Authority is read fresh on every request; a role change revokes the person's sessions.</li>
 <li>Coverage: <code>packetpulsetest/golang/aclconformance/acl_conformance_test.go</code> (the full matrix), <code>packetpulseflutter/test/permission_matrix_screen_test.dart</code>.</li>
 </ul>
 </li>
 </ul>
 <hr>
-<h3 id="23-sessions-and-seats">2.3 💺 Sessions and seats<a class="anchor" href="#23-sessions-and-seats" aria-label="Link to this section">#</a></h3>
-<p><strong>Screen:</strong> Administer → <strong>Sessions and seats</strong> · <strong>Routes:</strong> <code>GET /staff/session/list</code>, <code>DELETE /staff/session/{sessionId}</code>, <code>GET /staff/session/organisation</code>, <code>DELETE /staff/session/organisation/{sessionId}</code></p>
+<h3 id="23-who-is-signed-in-and-the-licence">2.3 🪪 Who is signed in, and the licence<a class="anchor" href="#23-who-is-signed-in-and-the-licence" aria-label="Link to this section">#</a></h3>
+<p><strong>Screen:</strong> Administer → <strong>Who is signed in</strong> · <strong>Routes:</strong> <code>GET /staff/session/list</code>, <code>DELETE /staff/session/{sessionId}</code>, <code>GET /staff/session/organisation</code>, <code>DELETE /staff/session/organisation/{sessionId}</code></p>
 <ul>
-<li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: Floating licences: seats count people signed in <em>now</em>, not accounts. Forty engineers share twenty seats across shifts, and an administrator can free a seat left signed in on a desk without disabling anyone.</li>
-<li>📖 <strong>User Guide &amp; Operational Flow</strong>: Your own sessions list every device you are signed in on, with its address (IPv4 or IPv6, in full in the tooltip). Administrators also see everyone signed in, and <strong>Free this seat</strong> ends one session.</li>
+<li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: A licence covers a number of <strong>people</strong> — everyone on the books, working or switched off — not sign-ins. One engineer on a laptop and a phone is one person. An administrator sees at a glance how many places are used and who is signed in where, and signs a lost phone out in one action.</li>
+<li>📖 <strong>User Guide &amp; Operational Flow</strong>: Three figures: <strong>People on the licence</strong>, <strong>People licensed</strong> and <strong>Live sessions</strong>. When every place is taken a warning says so, before the next person is refused. Your own sessions list every device you are signed in on, with its address (IPv4 or IPv6, in full in the tooltip). Administrators also see everyone signed in, and <strong>Sign this device out</strong> ends one session — for a lost phone, or a machine somebody walked away from. Signing a device out frees no place: the licence counts people.</li>
 <li>🧪 <strong>Manual Testing Playbook</strong>:<div class="tw"><table><thead>
 <tr>
 <th>ID</th>
@@ -1148,47 +1265,47 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 </thead>
 <tbody>
 <tr>
-<td><code>SEAT-001</code></td>
-<td>Engineer</td>
-<td>The next person over the limit is refused</td>
-<td>Licence of 2 seats (Platform → seats); two people signed in; a third signs in</td>
-<td>Third refused (<code>seat_limit_reached</code>) with guidance to ask an administrator. 🛑 <strong>Must NOT</strong> sign the third person in</td>
-</tr>
-<tr>
-<td><code>SEAT-002</code></td>
-<td>Engineer</td>
-<td>One person, two devices, one seat</td>
+<td><code>WHO-001</code></td>
+<td>Owner</td>
+<td>The licence counts people, not sign-ins</td>
 <td>Sign in on a laptop and a phone</td>
-<td>Seat count rises by one</td>
+<td><strong>People on the licence</strong> 1, <strong>Live sessions</strong> 2. 🛑 <strong>Must NOT</strong> count the second device as a second person</td>
 </tr>
 <tr>
-<td><code>SEAT-003</code></td>
-<td>Engineer</td>
-<td>A second tab never locks you out</td>
-<td>All seats full; open a second tab and sign in as yourself</td>
-<td>Allowed. 🛑 <strong>Must NOT</strong> refuse you for your own seat</td>
-</tr>
-<tr>
-<td><code>SEAT-004</code></td>
+<td><code>WHO-002</code></td>
 <td>Administrator</td>
-<td>Free a seat</td>
-<td><strong>Free this seat</strong> on a colleague's session</td>
-<td>Their next action returns them to sign-in; Activity records who freed whose seat</td>
+<td>Switched-off people still count; deleted ones do not</td>
+<td>Licence for 2: the owner and an engineer who never signed in. <strong>Disable</strong> the engineer; then <strong>Delete</strong> them</td>
+<td>Disabled: still 2, and adding a person is refused (<code>STF-009</code>). Deleted: 1, and adding a person succeeds</td>
 </tr>
 <tr>
-<td><code>SEAT-005</code></td>
+<td><code>WHO-003</code></td>
+<td>Administrator</td>
+<td>Sign a device out</td>
+<td><strong>Sign this device out</strong> on a colleague's session</td>
+<td>Their next action on that device returns them to sign-in; Activity records who signed out whose device; <strong>People on the licence</strong> unchanged</td>
+</tr>
+<tr>
+<td><code>WHO-004</code></td>
 <td>Engineer</td>
 <td>An IPv6 address shows whole</td>
 <td>Sign in over IPv6 (or seed a session with <code>2401:4900:1c2a:8e1f::1</code>)</td>
 <td>One line, ellipsised, full address in the tooltip and selectable. 🛑 <strong>Must NOT</strong> wrap across lines or overflow at phone width</td>
+</tr>
+<tr>
+<td><code>WHO-005</code></td>
+<td>Administrator</td>
+<td>A licence figure that cannot be read is not a number</td>
+<td>Give a custom role <code>staff_manage</code> but not <code>licence_view</code>; open the screen as someone holding it</td>
+<td><strong>People licensed</strong> shows <code>–</code>; the sessions still list. 🛑 <strong>Must NOT</strong> show 0 or &quot;unlimited&quot;</td>
 </tr>
 </tbody>
 </table></div>
 </li>
 <li>⚙️ <strong>Developer Guide &amp; Release Confidence</strong>:
 <ul>
-<li>Seats are checked at the password step <strong>and</strong> when the session opens (<code>enforceSeatLimit</code>), counted per person over live, unrevoked sessions.</li>
-<li>Coverage: <code>packetpulsetest/golang/tenancyassignment/</code>, <code>packetpulseflutter/test/session_screen_test.dart</code>.</li>
+<li>The count is <code>StaffCountUsers</code> — staff rows not deleted, switched on or off (<code>packetpulsego/pkg/staffmicroservice/staffdomain/repository/StaffRepositoryPostgres.go</code>). It is checked when a person is added or revived (<code>ensureRoomForAnotherUser</code> in <code>packetpulsego/pkg/staffmicroservice/staffservice/StaffService.go</code>) and at every sign-in against the installed licence file (<code>enforceUserLimit</code>, the owner excepted, §7.1).</li>
+<li>Coverage: <code>packetpulsetest/golang/tenancyassignment/</code>, <code>packetpulsetest/golang/tenancyisolation/</code>, <code>packetpulseflutter/test/session_screen_test.dart</code>.</li>
 </ul>
 </li>
 </ul>
@@ -1303,7 +1420,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>Tester</td>
 <td>A wrong code, and the lock</td>
 <td>Owner's right password, then wrong codes until locked</td>
-<td><em>Sign-in failed</em> rows: <em>Wrong code</em> (naming the authenticator) until the 10th, which says <em>Locked after too many wrong codes</em>; the next right password is recorded as locked too</td>
+<td><em>Sign-in failed</em> rows: <em>Wrong code</em> (naming how the code was sent) until the 10th, which says <em>Locked after too many wrong codes</em>; the next right password is recorded as locked too</td>
 </tr>
 <tr>
 <td><code>AUD-005</code></td>
@@ -1433,10 +1550,10 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 </ul>
 <hr>
 <h3 id="32-diagnostics-and-results">3.2 🩺 Diagnostics and results<a class="anchor" href="#32-diagnostics-and-results" aria-label="Link to this section">#</a></h3>
-<p><strong>Screen:</strong> Operate → <strong>Run diagnostic</strong> · <strong>Routes:</strong> <code>POST /diagnostic/submit</code>, <code>GET /diagnostic/{requestId}</code>, <code>GET /diagnostic/{requestId}/report.pdf</code> · <strong>Capabilities:</strong> <code>diagnostic_run</code>, <code>diagnostic_view_all</code>, <code>report_export</code> · <strong>Licence:</strong> required to run</p>
+<p><strong>Screen:</strong> Operate → <strong>Run diagnostic</strong> → <strong>From the server</strong> · <strong>Routes:</strong> <code>POST /diagnostic/submit</code>, <code>GET /diagnostic/{requestId}</code>, <code>GET /diagnostic/{requestId}/report.pdf</code> · <strong>Capabilities:</strong> <code>diagnostic_run</code>, <code>diagnostic_view_own</code> or <code>diagnostic_view_all</code>, <code>report_export</code> · <strong>Licence:</strong> required to run</p>
 <ul>
-<li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: One form, one sweep, one report against the ticket. Every figure a NOC argues about — loss, latency, RFC 3550 jitter, MOS — and a verdict on <em>where</em> the fault lies, with the evidence. A lapsed licence stops new tests but never takes away the evidence already gathered.</li>
-<li>📖 <strong>User Guide &amp; Operational Flow</strong>: Enter <strong>Customer ID</strong> and <strong>TT number</strong>, pick sites (or leave empty for every enabled site), choose packet count and timeout, tick <strong>Trace failures</strong> for the path to anything that fails. The result shows headline cards (sites reachable, average loss, average jitter), then a row per site and family: reachable, the packet line verbatim (<em>Sent = 4, Received = 4, Lost = 0</em>), round trips, jitter, MOS with its band, SLA grade, verdict, and — for a failure — the hops with the first lossy one marked. <strong>Export PDF</strong> and <strong>Export CSV</strong> sit at the top.</li>
+<li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: One form, one sweep, one report against the ticket. Every figure a NOC argues about — loss, latency, RFC 3550 jitter, MOS — from the server and, in the same screen, from the engineer's own device. A lapsed licence stops new tests but never takes away the evidence already gathered.</li>
+<li>📖 <strong>User Guide &amp; Operational Flow</strong>: <strong>Run diagnostic</strong> opens on <strong>From the server</strong> for anyone who may run a sweep; <strong>From this device</strong> beside it is the device test (§4.1), and switching between them keeps what each holds. Enter <strong>Customer ID</strong> and <strong>TT number</strong>, pick sites (or leave empty for every enabled site), and choose packet count and timeout. The result shows headline cards (sites reachable, average loss, average jitter), then a row per site and family: reachable, the packet line verbatim (<em>Sent = 4, Received = 4, Lost = 0</em>), round trips, jitter, MOS with its band and SLA grade. <strong>Export PDF</strong> and <strong>Export CSV</strong> sit at the top.</li>
 <li>🧪 <strong>Manual Testing Playbook</strong>:<div class="tw"><table><thead>
 <tr>
 <th>ID</th>
@@ -1464,16 +1581,16 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <tr>
 <td><code>DIAG-003</code></td>
 <td>Engineer</td>
-<td>Tracing marks where loss begins</td>
-<td>Include a black-holed address (<code>203.0.113.99</code>) with <strong>Trace failures</strong></td>
-<td>Its row lists hops; the first hop with loss is marked. A trace that runs out of time leaves the result intact without hops</td>
+<td>A failure is reported, not traced</td>
+<td>Include a black-holed address (<code>203.0.113.99</code>); run; open the result, its PDF and the <strong>Dashboard</strong></td>
+<td>The row shows the failure and its packet line. No path, hops or fault verdict anywhere, and no <em>Where the faults lay</em> card. 🛑 <strong>Must NOT</strong> offer a <em>Trace failures</em> switch</td>
 </tr>
 <tr>
 <td><code>DIAG-004</code></td>
 <td>Engineer</td>
 <td>The PDF is evidence</td>
 <td><strong>Export PDF</strong></td>
-<td>Named <code>packetpulse-&lt;TT&gt;-&lt;UTC time&gt;.pdf</code>; Customer ID, TT, UTC timestamps, Jitter and MOS columns, average loss and jitter cards; a long IPv6 address wraps onto two lines. 🛑 <strong>Must NOT</strong> truncate an address</td>
+<td>Named <code>packetpulse-&lt;TT&gt;-&lt;UTC time&gt;.pdf</code>; Customer ID, TT, UTC timestamps, Jitter and MOS columns, average loss and jitter cards; a long IPv6 address wraps onto two lines; the foot names who ran it and where — <em>Triggered by Asha Rao  -  at MG Road, Pune</em>. 🛑 <strong>Must NOT</strong> truncate an address</td>
 </tr>
 <tr>
 <td><code>DIAG-005</code></td>
@@ -1503,15 +1620,39 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td><code>GET /diagnostic/not-a-uuid</code></td>
 <td>400</td>
 </tr>
+<tr>
+<td><code>DIAG-009</code></td>
+<td>Engineer</td>
+<td>The PDF is made from the record when it is asked for</td>
+<td>Export a ticket's PDF twice, a minute apart; look for a stored copy on the server</td>
+<td>Both carry the same measurements, drawn from the stored results at the moment each was asked for; no PDF is kept on the server. 🛑 <strong>Must NOT</strong> depend on a file kept on disk</td>
+</tr>
+<tr>
+<td><code>DIAG-010</code></td>
+<td>Engineer</td>
+<td>A colleague's test cannot be exported</td>
+<td>As an engineer, <code>GET /diagnostic/&lt;colleague's request id&gt;/report.pdf</code> (and <code>.csv</code>)</td>
+<td>404, as though it did not exist. 🛑 <strong>Must NOT</strong> hand an engineer someone else's evidence</td>
+</tr>
+<tr>
+<td><code>DIAG-011</code></td>
+<td>Engineer, then Viewer</td>
+<td>One screen, two modes</td>
+<td>As an engineer: open <strong>Run diagnostic</strong>, type a Customer ID, switch to <strong>From this device</strong> and back. As a Viewer: open <strong>Run diagnostic</strong></td>
+<td>The engineer starts on <strong>From the server</strong>, and the Customer ID is still there after switching back. The Viewer gets the device test with no switch. 🛑 <strong>Must NOT</strong> offer a separate <em>Test from this device</em> entry in the rail</td>
+</tr>
 </tbody>
 </table></div>
 </li>
 <li>⚙️ <strong>Developer Guide &amp; Release Confidence</strong>:
 <ul>
 <li>Engine: <code>packetpulsego/pkg/pingmicroservice/pingprobe/PingProbeRunner.go</code> (pro-bing, unprivileged ICMP, TCP fallback); jitter: <code>packetpulsego/pkg/pingmicroservice/pingprobe/PingVoiceQuality.go</code> (<code>InterarrivalJitter</code>, RFC 3550).</li>
-<li>🔒 Results are saved under their <strong>own</strong> deadline, never the sweep's or the trace's: a traced sweep that runs long still stores everything it measured (<code>load</code> suite §4.5 proves it, and goes red with the old bug restored).</li>
+<li>🔒 Results are saved under their <strong>own</strong> deadline, never the sweep's: a sweep that runs long still stores everything it measured (<code>load</code> suite §4.5 proves it, and goes red with the old bug restored).</li>
+<li>The screen is <code>packetpulseflutter/lib/diagnosticmicroservice/presentation/screens/RunDiagnosticScreen.dart</code>. A mode is built when first shown and kept, so switching never loses a half-filled form or a finished device run. The server mode needs an organisation and <code>diagnostic_run</code>, as its own destination used to.</li>
+<li>Path analysis was removed in <code>packetpulsego/pkg/common/dbclient/migrations/0027_2026_10_05_path_analysis_removed.sql</code>: <code>ping_hop</code> and the fault verdict columns are no longer written, and the rows already stored stay. A client built before then still sends <code>trace_failures</code>; the server accepts and ignores it, because decoding is strict and refusing it would fail every run that client made.</li>
 <li>Ticket figures (<code>avg_loss_pct</code>, <code>max_loss_pct</code>, <code>avg_jitter_ms</code>) are computed in <code>RequestFinish</code> from the run's counted results (<code>packetpulsego/pkg/common/dbclient/migrations/0022_2026_10_03_loss_and_jitter.sql</code>).</li>
-<li>Coverage: <code>packetpulsego/pkg/diagnosticmicroservice/**</code>, <code>packetpulsego/pkg/pingmicroservice/**</code>, <code>packetpulseflutter/test/diagnostic_submit_screen_test.dart</code>, the <code>tenancy</code> and <code>contract</code> suites.</li>
+<li>The PDF is built on the fly from the database each time it is asked for (<code>packetpulsego/pkg/pingmicroservice/pingreport/PingReportPdfBuilder.go</code>); nothing is written to disk. Its foot names the person who ran the test and the place their session checked in from.</li>
+<li>Coverage: <code>packetpulsego/pkg/diagnosticmicroservice/**</code>, <code>packetpulsego/pkg/pingmicroservice/**</code>, <code>packetpulseflutter/test/diagnostic_submit_screen_test.dart</code>, <code>packetpulseflutter/test/run_diagnostic_screen_test.dart</code>, the <code>tenancy</code> and <code>contract</code> suites.</li>
 </ul>
 </li>
 </ul>
@@ -1559,13 +1700,6 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>On a server without IPv6, a dual-stack site</td>
 <td>The IPv6 row reads <em>There is no IPv6 route from this vantage point, so this IPv6 address could not be tested from here.</em> 🛑 <strong>Must NOT</strong> report it as the site being down</td>
 </tr>
-<tr>
-<td><code>V6-005</code></td>
-<td>Engineer</td>
-<td>Traceroute over IPv6 shows its hops</td>
-<td>Trace a failing IPv6 address on a host with IPv6</td>
-<td>Intermediate hops listed (not only the destination)</td>
-</tr>
 </tbody>
 </table></div>
 </li>
@@ -1573,7 +1707,6 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <ul>
 <li><code>ping_result.ip_version</code> (4, 6 or NULL when nothing was probed) and <code>report_only</code>; the daily rollup is keyed by family (<code>packetpulsego/pkg/common/dbclient/migrations/0023_2026_10_04_dual_stack_results.sql</code>).</li>
 <li><code>probeguard.ResolveAllAndCheck</code> returns one checked address per family; the runner probes them in parallel and marks IPv6 report-only only when there is more than one family.</li>
-<li>ICMPv6 Time Exceeded parsing walks extension headers (<code>quotedSequenceIPv6</code> in <code>packetpulsego/pkg/pingmicroservice/pingprobe/PingTraceRunner.go</code>).</li>
 </ul>
 </li>
 </ul>
@@ -1640,10 +1773,10 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 </ul>
 <hr>
 <h3 id="35-history-and-dashboard">3.5 🗂️ History and dashboard<a class="anchor" href="#35-history-and-dashboard" aria-label="Link to this section">#</a></h3>
-<p><strong>Screens:</strong> Operate → <strong>History</strong>, <strong>Dashboard</strong> · <strong>Routes:</strong> <code>GET /diagnostic/list</code>, <code>GET /diagnostic/tt/{ttNumber}</code>, <code>GET /ping/dashboard</code>, <code>GET /diagnostic/faults</code></p>
+<p><strong>Screens:</strong> Operate → <strong>History</strong>, <strong>Dashboard</strong> · <strong>Routes:</strong> <code>GET /diagnostic/list</code>, <code>GET /diagnostic/tt/{ttNumber}</code>, <code>GET /ping/dashboard</code></p>
 <ul>
-<li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: Every ticket investigated, with its loss and jitter on the row, and a management view of where faults lay over the last 90 days — the customer's own network, the access circuit or the carrier — for the supplier review.</li>
-<li>📖 <strong>User Guide &amp; Operational Flow</strong>: <strong>History</strong> searches by TT number or Customer ID; each row shows reachable/total, breaches, loss and jitter. <strong>Dashboard</strong> shows sites, the last sweep, the licence, 30 days of availability (a day with nothing measured is a gap, never zero) and the fault breakdown.</li>
+<li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: Every ticket investigated, with its loss and jitter on the row, who ran it and where — and 30 days of availability on the dashboard for the supplier review.</li>
+<li>📖 <strong>User Guide &amp; Operational Flow</strong>: An engineer's <strong>History</strong> is the tests they ran, with the note <em>These are the tests you ran. Administrators see everyone's.</em> An administrator's is everyone's, and narrows by <strong>Person</strong>, <strong>Place</strong> (<em>Where it was run, or a site or region</em>), <strong>Status</strong>, <strong>From</strong> and <strong>To</strong>; <strong>Clear filters</strong> puts them back. Both search by TT number or Customer ID. Each row shows reachable/total, breaches, loss and jitter, and who ran it and where: <em>Customer CUST-1 · Asha Rao · at MG Road, Pune</em>. <strong>Dashboard</strong> shows sites, the last sweep, the licence, 30 days of availability (a day with nothing measured is a gap, never zero).</li>
 <li>🧪 <strong>Manual Testing Playbook</strong>:<div class="tw"><table><thead>
 <tr>
 <th>ID</th>
@@ -1682,13 +1815,43 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>A schedule paused for a day; open <strong>Dashboard</strong></td>
 <td>The availability line has a gap. 🛑 <strong>Must NOT</strong> plot 0% for a day with nothing measured</td>
 </tr>
+<tr>
+<td><code>HIST-005</code></td>
+<td>Engineer</td>
+<td>An engineer reads only the tests they ran</td>
+<td>Two engineers each run a test; each opens <strong>History</strong>; then one opens the other's by id (<code>GET /diagnostic/&lt;id&gt;</code>) and by ticket (<code>GET /diagnostic/tt/&lt;TT&gt;</code>)</td>
+<td>Each sees only their own, with the note; by id: 404; by ticket: nothing. 🛑 <strong>Must NOT</strong> show an engineer a colleague's test by any route</td>
+</tr>
+<tr>
+<td><code>HIST-006</code></td>
+<td>Administrator</td>
+<td>The filters narrow</td>
+<td><strong>Person</strong> = one engineer; then <strong>Place</strong> = <code>Pune</code>; then <strong>Status</strong> = <em>Failed</em>; then <strong>From</strong> and <strong>To</strong> the same day; then <strong>Clear filters</strong></td>
+<td>Each narrows to what it names — <em>Place</em> matches the address the test was run from, or a site or region it probed; a <em>To</em> date includes the whole of that day — and <strong>Clear filters</strong> shows everything again</td>
+</tr>
+<tr>
+<td><code>HIST-007</code></td>
+<td>Tester</td>
+<td>A filter that cannot be read is refused</td>
+<td><code>GET /diagnostic/list?staff_id=nope</code>, then <code>?status=lost</code>, then <code>?from=yesterday</code></td>
+<td>422, naming the field. 🛑 <strong>Must NOT</strong> ignore the filter and answer with everything</td>
+</tr>
+<tr>
+<td><code>HIST-008</code></td>
+<td>Engineer</td>
+<td>Who and where, on the row and the PDF</td>
+<td>Sign in sharing your location; run a test; open <strong>History</strong> and the test's PDF</td>
+<td>The row reads <em>· <your name> · at <the address you signed in from></em>; the PDF's foot says the same. A test run without a position names the person only</td>
+</tr>
 </tbody>
 </table></div>
 </li>
 <li>⚙️ <strong>Developer Guide &amp; Release Confidence</strong>:
 <ul>
 <li>Row figures: <code>packetpulseflutter/lib/diagnosticmicroservice/presentation/widgets/DiagnosticFigures.dart</code>.</li>
-<li>Coverage: <code>packetpulseflutter/test/diagnostic_history_screen_test.dart</code>, <code>packetpulseflutter/test/dashboard_screen_test.dart</code>.</li>
+<li>🔒 Whose tests come back is the server's decision, made in SQL: <code>readerOf</code> (<code>packetpulsego/pkg/diagnosticmicroservice/diagnosticapp/DiagnosticHandlers.go</code>) gives an engineer <code>OwnOnly</code> and anyone with <code>diagnostic_view_all</code> <code>WholeOrganisation</code>, and every read — list, detail, ticket, PDF, CSV — passes it to the repository's <code>submitted_by_user_id</code> predicate. The Results API reads the whole organisation, as its key does.</li>
+<li>Place is the check-in address of the session the test was run from (<code>diagnostic_request.session_id</code>, <code>packetpulsego/pkg/common/dbclient/migrations/0026_2026_10_05_own_results_places_and_indexes.sql</code>) or, matched by the filter, a probed site's region or name. The same migration indexes a person's own tests and the administrator's filters.</li>
+<li>Coverage: <code>packetpulseflutter/test/diagnostic_history_screen_test.dart</code>, <code>packetpulseflutter/test/dashboard_screen_test.dart</code>, <code>packetpulsego/pkg/diagnosticmicroservice/diagnosticdomain/repository/DiagnosticRepositoryPostgres_test.go</code> (scope, who and where, every filter), <code>packetpulsego/pkg/diagnosticmicroservice/diagnosticapp/DiagnosticRouteHandler_test.go</code>.</li>
 </ul>
 </li>
 </ul>
@@ -1696,11 +1859,11 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <h2 id="group-4-the-customers-side">Group 4 — The Customer's Side<a class="anchor" href="#group-4-the-customers-side" aria-label="Link to this section">#</a></h2>
 <p>Measuring from where the person is, not from where PacketPulse is.</p>
 <hr>
-<h3 id="41-test-from-this-device">4.1 📱 Test from this device<a class="anchor" href="#41-test-from-this-device" aria-label="Link to this section">#</a></h3>
-<p><strong>Screen:</strong> Operate → <strong>Test from this device</strong> · <strong>Routes:</strong> <code>GET /organisation/settings</code>, <code>PUT /organisation/settings</code> (<code>staff_manage</code>), <code>POST /diagnostic/clientobservation</code> (<code>diagnostic_run</code>, licensed)</p>
+<h3 id="41-from-this-device">4.1 📱 From this device<a class="anchor" href="#41-from-this-device" aria-label="Link to this section">#</a></h3>
+<p><strong>Screen:</strong> Operate → <strong>Run diagnostic</strong> → <strong>From this device</strong> · <strong>Routes:</strong> <code>GET /organisation/settings</code>, <code>PUT /organisation/settings</code> (<code>staff_manage</code>), <code>POST /diagnostic/clientobservation</code> (<code>diagnostic_run</code>, licensed)</p>
 <ul>
-<li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: &quot;Is it slow for me?&quot; answered from the customer's own connection, in one tap, with no target to choose: everyone in the organisation measures the same host, so results compare. It shows the device's IPv4 <strong>and</strong> IPv6 addresses and its download and upload speed, then files the run against the ticket beside the server's figures — labelled as measured on a device.</li>
-<li>📖 <strong>User Guide &amp; Operational Flow</strong>: The screen names what it is <strong>Testing against</strong> — the organisation's host, or <em>Cloudflare DNS (1.1.1.1)</em> with a note when none is chosen. <strong>Start test</strong> runs it. Whoever manages people sees <strong>Change target</strong>: one tap for <em>Cloudflare DNS</em> or <em>Google DNS (dns.google)</em>, or <em>Your own host</em> to type one. <strong>Measure speed</strong> is a separate button because it moves about 12 MB each way. A finished run can be attached to a TT number.</li>
+<li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: &quot;Is it slow for me?&quot; answered from the customer's own connection, in one tap, with no target to choose: everyone in the organisation measures the same host, so results compare. It shows the device's IPv4 <strong>and</strong> IPv6 addresses, then files the run against the ticket beside the server's figures — labelled as measured on a device.</li>
+<li>📖 <strong>User Guide &amp; Operational Flow</strong>: Open <strong>Run diagnostic</strong> and choose <strong>From this device</strong>; someone who may not run a sweep, or has no organisation, gets this mode alone, with no switch. It names what it is <strong>Testing against</strong> — the organisation's host, or <em>Cloudflare DNS (1.1.1.1)</em> with a note when none is chosen. <strong>Start test</strong> runs it. Whoever manages people sees <strong>Change target</strong>: one tap for <em>Cloudflare DNS</em> or <em>Google DNS (dns.google)</em>, or <em>Your own host</em> to type one. A finished run can be attached to a TT number. The line-speed test is hidden.</li>
 <li>🧪 <strong>Manual Testing Playbook</strong>:<div class="tw"><table><thead>
 <tr>
 <th>ID</th>
@@ -1742,16 +1905,16 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <tr>
 <td><code>DEV-005</code></td>
 <td>Engineer</td>
-<td>Line speed</td>
-<td><strong>Measure speed</strong></td>
-<td>Download and upload in Mbit/s (median, warm-up excluded); the ~12 MB note shown before it runs</td>
+<td>The speed test is hidden</td>
+<td>Open <strong>From this device</strong>; then open a ticket that had a speed filed before the test was hidden</td>
+<td>No <strong>Measure speed</strong> button and no ~12 MB note. The older ticket still shows its line speed. 🛑 <strong>Must NOT</strong> move any data to the speed-test endpoints</td>
 </tr>
 <tr>
 <td><code>DEV-006</code></td>
 <td>Engineer</td>
 <td>Attach to a ticket</td>
-<td>Run, measure speed, attach to <code>TT-MAN-002</code></td>
-<td>The ticket shows the device run with its line speed and <em>measured on a device</em>; loss is <em>query</em> loss</td>
+<td>Run, then attach to <code>TT-MAN-002</code></td>
+<td>The ticket shows the device run, <em>measured on a device</em>, with no line speed; loss is <em>query</em> loss</td>
 </tr>
 <tr>
 <td><code>DEV-007</code></td>
@@ -1771,8 +1934,8 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td><code>DEV-009</code></td>
 <td>Superuser</td>
 <td>No organisation, still a test</td>
-<td>Sign in as the platform superuser; open the screen</td>
-<td>Tests Cloudflare DNS. The screen needs no organisation and no licence</td>
+<td>Sign in as the platform superuser; open <strong>Run diagnostic</strong></td>
+<td>The device test alone, with no mode switch, testing Cloudflare DNS. It needs no organisation and no licence</td>
 </tr>
 </tbody>
 </table></div>
@@ -1781,8 +1944,8 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <ul>
 <li>A browser cannot send ICMP, so the web build measures DNS-over-HTTPS (Cloudflare) or an HTTPS reach to the chosen host; the app on a desktop or phone can also ping it. Jitter is RFC 3550 with the standard deviation beside it.</li>
 <li>Target normalisation (pasted URL → host, lower case, canonical IPs, zones refused): <code>NormaliseTestTarget</code> in <code>packetpulsego/pkg/staffmicroservice/staffservice/StaffCheckinService.go</code>.</li>
-<li>Speed: <code>packetpulseflutter/lib/diagnosticmicroservice/service/ClientThroughput.dart</code> (Cloudflare <code>__down</code>/<code>__up</code>, median after a warm-up); egress: <code>packetpulseflutter/lib/diagnosticmicroservice/service/ClientEgress.dart</code>.</li>
-<li>Coverage: <code>packetpulseflutter/test/client_probe_screen_test.dart</code>, <code>packetpulseflutter/test/client_probe_run_test.dart</code>, <code>packetpulseflutter/test/client_throughput_test.dart</code>, <code>packetpulseflutter/test/client_egress_test.dart</code>.</li>
+<li>Speed, hidden: <code>packetpulseflutter/lib/diagnosticmicroservice/service/ClientThroughput.dart</code> (Cloudflare <code>__down</code>/<code>__up</code>, median after a warm-up) is kept and tested behind <code>speedTestEnabled = false</code> in <code>packetpulseflutter/lib/common/config/PacketPulseConfig.dart</code>; turning it back on is that one line. Egress: <code>packetpulseflutter/lib/diagnosticmicroservice/service/ClientEgress.dart</code>.</li>
+<li>Coverage: <code>packetpulseflutter/test/client_probe_screen_test.dart</code>, <code>packetpulseflutter/test/client_probe_run_test.dart</code>, <code>packetpulseflutter/test/run_diagnostic_screen_test.dart</code>, <code>packetpulseflutter/test/client_throughput_test.dart</code>, <code>packetpulseflutter/test/client_egress_test.dart</code>.</li>
 </ul>
 </li>
 </ul>
@@ -2150,8 +2313,8 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <h3 id="71-platform-console-and-licences">7.1 🏛️ Platform console and licences<a class="anchor" href="#71-platform-console-and-licences" aria-label="Link to this section">#</a></h3>
 <p><strong>Screen:</strong> Administer → <strong>Platform</strong> (superuser only) · <strong>Routes:</strong> <code>/platform/*</code> · <strong>Access:</strong> platform superuser</p>
 <ul>
-<li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: Tenants are created deliberately, never self-asserted: signing up cannot make an organisation or join one. Licences carry seats, sites, a period and a price, scale in proportion when sold for an unusual term, and keep a history of every change with who made it and why.</li>
-<li>📖 <strong>User Guide &amp; Operational Flow</strong>: <strong>Organisations → Add</strong>; place an unassigned account in it (as owner, or with a role); <strong>Issue licence</strong> with plan, seats, sites, months and currency. Per licence: <strong>Suspend</strong>, <strong>Resume</strong>, <strong>Revoke</strong>, <strong>Renew</strong>, change seats. <strong>Owners</strong> lists an organisation's owners and resets one's authenticator.</li>
+<li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: Every customer runs on a licence PacketPulse signs, so nobody can grant themselves an organisation, more people or a longer term. Licences carry the people covered, sites, a period and a price, scale in proportion when sold for an unusual term, and keep a history of every change with who made it and why. A customer's server needs nothing from PacketPulse to check one: the signature is checked against a key built into the server.</li>
+<li>📖 <strong>User Guide &amp; Operational Flow</strong>: The console is PacketPulse's own server; a customer's server has none. <strong>Organisations → Add</strong>; <strong>Issue licence</strong> with plan, people, sites, months and currency. Per licence: <strong>Suspend</strong>, <strong>Resume</strong>, <strong>Revoke</strong>, <strong>Renew</strong>, change the people and sites it covers. <strong>Download licence file</strong> asks for the <strong>Owner's email</strong> and saves the signed file; copy it into <code>LICENCE_DIR</code> on the customer's server. It is read at every sign-in, so no restart is needed. The first person to sign up there with that address, proved by an emailed code, becomes the Administrator.</li>
 <li>🧪 <strong>Manual Testing Playbook</strong>:<div class="tw"><table><thead>
 <tr>
 <th>ID</th>
@@ -2166,22 +2329,22 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td><code>PLAT-001</code></td>
 <td>Superuser</td>
 <td>Onboard a customer</td>
-<td>Create <code>ACME</code>; assign a signed-up account as owner; issue a 12-month, 10-seat licence</td>
-<td>The owner's next sign-in lands in ACME with every Administrator capability</td>
+<td>Create <code>ACME</code>; issue a 12-month licence for 10 people; <strong>Download licence file</strong> naming <code>owner@acme.example</code>; copy it into a test server's <code>LICENCE_DIR</code>; sign up there with that address</td>
+<td>The emailed code completes the sign-up, and the owner lands in ACME with every Administrator capability</td>
 </tr>
 <tr>
 <td><code>PLAT-002</code></td>
 <td>Superuser</td>
 <td>Suspend and resume</td>
-<td>Suspend ACME's licence with a reason; resume it</td>
+<td>Suspend ACME's licence with a reason; download its file again; resume</td>
 <td>While suspended: running a diagnostic is refused, reading is not. History shows both, with the reason</td>
 </tr>
 <tr>
 <td><code>PLAT-003</code></td>
 <td>Superuser</td>
-<td>Seats cannot drop below who is signed in</td>
-<td>Four people signed in; set seats to 3</td>
-<td>Refused, naming the people signed in</td>
+<td>A smaller licence keeps everyone but the owner out</td>
+<td>ACME has 4 people; change the licence to 3; replace the file; an engineer signs in, then the owner</td>
+<td>The engineer is refused (403, <em>Your organisation has more users than its licence covers…</em>). The owner signs in, because the owner is who can fix it</td>
 </tr>
 <tr>
 <td><code>PLAT-004</code></td>
@@ -2199,10 +2362,10 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 </tr>
 <tr>
 <td><code>PLAT-006</code></td>
-<td>Organisation owner</td>
-<td>Signing up never joins an organisation</td>
-<td>Sign up with an address at ACME's domain</td>
-<td>The account waits unassigned; it sees only <strong>Test from this device</strong> and <strong>Settings</strong></td>
+<td>Stranger</td>
+<td>Signing up never makes or joins an organisation</td>
+<td>On a customer's server, sign up with an address its licence does not name</td>
+<td>Refused: <em>Only the owner named in this server's licence can sign up. Ask your administrator to add you.</em> 🛑 <strong>Must NOT</strong> create an account</td>
 </tr>
 </tbody>
 </table></div>
@@ -2210,6 +2373,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <li>⚙️ <strong>Developer Guide &amp; Release Confidence</strong>:
 <ul>
 <li><code>packetpulsego/pkg/platformmicroservice/</code>; <code>packetpulseaccess.RequireSuperUser</code> on the console group (Appendix A); licence changes recorded in the licence history and the activity trail.</li>
+<li>🔒 Licence files are Ed25519-signed and verified by <code>packetpulsego/pkg/common/licence/Store.go</code> at every sign-in, against a key compiled into the server. <code>LICENCE_PUBLIC_KEY</code> may replace it only on a development build outside production, so a customer cannot swap in a key of their own.</li>
 <li>Coverage: <code>packetpulsetest/golang/tenancyassignment/</code>, <code>packetpulsego/pkg/platformmicroservice/**</code>, <code>packetpulseflutter/test/platform_console_screen_test.dart</code>.</li>
 </ul>
 </li>
@@ -2296,7 +2460,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>Visitor</td>
 <td>The site is current</td>
 <td>Read the capabilities</td>
-<td>Two-step sign-in, IPv4 and IPv6, CSV into your systems, check-ins, the device test with line speed. 🛑 <strong>Must NOT</strong> promise 23 languages</td>
+<td>Emailed or texted sign-in codes, IPv4 and IPv6, CSV into your systems, check-ins, testing from the engineer's own device. 🛑 <strong>Must NOT</strong> promise 23 languages, a hop-by-hop path or a line-speed test</td>
 </tr>
 <tr>
 <td><code>WEB-002</code></td>
@@ -2371,8 +2535,8 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td><code>packetpulseflutter/test/staff_screen_test.dart</code></td>
 </tr>
 <tr>
-<td>Sessions, seats</td>
-<td><code>SEAT-*</code></td>
+<td>Sessions and licence</td>
+<td><code>WHO-*</code></td>
 <td><code>packetpulsego/pkg/staffmicroservice/</code></td>
 <td><code>assignment</code>, <code>tenancy</code></td>
 <td><code>packetpulseflutter/test/session_screen_test.dart</code></td>
@@ -2413,11 +2577,11 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td><code>packetpulseflutter/test/diagnostic_history_screen_test.dart</code></td>
 </tr>
 <tr>
-<td>Device test</td>
+<td>Run diagnostic, device test</td>
 <td><code>DEV-*</code></td>
 <td><code>packetpulsego/pkg/diagnosticmicroservice/diagnosticservice/</code></td>
 <td><code>contract</code></td>
-<td><code>packetpulseflutter/test/client_probe_run_test.dart</code></td>
+<td><code>packetpulseflutter/test/client_probe_run_test.dart</code>, <code>packetpulseflutter/test/run_diagnostic_screen_test.dart</code></td>
 </tr>
 <tr>
 <td>Monitoring</td>
@@ -2463,19 +2627,19 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 </tr>
 </tbody>
 </table></div>
-<div class="alert a-note"><div class="alert-h">ℹ️ NOTE</div><p>What no suite covers, and why manual cases exist for it: a <strong>real SMS</strong> arriving on a phone (<code>AUTH-009</code>), a <strong>real authenticator app</strong> (<code>AUTH-001</code>), <strong>browser location prompts</strong> (<code>CHK-001</code>, <code>LOC-002</code>), <strong>real SFTP and FTPS servers</strong> (<code>EXP-006</code>, <code>EXP-011</code>), <strong>spreadsheet applications</strong> opening the CSV (<code>CSV-002</code>), and <strong>IPv6 on the live host</strong> (<code>V6-001</code>).</p>
+<div class="alert a-note"><div class="alert-h">ℹ️ NOTE</div><p>What no suite covers, and why manual cases exist for it: a <strong>real SMS</strong> arriving on a phone (<code>AUTH-009</code>), a <strong>real emailed code</strong> arriving in an inbox (<code>AUTH-001</code>), <strong>browser location prompts</strong> (<code>CHK-001</code>, <code>LOC-002</code>), <strong>real SFTP and FTPS servers</strong> (<code>EXP-006</code>, <code>EXP-011</code>), <strong>spreadsheet applications</strong> opening the CSV (<code>CSV-002</code>), and <strong>IPv6 on the live host</strong> (<code>V6-001</code>).</p>
 </div>
 <hr>
 <h1 id="part-iii-end-to-end-journeys">Part III — End-to-End Journeys<a class="anchor" href="#part-iii-end-to-end-journeys" aria-label="Link to this section">#</a></h1>
 <p>Each journey crosses several chapters the way a real customer does. Run them on a disposable stack after the chapter cases; every step's result is the precondition of the next, so stop at the first failure and file it against the step's case ID.</p>
 <hr>
 <h3 id="jrn-001-a-new-customer-from-contract-to-first-evidence">JRN-001 · A new customer, from contract to first evidence<a class="anchor" href="#jrn-001-a-new-customer-from-contract-to-first-evidence" aria-label="Link to this section">#</a></h3>
-<p><strong>Personas:</strong> platform superuser, ACME owner, NOC engineer · <strong>Covers:</strong> <code>PLAT-001</code>, <code>AUTH-001</code>, <code>STF-001</code>, <code>SITE-002</code>, <code>DIAG-001</code>, <code>DIAG-004</code>, <code>CSV-001</code></p>
+<p><strong>Personas:</strong> platform superuser, ACME owner, NOC engineer · <strong>Covers:</strong> <code>PLAT-001</code>, <code>AUTH-008</code>, <code>AUTH-001</code>, <code>STF-001</code>, <code>SITE-002</code>, <code>DIAG-001</code>, <code>DIAG-004</code>, <code>CSV-001</code></p>
 <ol>
-<li>The owner signs up; the superuser creates <strong>ACME</strong>, assigns the owner and issues a 10-seat licence.</li>
-<li>The owner signs in, sets up an authenticator and saves the recovery codes.</li>
+<li>On the console, the superuser creates <strong>ACME</strong>, issues a licence for 10 people and downloads its licence file, naming the owner's address.</li>
+<li>The file goes into <code>LICENCE_DIR</code> on ACME's server. The owner signs up there with that address and enters the emailed code.</li>
 <li>The owner adds an engineer (<em>NOC Engineer</em>) and pastes twenty sites with <strong>Bulk import</strong>.</li>
-<li>The engineer signs in (sets up an authenticator), runs a diagnostic with TT <code>TT-JRN-001</code>, <strong>Trace failures</strong> on.</li>
+<li>The engineer signs in with their emailed code and runs a diagnostic <strong>from the server</strong> with TT <code>TT-JRN-001</code>.</li>
 <li>The engineer exports the <strong>PDF</strong> and the <strong>CSV</strong>.</li>
 </ol>
 <p><strong>Expected:</strong> the PDF and CSV carry <code>TT-JRN-001</code>; Activity shows the owner's sign-in, the staff and site changes, both exports. 🛑 The engineer's sign-in is <strong>not</strong> in Activity.</p>
@@ -2484,7 +2648,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <p><strong>Covers:</strong> <code>DIAG-001</code>–<code>DIAG-005</code>, <code>HIST-001</code>, <code>V6-001</code></p>
 <ol>
 <li>Ticket <code>TT-JRN-002</code> arrives: Customer <code>CUST-88412</code>, slow calls.</li>
-<li>Run against the customer's sites. Read loss, jitter and MOS; open the failing site's hops.</li>
+<li>Run against the customer's sites. Read loss, jitter and MOS on each row.</li>
 <li>Re-run after the carrier's fix.</li>
 <li>In <strong>History</strong>, compare both attempts.</li>
 </ol>
@@ -2495,10 +2659,10 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <ol>
 <li>The administrator sets the engineer to <strong>Record location</strong> and turns on <strong>Require location to sign in</strong>.</li>
 <li>On a phone, the engineer signs in, allowing location.</li>
-<li>At the customer's site: <strong>Test from this device</strong>, <strong>Measure speed</strong>, attach to <code>TT-JRN-003</code>.</li>
+<li>At the customer's site: <strong>Run diagnostic → From this device</strong>, then attach the run to <code>TT-JRN-003</code>.</li>
 <li>Signs out, allowing location.</li>
 </ol>
-<p><strong>Expected:</strong> <strong>Check-ins</strong> shows the sign-in and sign-out with places and a map link; the ticket shows the device run with its line speed; the administrator's Activity shows no entry for the engineer's sign-in.</p>
+<p><strong>Expected:</strong> <strong>Check-ins</strong> shows the sign-in and sign-out with places and a map link; the ticket shows the device run, <em>measured on a device</em>; the administrator's Activity shows no entry for the engineer's sign-in.</p>
 <hr>
 <h3 id="jrn-004-the-it-system-takes-the-results">JRN-004 · The IT system takes the results<a class="anchor" href="#jrn-004-the-it-system-takes-the-results" aria-label="Link to this section">#</a></h3>
 <p><strong>Covers:</strong> <code>API-001</code>–<code>API-003</code>, <code>EXP-002</code>, <code>EXP-006</code>–<code>EXP-008</code></p>
@@ -2525,16 +2689,16 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <li>From an unfamiliar browser, try the owner's address with ten wrong passwords.</li>
 <li>Then, with the right password (a leaked one), ten wrong codes.</li>
 </ol>
-<p><strong>Expected:</strong> Activity shows the wrong passwords and wrong codes as <em>Sign-in failed</em> with the address and browser, ending in <em>Locked after too many wrong codes</em>; the owner, from their own browser with their authenticator, is locked for 15 minutes and then signs in. 🛑 The wrong passwords alone did not lock the account.</p>
+<p><strong>Expected:</strong> Activity shows the wrong passwords and wrong codes as <em>Sign-in failed</em> with the address and browser, ending in <em>Locked after too many wrong codes</em>; the owner, from their own browser with an emailed code, is locked for 15 minutes and then signs in. 🛑 The wrong passwords alone did not lock the account.</p>
 <hr>
 <h3 id="jrn-007-a-lost-phone">JRN-007 · A lost phone<a class="anchor" href="#jrn-007-a-lost-phone" aria-label="Link to this section">#</a></h3>
-<p><strong>Covers:</strong> <code>AUTH-005</code>, <code>AUTH-012</code>, <code>AUTH-013</code></p>
+<p><strong>Covers:</strong> <code>AUTH-012</code>, <code>WHO-003</code>, <code>STF-004</code></p>
 <ol>
-<li>An engineer loses their phone: signs in with a recovery code.</li>
-<li>Their administrator resets their authenticator; they set up a new one.</li>
-<li>The owner loses theirs with no codes left: the platform superuser resets it.</li>
+<li>An engineer set to text loses their phone, still signed in to the app on it.</li>
+<li>Their administrator signs that device out (<strong>Who is signed in → Sign device out</strong>) and switches them to <strong>Email</strong>.</li>
+<li>The engineer signs in on a laptop with the code emailed to them.</li>
 </ol>
-<p><strong>Expected:</strong> each reset signs the person out and is in Activity, naming who reset whom; nobody inside ACME could reset the owner.</p>
+<p><strong>Expected:</strong> the lost phone's next request returns it to sign-in; the sign-out and the change of method are in Activity, naming who made them; the engineer's code arrives by email, not by text.</p>
 <hr>
 <h3 id="jrn-008-a-licence-lapses">JRN-008 · A licence lapses<a class="anchor" href="#jrn-008-a-licence-lapses" aria-label="Link to this section">#</a></h3>
 <p><strong>Covers:</strong> <code>DIAG-006</code>, <code>PLAT-002</code>, <code>API-002</code></p>
@@ -2658,7 +2822,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <tr>
 <td><code>NFR-014</code></td>
 <td>The destination policy, everywhere PacketPulse connects out</td>
-<td>Sweeps, traceroutes, webhooks, the directory and the result export all refuse loopback, link-local and cloud metadata</td>
+<td>Sweeps, webhooks, the directory and the result export all refuse loopback, link-local and cloud metadata</td>
 </tr>
 <tr>
 <td><code>NFR-015</code></td>
@@ -2678,12 +2842,12 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <tr>
 <td><code>NFR-018</code></td>
 <td>Production configuration</td>
-<td>Production refuses <code>OWNER_TOTP_SECRET</code>, <code>DEMO_TOTP_SECRET</code>, <code>LDAP_ALLOW_LOOPBACK</code>, <code>EXPORT_ALLOW_LOOPBACK</code> and open CORS</td>
+<td>Production refuses <code>OTP_OUTBOX_FILE</code>, a <code>LICENCE_PUBLIC_KEY</code> override, <code>LDAP_ALLOW_LOOPBACK</code>, <code>EXPORT_ALLOW_LOOPBACK</code> and open CORS, and will not boot without an SMTP account</td>
 </tr>
 </tbody>
 </table></div>
 <h2 id="45-performance-the-load-suite">4.5 Performance — the load suite<a class="anchor" href="#45-performance-the-load-suite" aria-label="Link to this section">#</a></h2>
-<p><code>./packetpulsetest.sh load</code> provisions one licensed organisation — the owner and nineteen engineers, each with an authenticator, and 200 sites on TEST-NET-3 — and measures it. It also runs nightly (<code>.github/workflows/packetpulse-load.yml</code>). Budgets are 95th percentiles; the measured figures are from a developer laptop against a local server.</p>
+<p><code>./packetpulsetest.sh load</code> provisions one licensed organisation — the owner and nineteen engineers, each signing in with a code read from the server's outbox, and 200 sites on TEST-NET-3 — and measures it. It also runs nightly (<code>.github/workflows/packetpulse-load.yml</code>). Budgets are 95th percentiles; the measured figures are from a developer laptop against a local server.</p>
 <div class="tw"><table><thead>
 <tr>
 <th>Scenario</th>
@@ -2698,7 +2862,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>3 s</td>
 </tr>
 <tr>
-<td>Sign-in, authenticator step — all 20 at once</td>
+<td>Sign-in, code step — all 20 at once</td>
 <td>16 ms</td>
 <td>1 s</td>
 </tr>
@@ -2708,7 +2872,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>750 ms</td>
 </tr>
 <tr>
-<td>Sweep of 200 sites, failures traced</td>
+<td>Sweep of 200 sites (measured when failures were also traced, before path analysis was removed)</td>
 <td>91 s</td>
 <td>120 s</td>
 </tr>
@@ -2729,7 +2893,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 </tr>
 </tbody>
 </table></div>
-<p>🔒 Absolute whatever the machine: no 5xx; the traced 200-site sweep stores all 200 results; the CSV holds every stored result once. With the old bug restored (saving under the sweep's deadline) the sweep answers 500 and the suite goes red.</p>
+<p>🔒 Absolute whatever the machine: no 5xx; the 200-site sweep stores all 200 results; the CSV holds every stored result once. With the old bug restored (saving under the sweep's deadline) the sweep answers 500 and the suite goes red.</p>
 <hr>
 <h1 id="part-v-release-governance">Part V — Release Governance<a class="anchor" href="#part-v-release-governance" aria-label="Link to this section">#</a></h1>
 <p>How a release is judged ready, shipped, checked and — if it must be — rolled back.</p>
@@ -2791,7 +2955,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 </tr>
 <tr>
 <td><code>REL-004</code></td>
-<td>The live <code>.env</code> has <code>APP_ENV=production</code> and none of <code>OWNER_TOTP_SECRET</code>, <code>DEMO_TOTP_SECRET</code>, <code>EXPORT_ALLOW_LOOPBACK=true</code>, <code>LDAP_ALLOW_LOOPBACK=true</code></td>
+<td>The live <code>.env</code> has <code>APP_ENV=production</code>, an <code>SMTP_FROM_0</code> / <code>SMTP_PASSWORD_0</code> pair, and none of <code>OTP_OUTBOX_FILE</code>, <code>LICENCE_PUBLIC_KEY</code>, <code>EXPORT_ALLOW_LOOPBACK=true</code>, <code>LDAP_ALLOW_LOOPBACK=true</code></td>
 <td>Release owner</td>
 </tr>
 <tr>
@@ -2932,17 +3096,9 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/packetpulse/releases/&lt;previous&gt;
 </tr>
 <tr>
 <td><code>GET</code></td>
-<td><code>/diagnostic/faults</code></td>
-<td>member</td>
-<td><code>report_view</code></td>
-<td style="text-align:center">—</td>
-<td style="text-align:center">—</td>
-</tr>
-<tr>
-<td><code>GET</code></td>
 <td><code>/diagnostic/list</code></td>
 <td>member</td>
-<td><code>diagnostic_view_all</code></td>
+<td><code>diagnostic_view_own</code> or <code>diagnostic_view_all</code></td>
 <td style="text-align:center">—</td>
 <td style="text-align:center">—</td>
 </tr>
@@ -2958,7 +3114,7 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/packetpulse/releases/&lt;previous&gt;
 <td><code>GET</code></td>
 <td><code>/diagnostic/tt/{ttNumber}</code></td>
 <td>member</td>
-<td><code>diagnostic_view_all</code></td>
+<td><code>diagnostic_view_own</code> or <code>diagnostic_view_all</code></td>
 <td style="text-align:center">—</td>
 <td style="text-align:center">—</td>
 </tr>
@@ -2966,7 +3122,7 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/packetpulse/releases/&lt;previous&gt;
 <td><code>GET</code></td>
 <td><code>/diagnostic/{requestId}</code></td>
 <td>member</td>
-<td><code>diagnostic_view_all</code></td>
+<td><code>diagnostic_view_own</code> or <code>diagnostic_view_all</code></td>
 <td style="text-align:center">—</td>
 <td style="text-align:center">—</td>
 </tr>
@@ -2974,7 +3130,7 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/packetpulse/releases/&lt;previous&gt;
 <td><code>GET</code></td>
 <td><code>/diagnostic/{requestId}/report.csv</code></td>
 <td>member</td>
-<td><code>report_export</code></td>
+<td><code>diagnostic_view_own</code> or <code>diagnostic_view_all</code> and <code>report_export</code></td>
 <td style="text-align:center">—</td>
 <td style="text-align:center">✅</td>
 </tr>
@@ -2982,7 +3138,7 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/packetpulse/releases/&lt;previous&gt;
 <td><code>GET</code></td>
 <td><code>/diagnostic/{requestId}/report.pdf</code></td>
 <td>member</td>
-<td><code>report_export</code></td>
+<td><code>diagnostic_view_own</code> or <code>diagnostic_view_all</code> and <code>report_export</code></td>
 <td style="text-align:center">—</td>
 <td style="text-align:center">✅</td>
 </tr>
@@ -3388,6 +3544,14 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/packetpulse/releases/&lt;previous&gt;
 </tr>
 <tr>
 <td><code>POST</code></td>
+<td><code>/platform/licence/{licenceId}/file</code></td>
+<td>superuser</td>
+<td>—</td>
+<td style="text-align:center">—</td>
+<td style="text-align:center">✅</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
 <td><code>/platform/licence/{licenceId}/renew</code></td>
 <td>superuser</td>
 <td>—</td>
@@ -3443,14 +3607,6 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/packetpulse/releases/&lt;previous&gt;
 <td style="text-align:center">—</td>
 </tr>
 <tr>
-<td><code>POST</code></td>
-<td><code>/platform/organisation/{organisationId}/assign</code></td>
-<td>superuser</td>
-<td>—</td>
-<td style="text-align:center">—</td>
-<td style="text-align:center">✅</td>
-</tr>
-<tr>
 <td><code>GET</code></td>
 <td><code>/platform/organisation/{organisationId}/licence</code></td>
 <td>superuser</td>
@@ -3460,23 +3616,7 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/packetpulse/releases/&lt;previous&gt;
 </tr>
 <tr>
 <td><code>GET</code></td>
-<td><code>/platform/organisation/{organisationId}/owners</code></td>
-<td>superuser</td>
-<td>—</td>
-<td style="text-align:center">—</td>
-<td style="text-align:center">—</td>
-</tr>
-<tr>
-<td><code>GET</code></td>
 <td><code>/platform/plan/list</code></td>
-<td>superuser</td>
-<td>—</td>
-<td style="text-align:center">—</td>
-<td style="text-align:center">—</td>
-</tr>
-<tr>
-<td><code>GET</code></td>
-<td><code>/platform/user/unassigned</code></td>
 <td>superuser</td>
 <td>—</td>
 <td style="text-align:center">—</td>
@@ -3636,14 +3776,6 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/packetpulse/releases/&lt;previous&gt;
 </tr>
 <tr>
 <td><code>POST</code></td>
-<td><code>/staff/{staffId}/secondfactor/reset</code></td>
-<td>member</td>
-<td><code>staff_manage</code></td>
-<td style="text-align:center">—</td>
-<td style="text-align:center">✅</td>
-</tr>
-<tr>
-<td><code>POST</code></td>
 <td><code>/user/add</code></td>
 <td>member</td>
 <td><code>user_manage</code></td>
@@ -3708,14 +3840,6 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/packetpulse/releases/&lt;previous&gt;
 </tr>
 <tr>
 <td><code>POST</code></td>
-<td><code>/user/signin/enrol</code></td>
-<td>public</td>
-<td>—</td>
-<td style="text-align:center">—</td>
-<td style="text-align:center">—</td>
-</tr>
-<tr>
-<td><code>POST</code></td>
 <td><code>/user/signin/resend</code></td>
 <td>public</td>
 <td>—</td>
@@ -3751,14 +3875,6 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/packetpulse/releases/&lt;previous&gt;
 <td><code>/user/{userId}</code></td>
 <td>member</td>
 <td><code>user_manage</code></td>
-<td style="text-align:center">—</td>
-<td style="text-align:center">✅</td>
-</tr>
-<tr>
-<td><code>POST</code></td>
-<td><code>/user/{userId}/secondfactor/reset</code></td>
-<td>superuser</td>
-<td>—</td>
 <td style="text-align:center">—</td>
 <td style="text-align:center">✅</td>
 </tr>
@@ -3807,7 +3923,7 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/packetpulse/releases/&lt;previous&gt;
 <td><code>diagnostic_view_all</code></td>
 <td>View every diagnostic in the organisation.</td>
 <td style="text-align:center">✅</td>
-<td style="text-align:center">✅</td>
+<td style="text-align:center">—</td>
 <td style="text-align:center">✅</td>
 </tr>
 <tr>
@@ -3988,7 +4104,7 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/packetpulse/releases/&lt;previous&gt;
 </tr>
 <tr>
 <td><code>0021_2026_10_03_device_test.sql</code></td>
-<td>Test from this device: what it tests against, and how fast the line was.</td>
+<td>The device test: what it tests against, and how fast the line was.</td>
 </tr>
 <tr>
 <td><code>0022_2026_10_03_loss_and_jitter.sql</code></td>
@@ -4001,6 +4117,18 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/packetpulse/releases/&lt;previous&gt;
 <tr>
 <td><code>0024_2026_10_04_result_export.sql</code></td>
 <td>Results delivered to an organisation's own server, on a schedule, and</td>
+</tr>
+<tr>
+<td><code>0025_2026_10_05_otp_only_and_licence_files.sql</code></td>
+<td>Sign-in by one-time code only, and licences from signed files.</td>
+</tr>
+<tr>
+<td><code>0026_2026_10_05_own_results_places_and_indexes.sql</code></td>
+<td>Whose tests a person reads, where each test was run, and the indexes the busiest reads need.</td>
+</tr>
+<tr>
+<td><code>0027_2026_10_05_path_analysis_removed.sql</code></td>
+<td>Path analysis is removed: hops and fault verdicts are no longer written.</td>
 </tr>
 </tbody>
 </table></div>
@@ -4067,32 +4195,52 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/packetpulse/releases/&lt;previous&gt;
 <tr>
 <td><code>ALLOW_SIGNUP</code></td>
 <td><code>true</code></td>
-<td>Whether anyone may sign up (into the holding organisation)</td>
+<td>Whether the owner named in a licence may sign up on this server</td>
 </tr>
 <tr>
-<td><code>OWNER_EMAIL</code>, <code>OWNER_PASSWORD</code>, <code>OWNER_NAME</code></td>
+<td><code>OWNER_PASSWORD</code>, <code>OWNER_NAME</code></td>
 <td>—</td>
-<td>The platform superuser, created at boot</td>
+<td>The platform superuser (<code>superuser@rummaan53.com</code>, fixed in code), created at boot on the console only</td>
 </tr>
 <tr>
-<td><code>OWNER_TOTP_SECRET</code></td>
+<td><code>LICENCE_DIR</code></td>
 <td>—</td>
-<td>Pre-enrols the superuser's authenticator — <strong>outside production only</strong></td>
+<td>The folder of licence files this server signs organisations in under, read at every sign-in</td>
 </tr>
 <tr>
-<td><code>OWNER_RESET_SECOND_FACTOR</code></td>
-<td><code>false</code></td>
-<td>Break-glass: clears the superuser's authenticator at boot</td>
+<td><code>LICENCE_SIGNING_KEY</code></td>
+<td>—</td>
+<td>Makes this server the PacketPulse console, which issues licences. Only the vendor's own server has it</td>
+</tr>
+<tr>
+<td><code>LICENCE_PUBLIC_KEY</code></td>
+<td>—</td>
+<td>Replaces the vendor key licences are checked against — <strong>development builds outside production only</strong></td>
+</tr>
+<tr>
+<td><code>SMTP_HOST</code>, <code>SMTP_PORT</code></td>
+<td><code>smtp.gmail.com</code>, <code>587</code></td>
+<td>Where sign-in codes are emailed from</td>
+</tr>
+<tr>
+<td><code>SMTP_FROM_n</code>, <code>SMTP_PASSWORD_n</code> (n = 0–3)</td>
+<td>—</td>
+<td>Gmail accounts (with app passwords) that send codes, spread across to stay inside Gmail's daily cap. Production needs at least one</td>
+</tr>
+<tr>
+<td><code>OTP_OUTBOX_FILE</code></td>
+<td>—</td>
+<td>Writes codes to a file instead of sending them, for tests — <strong>refused in production</strong></td>
 </tr>
 <tr>
 <td><code>SEED_DEMO</code>, <code>DEMO_EMAIL</code>, <code>DEMO_PASSWORD</code>, <code>DEMO_NAME</code>, <code>DEMO_ORGANISATION_NAME</code></td>
 <td><code>false</code>, …</td>
-<td>A demo organisation with sites and a licence</td>
+<td>The demo organisation, its logins, sites and licence — <strong>console only</strong></td>
 </tr>
 <tr>
-<td><code>DEMO_TOTP_SECRET</code></td>
-<td>—</td>
-<td>Pre-enrols the demo owner — <strong>outside production only</strong></td>
+<td><code>DEMO_SMS_CODE</code>, <code>DEMO_SEATS</code></td>
+<td><code>111111</code>, <code>3</code></td>
+<td>The demo's on-screen code, and how many demo walkthroughs may run at once</td>
 </tr>
 <tr>
 <td><code>TRIAL_DAYS</code>, <code>TRIAL_SEATS</code>, <code>TRIAL_SITES</code></td>
@@ -4198,8 +4346,8 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/packetpulse/releases/&lt;previous&gt;
 </tr>
 <tr>
 <td><code>seat_limit_reached</code></td>
-<td style="text-align:center">403</td>
-<td>Every seat is taken</td>
+<td style="text-align:center">403 / 409</td>
+<td>The licence covers no more people (adding someone), or fewer than are on it (signing in)</td>
 </tr>
 <tr>
 <td><code>invalid_code</code></td>
@@ -4269,8 +4417,8 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/packetpulse/releases/&lt;previous&gt;
 <td>A site reachable over both IPv4 and IPv6</td>
 </tr>
 <tr>
-<td><strong>Holding organisation</strong></td>
-<td>Where a signed-up account waits until the platform operator places it</td>
+<td><strong>Licence file</strong></td>
+<td>The signed file in <code>LICENCE_DIR</code> that lets an organisation sign in on a server</td>
 </tr>
 <tr>
 <td><strong>MOS</strong></td>
@@ -4285,16 +4433,12 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/packetpulse/releases/&lt;previous&gt;
 <td>Interarrival jitter: the smoothed difference between consecutive round trips</td>
 </tr>
 <tr>
-<td><strong>Seat</strong></td>
-<td>One person signed in, however many devices</td>
-</tr>
-<tr>
 <td><strong>Sweep</strong></td>
 <td>One run of probes over a set of sites</td>
 </tr>
 <tr>
-<td><strong>TOTP</strong></td>
-<td>Time-based one-time password — the 6-digit code an authenticator app shows</td>
+<td><strong>Sign-in code</strong></td>
+<td>The 6-digit, ten-minute code emailed or texted for the second step</td>
 </tr>
 <tr>
 <td><strong>TT number</strong></td>
@@ -4307,7 +4451,7 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/packetpulse/releases/&lt;previous&gt;
 </tbody>
 </table></div>
 <hr>
-<p><em>Guide version <code>v2026.10-PROD-v1</code> — verified against source on 2026-10-04, and continuously re-verified by <code>./packetpulsetest.sh docs</code>.</em></p>
+<p><em>Guide version <code>v2026.10-PROD-v2</code> — verified against source on 2026-10-05, and continuously re-verified by <code>./packetpulsetest.sh docs</code>.</em></p>
 
     </article>
   </main>

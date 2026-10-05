@@ -6,12 +6,12 @@ Each journey crosses several chapters the way a real customer does. Run them on 
 
 ### JRN-001 · A new customer, from contract to first evidence
 
-**Personas:** platform superuser, ACME owner, NOC engineer · **Covers:** `PLAT-001`, `AUTH-001`, `STF-001`, `SITE-002`, `DIAG-001`, `DIAG-004`, `CSV-001`
+**Personas:** platform superuser, ACME owner, NOC engineer · **Covers:** `PLAT-001`, `AUTH-008`, `AUTH-001`, `STF-001`, `SITE-002`, `DIAG-001`, `DIAG-004`, `CSV-001`
 
-1. The owner signs up; the superuser creates **ACME**, assigns the owner and issues a 10-seat licence.
-2. The owner signs in, sets up an authenticator and saves the recovery codes.
+1. On the console, the superuser creates **ACME**, issues a licence for 10 people and downloads its licence file, naming the owner's address.
+2. The file goes into `LICENCE_DIR` on ACME's server. The owner signs up there with that address and enters the emailed code.
 3. The owner adds an engineer (*NOC Engineer*) and pastes twenty sites with **Bulk import**.
-4. The engineer signs in (sets up an authenticator), runs a diagnostic with TT `TT-JRN-001`, **Trace failures** on.
+4. The engineer signs in with their emailed code and runs a diagnostic **from the server** with TT `TT-JRN-001`.
 5. The engineer exports the **PDF** and the **CSV**.
 
 **Expected:** the PDF and CSV carry `TT-JRN-001`; Activity shows the owner's sign-in, the staff and site changes, both exports. 🛑 The engineer's sign-in is **not** in Activity.
@@ -23,7 +23,7 @@ Each journey crosses several chapters the way a real customer does. Run them on 
 **Covers:** `DIAG-001`–`DIAG-005`, `HIST-001`, `V6-001`
 
 1. Ticket `TT-JRN-002` arrives: Customer `CUST-88412`, slow calls.
-2. Run against the customer's sites. Read loss, jitter and MOS; open the failing site's hops.
+2. Run against the customer's sites. Read loss, jitter and MOS on each row.
 3. Re-run after the carrier's fix.
 4. In **History**, compare both attempts.
 
@@ -37,10 +37,10 @@ Each journey crosses several chapters the way a real customer does. Run them on 
 
 1. The administrator sets the engineer to **Record location** and turns on **Require location to sign in**.
 2. On a phone, the engineer signs in, allowing location.
-3. At the customer's site: **Test from this device**, **Measure speed**, attach to `TT-JRN-003`.
+3. At the customer's site: **Run diagnostic → From this device**, then attach the run to `TT-JRN-003`.
 4. Signs out, allowing location.
 
-**Expected:** **Check-ins** shows the sign-in and sign-out with places and a map link; the ticket shows the device run with its line speed; the administrator's Activity shows no entry for the engineer's sign-in.
+**Expected:** **Check-ins** shows the sign-in and sign-out with places and a map link; the ticket shows the device run, *measured on a device*; the administrator's Activity shows no entry for the engineer's sign-in.
 
 ---
 
@@ -76,19 +76,19 @@ Each journey crosses several chapters the way a real customer does. Run them on 
 1. From an unfamiliar browser, try the owner's address with ten wrong passwords.
 2. Then, with the right password (a leaked one), ten wrong codes.
 
-**Expected:** Activity shows the wrong passwords and wrong codes as *Sign-in failed* with the address and browser, ending in *Locked after too many wrong codes*; the owner, from their own browser with their authenticator, is locked for 15 minutes and then signs in. 🛑 The wrong passwords alone did not lock the account.
+**Expected:** Activity shows the wrong passwords and wrong codes as *Sign-in failed* with the address and browser, ending in *Locked after too many wrong codes*; the owner, from their own browser with an emailed code, is locked for 15 minutes and then signs in. 🛑 The wrong passwords alone did not lock the account.
 
 ---
 
 ### JRN-007 · A lost phone
 
-**Covers:** `AUTH-005`, `AUTH-012`, `AUTH-013`
+**Covers:** `AUTH-012`, `WHO-003`, `STF-004`
 
-1. An engineer loses their phone: signs in with a recovery code.
-2. Their administrator resets their authenticator; they set up a new one.
-3. The owner loses theirs with no codes left: the platform superuser resets it.
+1. An engineer set to text loses their phone, still signed in to the app on it.
+2. Their administrator signs that device out (**Who is signed in → Sign device out**) and switches them to **Email**.
+3. The engineer signs in on a laptop with the code emailed to them.
 
-**Expected:** each reset signs the person out and is in Activity, naming who reset whom; nobody inside ACME could reset the owner.
+**Expected:** the lost phone's next request returns it to sign-in; the sign-out and the change of method are in Activity, naming who made them; the engineer's code arrives by email, not by text.
 
 ---
 

@@ -8,7 +8,7 @@ The human-facing counterpart to the automated suites driven by `packetpulsetest.
 
 | File | Audience | Purpose |
 |---|---|---|
-| **[`MANUAL_TESTING_GUIDE.md`](MANUAL_TESTING_GUIDE.md)** | Sales, operators, QA, backend, Flutter, security | **The 4-in-1 manual (`v2026.10-PROD-v1`)** — **generated from `parts/`; do not hand-edit**. Every feature chapter carries four lenses: 🌟 commercial pitch, 📖 user guide, 🧪 manual testing playbook (with the 🛑 *must not happen* assertions), ⚙️ developer guide. Plus the concepts, end-to-end journeys, the non-functional matrix, release governance, and appendices of every route, capability, migration and setting. |
+| **[`MANUAL_TESTING_GUIDE.md`](MANUAL_TESTING_GUIDE.md)** | Sales, operators, QA, backend, Flutter, security | **The 4-in-1 manual (`v2026.10-PROD-v2`)** — **generated from `parts/`; do not hand-edit**. Every feature chapter carries four lenses: 🌟 commercial pitch, 📖 user guide, 🧪 manual testing playbook (with the 🛑 *must not happen* assertions), ⚙️ developer guide. Plus the concepts, end-to-end journeys, the non-functional matrix, release governance, and appendices of every route, capability, migration and setting. |
 | **[`manual-testing-guide.html`](manual-testing-guide.html)** | Same | The styled edition: contents sidebar with a working filter, light/dark theme, print to PDF. **Generated** — never hand-edit it. |
 | **[`parts/`](parts/)** | Authors | **The source.** Each part of the guide is its own file, numbered in reading order. |
 | **[`build/build_guide.py`](build/build_guide.py)** | Authors | The generator. Run it after editing anything under `parts/`. |

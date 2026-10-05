@@ -34,9 +34,6 @@ func BaseURL() string {
 	if url := os.Getenv("PACKETPULSE_TEST_URL"); url != "" {
 		return url
 	}
-	if url := os.Getenv("PINGLE_TEST_URL"); url != "" {
-		return url
-	}
 	return "http://localhost:8080"
 }
 
