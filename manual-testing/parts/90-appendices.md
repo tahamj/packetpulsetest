@@ -195,7 +195,7 @@ Read from the environment, falling back to `.env` (see `.env.example`); defined 
 | `SMTP_FROM_n`, `SMTP_PASSWORD_n` (n = 0–3) | — | Gmail accounts (with app passwords) that send codes, spread across to stay inside Gmail's daily cap. Production needs at least one |
 | `OTP_OUTBOX_FILE` | — | Writes codes to a file instead of sending them, for tests — **refused in production** |
 | `SEED_DEMO`, `DEMO_EMAIL`, `DEMO_PASSWORD`, `DEMO_NAME`, `DEMO_ORGANISATION_NAME` | `false`, … | The demo organisation, its logins, sites and licence — **console only** |
-| `DEMO_SMS_CODE`, `DEMO_SEATS` | `111111`, `3` | The demo's on-screen code, and how many demo walkthroughs may run at once |
+| `DEMO_SMS_CODE`, `DEMO_SEATS` | `111111`, `5` | The demo's on-screen code, and how many demo walkthroughs may run at once — at least 5; a session unused for 30 minutes gives up its place |
 | `DEMO_ORGANISATION_CODE` | — | Gives an organisation that already exists, by its licence's code, the demo sign-in: the on-screen code instead of an emailed or texted one, no password changes, the `DEMO_SEATS` cap, and public-only sweeps. Seeds nothing. **Console only**, and not with `SEED_DEMO` |
 | `TRIAL_DAYS`, `TRIAL_SEATS`, `TRIAL_SITES` | `14`, `5`, `25` | A trial licence's terms |
 | `PING_COUNT`, `PING_TIMEOUT`, `PING_INTERVAL`, `PING_CONCURRENCY` | `4`, `5s`, `200ms`, `16` | The probe engine's defaults |

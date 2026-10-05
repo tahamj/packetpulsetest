@@ -963,8 +963,15 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td><code>DEMO-003</code></td>
 <td>Tester</td>
 <td>The demo is capped</td>
-<td>Open <code>DEMO_SEATS</code> (default 3) concurrent demo sessions, then sign in once more</td>
+<td>Open <code>DEMO_SEATS</code> (default and minimum 5) concurrent demo sessions, then sign in once more</td>
 <td>The extra sign-in is refused with <em>the demo is busy</em> (<code>demo_busy</code>). 🛑 <strong>Must NOT</strong> let shared demo accounts open unlimited sessions</td>
+</tr>
+<tr>
+<td><code>DEMO-005</code></td>
+<td>Tester</td>
+<td>A walkthrough left idle gives up its place</td>
+<td>Fill the demo as in <code>DEMO-003</code>; close every tab without signing out; wait 30 minutes; sign in again</td>
+<td>Admitted: only sessions used in the last 30 minutes count. Reopening a closed tab within its 12 hours still works. 🛑 <strong>Must NOT</strong> keep visitors out because earlier ones walked away</td>
 </tr>
 <tr>
 <td><code>DEMO-004</code></td>
@@ -4248,8 +4255,8 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/packetpulse/releases/&lt;previous&gt;
 </tr>
 <tr>
 <td><code>DEMO_SMS_CODE</code>, <code>DEMO_SEATS</code></td>
-<td><code>111111</code>, <code>3</code></td>
-<td>The demo's on-screen code, and how many demo walkthroughs may run at once</td>
+<td><code>111111</code>, <code>5</code></td>
+<td>The demo's on-screen code, and how many demo walkthroughs may run at once — at least 5; a session unused for 30 minutes gives up its place</td>
 </tr>
 <tr>
 <td><code>DEMO_ORGANISATION_CODE</code></td>
