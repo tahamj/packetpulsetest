@@ -394,9 +394,9 @@ nav.side .nohit.on{display:block}
 </tr>
 <tr>
 <td><strong>Device-test target kept internal</strong></td>
-<td>The device test no longer names what it measures and offers no <strong>Change target</strong>; it still measures the organisation's host, or Cloudflare DNS when none is chosen. The target is set through <code>PUT /organisation/settings</code> (since 2026-10-06).</td>
-<td><code>DEV-001</code>, <code>DEV-002</code>, <code>DEV-007</code></td>
-<td><code>packetpulseflutter/lib/common/config/PacketPulseConfig.dart</code></td>
+<td>The device test no longer names what it measures and offers no <strong>Change target</strong>; it still measures the organisation's host, or Cloudflare DNS when none is chosen. A filed device run reads <em>Device test</em>, with no address, in History, its PDF and every CSV; the stored row keeps the host. The target is set through <code>PUT /organisation/settings</code> (since 2026-10-06).</td>
+<td><code>DEV-001</code>, <code>DEV-002</code>, <code>DEV-006</code>, <code>DEV-007</code></td>
+<td><code>packetpulseflutter/lib/common/config/PacketPulseConfig.dart</code><br><code>packetpulsego/pkg/diagnosticmicroservice/diagnosticdomain/shared/DeviceTarget.go</code></td>
 </tr>
 </tbody>
 </table></div>
@@ -1898,7 +1898,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>Administrator</td>
 <td>The target is internal</td>
 <td>Open <strong>Run diagnostic</strong>; run a device test</td>
-<td>No <em>Testing against</em> panel, no <strong>Change target</strong>, no dropdown or free host field, and no <em>Target</em> line in <em>What this run found</em>. ⚠️ The address panel still says the address was reported by 1.1.1.1: that is the address lookup, not the target</td>
+<td>No <em>Testing against</em> panel, no <strong>Change target</strong>, no dropdown or free host field, and no <em>Target</em> line in <em>What this run found</em>. The address card says the address came from <em>a public address lookup over the same connection</em>. 🛑 <strong>Must NOT</strong> name a host anywhere on the page: no <em>1.1.1.1</em>, <em>Cloudflare DNS</em> or the organisation's own</td>
 </tr>
 <tr>
 <td><code>DEV-002</code></td>
@@ -1933,7 +1933,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>Engineer</td>
 <td>Attach to a ticket</td>
 <td>Type TT <code>TT-MAN-002</code> at the top of the page; run a device test; <strong>Attach to a ticket</strong></td>
-<td>The ticket shows the device run, <em>measured on a device</em>, with no line speed; loss is <em>query</em> loss</td>
+<td>The ticket shows the device run, <em>measured on a device</em>, named <em>Device test</em> with no address, and no line speed; loss is <em>query</em> loss. Its <strong>Export PDF</strong> and <strong>Export CSV</strong> name it the same way; an error that quoted the host says <em>the target</em>. 🛑 <strong>Must NOT</strong> show the host the device measured (stored with the result, never served)</td>
 </tr>
 <tr>
 <td><code>DEV-007</code></td>
@@ -1963,6 +1963,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <ul>
 <li>A browser cannot send ICMP, so the web build measures DNS-over-HTTPS (Cloudflare) or an HTTPS reach to the chosen host; the app on a desktop or phone can also ping it. Jitter is RFC 3550 with the standard deviation beside it.</li>
 <li>Target hidden: the <em>Testing against</em> panel, the <em>Target</em> line and the <strong>Change target</strong> dialog are kept and tested behind <code>testTargetShown = false</code> in <code>packetpulseflutter/lib/common/config/PacketPulseConfig.dart</code>, as the speed test is.</li>
+<li>A filed device run keeps its host in <code>ping_result</code>. It is replaced when read back — the diagnostic detail, the Results API's ticket, the PDF, and every CSV (ticket, pulled, scheduled push) — by <code>hideDeviceTargets</code> in <code>packetpulsego/pkg/diagnosticmicroservice/diagnosticservice/DiagnosticService.go</code> and <code>Row.shown</code> in <code>packetpulsego/pkg/diagnosticmicroservice/diagnosticexport/DiagnosticExport.go</code>. The raw <code>/ping/run/{runId}</code> routes, which the app does not call, still show it. The page's wording is held to naming no host by <code>TestTheRunDiagnosticPageNamesNoDeviceTarget</code> in <code>packetpulsego/pkg/initmicroservice/initconstants/PacketPulseStrings_test.go</code>.</li>
 <li>Target normalisation (pasted URL → host, lower case, canonical IPs, zones refused): <code>NormaliseTestTarget</code> in <code>packetpulsego/pkg/staffmicroservice/staffservice/StaffCheckinService.go</code>.</li>
 <li>Speed, hidden: <code>packetpulseflutter/lib/diagnosticmicroservice/service/ClientThroughput.dart</code> (Cloudflare <code>__down</code>/<code>__up</code>, median after a warm-up) is kept and tested behind <code>speedTestEnabled = false</code> in <code>packetpulseflutter/lib/common/config/PacketPulseConfig.dart</code>; turning it back on is that one line. Egress: <code>packetpulseflutter/lib/diagnosticmicroservice/service/ClientEgress.dart</code>.</li>
 <li>Coverage: <code>packetpulseflutter/test/client_probe_screen_test.dart</code>, <code>packetpulseflutter/test/client_probe_run_test.dart</code>, <code>packetpulseflutter/test/run_diagnostic_screen_test.dart</code>, <code>packetpulseflutter/test/client_throughput_test.dart</code>, <code>packetpulseflutter/test/client_egress_test.dart</code>.</li>
