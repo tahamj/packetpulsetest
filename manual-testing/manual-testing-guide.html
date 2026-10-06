@@ -1322,8 +1322,9 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 </li>
 <li>⚙️ <strong>Developer Guide &amp; Release Confidence</strong>:
 <ul>
-<li>The count is <code>StaffCountUsers</code> — staff rows not deleted, switched on or off (<code>packetpulsego/pkg/staffmicroservice/staffdomain/repository/StaffRepositoryPostgres.go</code>). It is checked when a person is added or revived (<code>ensureRoomForAnotherUser</code> in <code>packetpulsego/pkg/staffmicroservice/staffservice/StaffService.go</code>) and at every sign-in against the installed licence file (<code>enforceUserLimit</code>, the owner excepted, §7.1).</li>
-<li>Coverage: <code>packetpulsetest/golang/tenancyassignment/</code>, <code>packetpulsetest/golang/tenancyisolation/</code>, <code>packetpulseflutter/test/session_screen_test.dart</code>.</li>
+<li>The count is <code>StaffCountUsers</code> — staff rows not deleted, switched on or off (<code>packetpulsego/pkg/staffmicroservice/staffdomain/repository/StaffRepositoryPostgres.go</code>). It is checked at every sign-in against the installed licence file (<code>enforceUserLimit</code>, the owner excepted, §7.1). It is also checked when a person is added or revived, by <code>ensureRoomForAnotherUser</code> in the same file.</li>
+<li>🔒 That check runs inside the transaction that writes the person, after locking the organisation's row <code>FOR NO KEY UPDATE</code>. The lock and the count are separate statements, because a count in the statement that waited for the lock reads from before the other addition committed. Before October 2026 the count ran before the write: twenty additions racing for one place created up to ten people, and a licence for twenty ended with twenty-two.</li>
+<li>Coverage: <code>packetpulsetest/golang/tenancyassignment/</code>, <code>packetpulsetest/golang/tenancyisolation/</code>, <code>packetpulsego/pkg/usermicroservice/userservice/UserLicenceFile_test.go</code>, <code>packetpulseflutter/test/session_screen_test.dart</code>.</li>
 </ul>
 </li>
 </ul>
@@ -2333,7 +2334,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <p><strong>Screen:</strong> Administer → <strong>Platform</strong> (superuser only) · <strong>Routes:</strong> <code>/platform/*</code> · <strong>Access:</strong> platform superuser</p>
 <ul>
 <li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: Every customer runs on a licence PacketPulse signs, so nobody can grant themselves an organisation, more people or a longer term. Licences carry the people covered, sites, a period and a price, scale in proportion when sold for an unusual term, and keep a history of every change with who made it and why. A customer's server needs nothing from PacketPulse to check one: the signature is checked against a key built into the server.</li>
-<li>📖 <strong>User Guide &amp; Operational Flow</strong>: The console is PacketPulse's own server; a customer's server has none. <strong>Organisations → Add</strong>; <strong>Issue licence</strong> with plan, people, sites, months and currency. Per licence: <strong>Suspend</strong>, <strong>Resume</strong>, <strong>Revoke</strong>, <strong>Renew</strong>, change the people and sites it covers. <strong>Download licence file</strong> asks for the <strong>Owner's email</strong> and saves the signed file; copy it into <code>LICENCE_DIR</code> on the customer's server. It is read at every sign-in, so no restart is needed. The first person to sign up there with that address, proved by an emailed code, becomes the Administrator.</li>
+<li>📖 <strong>User Guide &amp; Operational Flow</strong>: The console is PacketPulse's own server; a customer's server has none. <strong>Organisations → Add</strong>; <strong>Issue licence</strong> with plan, people, sites, months and currency. Per licence: <strong>Suspend</strong>, <strong>Resume</strong>, <strong>Revoke</strong>, <strong>Renew</strong>, change the people and sites it covers. <strong>Download licence file</strong> asks for the <strong>Owner's email</strong> and saves the signed file; copy it into <code>LICENCE_DIR</code> on the customer's server. It is read at every sign-in, so no restart is needed. The first person to sign up there with that address, proved by an emailed code, becomes the Administrator. Several files for one organisation do not add up: the one that runs longest is the licence, and of two that end the same day, the one issued later. An old file can stay beside its renewal, and what the files are called never matters.</li>
 <li>🧪 <strong>Manual Testing Playbook</strong>:<div class="tw"><table><thead>
 <tr>
 <th>ID</th>
@@ -2386,6 +2387,27 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>On a customer's server, sign up with an address its licence does not name</td>
 <td>Refused: <em>Only the owner named in this server's licence can sign up. Ask your administrator to add you.</em> 🛑 <strong>Must NOT</strong> create an account</td>
 </tr>
+<tr>
+<td><code>PLAT-007</code></td>
+<td>Superuser, then Administrator</td>
+<td>A licence for 20 refuses the 21st person</td>
+<td>Issue ACME a licence for 20 people and install its file; the owner adds 19 colleagues; add a 21st. Then change the licence to 21, download the file again, replace it, and add the 21st again</td>
+<td>20th added; 21st refused (409 <code>seat_limit_reached</code>): <em>Your licence covers no more users…</em>, and <strong>People on the licence</strong> reads 20 of 20. After the new file, with no restart, the 21st is added and a 22nd is refused. 🛑 <strong>Must NOT</strong> add the 21st under the licence for 20, or leave an account for the refused person</td>
+</tr>
+<tr>
+<td><code>PLAT-008</code></td>
+<td>Tester</td>
+<td>An edited licence file admits nobody</td>
+<td>Open ACME's installed file in a text editor; change <code>seat_limit</code> (or <code>valid_until</code>) and save; sign in, and add a person. Put the original file back</td>
+<td>Both refused as no licence (403 <code>licence_expired</code>, <em>renew</em>), never as a full licence. With the original back, both work again. 🛑 <strong>Must NOT</strong> honour the edited number</td>
+</tr>
+<tr>
+<td><code>PLAT-009</code></td>
+<td>Superuser, then Administrator</td>
+<td>Licence files do not add up, and the later issue wins</td>
+<td>ACME has a licence for 3 people, full. Change it to 5 people (its end date stays), download the file and save it <strong>beside</strong> the installed one under a name that sorts after it, e.g. <code>zz-acme.licence</code>. Add people until one is refused</td>
+<td>The 4th and 5th are added and the 6th is refused: of two files ending the same day the later issue is the licence, and the two files' people are not added together. 🛑 <strong>Must NOT</strong> let the file names decide, or allow 8</td>
+</tr>
 </tbody>
 </table></div>
 </li>
@@ -2393,7 +2415,9 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <ul>
 <li><code>packetpulsego/pkg/platformmicroservice/</code>; <code>packetpulseaccess.RequireSuperUser</code> on the console group (Appendix A); licence changes recorded in the licence history and the activity trail.</li>
 <li>🔒 Licence files are Ed25519-signed and verified by <code>packetpulsego/pkg/common/licence/Store.go</code> at every sign-in, against a key compiled into the server. <code>LICENCE_PUBLIC_KEY</code> may replace it only on a development build outside production, so a customer cannot swap in a key of their own.</li>
-<li>Coverage: <code>packetpulsetest/golang/tenancyassignment/</code>, <code>packetpulsego/pkg/platformmicroservice/**</code>, <code>packetpulseflutter/test/platform_console_screen_test.dart</code>.</li>
+<li>Of one organisation's genuine files, <code>supersedes</code> in <code>Store.go</code> picks the licence: the latest <code>valid_until</code>, then the latest <code>issued_on</code>. Before October 2026 a same-day tie went to the first file name in sort order, so a customer could keep the bigger file of a downgrade just by naming it to sort first.</li>
+<li>The console's own demo licence is dated from the UTC day (<code>packetpulsego/cmd/packetpulseserver/PacketPulseBootstrap.go</code>). Dated from the local day, a demo licence issued just after midnight in India did not start until UTC caught up, so the demo refused every sign-in for five and a half hours.</li>
+<li>Coverage: <code>packetpulsetest/golang/tenancyassignment/</code> (the 20-user licence, and additions racing for the last place), <code>packetpulsego/pkg/usermicroservice/userservice/UserLicenceFile_test.go</code> (every state a licence file can be in, renewals beside and over the old file, one organisation's licence lending nothing to another), <code>packetpulsego/pkg/common/licence/</code>, <code>packetpulsego/pkg/platformmicroservice/**</code>, <code>packetpulseflutter/test/platform_console_screen_test.dart</code>.</li>
 </ul>
 </li>
 </ul>

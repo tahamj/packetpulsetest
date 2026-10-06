@@ -68,8 +68,9 @@ Who is in the organisation, what each may do, who is signed in, and the record o
   | `WHO-004` | Engineer | An IPv6 address shows whole | Sign in over IPv6 (or seed a session with `2401:4900:1c2a:8e1f::1`) | One line, ellipsised, full address in the tooltip and selectable. 🛑 **Must NOT** wrap across lines or overflow at phone width |
   | `WHO-005` | Administrator | A licence figure that cannot be read is not a number | Give a custom role `staff_manage` but not `licence_view`; open the screen as someone holding it | **People licensed** shows `–`; the sessions still list. 🛑 **Must NOT** show 0 or "unlimited" |
 - ⚙️ **Developer Guide & Release Confidence**:
-  - The count is `StaffCountUsers` — staff rows not deleted, switched on or off (`packetpulsego/pkg/staffmicroservice/staffdomain/repository/StaffRepositoryPostgres.go`). It is checked when a person is added or revived (`ensureRoomForAnotherUser` in `packetpulsego/pkg/staffmicroservice/staffservice/StaffService.go`) and at every sign-in against the installed licence file (`enforceUserLimit`, the owner excepted, §7.1).
-  - Coverage: `packetpulsetest/golang/tenancyassignment/`, `packetpulsetest/golang/tenancyisolation/`, `packetpulseflutter/test/session_screen_test.dart`.
+  - The count is `StaffCountUsers` — staff rows not deleted, switched on or off (`packetpulsego/pkg/staffmicroservice/staffdomain/repository/StaffRepositoryPostgres.go`). It is checked at every sign-in against the installed licence file (`enforceUserLimit`, the owner excepted, §7.1). It is also checked when a person is added or revived, by `ensureRoomForAnotherUser` in the same file.
+  - 🔒 That check runs inside the transaction that writes the person, after locking the organisation's row `FOR NO KEY UPDATE`. The lock and the count are separate statements, because a count in the statement that waited for the lock reads from before the other addition committed. Before October 2026 the count ran before the write: twenty additions racing for one place created up to ten people, and a licence for twenty ended with twenty-two.
+  - Coverage: `packetpulsetest/golang/tenancyassignment/`, `packetpulsetest/golang/tenancyisolation/`, `packetpulsego/pkg/usermicroservice/userservice/UserLicenceFile_test.go`, `packetpulseflutter/test/session_screen_test.dart`.
 
 ---
 

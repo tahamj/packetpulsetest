@@ -19,6 +19,7 @@ import (
 	"os"
 	"regexp"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -320,6 +321,121 @@ func TestASmallerLicenceKeepsEveryoneButTheOwnerOut(t *testing.T) {
 	packetpulsetest.SignIn(t, organisation.OwnerEmail, organisation.OwnerPassword)
 }
 
+// The licence-file example a customer asks about first, against the server
+// they run: a file for twenty users. The owner and nineteen colleagues fill
+// it. The twenty-first is refused with 409 seat_limit_reached and the renew
+// action, nobody is created, and the licence screen says twenty of twenty.
+// The console's renewal for twenty-one, installed over the file, admits the
+// twenty-first at once, and is itself a limit.
+func TestATwentyUserLicenceFileRefusesTheTwentyFirstUser(t *testing.T) {
+	packetpulsetest.RequireServer(t)
+
+	organisation := packetpulsetest.NewOrganisation(t, "twenty", 20)
+	for range 19 {
+		addColleague(t, organisation.OwnerToken)
+	}
+	expectSeats(t, organisation.OwnerToken, 20, 20)
+
+	refused, twentyFirst := tryAddColleague(t, organisation.OwnerToken)
+	expectFull(t, refused, "the 21st user on a 20-user licence")
+	if refused.Status != http.StatusConflict {
+		t.Errorf("status = %d, want 409", refused.Status)
+	}
+	if action, _ := refused.Body["error"].(map[string]any)["action"].(string); action != "renew" {
+		t.Errorf("action = %q, want renew: the remedy is a licence for more users", action)
+	}
+	signIn := packetpulsetest.Call(t, http.MethodPost, "/user/signin", "", map[string]any{
+		"email": twentyFirst.email, "password": twentyFirst.password,
+	})
+	if signIn.Status != http.StatusUnauthorized {
+		t.Errorf("the refused 21st user signing in = %d %s, want 401: no account was made", signIn.Status, signIn.Raw)
+	}
+	expectSeats(t, organisation.OwnerToken, 20, 20)
+
+	superUser := packetpulsetest.SuperUserToken(t)
+	raised := packetpulsetest.Call(t, http.MethodPut, "/platform/licence/"+organisation.LicenceId+"/seats",
+		superUser, map[string]any{"seat_limit": 21, "site_limit": 200})
+	if raised.Status != http.StatusOK {
+		t.Fatalf("the console raising the licence to 21 users: %d %s", raised.Status, raised.Raw)
+	}
+	_, content := packetpulsetest.LicenceFile(t, superUser, organisation.LicenceId, organisation.OwnerEmail)
+	if err := os.WriteFile(organisation.LicencePath, []byte(content), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	addColleague(t, organisation.OwnerToken)
+	expectSeats(t, organisation.OwnerToken, 21, 21)
+	refused, _ = tryAddColleague(t, organisation.OwnerToken)
+	expectFull(t, refused, "the 22nd user on the renewal for 21")
+}
+
+// Administrators adding people at the same moment put nobody past the
+// licence. With one place left, of twenty additions at once exactly one is
+// created and the others are refused as full. A count taken before the write
+// let every racer see the place: a licence for three ended with twelve
+// people. Racing is chance, so three organisations race, one round each.
+func TestAdditionsRacingForTheLastPlaceCannotOverfillTheLicence(t *testing.T) {
+	packetpulsetest.RequireServer(t)
+
+	for round := 1; round <= 3; round++ {
+		organisation := packetpulsetest.NewOrganisation(t, "racing", 3)
+		addColleague(t, organisation.OwnerToken)
+
+		responses := make([]packetpulsetest.Response, 20)
+		var group sync.WaitGroup
+		for index := range responses {
+			group.Add(1)
+			go func() {
+				defer group.Done()
+				responses[index], _ = tryAddColleague(t, organisation.OwnerToken)
+			}()
+		}
+		group.Wait()
+
+		created := 0
+		for _, response := range responses {
+			if response.Status == http.StatusCreated {
+				created++
+				continue
+			}
+			expectFull(t, response, "an addition racing for the last place")
+		}
+		if created != 1 {
+			t.Errorf("round %d: %d of %d racing additions were created into one place", round, created, len(responses))
+		}
+		expectSeats(t, organisation.OwnerToken, 3, 3)
+	}
+}
+
+// A changed licence saved beside the file it replaces, rather than over it,
+// is the licence. Of two files that end the same day the console's later
+// issue wins, whatever the files are called, and their people are not added
+// together. The new file here is named to sort after the old one, which used
+// to be enough to leave the old one in force.
+func TestALicenceSavedBesideTheOldFileTakesOverWithoutAddingUp(t *testing.T) {
+	packetpulsetest.RequireServer(t)
+
+	organisation := packetpulsetest.NewOrganisation(t, "beside", 3)
+	addColleague(t, organisation.OwnerToken)
+	addColleague(t, organisation.OwnerToken)
+	refused, _ := tryAddColleague(t, organisation.OwnerToken)
+	expectFull(t, refused, "a 4th person on a licence for 3")
+
+	superUser := packetpulsetest.SuperUserToken(t)
+	raised := packetpulsetest.Call(t, http.MethodPut, "/platform/licence/"+organisation.LicenceId+"/seats",
+		superUser, map[string]any{"seat_limit": 5, "site_limit": 200})
+	if raised.Status != http.StatusOK {
+		t.Fatalf("the console raising the licence to 5 users: %d %s", raised.Status, raised.Raw)
+	}
+	filename, content := packetpulsetest.LicenceFile(t, superUser, organisation.LicenceId, organisation.OwnerEmail)
+	packetpulsetest.InstallLicence(t, "zz-"+filename, content)
+
+	addColleague(t, organisation.OwnerToken)
+	addColleague(t, organisation.OwnerToken)
+	refused, _ = tryAddColleague(t, organisation.OwnerToken)
+	expectFull(t, refused, "a 6th person with files for 3 and for 5 side by side")
+	expectSeats(t, organisation.OwnerToken, 5, 5)
+}
+
 // ---------------------------------------------------------- second step ---
 
 // A password alone opens nothing. The token comes from the emailed code, a
@@ -452,6 +568,17 @@ func expectFull(t *testing.T, response packetpulsetest.Response, what string) {
 	}
 	if action, _ := response.Body["error"].(map[string]any)["action"].(string); action == "" {
 		t.Errorf("%s: the refusal carries no action; the client cannot offer a way forward", what)
+	}
+}
+
+// expectSeats asserts the licence screen's figures: the people on the licence
+// and the people it covers.
+func expectSeats(t *testing.T, ownerToken string, used, limit int) {
+	t.Helper()
+	response := packetpulsetest.Call(t, http.MethodGet, "/licence/my", ownerToken, nil)
+	if response.Status != http.StatusOK || response.Float("seats_used") != float64(used) ||
+		response.Float("seat_limit") != float64(limit) {
+		t.Errorf("licence = %d %s, want %d of %d users", response.Status, response.Raw, used, limit)
 	}
 }
 
