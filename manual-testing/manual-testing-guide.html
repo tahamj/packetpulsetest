@@ -237,7 +237,7 @@ nav.side .nohit.on{display:block}
 <td style="text-align:center"><strong>104</strong> <br><sub>under <code>/api/v1</code></sub></td>
 <td style="text-align:center"><strong>17</strong> <br><sub>3 built-in roles</sub></td>
 <td style="text-align:center"><strong>28</strong> <br><sub>applied at boot</sub></td>
-<td style="text-align:center"><strong>882</strong> <br><sub>English, server-served</sub></td>
+<td style="text-align:center"><strong>927</strong> <br><sub>English, server-served</sub></td>
 <td style="text-align:center"><strong>18</strong> <br><sub>one per screen</sub></td>
 <td style="text-align:center"><strong>11</strong> <br><sub>+ <code>load</code>, opt-in</sub></td>
 </tr>
@@ -397,6 +397,12 @@ nav.side .nohit.on{display:block}
 <td>The device test no longer names what it measures and offers no <strong>Change target</strong>; it still measures the organisation's host, or Cloudflare DNS when none is chosen. A filed device run reads <em>Device test</em>, with no address, in History, its PDF and every CSV; the stored row keeps the host. The target is set through <code>PUT /organisation/settings</code> (since 2026-10-06).</td>
 <td><code>DEV-001</code>, <code>DEV-002</code>, <code>DEV-006</code>, <code>DEV-007</code></td>
 <td><code>packetpulseflutter/lib/common/config/PacketPulseConfig.dart</code><br><code>packetpulsego/pkg/diagnosticmicroservice/diagnosticdomain/shared/DeviceTarget.go</code></td>
+</tr>
+<tr>
+<td><strong>Device test, live</strong></td>
+<td><strong>From this device</strong> shows its IPv4 and IPv6 addresses and the nearest edge as three cards with an <em>IPv6 active</em> / <em>IPv4 only</em> badge (no ISP or AS number). <strong>IP version</strong> holds a run against the default target to IPv4 or IPv6. Eight figures, the round-trip chart with jitter, <strong>Round-trips by band</strong> and a <strong>Probe log</strong> fill in as each sample comes back; <strong>Clear results</strong> and <strong>Clear log</strong> empty them (since 2026-10-06).</td>
+<td><code>DEV-010</code>–<code>DEV-015</code></td>
+<td><code>packetpulseflutter/lib/diagnosticmicroservice/presentation/widgets/ClientProbeCharts.dart</code><br><code>packetpulseflutter/lib/diagnosticmicroservice/presentation/widgets/ClientProbeConsole.dart</code></td>
 </tr>
 </tbody>
 </table></div>
@@ -1882,7 +1888,13 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <p><strong>Screen:</strong> Operate → <strong>Run diagnostic</strong>, bottom half (<strong>From this device</strong>) · <strong>Routes:</strong> <code>GET /organisation/settings</code>, <code>POST /diagnostic/clientobservation</code> (<code>diagnostic_run</code>, licensed); the target is set with <code>PUT /organisation/settings</code> (<code>staff_manage</code>), not on this screen</p>
 <ul>
 <li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: &quot;Is it slow for me?&quot; answered from the customer's own connection, in one tap, with no target to choose or explain: everyone in the organisation measures the same host, so results compare. It shows the device's IPv4 <strong>and</strong> IPv6 addresses, then files the run against the ticket beside the server's figures — labelled as measured on a device.</li>
-<li>📖 <strong>User Guide &amp; Operational Flow</strong>: The bottom half of <strong>Run diagnostic</strong>; someone who may not run a sweep, or has no organisation, gets this half alone, with no ticket fields. <strong>Start test</strong> runs it against the organisation's host, or Cloudflare DNS when none is chosen. The target is internal: the screen does not name it, and nobody changes it here. A finished run can be attached to the ticket typed at the top of the page. The line-speed test is hidden.</li>
+<li>📖 <strong>User Guide &amp; Operational Flow</strong>: The bottom half of <strong>Run diagnostic</strong>; someone who may not run a sweep, or has no organisation, gets this half alone, with no ticket fields. <strong>Start test</strong> runs it against the organisation's host, or Cloudflare DNS when none is chosen. The target is internal: the screen does not name it, and nobody changes it here. A finished run can be attached to the ticket typed at the top of the page. The line-speed test is hidden.
+<ul>
+<li>Above the controls, three cards: the <strong>IPv4</strong> address, the <strong>IPv6</strong> address (or <em>No IPv6 connectivity</em>) and the <strong>Nearest edge</strong> that answered, with an <em>IPv6 active</em> or <em>IPv4 only</em> badge. No network operator or AS number is shown: finding one would send the engineer's address to a third party.</li>
+<li><strong>IP version</strong> — <em>Auto</em>, <em>IPv4 only</em>, <em>IPv6 only</em> — holds a run against the default target to one address family, to compare the two paths. It is offered only when the organisation tests the default over HTTPS: a browser cannot choose the family a hostname resolves to, and the native ping is IPv4.</li>
+<li>While a run goes, eight figures fill in — average, fastest, slowest, jitter, standard deviation, loss, MOS and progress — with <strong>Round-trip, sample by sample</strong> (jitter as a band, the average dashed, a red mark per unanswered sample; point at it to read one), <strong>Round-trips by band</strong> (under 20, 20–50, 50–100, 100–200, 200 ms and over) and a <strong>Probe log</strong> of every reply. <strong>Clear results</strong> empties the figures and charts and keeps the log; <strong>Clear log</strong> empties the log.</li>
+</ul>
+</li>
 <li>🧪 <strong>Manual Testing Playbook</strong>:<div class="tw"><table><thead>
 <tr>
 <th>ID</th>
@@ -1956,6 +1968,48 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>Sign in as the platform superuser; open <strong>Run diagnostic</strong></td>
 <td>The device test alone, with no ticket fields, testing Cloudflare DNS. It needs no organisation and no licence</td>
 </tr>
+<tr>
+<td><code>DEV-010</code></td>
+<td>Engineer</td>
+<td>The figures fill in as the run goes</td>
+<td>Set 25 samples and 500 ms interval; <strong>Start test</strong> and watch</td>
+<td><strong>Progress</strong> counts up (<em>4 of 25 samples</em>, …) and the average, fastest, slowest, jitter and loss change with each answer; at the end <em>100%</em>, <em>25 of 25 samples</em>. 🛑 <strong>Must NOT</strong> show zeros before the first answer — dashes until then</td>
+</tr>
+<tr>
+<td><code>DEV-011</code></td>
+<td>Engineer</td>
+<td>IPv6 only</td>
+<td>On a dual-stack connection choose <strong>IP version → IPv6 only</strong>; run with the browser's network panel open; then repeat on a connection with no IPv6</td>
+<td>Every probe goes to the resolver's IPv6 address, and the log reads <em>Started: DNS over HTTPS · IPv6 only, …</em>; with no IPv6, every sample is <em>No answer</em> and loss is 100%. Choosing another version clears the run on screen. 🛑 <strong>Must NOT</strong> name the address or the resolver anywhere on the page</td>
+</tr>
+<tr>
+<td><code>DEV-012</code></td>
+<td>Administrator</td>
+<td>No switch where it cannot hold</td>
+<td><code>PUT /organisation/settings</code> with <code>device_test_target</code> <code>dns.google</code>; open <strong>Run diagnostic</strong></td>
+<td>No <strong>IP version</strong> control, and <em>How this test works</em> has no <em>One family at a time</em> point. On the desktop app with <strong>ICMP echo</strong> chosen, no <strong>IP version</strong> either. 🛑 <strong>Must NOT</strong> offer a choice the run would ignore</td>
+</tr>
+<tr>
+<td><code>DEV-013</code></td>
+<td>Engineer</td>
+<td>The charts</td>
+<td>Run 25 samples; point at the round-trip chart</td>
+<td><strong>Round-trips by band</strong> counts add up to the answered samples; pointing reads <em>#n</em>, the round-trip and the jitter so far, or <em>unanswered</em> for a gap. 🛑 <strong>Must NOT</strong> join the line across an unanswered sample</td>
+</tr>
+<tr>
+<td><code>DEV-014</code></td>
+<td>Engineer</td>
+<td>The probe log</td>
+<td>Set <strong>Timeout</strong> to 200 ms on a slow line; run; <strong>Clear results</strong>; then <strong>Clear log</strong></td>
+<td>Each line is stamped <em>[HH:MM:SS]</em>: replies in green, <em>No answer: seq=n, timed out after 200 ms</em> in red, then <em>Finished. Queries: Sent = …</em> (amber when anything was lost). <strong>Clear results</strong> keeps the log; <strong>Clear log</strong> empties it to <em>Nothing logged yet.</em></td>
+</tr>
+<tr>
+<td><code>DEV-015</code></td>
+<td>Engineer</td>
+<td>The address cards</td>
+<td>Open from a dual-stack connection; then from an IPv4-only one</td>
+<td><em>IPv6 active</em> with both addresses and the nearest edge; then <em>IPv4 only</em> with <em>No IPv6 connectivity</em>. 🛑 <strong>Must NOT</strong> show an ISP or AS number, or contact <code>ipinfo.io</code></td>
+</tr>
 </tbody>
 </table></div>
 </li>
@@ -1966,7 +2020,8 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <li>A filed device run keeps its host in <code>ping_result</code>. It is replaced when read back — the diagnostic detail, the Results API's ticket, the PDF, and every CSV (ticket, pulled, scheduled push) — by <code>hideDeviceTargets</code> in <code>packetpulsego/pkg/diagnosticmicroservice/diagnosticservice/DiagnosticService.go</code> and <code>Row.shown</code> in <code>packetpulsego/pkg/diagnosticmicroservice/diagnosticexport/DiagnosticExport.go</code>. The raw <code>/ping/run/{runId}</code> routes, which the app does not call, still show it. The page's wording is held to naming no host by <code>TestTheRunDiagnosticPageNamesNoDeviceTarget</code> in <code>packetpulsego/pkg/initmicroservice/initconstants/PacketPulseStrings_test.go</code>.</li>
 <li>Target normalisation (pasted URL → host, lower case, canonical IPs, zones refused): <code>NormaliseTestTarget</code> in <code>packetpulsego/pkg/staffmicroservice/staffservice/StaffCheckinService.go</code>.</li>
 <li>Speed, hidden: <code>packetpulseflutter/lib/diagnosticmicroservice/service/ClientThroughput.dart</code> (Cloudflare <code>__down</code>/<code>__up</code>, median after a warm-up) is kept and tested behind <code>speedTestEnabled = false</code> in <code>packetpulseflutter/lib/common/config/PacketPulseConfig.dart</code>; turning it back on is that one line. Egress: <code>packetpulseflutter/lib/diagnosticmicroservice/service/ClientEgress.dart</code>.</li>
-<li>Coverage: <code>packetpulseflutter/test/client_probe_screen_test.dart</code>, <code>packetpulseflutter/test/client_probe_run_test.dart</code>, <code>packetpulseflutter/test/run_diagnostic_screen_test.dart</code>, <code>packetpulseflutter/test/client_throughput_test.dart</code>, <code>packetpulseflutter/test/client_egress_test.dart</code>.</li>
+<li>Live panels: the address cards in <code>packetpulseflutter/lib/diagnosticmicroservice/presentation/widgets/ClientEgressPanel.dart</code>; the timeline, the bands, <code>runningJitter</code> and <code>latencyBands</code> in <code>packetpulseflutter/lib/diagnosticmicroservice/presentation/widgets/ClientProbeCharts.dart</code>; the log in <code>packetpulseflutter/lib/diagnosticmicroservice/presentation/widgets/ClientProbeConsole.dart</code>. The figures are <code>ClientProbeSummary.from</code> over the samples so far, so the live numbers and the filed ones are one calculation. <strong>IPv6 only</strong> is <code>ClientProbeTarget.resolverV6</code> (<code>ClientProbeTarget.defaultFor</code>) in <code>packetpulseflutter/lib/diagnosticmicroservice/service/ClientProbeEngine.dart</code>; a filed run keeps the IPv6 address in <code>ping_result</code>, hidden on read like any device target. The new strings are held to naming no host, the IPv6 literals included, by the same Go test.</li>
+<li>Coverage: <code>packetpulseflutter/test/client_probe_screen_test.dart</code>, <code>packetpulseflutter/test/client_probe_run_test.dart</code>, <code>packetpulseflutter/test/client_probe_live_panels_test.dart</code>, <code>packetpulseflutter/test/run_diagnostic_screen_test.dart</code>, <code>packetpulseflutter/test/https_probe_transport_test.dart</code>, <code>packetpulseflutter/test/client_throughput_test.dart</code>, <code>packetpulseflutter/test/client_egress_test.dart</code>.</li>
 </ul>
 </li>
 </ul>
@@ -2625,7 +2680,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td><code>DEV-*</code></td>
 <td><code>packetpulsego/pkg/diagnosticmicroservice/diagnosticservice/</code></td>
 <td><code>contract</code></td>
-<td><code>packetpulseflutter/test/client_probe_run_test.dart</code>, <code>packetpulseflutter/test/run_diagnostic_screen_test.dart</code></td>
+<td><code>packetpulseflutter/test/client_probe_run_test.dart</code>, <code>packetpulseflutter/test/client_probe_live_panels_test.dart</code>, <code>packetpulseflutter/test/run_diagnostic_screen_test.dart</code></td>
 </tr>
 <tr>
 <td>Monitoring</td>

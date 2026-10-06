@@ -14,7 +14,7 @@
 
 | 🧭 Screens | 🔌 API routes | 🔐 Capabilities | 🗄️ Migrations | 💬 Catalogue strings | ❓ Help topics | 🧪 Guard suites |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| **16** <br><sub>in the navigation rail</sub> | **104** <br><sub>under `/api/v1`</sub> | **17** <br><sub>3 built-in roles</sub> | **28** <br><sub>applied at boot</sub> | **882** <br><sub>English, server-served</sub> | **18** <br><sub>one per screen</sub> | **11** <br><sub>+ `load`, opt-in</sub> |
+| **16** <br><sub>in the navigation rail</sub> | **104** <br><sub>under `/api/v1`</sub> | **17** <br><sub>3 built-in roles</sub> | **28** <br><sub>applied at boot</sub> | **927** <br><sub>English, server-served</sub> | **18** <br><sub>one per screen</sub> | **11** <br><sub>+ `load`, opt-in</sub> |
 
 <br>
 
@@ -77,6 +77,7 @@ PacketPulse is a multi-tenant network-diagnostics service for telecom operators:
 | **Speed test hidden** | **Measure speed** is no longer offered. A speed filed with a run before still shows with it. | `DEV-*` | `packetpulseflutter/lib/common/config/PacketPulseConfig.dart` |
 | **One Run diagnostic page** | *Run diagnostic* and *Test from this device* are one page: the sweep **From the server** on top, the test **From this device** below, and one Customer ID, TT number and note for both. There is no mode switch (since 2026-10-06; v2 shipped two modes). Someone without the right to run a sweep gets the device test alone. | `DEV-*`, `DIAG-011` | `packetpulseflutter/lib/diagnosticmicroservice/presentation/screens/RunDiagnosticScreen.dart` |
 | **Device-test target kept internal** | The device test no longer names what it measures and offers no **Change target**; it still measures the organisation's host, or Cloudflare DNS when none is chosen. A filed device run reads *Device test*, with no address, in History, its PDF and every CSV; the stored row keeps the host. The target is set through `PUT /organisation/settings` (since 2026-10-06). | `DEV-001`, `DEV-002`, `DEV-006`, `DEV-007` | `packetpulseflutter/lib/common/config/PacketPulseConfig.dart`<br>`packetpulsego/pkg/diagnosticmicroservice/diagnosticdomain/shared/DeviceTarget.go` |
+| **Device test, live** | **From this device** shows its IPv4 and IPv6 addresses and the nearest edge as three cards with an *IPv6 active* / *IPv4 only* badge (no ISP or AS number). **IP version** holds a run against the default target to IPv4 or IPv6. Eight figures, the round-trip chart with jitter, **Round-trips by band** and a **Probe log** fill in as each sample comes back; **Clear results** and **Clear log** empty them (since 2026-10-06). | `DEV-010`–`DEV-015` | `packetpulseflutter/lib/diagnosticmicroservice/presentation/widgets/ClientProbeCharts.dart`<br>`packetpulseflutter/lib/diagnosticmicroservice/presentation/widgets/ClientProbeConsole.dart` |
 
 ---
 
