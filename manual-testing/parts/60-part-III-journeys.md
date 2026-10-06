@@ -37,7 +37,7 @@ Each journey crosses several chapters the way a real customer does. Run them on 
 
 1. The administrator sets the engineer to **Record location** and turns on **Require location to sign in**.
 2. On a phone, the engineer signs in, allowing location.
-3. At the customer's site: **Run diagnostic → From this device**, then attach the run to `TT-JRN-003`.
+3. At the customer's site: **Run diagnostic**, type `TT-JRN-003` at the top, run the test **From this device**, then attach it.
 4. Signs out, allowing location.
 
 **Expected:** **Check-ins** shows the sign-in and sign-out with places and a map link; the ticket shows the device run, *measured on a device*; the administrator's Activity shows no entry for the engineer's sign-in.

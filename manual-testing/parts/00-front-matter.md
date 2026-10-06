@@ -8,13 +8,13 @@
 
 <br>
 
-`v2026.10-PROD-v2`  ·  `Verified against source 2026-10-05`
+`v2026.10-PROD-v2`  ·  `Verified against source 2026-10-06`
 
 <br>
 
 | 🧭 Screens | 🔌 API routes | 🔐 Capabilities | 🗄️ Migrations | 💬 Catalogue strings | ❓ Help topics | 🧪 Guard suites |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| **16** <br><sub>in the navigation rail</sub> | **104** <br><sub>under `/api/v1`</sub> | **17** <br><sub>3 built-in roles</sub> | **28** <br><sub>applied at boot</sub> | **881** <br><sub>English, server-served</sub> | **18** <br><sub>one per screen</sub> | **11** <br><sub>+ `load`, opt-in</sub> |
+| **16** <br><sub>in the navigation rail</sub> | **104** <br><sub>under `/api/v1`</sub> | **17** <br><sub>3 built-in roles</sub> | **28** <br><sub>applied at boot</sub> | **882** <br><sub>English, server-served</sub> | **18** <br><sub>one per screen</sub> | **11** <br><sub>+ `load`, opt-in</sub> |
 
 <br>
 
@@ -75,7 +75,8 @@ PacketPulse is a multi-tenant network-diagnostics service for telecom operators:
 | **Own tests, and everyone's** | An engineer sees the tests they ran. An administrator sees everyone's, narrowed by person, place, status and dates. Each test records who ran it and where. | `HIST-*` | `packetpulsego/pkg/common/dbclient/migrations/0026_2026_10_05_own_results_places_and_indexes.sql` |
 | **Path analysis removed** | No traceroute, no fault verdict, and no *Where the faults lay* card. Paths stored before stay in the database, unshown; the CSV keeps its `fault_class` column. | `DIAG-*` | `packetpulsego/pkg/common/dbclient/migrations/0027_2026_10_05_path_analysis_removed.sql` |
 | **Speed test hidden** | **Measure speed** is no longer offered. A speed filed with a run before still shows with it. | `DEV-*` | `packetpulseflutter/lib/common/config/PacketPulseConfig.dart` |
-| **One Run diagnostic screen** | *Run diagnostic* and *Test from this device* are one destination with two modes: **From the server** and **From this device**. Someone without the right to run a sweep gets the device mode alone. | `DEV-*`, `DIAG-*` | `packetpulseflutter/lib/diagnosticmicroservice/presentation/screens/RunDiagnosticScreen.dart` |
+| **One Run diagnostic page** | *Run diagnostic* and *Test from this device* are one page: the sweep **From the server** on top, the test **From this device** below, and one Customer ID, TT number and note for both. There is no mode switch (since 2026-10-06; v2 shipped two modes). Someone without the right to run a sweep gets the device test alone. | `DEV-*`, `DIAG-011` | `packetpulseflutter/lib/diagnosticmicroservice/presentation/screens/RunDiagnosticScreen.dart` |
+| **Device-test target kept internal** | The device test no longer names what it measures and offers no **Change target**; it still measures the organisation's host, or Cloudflare DNS when none is chosen. The target is set through `PUT /organisation/settings` (since 2026-10-06). | `DEV-001`, `DEV-002`, `DEV-007` | `packetpulseflutter/lib/common/config/PacketPulseConfig.dart` |
 
 ---
 
@@ -88,7 +89,7 @@ PacketPulse is a multi-tenant network-diagnostics service for telecom operators:
 |---|---|---|---|
 | **1. Show IPv6** | Client IPs are read only from trusted proxies and shown canonically; a dual-stack site is measured over **both** families, the IPv6 result **reported, not counted**; the device test shows its IPv4 and IPv6 egress. | `V6-*`, `DEV-004` | `packetpulsego/pkg/common/probeguard/ProbeGuardPolicy.go`<br>`packetpulsego/pkg/common/dbclient/migrations/0023_2026_10_04_dual_stack_results.sql` |
 | **2. Two-step sign-in** | Every sign-in has a second step. *v2 replaced the authenticator app and recovery codes with an emailed or texted code.* | `AUTH-*`, `SMS-*` | `packetpulsego/pkg/usermicroservice/userservice/UserSignInSteps.go`<br>`packetpulsego/pkg/common/dbclient/migrations/0019_2026_10_03_two_step_sign_in.sql` |
-| **3. No target dropdown** | The device test measures the target the organisation chose (Cloudflare DNS by default), with one-tap presets for whoever may change it. *In v2 it is the From this device mode of Run diagnostic.* | `DEV-*` | `packetpulseflutter/lib/diagnosticmicroservice/presentation/screens/ClientProbeScreen.dart` |
+| **3. No target dropdown** | The device test measures the target the organisation chose (Cloudflare DNS by default), with one-tap presets for whoever may change it. *In v2 it is the From this device half of Run diagnostic, and since 2026-10-06 the target is not shown there.* | `DEV-*` | `packetpulseflutter/lib/diagnosticmicroservice/presentation/screens/ClientProbeScreen.dart` |
 | **4. Location at check-in** | Sign-in and sign-out record the device's position for people set to *Record location*; field engineers on a separate **Check-ins** screen with address and map link; a per-organisation *Require location* rule. | `CHK-*`, `LOC-*` | `packetpulsego/pkg/common/dbclient/migrations/0020_2026_10_03_session_checkin.sql`<br>`packetpulsego/pkg/common/geocode/Geocode.go` |
 | **5. Loss and jitter** | Loss and RFC 3550 jitter on every result, ticket, history row, dashboard row, PDF and SLA report. | `DIAG-005`, `HIST-*`, `MON-*` | `packetpulsego/pkg/pingmicroservice/pingprobe/PingVoiceQuality.go`<br>`packetpulsego/pkg/common/dbclient/migrations/0022_2026_10_03_loss_and_jitter.sql` |
 | **6. CSV, FTP and download** | **Export CSV** on every ticket; a Results API bulk pull; a scheduled push to the organisation's own **SFTP / FTPS / FTP** server with the SSH host key confirmed first. | `CSV-*`, `EXP-*` | `packetpulsego/pkg/diagnosticmicroservice/diagnosticexport/DiagnosticExport.go`<br>`packetpulsego/pkg/exportmicroservice/exportservice/ExportService.go` |

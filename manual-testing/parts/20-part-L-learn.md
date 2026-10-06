@@ -32,7 +32,7 @@ A site whose name resolves to both an IPv4 and an IPv6 address is measured over 
 
 ## L.5 Two vantage points
 
-**Run diagnostic** has two modes. **From the server** measures from PacketPulse's data centre. **From this device** measures from wherever the person is, over their own connection — the right tool for "is it slow for me?". The two will not match, and both are correct: they measure different layers from different places. A device test can be **attached** to a ticket, where it sits beside the server's figures, labelled as measured on a device.
+**Run diagnostic** measures from two places on one page, against one ticket. The top half, **From the server**, sweeps the organisation's endpoints from PacketPulse's data centre. The bottom half, **From this device**, measures from wherever the person is, over their own connection — the right tool for "is it slow for me?". The two will not match, and both are correct: they measure different layers from different places. A device test can be **attached** to the same ticket, where it sits beside the server's figures, labelled as measured on a device.
 
 ## L.6 Two-step sign-in
 

@@ -8,13 +8,13 @@
 
 <br>
 
-`v2026.10-PROD-v2`  ·  `Verified against source 2026-10-05`
+`v2026.10-PROD-v2`  ·  `Verified against source 2026-10-06`
 
 <br>
 
 | 🧭 Screens | 🔌 API routes | 🔐 Capabilities | 🗄️ Migrations | 💬 Catalogue strings | ❓ Help topics | 🧪 Guard suites |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| **16** <br><sub>in the navigation rail</sub> | **104** <br><sub>under `/api/v1`</sub> | **17** <br><sub>3 built-in roles</sub> | **28** <br><sub>applied at boot</sub> | **881** <br><sub>English, server-served</sub> | **18** <br><sub>one per screen</sub> | **11** <br><sub>+ `load`, opt-in</sub> |
+| **16** <br><sub>in the navigation rail</sub> | **104** <br><sub>under `/api/v1`</sub> | **17** <br><sub>3 built-in roles</sub> | **28** <br><sub>applied at boot</sub> | **882** <br><sub>English, server-served</sub> | **18** <br><sub>one per screen</sub> | **11** <br><sub>+ `load`, opt-in</sub> |
 
 <br>
 
@@ -75,7 +75,8 @@ PacketPulse is a multi-tenant network-diagnostics service for telecom operators:
 | **Own tests, and everyone's** | An engineer sees the tests they ran. An administrator sees everyone's, narrowed by person, place, status and dates. Each test records who ran it and where. | `HIST-*` | `packetpulsego/pkg/common/dbclient/migrations/0026_2026_10_05_own_results_places_and_indexes.sql` |
 | **Path analysis removed** | No traceroute, no fault verdict, and no *Where the faults lay* card. Paths stored before stay in the database, unshown; the CSV keeps its `fault_class` column. | `DIAG-*` | `packetpulsego/pkg/common/dbclient/migrations/0027_2026_10_05_path_analysis_removed.sql` |
 | **Speed test hidden** | **Measure speed** is no longer offered. A speed filed with a run before still shows with it. | `DEV-*` | `packetpulseflutter/lib/common/config/PacketPulseConfig.dart` |
-| **One Run diagnostic screen** | *Run diagnostic* and *Test from this device* are one destination with two modes: **From the server** and **From this device**. Someone without the right to run a sweep gets the device mode alone. | `DEV-*`, `DIAG-*` | `packetpulseflutter/lib/diagnosticmicroservice/presentation/screens/RunDiagnosticScreen.dart` |
+| **One Run diagnostic page** | *Run diagnostic* and *Test from this device* are one page: the sweep **From the server** on top, the test **From this device** below, and one Customer ID, TT number and note for both. There is no mode switch (since 2026-10-06; v2 shipped two modes). Someone without the right to run a sweep gets the device test alone. | `DEV-*`, `DIAG-011` | `packetpulseflutter/lib/diagnosticmicroservice/presentation/screens/RunDiagnosticScreen.dart` |
+| **Device-test target kept internal** | The device test no longer names what it measures and offers no **Change target**; it still measures the organisation's host, or Cloudflare DNS when none is chosen. The target is set through `PUT /organisation/settings` (since 2026-10-06). | `DEV-001`, `DEV-002`, `DEV-007` | `packetpulseflutter/lib/common/config/PacketPulseConfig.dart` |
 
 ---
 
@@ -88,7 +89,7 @@ PacketPulse is a multi-tenant network-diagnostics service for telecom operators:
 |---|---|---|---|
 | **1. Show IPv6** | Client IPs are read only from trusted proxies and shown canonically; a dual-stack site is measured over **both** families, the IPv6 result **reported, not counted**; the device test shows its IPv4 and IPv6 egress. | `V6-*`, `DEV-004` | `packetpulsego/pkg/common/probeguard/ProbeGuardPolicy.go`<br>`packetpulsego/pkg/common/dbclient/migrations/0023_2026_10_04_dual_stack_results.sql` |
 | **2. Two-step sign-in** | Every sign-in has a second step. *v2 replaced the authenticator app and recovery codes with an emailed or texted code.* | `AUTH-*`, `SMS-*` | `packetpulsego/pkg/usermicroservice/userservice/UserSignInSteps.go`<br>`packetpulsego/pkg/common/dbclient/migrations/0019_2026_10_03_two_step_sign_in.sql` |
-| **3. No target dropdown** | The device test measures the target the organisation chose (Cloudflare DNS by default), with one-tap presets for whoever may change it. *In v2 it is the From this device mode of Run diagnostic.* | `DEV-*` | `packetpulseflutter/lib/diagnosticmicroservice/presentation/screens/ClientProbeScreen.dart` |
+| **3. No target dropdown** | The device test measures the target the organisation chose (Cloudflare DNS by default), with one-tap presets for whoever may change it. *In v2 it is the From this device half of Run diagnostic, and since 2026-10-06 the target is not shown there.* | `DEV-*` | `packetpulseflutter/lib/diagnosticmicroservice/presentation/screens/ClientProbeScreen.dart` |
 | **4. Location at check-in** | Sign-in and sign-out record the device's position for people set to *Record location*; field engineers on a separate **Check-ins** screen with address and map link; a per-organisation *Require location* rule. | `CHK-*`, `LOC-*` | `packetpulsego/pkg/common/dbclient/migrations/0020_2026_10_03_session_checkin.sql`<br>`packetpulsego/pkg/common/geocode/Geocode.go` |
 | **5. Loss and jitter** | Loss and RFC 3550 jitter on every result, ticket, history row, dashboard row, PDF and SLA report. | `DIAG-005`, `HIST-*`, `MON-*` | `packetpulsego/pkg/pingmicroservice/pingprobe/PingVoiceQuality.go`<br>`packetpulsego/pkg/common/dbclient/migrations/0022_2026_10_03_loss_and_jitter.sql` |
 | **6. CSV, FTP and download** | **Export CSV** on every ticket; a Results API bulk pull; a scheduled push to the organisation's own **SFTP / FTPS / FTP** server with the SSH host key confirmed first. | `CSV-*`, `EXP-*` | `packetpulsego/pkg/diagnosticmicroservice/diagnosticexport/DiagnosticExport.go`<br>`packetpulsego/pkg/exportmicroservice/exportservice/ExportService.go` |
@@ -219,7 +220,7 @@ A site whose name resolves to both an IPv4 and an IPv6 address is measured over 
 
 ## L.5 Two vantage points
 
-**Run diagnostic** has two modes. **From the server** measures from PacketPulse's data centre. **From this device** measures from wherever the person is, over their own connection — the right tool for "is it slow for me?". The two will not match, and both are correct: they measure different layers from different places. A device test can be **attached** to a ticket, where it sits beside the server's figures, labelled as measured on a device.
+**Run diagnostic** measures from two places on one page, against one ticket. The top half, **From the server**, sweeps the organisation's endpoints from PacketPulse's data centre. The bottom half, **From this device**, measures from wherever the person is, over their own connection — the right tool for "is it slow for me?". The two will not match, and both are correct: they measure different layers from different places. A device test can be **attached** to the same ticket, where it sits beside the server's figures, labelled as measured on a device.
 
 ## L.6 Two-step sign-in
 
@@ -491,10 +492,10 @@ The core of the product: what to test, testing it against a ticket, and reading 
 
 ### 3.2 🩺 Diagnostics and results
 
-**Screen:** Operate → **Run diagnostic** → **From the server** · **Routes:** `POST /diagnostic/submit`, `GET /diagnostic/{requestId}`, `GET /diagnostic/{requestId}/report.pdf` · **Capabilities:** `diagnostic_run`, `diagnostic_view_own` or `diagnostic_view_all`, `report_export` · **Licence:** required to run
+**Screen:** Operate → **Run diagnostic**, top half (**From the server**) · **Routes:** `POST /diagnostic/submit`, `GET /diagnostic/{requestId}`, `GET /diagnostic/{requestId}/report.pdf` · **Capabilities:** `diagnostic_run`, `diagnostic_view_own` or `diagnostic_view_all`, `report_export` · **Licence:** required to run
 
 - 🌟 **Commercial Presentation & Sales Pitch**: One form, one sweep, one report against the ticket. Every figure a NOC argues about — loss, latency, RFC 3550 jitter, MOS — from the server and, in the same screen, from the engineer's own device. A lapsed licence stops new tests but never takes away the evidence already gathered.
-- 📖 **User Guide & Operational Flow**: **Run diagnostic** opens on **From the server** for anyone who may run a sweep; **From this device** beside it is the device test (§4.1), and switching between them keeps what each holds. Enter **Customer ID** and **TT number**, pick sites (or leave empty for every enabled site), and choose packet count and timeout. The result shows headline cards (sites reachable, average loss, average jitter), then a row per site and family: reachable, the packet line verbatim (*Sent = 4, Received = 4, Lost = 0*), round trips, jitter, MOS with its band and SLA grade. **Export PDF** and **Export CSV** sit at the top.
+- 📖 **User Guide & Operational Flow**: **Run diagnostic** is one page. For anyone who may run a sweep, the sweep **From the server** is on top and the device test **From this device** (§4.1) is below it. One **Customer ID**, **TT number** and optional **Notes** serve both. Enter them, pick sites (or leave empty for every enabled site), and press **Run diagnostic**. The result shows headline cards (sites reachable, average loss, average jitter), then a row per site and family: reachable, the packet line verbatim (*Sent = 4, Received = 4, Lost = 0*), round trips, jitter, MOS with its band and SLA grade. **Export PDF** and **Export CSV** sit at the top.
 - 🧪 **Manual Testing Playbook**:
   | ID | Persona | Scenario | Steps | Observable Expected Result |
   |---|---|---|---|---|
@@ -508,15 +509,15 @@ The core of the product: what to test, testing it against a ticket, and reading 
   | `DIAG-008` | Tester | A malformed id is refused before it is looked up | `GET /diagnostic/not-a-uuid` | 400 |
   | `DIAG-009` | Engineer | The PDF is made from the record when it is asked for | Export a ticket's PDF twice, a minute apart; look for a stored copy on the server | Both carry the same measurements, drawn from the stored results at the moment each was asked for; no PDF is kept on the server. 🛑 **Must NOT** depend on a file kept on disk |
   | `DIAG-010` | Engineer | A colleague's test cannot be exported | As an engineer, `GET /diagnostic/<colleague's request id>/report.pdf` (and `.csv`) | 404, as though it did not exist. 🛑 **Must NOT** hand an engineer someone else's evidence |
-  | `DIAG-011` | Engineer, then Viewer | One screen, two modes | As an engineer: open **Run diagnostic**, type a Customer ID, switch to **From this device** and back. As a Viewer: open **Run diagnostic** | The engineer starts on **From the server**, and the Customer ID is still there after switching back. The Viewer gets the device test with no switch. 🛑 **Must NOT** offer a separate *Test from this device* entry in the rail |
+  | `DIAG-011` | Engineer, then Viewer | One page, one ticket | As an engineer: open **Run diagnostic**; type Customer ID, TT `TT-MAN-011` and a note; **Run diagnostic**; then **Start test** and **Attach to a ticket**. As a Viewer: open **Run diagnostic** | The engineer sees the sweep and the device test on one page, with no mode switch. **History** for `TT-MAN-011` holds the sweep and the device run, with the same Customer ID and note. The Viewer gets the device test alone, with no ticket fields. 🛑 **Must NOT** ask for the ticket twice, or offer a separate *From the server* page or *Test from this device* entry in the rail |
 - ⚙️ **Developer Guide & Release Confidence**:
   - Engine: `packetpulsego/pkg/pingmicroservice/pingprobe/PingProbeRunner.go` (pro-bing, unprivileged ICMP, TCP fallback); jitter: `packetpulsego/pkg/pingmicroservice/pingprobe/PingVoiceQuality.go` (`InterarrivalJitter`, RFC 3550).
   - 🔒 Results are saved under their **own** deadline, never the sweep's: a sweep that runs long still stores everything it measured (`load` suite §4.5 proves it, and goes red with the old bug restored).
-  - The screen is `packetpulseflutter/lib/diagnosticmicroservice/presentation/screens/RunDiagnosticScreen.dart`. A mode is built when first shown and kept, so switching never loses a half-filled form or a finished device run. The server mode needs an organisation and `diagnostic_run`, as its own destination used to.
+  - The screen is `packetpulseflutter/lib/diagnosticmicroservice/presentation/screens/RunDiagnosticScreen.dart`. The sweep is `packetpulseflutter/lib/diagnosticmicroservice/presentation/widgets/DiagnosticSweepForm.dart`, and the ticket both filings use is `packetpulseflutter/lib/diagnosticmicroservice/presentation/widgets/DiagnosticTicket.dart`. The sweep and attaching a device run need an organisation and `diagnostic_run`, as the sweep's own destination used to.
   - Path analysis was removed in `packetpulsego/pkg/common/dbclient/migrations/0027_2026_10_05_path_analysis_removed.sql`: `ping_hop` and the fault verdict columns are no longer written, and the rows already stored stay. A client built before then still sends `trace_failures`; the server accepts and ignores it, because decoding is strict and refusing it would fail every run that client made.
   - Ticket figures (`avg_loss_pct`, `max_loss_pct`, `avg_jitter_ms`) are computed in `RequestFinish` from the run's counted results (`packetpulsego/pkg/common/dbclient/migrations/0022_2026_10_03_loss_and_jitter.sql`).
   - The PDF is built on the fly from the database each time it is asked for (`packetpulsego/pkg/pingmicroservice/pingreport/PingReportPdfBuilder.go`); nothing is written to disk. Its foot names the person who ran the test and the place their session checked in from.
-  - Coverage: `packetpulsego/pkg/diagnosticmicroservice/**`, `packetpulsego/pkg/pingmicroservice/**`, `packetpulseflutter/test/diagnostic_submit_screen_test.dart`, `packetpulseflutter/test/run_diagnostic_screen_test.dart`, the `tenancy` and `contract` suites.
+  - Coverage: `packetpulsego/pkg/diagnosticmicroservice/**`, `packetpulsego/pkg/pingmicroservice/**`, `packetpulseflutter/test/diagnostic_sweep_form_test.dart`, `packetpulseflutter/test/run_diagnostic_screen_test.dart`, the `tenancy` and `contract` suites.
 
 ---
 
@@ -591,24 +592,25 @@ Measuring from where the person is, not from where PacketPulse is.
 
 ### 4.1 📱 From this device
 
-**Screen:** Operate → **Run diagnostic** → **From this device** · **Routes:** `GET /organisation/settings`, `PUT /organisation/settings` (`staff_manage`), `POST /diagnostic/clientobservation` (`diagnostic_run`, licensed)
+**Screen:** Operate → **Run diagnostic**, bottom half (**From this device**) · **Routes:** `GET /organisation/settings`, `POST /diagnostic/clientobservation` (`diagnostic_run`, licensed); the target is set with `PUT /organisation/settings` (`staff_manage`), not on this screen
 
-- 🌟 **Commercial Presentation & Sales Pitch**: "Is it slow for me?" answered from the customer's own connection, in one tap, with no target to choose: everyone in the organisation measures the same host, so results compare. It shows the device's IPv4 **and** IPv6 addresses, then files the run against the ticket beside the server's figures — labelled as measured on a device.
-- 📖 **User Guide & Operational Flow**: Open **Run diagnostic** and choose **From this device**; someone who may not run a sweep, or has no organisation, gets this mode alone, with no switch. It names what it is **Testing against** — the organisation's host, or *Cloudflare DNS (1.1.1.1)* with a note when none is chosen. **Start test** runs it. Whoever manages people sees **Change target**: one tap for *Cloudflare DNS* or *Google DNS (dns.google)*, or *Your own host* to type one. A finished run can be attached to a TT number. The line-speed test is hidden.
+- 🌟 **Commercial Presentation & Sales Pitch**: "Is it slow for me?" answered from the customer's own connection, in one tap, with no target to choose or explain: everyone in the organisation measures the same host, so results compare. It shows the device's IPv4 **and** IPv6 addresses, then files the run against the ticket beside the server's figures — labelled as measured on a device.
+- 📖 **User Guide & Operational Flow**: The bottom half of **Run diagnostic**; someone who may not run a sweep, or has no organisation, gets this half alone, with no ticket fields. **Start test** runs it against the organisation's host, or Cloudflare DNS when none is chosen. The target is internal: the screen does not name it, and nobody changes it here. A finished run can be attached to the ticket typed at the top of the page. The line-speed test is hidden.
 - 🧪 **Manual Testing Playbook**:
   | ID | Persona | Scenario | Steps | Observable Expected Result |
   |---|---|---|---|---|
-  | `DEV-001` | Engineer | No target to choose | Open the screen | *Testing against* names one host; there is no dropdown or free host field. With none chosen: *Cloudflare DNS (1.1.1.1)* and the default note |
-  | `DEV-002` | Administrator | Presets, and your own host | **Change target** → *Google DNS*; save. Reopen → *Your own host* → type `noc.northwind.example`; save | First saves `dns.google`; second saves the typed host. While *Your own host* is chosen with the field still empty, that chip — not Cloudflare — is lit |
-  | `DEV-003` | Administrator | The target saves alone | Change the target | The *Require location* rule (§1.2) is unchanged. 🛑 **Must NOT** reset another setting |
+  | `DEV-001` | Administrator | The target is internal | Open **Run diagnostic**; run a device test | No *Testing against* panel, no **Change target**, no dropdown or free host field, and no *Target* line in *What this run found*. ⚠️ The address panel still says the address was reported by 1.1.1.1: that is the address lookup, not the target |
+  | `DEV-002` | Administrator | The internal target is still what is measured | `PUT /organisation/settings` with `device_test_target` `dns.google`; open **Run diagnostic**; run a device test with the browser's network panel open | Every probe goes to `dns.google`, and the screen names no host. 🛑 **Must NOT** fall back to Cloudflare while a target is set |
+  | `DEV-003` | Administrator | The target saves alone | `PUT /organisation/settings` with a new `device_test_target` and the current `require_checkin_location` | The *Require location* rule (§1.2) is unchanged. 🛑 **Must NOT** reset another setting |
   | `DEV-004` | Engineer | Both addresses | Run from a dual-stack connection; then from one without IPv6 | *IPv4 a.b.c.d · IPv6 2401:…*; then *No IPv6 connectivity* |
-  | `DEV-005` | Engineer | The speed test is hidden | Open **From this device**; then open a ticket that had a speed filed before the test was hidden | No **Measure speed** button and no ~12 MB note. The older ticket still shows its line speed. 🛑 **Must NOT** move any data to the speed-test endpoints |
-  | `DEV-006` | Engineer | Attach to a ticket | Run, then attach to `TT-MAN-002` | The ticket shows the device run, *measured on a device*, with no line speed; loss is *query* loss |
-  | `DEV-007` | Viewer | Only people managers change the target | Open as a Viewer | No **Change target**. `PUT /organisation/settings` answers 403 |
-  | `DEV-008` | Engineer | An unreadable setting does not block the test | Stop the API after the screen loads; reopen it | *Your organisation's target could not be read, so this tests Cloudflare DNS*; the test still runs |
-  | `DEV-009` | Superuser | No organisation, still a test | Sign in as the platform superuser; open **Run diagnostic** | The device test alone, with no mode switch, testing Cloudflare DNS. It needs no organisation and no licence |
+  | `DEV-005` | Engineer | The speed test is hidden | Open **Run diagnostic**; then open a ticket that had a speed filed before the test was hidden | No **Measure speed** button and no ~12 MB note. The older ticket still shows its line speed. 🛑 **Must NOT** move any data to the speed-test endpoints |
+  | `DEV-006` | Engineer | Attach to a ticket | Type TT `TT-MAN-002` at the top of the page; run a device test; **Attach to a ticket** | The ticket shows the device run, *measured on a device*, with no line speed; loss is *query* loss |
+  | `DEV-007` | Viewer | Only people managers change the target | As a Viewer, `PUT /organisation/settings` | 403. No **Change target** on the screen, for anyone |
+  | `DEV-008` | Engineer | An unreadable setting does not block the test | Stop the API after the screen loads; reopen it | The test still runs, against Cloudflare DNS, and no error about the target is shown |
+  | `DEV-009` | Superuser | No organisation, still a test | Sign in as the platform superuser; open **Run diagnostic** | The device test alone, with no ticket fields, testing Cloudflare DNS. It needs no organisation and no licence |
 - ⚙️ **Developer Guide & Release Confidence**:
   - A browser cannot send ICMP, so the web build measures DNS-over-HTTPS (Cloudflare) or an HTTPS reach to the chosen host; the app on a desktop or phone can also ping it. Jitter is RFC 3550 with the standard deviation beside it.
+  - Target hidden: the *Testing against* panel, the *Target* line and the **Change target** dialog are kept and tested behind `testTargetShown = false` in `packetpulseflutter/lib/common/config/PacketPulseConfig.dart`, as the speed test is.
   - Target normalisation (pasted URL → host, lower case, canonical IPs, zones refused): `NormaliseTestTarget` in `packetpulsego/pkg/staffmicroservice/staffservice/StaffCheckinService.go`.
   - Speed, hidden: `packetpulseflutter/lib/diagnosticmicroservice/service/ClientThroughput.dart` (Cloudflare `__down`/`__up`, median after a warm-up) is kept and tested behind `speedTestEnabled = false` in `packetpulseflutter/lib/common/config/PacketPulseConfig.dart`; turning it back on is that one line. Egress: `packetpulseflutter/lib/diagnosticmicroservice/service/ClientEgress.dart`.
   - Coverage: `packetpulseflutter/test/client_probe_screen_test.dart`, `packetpulseflutter/test/client_probe_run_test.dart`, `packetpulseflutter/test/run_diagnostic_screen_test.dart`, `packetpulseflutter/test/client_throughput_test.dart`, `packetpulseflutter/test/client_egress_test.dart`.
@@ -813,7 +815,7 @@ What guards each area automatically, so a manual pass can spend its time where a
 | Check-ins | `CHK-*` | `packetpulsego/pkg/common/geocode/` | `tenancy`, `audit` | `packetpulseflutter/test/checkin_screen_test.dart` |
 | Activity | `AUD-*` | `packetpulsego/pkg/common/auditlog/` | `audit` | `packetpulseflutter/test/audit_log_screen_test.dart` |
 | Sites, policy | `SITE-*` | `packetpulsego/pkg/dnssitemicroservice/`, `packetpulsego/pkg/common/probeguard/` | `tenancy` | `packetpulseflutter/test/dns_site_screen_test.dart` |
-| Diagnostics, IPv6 | `DIAG-*`, `V6-*` | `packetpulsego/pkg/pingmicroservice/`, `packetpulsego/pkg/diagnosticmicroservice/` | `contract`, `tenancy`, `load` | `packetpulseflutter/test/diagnostic_submit_screen_test.dart` |
+| Diagnostics, IPv6 | `DIAG-*`, `V6-*` | `packetpulsego/pkg/pingmicroservice/`, `packetpulsego/pkg/diagnosticmicroservice/` | `contract`, `tenancy`, `load` | `packetpulseflutter/test/diagnostic_sweep_form_test.dart` |
 | CSV | `CSV-*`, `API-003` | `packetpulsego/pkg/diagnosticmicroservice/diagnosticexport/` | `contract`, `tenancy`, `load` | `packetpulseflutter/test/diagnostic_history_screen_test.dart` |
 | Run diagnostic, device test | `DEV-*` | `packetpulsego/pkg/diagnosticmicroservice/diagnosticservice/` | `contract` | `packetpulseflutter/test/client_probe_run_test.dart`, `packetpulseflutter/test/run_diagnostic_screen_test.dart` |
 | Monitoring | `MON-*` | `packetpulsego/pkg/monitormicroservice/` | `monitor` | `packetpulseflutter/test/monitor_flows_test.dart` |
@@ -866,7 +868,7 @@ Each journey crosses several chapters the way a real customer does. Run them on 
 
 1. The administrator sets the engineer to **Record location** and turns on **Require location to sign in**.
 2. On a phone, the engineer signs in, allowing location.
-3. At the customer's site: **Run diagnostic → From this device**, then attach the run to `TT-JRN-003`.
+3. At the customer's site: **Run diagnostic**, type `TT-JRN-003` at the top, run the test **From this device**, then attach it.
 4. Signs out, allowing location.
 
 **Expected:** **Check-ins** shows the sign-in and sign-out with places and a map link; the ticket shows the device run, *measured on a device*; the administrator's Activity shows no entry for the engineer's sign-in.

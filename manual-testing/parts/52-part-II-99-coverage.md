@@ -11,7 +11,7 @@ What guards each area automatically, so a manual pass can spend its time where a
 | Check-ins | `CHK-*` | `packetpulsego/pkg/common/geocode/` | `tenancy`, `audit` | `packetpulseflutter/test/checkin_screen_test.dart` |
 | Activity | `AUD-*` | `packetpulsego/pkg/common/auditlog/` | `audit` | `packetpulseflutter/test/audit_log_screen_test.dart` |
 | Sites, policy | `SITE-*` | `packetpulsego/pkg/dnssitemicroservice/`, `packetpulsego/pkg/common/probeguard/` | `tenancy` | `packetpulseflutter/test/dns_site_screen_test.dart` |
-| Diagnostics, IPv6 | `DIAG-*`, `V6-*` | `packetpulsego/pkg/pingmicroservice/`, `packetpulsego/pkg/diagnosticmicroservice/` | `contract`, `tenancy`, `load` | `packetpulseflutter/test/diagnostic_submit_screen_test.dart` |
+| Diagnostics, IPv6 | `DIAG-*`, `V6-*` | `packetpulsego/pkg/pingmicroservice/`, `packetpulsego/pkg/diagnosticmicroservice/` | `contract`, `tenancy`, `load` | `packetpulseflutter/test/diagnostic_sweep_form_test.dart` |
 | CSV | `CSV-*`, `API-003` | `packetpulsego/pkg/diagnosticmicroservice/diagnosticexport/` | `contract`, `tenancy`, `load` | `packetpulseflutter/test/diagnostic_history_screen_test.dart` |
 | Run diagnostic, device test | `DEV-*` | `packetpulsego/pkg/diagnosticmicroservice/diagnosticservice/` | `contract` | `packetpulseflutter/test/client_probe_run_test.dart`, `packetpulseflutter/test/run_diagnostic_screen_test.dart` |
 | Monitoring | `MON-*` | `packetpulsego/pkg/monitormicroservice/` | `monitor` | `packetpulseflutter/test/monitor_flows_test.dart` |
