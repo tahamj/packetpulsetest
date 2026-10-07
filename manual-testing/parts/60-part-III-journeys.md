@@ -33,14 +33,14 @@ Each journey crosses several chapters the way a real customer does. Run them on 
 
 ### JRN-003 · A field engineer's day
 
-**Covers:** `STF-004`, `LOC-002`, `CHK-001`–`CHK-002`, `DEV-001`–`DEV-006`
+**Covers:** `STF-004`, `LOC-002`, `CHK-001`–`CHK-002`, `DEV-004`–`DEV-006`, `DEV-017`
 
 1. The administrator sets the engineer to **Record location** and turns on **Require location to sign in**.
 2. On a phone, the engineer signs in, allowing location.
-3. At the customer's site: **Run diagnostic**, type `TT-JRN-003` at the top, run the test **From this device**, then attach it.
+3. At the customer's site: **Run diagnostic**, type a Customer ID and `TT-JRN-003` at the top, keep the endpoint chosen for the site, **Start test**, then attach it.
 4. Signs out, allowing location.
 
-**Expected:** **Check-ins** shows the sign-in and sign-out with places and a map link; the ticket shows the device run, *measured on a device*; the administrator's Activity shows no entry for the engineer's sign-in.
+**Expected:** **Check-ins** shows the sign-in and sign-out with places and a map link; the ticket shows the device run, *measured on a device*, named after the endpoint nearest the site; the administrator's Activity shows no entry for the engineer's sign-in.
 
 ---
 

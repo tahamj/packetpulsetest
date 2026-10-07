@@ -10,6 +10,7 @@ package apicontract
 import (
 	"fmt"
 	"net/http"
+	"strings"
 	"testing"
 	"time"
 
@@ -243,5 +244,97 @@ func TestALineSpeedIsFiledWithTheDevicesRun(t *testing.T) {
 	run["tt_number"], run["upload_mbps"] = ttNumber+"-X", -3
 	if refused := packetpulsetest.Call(t, http.MethodPost, "/diagnostic/clientobservation", ownerToken, run); refused.Status != http.StatusUnprocessableEntity {
 		t.Errorf("a negative speed answered %d, want 422", refused.Status)
+	}
+}
+
+// addEndpoint adds an enabled endpoint to the caller's organisation and
+// returns its id.
+func addEndpoint(t *testing.T, token, name, address string) string {
+	t.Helper()
+	site := packetpulsetest.Call(t, http.MethodPost, "/dnssite/add", token, map[string]any{
+		"site_name": name, "ip_address": address, "is_enabled": true,
+	})
+	if site.Status != http.StatusCreated {
+		t.Fatalf("add endpoint: %d %s", site.Status, site.Raw)
+	}
+	id, _ := site.Body["dns_site_id"].(string)
+	if id == "" {
+		t.Fatalf("no dns_site_id in %s", site.Raw)
+	}
+	return id
+}
+
+// Run diagnostic tests one of the organisation's endpoints from the device
+// (October 2026). The run is filed under that endpoint and read back by its
+// name - on the ticket, in History and in the CSV - not as the internal
+// device target.
+func TestADeviceRunOfAnEndpointIsFiledUnderItsName(t *testing.T) {
+	packetpulsetest.RequireServer(t)
+
+	ownerToken, _ := packetpulsetest.SignUpOrganisation(t, "clientendpoint")
+	endpoint := addEndpoint(t, ownerToken, "Chennai Core", "192.0.2.61")
+	ttNumber := fmt.Sprintf("TT-ENDPOINT-%d", time.Now().UnixNano())
+	run := oneRun(ttNumber)
+	run["dns_site_id"] = endpoint
+	run["observations"] = run["observations"].([]map[string]any)[:1]
+
+	attached := packetpulsetest.Call(t, http.MethodPost, "/diagnostic/clientobservation", ownerToken, run)
+	if attached.Status != http.StatusCreated {
+		t.Fatalf("attach returned %d: %s", attached.Status, attached.Raw)
+	}
+	requestId, _ := attached.Body["request"].(map[string]any)["request_id"].(string)
+
+	detail := packetpulsetest.Call(t, http.MethodGet, "/diagnostic/"+requestId, ownerToken, nil)
+	results := packetpulsetest.ListOf(t, detail, "results")
+	if len(results) != 1 {
+		t.Fatalf("read back %d results, want 1: %s", len(results), detail.Raw)
+	}
+	if results[0]["site_name"] != "Chennai Core" || results[0]["ip_address"] != "192.0.2.61" ||
+		results[0]["dns_site_id"] != endpoint {
+		t.Errorf("result = %v, want Chennai Core at 192.0.2.61, endpoint %s", results[0], endpoint)
+	}
+
+	csv := packetpulsetest.Call(t, http.MethodGet, "/diagnostic/"+requestId+"/report.csv", ownerToken, nil)
+	if csv.Status != http.StatusOK || !strings.Contains(string(csv.Raw), "Chennai Core") {
+		t.Errorf("the ticket's CSV (%d) does not name the endpoint:\n%s", csv.Status, csv.Raw)
+	}
+}
+
+// An endpoint a device run is filed against must be the caller's own: another
+// organisation's is refused exactly like one that does not exist, and
+// nothing is filed.
+func TestADeviceRunCannotBeFiledAgainstAnotherOrganisationsEndpoint(t *testing.T) {
+	packetpulsetest.RequireServer(t)
+
+	theirToken, _ := packetpulsetest.SignUpOrganisation(t, "clientendpointtheirs")
+	theirs := addEndpoint(t, theirToken, "Their Core", "192.0.2.62")
+	ourToken, _ := packetpulsetest.SignUpOrganisation(t, "clientendpointours")
+
+	for name, dnsSiteId := range map[string]string{
+		"another organisation's": theirs,
+		"nobody's":               "0b5e9a4c-7d2f-4e1a-8c3b-6f5a4d3c2b1a",
+		"not an id":              "chennai-core",
+	} {
+		t.Run(name, func(t *testing.T) {
+			ttNumber := fmt.Sprintf("TT-THEIRS-%d", time.Now().UnixNano())
+			run := oneRun(ttNumber)
+			run["dns_site_id"] = dnsSiteId
+
+			refused := packetpulsetest.Call(t, http.MethodPost, "/diagnostic/clientobservation", ourToken, run)
+			if refused.Status != http.StatusUnprocessableEntity || refused.ErrorCode() != "validation_failed" {
+				t.Fatalf("status = %d, want 422 validation_failed: %s", refused.Status, refused.Raw)
+			}
+			details, _ := refused.Body["error"].(map[string]any)["details"].(map[string]any)
+			if _, named := details["dns_site_id"]; !named {
+				t.Errorf("no message on dns_site_id: %s", refused.Raw)
+			}
+			if strings.Contains(string(refused.Raw), "Their Core") {
+				t.Errorf("the refusal names the other organisation's endpoint: %s", refused.Raw)
+			}
+			byTt := packetpulsetest.Call(t, http.MethodGet, "/diagnostic/tt/"+ttNumber, ourToken, nil)
+			if byTt.Status != http.StatusNotFound {
+				t.Errorf("the refused run was filed: %d %s", byTt.Status, byTt.Raw)
+			}
+		})
 	}
 }

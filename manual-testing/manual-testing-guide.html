@@ -237,7 +237,7 @@ nav.side .nohit.on{display:block}
 <td style="text-align:center"><strong>108</strong> <br><sub>under <code>/api/v1</code></sub></td>
 <td style="text-align:center"><strong>17</strong> <br><sub>3 built-in roles</sub></td>
 <td style="text-align:center"><strong>29</strong> <br><sub>applied at boot</sub></td>
-<td style="text-align:center"><strong>972</strong> <br><sub>English, server-served</sub></td>
+<td style="text-align:center"><strong>980</strong> <br><sub>English, server-served</sub></td>
 <td style="text-align:center"><strong>19</strong> <br><sub>one per screen</sub></td>
 <td style="text-align:center"><strong>11</strong> <br><sub>+ <code>load</code>, opt-in</sub></td>
 </tr>
@@ -388,8 +388,8 @@ nav.side .nohit.on{display:block}
 </tr>
 <tr>
 <td><strong>One Run diagnostic page</strong></td>
-<td><em>Run diagnostic</em> and <em>Test from this device</em> are one page: the sweep <strong>From the server</strong> on top, the test <strong>From this device</strong> below, and one Customer ID, TT number and note for both. There is no mode switch (since 2026-10-06; v2 shipped two modes). Someone without the right to run a sweep gets the device test alone.</td>
-<td><code>DEV-*</code>, <code>DIAG-011</code></td>
+<td><em>Run diagnostic</em> and <em>Test from this device</em> are one page: the sweep <strong>From the server</strong> on top, the test <strong>From this device</strong> below, and one Customer ID, TT number and note for both. There is no mode switch (since 2026-10-06; v2 shipped two modes). Superseded on 2026-10-07: see the next row.</td>
+<td><code>DEV-*</code></td>
 <td><code>packetpulseflutter/lib/diagnosticmicroservice/presentation/screens/RunDiagnosticScreen.dart</code></td>
 </tr>
 <tr>
@@ -397,6 +397,12 @@ nav.side .nohit.on{display:block}
 <td>The device test no longer names what it measures and offers no <strong>Change target</strong>; it still measures the organisation's host, or Cloudflare DNS when none is chosen. A filed device run reads <em>Device test</em>, with no address, in History, its PDF and every CSV; the stored row keeps the host. The target is set through <code>PUT /organisation/settings</code> (since 2026-10-06).</td>
 <td><code>DEV-001</code>, <code>DEV-002</code>, <code>DEV-006</code>, <code>DEV-007</code></td>
 <td><code>packetpulseflutter/lib/common/config/PacketPulseConfig.dart</code><br><code>packetpulsego/pkg/diagnosticmicroservice/diagnosticdomain/shared/DeviceTarget.go</code></td>
+</tr>
+<tr>
+<td><strong>Run diagnostic from this device, to an endpoint</strong></td>
+<td>The sweep <strong>From the server</strong> left the page; <strong>Run diagnostic</strong> is the test from this device. Customer ID, TT number and <strong>Endpoint</strong> are required before <strong>Start test</strong>; the endpoint nearest the device is chosen from each endpoint's latitude and longitude, an engineer cannot change it, and a manager can. The run measures that endpoint and is filed, and named, under it; the server refuses another organisation's (since 2026-10-07).</td>
+<td><code>DEV-017</code>–<code>DEV-022</code>, <code>DEV-006</code></td>
+<td><code>packetpulseflutter/lib/diagnosticmicroservice/presentation/widgets/DiagnosticEndpointField.dart</code><br><code>packetpulsego/pkg/diagnosticmicroservice/diagnosticservice/DiagnosticService.go</code></td>
 </tr>
 <tr>
 <td><strong>Device test, live</strong></td>
@@ -738,7 +744,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <h2 id="l4-ipv4-ipv6-and-not-counted">L.4 IPv4, IPv6 and &quot;not counted&quot;<a class="anchor" href="#l4-ipv4-ipv6-and-not-counted" aria-label="Link to this section">#</a></h2>
 <p>A site whose name resolves to both an IPv4 and an IPv6 address is measured over <strong>both</strong>. The IPv6 result is shown, kept and exported, but marked <strong>not counted</strong>: the site's totals, alerts and SLA availability are carried by IPv4, because the customer's agreement is for the service and IPv4 still carries it. A site that is IPv6 <em>only</em> counts over IPv6 — otherwise it could never fail. When the server itself has no IPv6 route, an IPv6 address is reported as <em>could not be tested from here</em> rather than as an outage.</p>
 <h2 id="l5-two-vantage-points">L.5 Two vantage points<a class="anchor" href="#l5-two-vantage-points" aria-label="Link to this section">#</a></h2>
-<p><strong>Run diagnostic</strong> measures from two places on one page, against one ticket. The top half, <strong>From the server</strong>, sweeps the organisation's endpoints from PacketPulse's data centre. The bottom half, <strong>From this device</strong>, measures from wherever the person is, over their own connection — the right tool for &quot;is it slow for me?&quot;. The two will not match, and both are correct: they measure different layers from different places. A device test can be <strong>attached</strong> to the same ticket, where it sits beside the server's figures, labelled as measured on a device.</p>
+<p>PacketPulse measures from two places. Its server sweeps the organisation's endpoints from PacketPulse's data centre, on a schedule and for the Results API. <strong>Run diagnostic</strong> measures from wherever the person is, over their own connection, to the endpoint nearest them — the right tool for &quot;is it slow for me?&quot;. The two will not match, and both are correct: they measure different layers from different places. A device test is <strong>attached</strong> to a ticket, under the endpoint it measured, labelled as measured on a device.</p>
 <h2 id="l6-two-step-sign-in">L.6 Two-step sign-in<a class="anchor" href="#l6-two-step-sign-in" aria-label="Link to this section">#</a></h2>
 <p>After the password, everyone enters a one-time <strong>6-digit code</strong>. It is <strong>emailed</strong> to their sign-in address, or <strong>texted</strong> to their mobile when an administrator chose text for them and the organisation's own SMS gateway is on. An owner's code is always emailed, so the account that runs the organisation never depends on a gateway. A code is good for ten minutes and five tries; ten wrong codes in all lock the account for fifteen minutes, and nobody is sent more than ten codes an hour. A wrong <em>password</em> never locks anything, so a stranger cannot lock someone out by typing their address. A lost phone is handled by an administrator, who signs that device out and switches the person to email.</p>
 <h2 id="l7-location-at-sign-in">L.7 Location at sign-in<a class="anchor" href="#l7-location-at-sign-in" aria-label="Link to this section">#</a></h2>
@@ -1612,10 +1618,10 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 </ul>
 <hr>
 <h3 id="32-diagnostics-and-results">3.2 🩺 Diagnostics and results<a class="anchor" href="#32-diagnostics-and-results" aria-label="Link to this section">#</a></h3>
-<p><strong>Screen:</strong> Operate → <strong>Run diagnostic</strong>, top half (<strong>From the server</strong>) · <strong>Routes:</strong> <code>POST /diagnostic/submit</code>, <code>GET /diagnostic/{requestId}</code>, <code>GET /diagnostic/{requestId}/report.pdf</code> · <strong>Capabilities:</strong> <code>diagnostic_run</code>, <code>diagnostic_view_own</code> or <code>diagnostic_view_all</code>, <code>report_export</code> · <strong>Licence:</strong> required to run</p>
+<p><strong>Screen:</strong> a ticket's result, from <strong>History</strong>; no screen starts a sweep (since 2026-10-07: <strong>Run diagnostic</strong> is the test from this device, §4.1) · <strong>Routes:</strong> <code>POST /diagnostic/submit</code>, <code>GET /diagnostic/{requestId}</code>, <code>GET /diagnostic/{requestId}/report.pdf</code> · <strong>Capabilities:</strong> <code>diagnostic_run</code>, <code>diagnostic_view_own</code> or <code>diagnostic_view_all</code>, <code>report_export</code> · <strong>Licence:</strong> required to run</p>
 <ul>
-<li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: One form, one sweep, one report against the ticket. Every figure a NOC argues about — loss, latency, RFC 3550 jitter, MOS — from the server and, in the same screen, from the engineer's own device. A lapsed licence stops new tests but never takes away the evidence already gathered.</li>
-<li>📖 <strong>User Guide &amp; Operational Flow</strong>: <strong>Run diagnostic</strong> is one page. For anyone who may run a sweep, the sweep <strong>From the server</strong> is on top and the device test <strong>From this device</strong> (§4.1) is below it. One <strong>Customer ID</strong>, <strong>TT number</strong> and optional <strong>Notes</strong> serve both. Enter them and press <strong>Run diagnostic</strong>. The device is asked where it is, and the server sweeps the endpoints of the city nearest it (§3.1); with no position — location refused, no fix, or no endpoint placed yet — every enabled endpoint is swept. An engineer is told the endpoints are chosen for them and offered none to pick. Whoever manages the endpoints (<code>dns_site_manage</code>) may pick some instead, or go back with <strong>Choose by my location</strong>. The result says <strong>Tested from</strong> — the device's position as the test ran, beside the sign-in place — and <strong>Endpoints</strong>: the nearest city and how far away it was, every endpoint, or chosen by hand. The result shows headline cards (sites reachable, average loss, average jitter), then a row per site and family: reachable, the packet line verbatim (<em>Sent = 4, Received = 4, Lost = 0</em>), round trips, jitter, MOS with its band and SLA grade. <strong>Export PDF</strong> and <strong>Export CSV</strong> sit at the top.</li>
+<li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: One ticket, one report. Every figure a NOC argues about — loss, latency, RFC 3550 jitter, MOS — from PacketPulse's server on its schedule, and from the engineer's own device on <strong>Run diagnostic</strong>. A lapsed licence stops new tests but never takes away the evidence already gathered.</li>
+<li>📖 <strong>User Guide &amp; Operational Flow</strong>: A sweep runs on PacketPulse's server: on a schedule (§5.1), from the Results API, or with <code>POST /diagnostic/submit</code>. <strong>Run diagnostic</strong> no longer starts one (since 2026-10-07); it is the test from this device against one endpoint (§4.1). A sweep given a position tests the endpoints of the city nearest it (§3.1); with no position — location refused, no fix, or no endpoint placed yet — every enabled endpoint is swept. Only whoever manages the endpoints (<code>dns_site_manage</code>) may name endpoints instead; an engineer's list is ignored. The result says <strong>Tested from</strong> — the device's position as the test ran, beside the sign-in place — and <strong>Endpoints</strong>: the nearest city and how far away it was, every endpoint, or chosen by hand. The result shows headline cards (sites reachable, average loss, average jitter), then a row per site and family: reachable, the packet line verbatim (<em>Sent = 4, Received = 4, Lost = 0</em>), round trips, jitter, MOS with its band and SLA grade. <strong>Export PDF</strong> and <strong>Export CSV</strong> sit at the top.</li>
 <li>🧪 <strong>Manual Testing Playbook</strong>:<div class="tw"><table><thead>
 <tr>
 <th>ID</th>
@@ -1628,23 +1634,23 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <tbody>
 <tr>
 <td><code>DIAG-001</code></td>
-<td>Engineer</td>
+<td>Tester</td>
 <td>A sweep files against the ticket</td>
-<td>Run against every enabled site with TT <code>TT-MAN-001</code></td>
+<td><code>POST /diagnostic/submit</code> against every enabled site with TT <code>TT-MAN-001</code></td>
 <td>Status <em>Completed</em>; one row per site (and family); the packet line exactly as specified</td>
 </tr>
 <tr>
 <td><code>DIAG-002</code></td>
-<td>Engineer</td>
+<td>Tester</td>
 <td>A ticket keeps every attempt</td>
-<td>Run <code>TT-MAN-001</code> again</td>
+<td>Submit <code>TT-MAN-001</code> again</td>
 <td><strong>History</strong> for the ticket shows both attempts, newest first</td>
 </tr>
 <tr>
 <td><code>DIAG-003</code></td>
 <td>Engineer</td>
 <td>A failure is reported, not traced</td>
-<td>Include a black-holed address (<code>203.0.113.99</code>); run; open the result, its PDF and the <strong>Dashboard</strong></td>
+<td>Include a black-holed address (<code>203.0.113.99</code>); submit; open the result, its PDF and the <strong>Dashboard</strong></td>
 <td>The row shows the failure and its packet line. No path, hops or fault verdict anywhere, and no <em>Where the faults lay</em> card. 🛑 <strong>Must NOT</strong> offer a <em>Trace failures</em> switch</td>
 </tr>
 <tr>
@@ -1665,8 +1671,8 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td><code>DIAG-006</code></td>
 <td>Engineer</td>
 <td>A lapsed licence stops new runs only</td>
-<td>Platform suspends the licence; run a diagnostic; open an old one and export it</td>
-<td>Run refused (<code>licence_suspended</code>, who can renew named); the old result opens and exports. 🛑 <strong>Must NOT</strong> hide recorded evidence</td>
+<td>Platform suspends the licence; submit a sweep, and attach a device run (§4.1); open an old one and export it</td>
+<td>Both refused (<code>licence_suspended</code>, who can renew named); the old result opens and exports. 🛑 <strong>Must NOT</strong> hide recorded evidence</td>
 </tr>
 <tr>
 <td><code>DIAG-007</code></td>
@@ -1698,31 +1704,31 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 </tr>
 <tr>
 <td><code>DIAG-012</code></td>
-<td>Engineer</td>
+<td>Tester</td>
 <td>The nearest city is tested</td>
-<td>With endpoints placed in Bengaluru and Mumbai (<code>SITE-007</code>), run from a phone in Bengaluru, allowing location</td>
+<td>With endpoints placed in Bengaluru and Mumbai (<code>SITE-007</code>), <code>POST /diagnostic/submit</code> with a <code>location</code> in Bengaluru</td>
 <td>Only Bengaluru's endpoints in the result; <em>Endpoints: The city nearest the device, Bengaluru, N km away</em>; <em>Tested from</em> the phone's coordinates. 🛑 <strong>Must NOT</strong> sweep Mumbai</td>
 </tr>
 <tr>
 <td><code>DIAG-013</code></td>
-<td>Engineer</td>
+<td>Tester</td>
 <td>No position, nothing lost</td>
-<td>Refuse location in the browser; run</td>
+<td>Submit with <code>location</code> <code>{&quot;status&quot;: &quot;denied&quot;}</code></td>
 <td>Every enabled endpoint swept; <em>Tested from: Unknown: location was refused on the device</em>; <em>Endpoints: Every enabled endpoint</em></td>
 </tr>
 <tr>
 <td><code>DIAG-014</code></td>
 <td>Engineer</td>
 <td>An engineer cannot choose</td>
-<td>As an engineer, open <strong>Run diagnostic</strong>; then <code>POST /diagnostic/submit</code> with <code>dns_site_ids</code> naming a Mumbai endpoint and a Bengaluru position</td>
-<td>No chips, only the note that endpoints are chosen; the crafted request sweeps Bengaluru's. 🛑 <strong>Must NOT</strong> honour an engineer's endpoint list</td>
+<td>As an engineer, <code>POST /diagnostic/submit</code> with <code>dns_site_ids</code> naming a Mumbai endpoint and a Bengaluru position</td>
+<td>The request sweeps Bengaluru's. 🛑 <strong>Must NOT</strong> honour an engineer's endpoint list</td>
 </tr>
 <tr>
 <td><code>DIAG-015</code></td>
 <td>Administrator</td>
 <td>A manager may still choose</td>
-<td>Pick one Mumbai endpoint; run from Bengaluru</td>
-<td>Only that endpoint; <em>Endpoints: Chosen by the person who ran the test</em>. <strong>Choose by my location</strong> clears the choice</td>
+<td>Submit with <code>dns_site_ids</code> naming one Mumbai endpoint and a Bengaluru <code>location</code></td>
+<td>Only that endpoint; <em>Endpoints: Chosen by the person who ran the test</em></td>
 </tr>
 <tr>
 <td><code>DIAG-016</code></td>
@@ -1731,13 +1737,6 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td><strong>Export PDF</strong> of <code>DIAG-012</code></td>
 <td>Under the run details: <em>Tested from 12.97…, 77.75…, within N m    |    Endpoints: the city nearest the device, Bengaluru, N km away</em></td>
 </tr>
-<tr>
-<td><code>DIAG-011</code></td>
-<td>Engineer, then Viewer</td>
-<td>One page, one ticket</td>
-<td>As an engineer: open <strong>Run diagnostic</strong>; type Customer ID, TT <code>TT-MAN-011</code> and a note; <strong>Run diagnostic</strong>; then <strong>Start test</strong> and <strong>Attach to a ticket</strong>. As a Viewer: open <strong>Run diagnostic</strong></td>
-<td>The engineer sees the sweep and the device test on one page, with no mode switch. <strong>History</strong> for <code>TT-MAN-011</code> holds the sweep and the device run, with the same Customer ID and note. The Viewer gets the device test alone, with no ticket fields. 🛑 <strong>Must NOT</strong> ask for the ticket twice, or offer a separate <em>From the server</em> page or <em>Test from this device</em> entry in the rail</td>
-</tr>
 </tbody>
 </table></div>
 </li>
@@ -1745,12 +1744,12 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <ul>
 <li>Engine: <code>packetpulsego/pkg/pingmicroservice/pingprobe/PingProbeRunner.go</code> (pro-bing, unprivileged ICMP, TCP fallback); jitter: <code>packetpulsego/pkg/pingmicroservice/pingprobe/PingVoiceQuality.go</code> (<code>InterarrivalJitter</code>, RFC 3550).</li>
 <li>🔒 Results are saved under their <strong>own</strong> deadline, never the sweep's: a sweep that runs long still stores everything it measured (<code>load</code> suite §4.5 proves it, and goes red with the old bug restored).</li>
-<li>The screen is <code>packetpulseflutter/lib/diagnosticmicroservice/presentation/screens/RunDiagnosticScreen.dart</code>. The sweep is <code>packetpulseflutter/lib/diagnosticmicroservice/presentation/widgets/DiagnosticSweepForm.dart</code>, and the ticket both filings use is <code>packetpulseflutter/lib/diagnosticmicroservice/presentation/widgets/DiagnosticTicket.dart</code>. The sweep and attaching a device run need an organisation and <code>diagnostic_run</code>, as the sweep's own destination used to.</li>
+<li>No screen starts a sweep: the app's sweep form was removed when <strong>Run diagnostic</strong> became the test from this device (2026-10-07, §4.1), and the client no longer calls <code>POST /diagnostic/submit</code>. The route stays, for the scheduler's runs, the Results API and scripts. The case for one page holding the sweep and the device test is retired, its number left vacant.</li>
 <li>Path analysis was removed in <code>packetpulsego/pkg/common/dbclient/migrations/0027_2026_10_05_path_analysis_removed.sql</code>: <code>ping_hop</code> and the fault verdict columns are no longer written, and the rows already stored stay. A client built before then still sends <code>trace_failures</code>; the server accepts and ignores it, because decoding is strict and refusing it would fail every run that client made.</li>
-<li>Endpoint choice: <code>chooseEndpoints</code> in <code>packetpulsego/pkg/diagnosticmicroservice/diagnosticservice/DiagnosticService.go</code>; the handler empties <code>dns_site_ids</code> for anyone without <code>dns_site_manage</code>. The request records <code>test_location_*</code>, <code>endpoint_selection</code> (<code>chosen</code>, <code>nearest</code>, <code>all</code>), <code>selection_city</code> and <code>selection_distance_km</code> (migration 0029). The sweep form reads the position only when the person's location is recorded (<code>capture_location</code>, §2.1), through <code>PacketPulseLocationReader</code>.</li>
+<li>Endpoint choice: <code>chooseEndpoints</code> in <code>packetpulsego/pkg/diagnosticmicroservice/diagnosticservice/DiagnosticService.go</code>; the handler empties <code>dns_site_ids</code> for anyone without <code>dns_site_manage</code>. The request records <code>test_location_*</code>, <code>endpoint_selection</code> (<code>chosen</code>, <code>nearest</code>, <code>all</code>), <code>selection_city</code> and <code>selection_distance_km</code> (migration 0029).</li>
 <li>Ticket figures (<code>avg_loss_pct</code>, <code>max_loss_pct</code>, <code>avg_jitter_ms</code>) are computed in <code>RequestFinish</code> from the run's counted results (<code>packetpulsego/pkg/common/dbclient/migrations/0022_2026_10_03_loss_and_jitter.sql</code>).</li>
 <li>The PDF is built on the fly from the database each time it is asked for (<code>packetpulsego/pkg/pingmicroservice/pingreport/PingReportPdfBuilder.go</code>); nothing is written to disk. Its foot names the person who ran the test and the place their session checked in from.</li>
-<li>Coverage: <code>packetpulsego/pkg/diagnosticmicroservice/**</code>, <code>packetpulsego/pkg/pingmicroservice/**</code>, <code>packetpulseflutter/test/diagnostic_sweep_form_test.dart</code>, <code>packetpulseflutter/test/diagnostic_endpoint_choice_test.dart</code>, <code>packetpulseflutter/test/run_diagnostic_screen_test.dart</code>, the <code>tenancy</code> and <code>contract</code> suites.</li>
+<li>Coverage: <code>packetpulsego/pkg/diagnosticmicroservice/**</code>, <code>packetpulsego/pkg/pingmicroservice/**</code>, <code>packetpulseflutter/test/diagnostic_result_selection_test.dart</code>, <code>packetpulseflutter/test/diagnostic_history_screen_test.dart</code>, the <code>tenancy</code> and <code>contract</code> suites.</li>
 </ul>
 </li>
 </ul>
@@ -1965,13 +1964,14 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <p>Measuring from where the person is, not from where PacketPulse is.</p>
 <hr>
 <h3 id="41-from-this-device">4.1 📱 From this device<a class="anchor" href="#41-from-this-device" aria-label="Link to this section">#</a></h3>
-<p><strong>Screen:</strong> Operate → <strong>Run diagnostic</strong>, bottom half (<strong>From this device</strong>) · <strong>Routes:</strong> <code>GET /organisation/settings</code>, <code>POST /diagnostic/clientobservation</code> (<code>diagnostic_run</code>, licensed); the target is set with <code>PUT /organisation/settings</code> (<code>staff_manage</code>), not on this screen</p>
+<p><strong>Screen:</strong> Operate → <strong>Run diagnostic</strong> · <strong>Routes:</strong> <code>GET /dnssite/list</code> (<code>dns_site_view</code>), <code>POST /diagnostic/clientobservation</code> (<code>diagnostic_run</code>, licensed), and <code>GET /organisation/settings</code> for the test with no ticket; that test's target is set with <code>PUT /organisation/settings</code> (<code>staff_manage</code>), not on this screen</p>
 <ul>
-<li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: &quot;Is it slow for me?&quot; answered from the customer's own connection, in one tap, with no target to choose or explain: everyone in the organisation measures the same host, so results compare. It shows the device's IPv4 <strong>and</strong> IPv6 addresses, then files the run against the ticket beside the server's figures — labelled as measured on a device.</li>
-<li>📖 <strong>User Guide &amp; Operational Flow</strong>: The bottom half of <strong>Run diagnostic</strong>; someone who may not run a sweep, or has no organisation, gets this half alone, with no ticket fields. <strong>Start test</strong> runs it against the organisation's host, or Cloudflare DNS when none is chosen. The target is internal: the screen does not name it, and nobody changes it here. A finished run can be attached to the ticket typed at the top of the page. The line-speed test is hidden.
+<li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: &quot;Is it slow for me?&quot; answered from the customer's own connection, to the customer's own endpoint: the engineer opens the page and the endpoint nearest them is already chosen, from the position entered for each endpoint. It shows the device's IPv4 <strong>and</strong> IPv6 addresses, then files the run against the ticket, under the endpoint it measured — labelled as measured on a device.</li>
+<li>📖 <strong>User Guide &amp; Operational Flow</strong>: <strong>Run diagnostic</strong> is the test from this device, filed against a ticket (since 2026-10-07 the page no longer sweeps from the server). The ticket comes first: <strong>Customer ID</strong>, <strong>TT number</strong>, optional <strong>Notes</strong> and the <strong>Endpoint</strong>; <strong>Start test</strong> does nothing until the customer, the TT number and the endpoint are given, and marks the one missing. As the page opens the device is asked where it is, and the endpoint nearest it — by the latitude and longitude entered under DNS sites (§3.1) — is chosen, with <em>Nearest to this device, N km away</em>. An engineer is given that endpoint and cannot change it (<em>Chosen for you: the endpoint nearest where this device is.</em>). Whoever manages the endpoints (<code>dns_site_manage</code>) may pick another, and go back with <strong>Choose by my location</strong>. With no position to go by — location refused or unknown, or no endpoint placed — everyone picks by hand, and the page says why. Choosing another endpoint empties a finished run, and stops one under way. The position chooses; it is filed with a run only for people whose location is recorded (§2.1). Someone who may not run diagnostics, or has no organisation, gets the device test alone, with no ticket, against the organisation's internal host or Cloudflare DNS, which the screen does not name. The line-speed test is hidden.
 <ul>
 <li>Above the controls, three cards: the <strong>IPv4</strong> address, the <strong>IPv6</strong> address (or <em>No IPv6 connectivity</em>) and the <strong>Nearest edge</strong> that answered, with an <em>IPv6 active</em> or <em>IPv4 only</em> badge. No network operator or AS number is shown: finding one would send the engineer's address to a third party.</li>
-<li><strong>IP version</strong> — <em>Auto</em>, <em>IPv4 only</em>, <em>IPv6 only</em> — holds a run against the default target to one address family, to compare the two paths. It is offered only when the organisation tests the default over HTTPS: a browser cannot choose the family a hostname resolves to, and the native ping is IPv4.</li>
+<li>In a browser an endpoint is reached by an HTTPS request to its address, timed end to end; the app on a desktop or phone sends a real ICMP echo where the device allows it. An endpoint that does not serve HTTPS — most routers and resolvers do not — shows every sample unanswered in a browser, even when it is up, and the note beside the figures says so.</li>
+<li><strong>IP version</strong> — <em>Auto</em>, <em>IPv4 only</em>, <em>IPv6 only</em> — holds a run against the default target to one address family, to compare the two paths. It is offered only on the test with no ticket, when the organisation tests the default over HTTPS: an endpoint is reached at its own address, a browser cannot choose the family a hostname resolves to, and the native ping is IPv4.</li>
 <li>While a run goes, eight figures fill in — average, fastest, slowest, jitter, standard deviation, loss, MOS and progress — with <strong>Round-trip, sample by sample</strong> (jitter as a band, the average dashed, a red mark per unanswered sample; point at it to read one), <strong>Round-trips by band</strong> (under 20, 20–50, 50–100, 100–200, 200 ms and over) and a <strong>Probe log</strong> of every reply. <strong>Clear results</strong> empties the figures and charts and keeps the log; <strong>Clear log</strong> empties the log.</li>
 </ul>
 </li>
@@ -1987,16 +1987,16 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <tbody>
 <tr>
 <td><code>DEV-001</code></td>
-<td>Administrator</td>
+<td>Viewer</td>
 <td>The target is internal</td>
-<td>Open <strong>Run diagnostic</strong>; run a device test</td>
+<td>Open <strong>Run diagnostic</strong> (no ticket for a Viewer); run a device test</td>
 <td>No <em>Testing against</em> panel, no <strong>Change target</strong>, no dropdown or free host field, and no <em>Target</em> line in <em>What this run found</em>. The address card says the address came from <em>a public address lookup over the same connection</em>. 🛑 <strong>Must NOT</strong> name a host anywhere on the page: no <em>1.1.1.1</em>, <em>Cloudflare DNS</em> or the organisation's own</td>
 </tr>
 <tr>
 <td><code>DEV-002</code></td>
-<td>Administrator</td>
+<td>Administrator, then Viewer</td>
 <td>The internal target is still what is measured</td>
-<td><code>PUT /organisation/settings</code> with <code>device_test_target</code> <code>dns.google</code>; open <strong>Run diagnostic</strong>; run a device test with the browser's network panel open</td>
+<td>As the administrator, <code>PUT /organisation/settings</code> with <code>device_test_target</code> <code>dns.google</code>; as a Viewer, open <strong>Run diagnostic</strong> and run a device test with the browser's network panel open</td>
 <td>Every probe goes to <code>dns.google</code>, and the screen names no host. 🛑 <strong>Must NOT</strong> fall back to Cloudflare while a target is set</td>
 </tr>
 <tr>
@@ -2024,8 +2024,8 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td><code>DEV-006</code></td>
 <td>Engineer</td>
 <td>Attach to a ticket</td>
-<td>Type TT <code>TT-MAN-002</code> at the top of the page; run a device test; <strong>Attach to a ticket</strong></td>
-<td>The ticket shows the device run, <em>measured on a device</em>, named <em>Device test</em> with no address, and no line speed; loss is <em>query</em> loss. Its <strong>Export PDF</strong> and <strong>Export CSV</strong> name it the same way; an error that quoted the host says <em>the target</em>. 🛑 <strong>Must NOT</strong> show the host the device measured (stored with the result, never served)</td>
+<td>Type a Customer ID and TT <code>TT-MAN-002</code> at the top of the page; keep the endpoint chosen; <strong>Start test</strong>; <strong>Attach to a ticket</strong></td>
+<td>The ticket shows the device run, <em>measured on a device</em>, named after the endpoint with its address, and no line speed; loss is <em>query</em> loss. Its <strong>Export PDF</strong> and <strong>Export CSV</strong> name it the same way. A device run filed before 2026-10-07, with no endpoint, still reads <em>Device test</em> with no address. 🛑 <strong>Must NOT</strong> show the internal target's host for a run that had no endpoint</td>
 </tr>
 <tr>
 <td><code>DEV-007</code></td>
@@ -2036,7 +2036,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 </tr>
 <tr>
 <td><code>DEV-008</code></td>
-<td>Engineer</td>
+<td>Viewer</td>
 <td>An unreadable setting does not block the test</td>
 <td>Stop the API after the screen loads; reopen it</td>
 <td>The test still runs, against Cloudflare DNS, and no error about the target is shown</td>
@@ -2057,17 +2057,17 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 </tr>
 <tr>
 <td><code>DEV-011</code></td>
-<td>Engineer</td>
+<td>Viewer</td>
 <td>IPv6 only</td>
 <td>On a dual-stack connection choose <strong>IP version → IPv6 only</strong>; run with the browser's network panel open; then repeat on a connection with no IPv6</td>
 <td>Every probe goes to the resolver's IPv6 address, and the log reads <em>Started: DNS over HTTPS · IPv6 only, …</em>; with no IPv6, every sample is <em>No answer</em> and loss is 100%. Choosing another version clears the run on screen. 🛑 <strong>Must NOT</strong> name the address or the resolver anywhere on the page</td>
 </tr>
 <tr>
 <td><code>DEV-012</code></td>
-<td>Administrator</td>
+<td>Administrator, then Viewer</td>
 <td>No switch where it cannot hold</td>
-<td><code>PUT /organisation/settings</code> with <code>device_test_target</code> <code>dns.google</code>; open <strong>Run diagnostic</strong></td>
-<td>No <strong>IP version</strong> control, and <em>How this test works</em> has no <em>One family at a time</em> point. On the desktop app with <strong>ICMP echo</strong> chosen, no <strong>IP version</strong> either. 🛑 <strong>Must NOT</strong> offer a choice the run would ignore</td>
+<td>Open <strong>Run diagnostic</strong> as the administrator; then <code>PUT /organisation/settings</code> with <code>device_test_target</code> <code>dns.google</code> and open it as a Viewer</td>
+<td>No <strong>IP version</strong> control for the administrator's endpoint, nor for the Viewer's host, and <em>How this test works</em> has no <em>One family at a time</em> point. On the desktop app with <strong>ICMP echo</strong> chosen, no <strong>IP version</strong> either. 🛑 <strong>Must NOT</strong> offer a choice the run would ignore</td>
 </tr>
 <tr>
 <td><code>DEV-013</code></td>
@@ -2097,18 +2097,62 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>With location recorded for the engineer, run on a phone and <strong>Attach to a ticket</strong></td>
 <td>The ticket shows <em>Tested from</em> the phone's coordinates as it was filed, beside the sign-in place. With location refused: <em>Unknown: location was refused on the device</em></td>
 </tr>
+<tr>
+<td><code>DEV-017</code></td>
+<td>Engineer</td>
+<td>The nearest endpoint is chosen</td>
+<td>With endpoints placed in Pune and Mumbai (<code>SITE-007</code>), open <strong>Run diagnostic</strong> on a phone in Pune, allowing location</td>
+<td><strong>Endpoint *</strong> shows the Pune endpoint with <em>Chosen for you: the endpoint nearest where this device is.</em> and <em>Nearest to this device, N km away</em>; no endpoint chips. <strong>Start test</strong> probes the Pune endpoint (network panel). 🛑 <strong>Must NOT</strong> offer an engineer another endpoint while a position chose one</td>
+</tr>
+<tr>
+<td><code>DEV-018</code></td>
+<td>Administrator</td>
+<td>A manager may choose another</td>
+<td>As in <code>DEV-017</code>, as the administrator; pick Mumbai; run; then <strong>Choose by my location</strong></td>
+<td>Every enabled endpoint as a chip, Pune chosen; Mumbai can be picked and is what is probed; <strong>Choose by my location</strong> goes back to Pune and empties the Mumbai run on screen</td>
+</tr>
+<tr>
+<td><code>DEV-019</code></td>
+<td>Engineer</td>
+<td>No position, choose by hand</td>
+<td>Refuse location in the browser; open <strong>Run diagnostic</strong>; then, with location allowed, remove every endpoint's position and reopen</td>
+<td>Chips with no endpoint chosen and <em>This device's location is not available, so choose the endpoint to test.</em>; then <em>None of your endpoints has a position yet, so choose the endpoint to test.</em></td>
+</tr>
+<tr>
+<td><code>DEV-020</code></td>
+<td>Engineer</td>
+<td>Nothing runs without the ticket</td>
+<td>With location refused, press <strong>Start test</strong> with every field empty</td>
+<td><em>Enter the Customer ID.</em>, <em>Enter the TT number.</em> and <em>Choose the endpoint to test.</em>, scrolled into view; the network panel shows no probe. 🛑 <strong>Must NOT</strong> test the internal target in the endpoint's place</td>
+</tr>
+<tr>
+<td><code>DEV-021</code></td>
+<td>Engineer</td>
+<td>A browser cannot ping an endpoint</td>
+<td>In a browser, run against an endpoint that answers ping but serves no HTTPS</td>
+<td>Every sample <em>No answer</em>, and the note beside the figures says an endpoint that does not serve HTTPS shows unanswered here and that the app sends a real ping. The desktop app with <strong>ICMP echo</strong> answers</td>
+</tr>
+<tr>
+<td><code>DEV-022</code></td>
+<td>RIVAL tester</td>
+<td>Another organisation's endpoint is refused</td>
+<td><code>POST /diagnostic/clientobservation</code> with ACME's <code>dns_site_id</code>; then with a made-up one</td>
+<td>422 <code>validation_failed</code> on <code>dns_site_id</code>, the same for both, naming neither; nothing is filed under the ticket. 🛑 <strong>Must NOT</strong> file a run under, or name, another organisation's endpoint</td>
+</tr>
 </tbody>
 </table></div>
 </li>
 <li>⚙️ <strong>Developer Guide &amp; Release Confidence</strong>:
 <ul>
-<li>A browser cannot send ICMP, so the web build measures DNS-over-HTTPS (Cloudflare) or an HTTPS reach to the chosen host; the app on a desktop or phone can also ping it. Jitter is RFC 3550 with the standard deviation beside it.</li>
+<li>The page: <code>packetpulseflutter/lib/diagnosticmicroservice/presentation/screens/RunDiagnosticScreen.dart</code>, with the ticket in <code>packetpulseflutter/lib/diagnosticmicroservice/presentation/widgets/DiagnosticTicket.dart</code> and the endpoint in <code>packetpulseflutter/lib/diagnosticmicroservice/presentation/widgets/DiagnosticEndpointField.dart</code>. The nearest endpoint is <code>nearestEndpoint</code> in <code>packetpulseflutter/lib/dnssitemicroservice/domain/shared/DnsSite.dart</code>, the same haversine on the same radius as the server's <code>DistanceKm</code>. An endpoint's probe target is <code>ClientProbeTarget.endpoint</code> in <code>packetpulseflutter/lib/diagnosticmicroservice/service/ClientProbeEngine.dart</code>.</li>
+<li>Filing: the client sends <code>dns_site_id</code>. <code>ClientObservationRecord</code> in <code>packetpulsego/pkg/diagnosticmicroservice/diagnosticservice/DiagnosticService.go</code> reads it among the caller's organisation's <strong>enabled</strong> endpoints only, refuses anything else on <code>dns_site_id</code> (422), and stores each result against the endpoint, named as the inventory names it. The server does not demand one: a client older than the change still files, as the internal target.</li>
+<li>A browser cannot send ICMP, so the web build measures an HTTPS reach to the endpoint, or DNS-over-HTTPS (Cloudflare) or an HTTPS reach to the organisation's host on the test with no ticket; the app on a desktop or phone can also ping. Jitter is RFC 3550 with the standard deviation beside it.</li>
 <li>Target hidden: the <em>Testing against</em> panel, the <em>Target</em> line and the <strong>Change target</strong> dialog are kept and tested behind <code>testTargetShown = false</code> in <code>packetpulseflutter/lib/common/config/PacketPulseConfig.dart</code>, as the speed test is.</li>
-<li>A filed device run keeps its host in <code>ping_result</code>. It is replaced when read back — the diagnostic detail, the Results API's ticket, the PDF, and every CSV (ticket, pulled, scheduled push) — by <code>hideDeviceTargets</code> in <code>packetpulsego/pkg/diagnosticmicroservice/diagnosticservice/DiagnosticService.go</code> and <code>Row.shown</code> in <code>packetpulsego/pkg/diagnosticmicroservice/diagnosticexport/DiagnosticExport.go</code>. The raw <code>/ping/run/{runId}</code> routes, which the app does not call, still show it. The page's wording is held to naming no host by <code>TestTheRunDiagnosticPageNamesNoDeviceTarget</code> in <code>packetpulsego/pkg/initmicroservice/initconstants/PacketPulseStrings_test.go</code>.</li>
+<li>A filed device run with no endpoint keeps its host in <code>ping_result</code>. It is replaced when read back — the diagnostic detail, the Results API's ticket, the PDF, and every CSV (ticket, pulled, scheduled push) — by <code>hideDeviceTargets</code> in <code>packetpulsego/pkg/diagnosticmicroservice/diagnosticservice/DiagnosticService.go</code> and <code>Row.shown</code> in <code>packetpulsego/pkg/diagnosticmicroservice/diagnosticexport/DiagnosticExport.go</code>; a result with a <code>dns_site_id</code> measured the organisation's own endpoint and is shown as stored. The raw <code>/ping/run/{runId}</code> routes, which the app does not call, still show it. The page's wording is held to naming no host by <code>TestTheRunDiagnosticPageNamesNoDeviceTarget</code> in <code>packetpulsego/pkg/initmicroservice/initconstants/PacketPulseStrings_test.go</code>.</li>
 <li>Target normalisation (pasted URL → host, lower case, canonical IPs, zones refused): <code>NormaliseTestTarget</code> in <code>packetpulsego/pkg/staffmicroservice/staffservice/StaffCheckinService.go</code>.</li>
 <li>Speed, hidden: <code>packetpulseflutter/lib/diagnosticmicroservice/service/ClientThroughput.dart</code> (Cloudflare <code>__down</code>/<code>__up</code>, median after a warm-up) is kept and tested behind <code>speedTestEnabled = false</code> in <code>packetpulseflutter/lib/common/config/PacketPulseConfig.dart</code>; turning it back on is that one line. Egress: <code>packetpulseflutter/lib/diagnosticmicroservice/service/ClientEgress.dart</code>.</li>
 <li>Live panels: the address cards in <code>packetpulseflutter/lib/diagnosticmicroservice/presentation/widgets/ClientEgressPanel.dart</code>; the timeline, the bands, <code>runningJitter</code> and <code>latencyBands</code> in <code>packetpulseflutter/lib/diagnosticmicroservice/presentation/widgets/ClientProbeCharts.dart</code>; the log in <code>packetpulseflutter/lib/diagnosticmicroservice/presentation/widgets/ClientProbeConsole.dart</code>. The figures are <code>ClientProbeSummary.from</code> over the samples so far, so the live numbers and the filed ones are one calculation. <strong>IPv6 only</strong> is <code>ClientProbeTarget.resolverV6</code> (<code>ClientProbeTarget.defaultFor</code>) in <code>packetpulseflutter/lib/diagnosticmicroservice/service/ClientProbeEngine.dart</code>; a filed run keeps the IPv6 address in <code>ping_result</code>, hidden on read like any device target. The new strings are held to naming no host, the IPv6 literals included, by the same Go test.</li>
-<li>Coverage: <code>packetpulseflutter/test/client_probe_screen_test.dart</code>, <code>packetpulseflutter/test/client_probe_run_test.dart</code>, <code>packetpulseflutter/test/client_probe_live_panels_test.dart</code>, <code>packetpulseflutter/test/run_diagnostic_screen_test.dart</code>, <code>packetpulseflutter/test/https_probe_transport_test.dart</code>, <code>packetpulseflutter/test/client_throughput_test.dart</code>, <code>packetpulseflutter/test/client_egress_test.dart</code>.</li>
+<li>Coverage: <code>packetpulsego/pkg/diagnosticmicroservice/diagnosticservice/EndpointDeviceRun_test.go</code>, the <code>contract</code> suite's <code>client_observation_test.go</code>, <code>packetpulseflutter/test/dns_site_nearest_test.dart</code>, <code>packetpulseflutter/test/client_probe_screen_test.dart</code>, <code>packetpulseflutter/test/client_probe_run_test.dart</code>, <code>packetpulseflutter/test/client_probe_live_panels_test.dart</code>, <code>packetpulseflutter/test/run_diagnostic_screen_test.dart</code>, <code>packetpulseflutter/test/https_probe_transport_test.dart</code>, <code>packetpulseflutter/test/client_throughput_test.dart</code>, <code>packetpulseflutter/test/client_egress_test.dart</code>.</li>
 </ul>
 </li>
 </ul>
@@ -2835,7 +2879,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td><code>DIAG-*</code>, <code>V6-*</code></td>
 <td><code>packetpulsego/pkg/pingmicroservice/</code>, <code>packetpulsego/pkg/diagnosticmicroservice/</code></td>
 <td><code>contract</code>, <code>tenancy</code>, <code>load</code></td>
-<td><code>packetpulseflutter/test/diagnostic_sweep_form_test.dart</code></td>
+<td><code>packetpulseflutter/test/diagnostic_result_selection_test.dart</code></td>
 </tr>
 <tr>
 <td>CSV</td>
@@ -2849,7 +2893,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td><code>DEV-*</code></td>
 <td><code>packetpulsego/pkg/diagnosticmicroservice/diagnosticservice/</code></td>
 <td><code>contract</code></td>
-<td><code>packetpulseflutter/test/client_probe_run_test.dart</code>, <code>packetpulseflutter/test/client_probe_live_panels_test.dart</code>, <code>packetpulseflutter/test/run_diagnostic_screen_test.dart</code></td>
+<td><code>packetpulseflutter/test/run_diagnostic_screen_test.dart</code>, <code>packetpulseflutter/test/client_probe_run_test.dart</code>, <code>packetpulseflutter/test/client_probe_live_panels_test.dart</code>, <code>packetpulseflutter/test/dns_site_nearest_test.dart</code></td>
 </tr>
 <tr>
 <td>Monitoring</td>
@@ -2930,14 +2974,14 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <p><strong>Expected:</strong> both attempts kept; the second's average loss and jitter lower; the dual-stack site shows its IPv6 row <em>not counted</em>.</p>
 <hr>
 <h3 id="jrn-003-a-field-engineers-day">JRN-003 · A field engineer's day<a class="anchor" href="#jrn-003-a-field-engineers-day" aria-label="Link to this section">#</a></h3>
-<p><strong>Covers:</strong> <code>STF-004</code>, <code>LOC-002</code>, <code>CHK-001</code>–<code>CHK-002</code>, <code>DEV-001</code>–<code>DEV-006</code></p>
+<p><strong>Covers:</strong> <code>STF-004</code>, <code>LOC-002</code>, <code>CHK-001</code>–<code>CHK-002</code>, <code>DEV-004</code>–<code>DEV-006</code>, <code>DEV-017</code></p>
 <ol>
 <li>The administrator sets the engineer to <strong>Record location</strong> and turns on <strong>Require location to sign in</strong>.</li>
 <li>On a phone, the engineer signs in, allowing location.</li>
-<li>At the customer's site: <strong>Run diagnostic</strong>, type <code>TT-JRN-003</code> at the top, run the test <strong>From this device</strong>, then attach it.</li>
+<li>At the customer's site: <strong>Run diagnostic</strong>, type a Customer ID and <code>TT-JRN-003</code> at the top, keep the endpoint chosen for the site, <strong>Start test</strong>, then attach it.</li>
 <li>Signs out, allowing location.</li>
 </ol>
-<p><strong>Expected:</strong> <strong>Check-ins</strong> shows the sign-in and sign-out with places and a map link; the ticket shows the device run, <em>measured on a device</em>; the administrator's Activity shows no entry for the engineer's sign-in.</p>
+<p><strong>Expected:</strong> <strong>Check-ins</strong> shows the sign-in and sign-out with places and a map link; the ticket shows the device run, <em>measured on a device</em>, named after the endpoint nearest the site; the administrator's Activity shows no entry for the engineer's sign-in.</p>
 <hr>
 <h3 id="jrn-004-the-it-system-takes-the-results">JRN-004 · The IT system takes the results<a class="anchor" href="#jrn-004-the-it-system-takes-the-results" aria-label="Link to this section">#</a></h3>
 <p><strong>Covers:</strong> <code>API-001</code>–<code>API-003</code>, <code>EXP-002</code>, <code>EXP-006</code>–<code>EXP-008</code></p>

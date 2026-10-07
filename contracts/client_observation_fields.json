@@ -9,7 +9,8 @@
     "observations",
     "download_mbps",
     "upload_mbps",
-    "location"
+    "location",
+    "dns_site_id"
   ],
   "fields": [
     "target_label",
