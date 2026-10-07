@@ -20,6 +20,7 @@ All routes are under `/api/v1`. **Access**: *public* (no session), *session* (si
 | `GET` | `/diagnostic/{requestId}/report.pdf` | member | `diagnostic_view_own` or `diagnostic_view_all` and `report_export` | — | ✅ |
 | `POST` | `/dnssite/add` | member | `dns_site_manage` | required | ✅ |
 | `POST` | `/dnssite/bulkimport` | member | `dns_site_manage` | required | ✅ |
+| `POST` | `/dnssite/importfile` | member | `dns_site_manage` | required | ✅ |
 | `GET` | `/dnssite/list` | member | `dns_site_view` | — | — |
 | `DELETE` | `/dnssite/{dnsSiteId}` | member | `dns_site_manage` | — | ✅ |
 | `PUT` | `/dnssite/{dnsSiteId}` | member | `dns_site_manage` | required | ✅ |
@@ -57,6 +58,9 @@ All routes are under `/api/v1`. **Access**: *public* (no session), *session* (si
 | `GET` | `/monitor/slareport` | member | `report_view` | — | — |
 | `GET` | `/monitor/slareport.pdf` | member | `report_export` | — | — |
 | `GET` | `/monitor/trend` | member | `report_view` | — | — |
+| `GET` | `/organisation/brand` | member | — | — | — |
+| `DELETE` | `/organisation/brand/{part}` | member | `staff_manage` | — | ✅ |
+| `PUT` | `/organisation/brand/{part}` | member | `staff_manage` | — | ✅ |
 | `GET` | `/organisation/settings` | member | — | — | — |
 | `PUT` | `/organisation/settings` | member | `staff_manage` | — | ✅ |
 | `GET` | `/ping/dashboard` | member | `report_view` | — | — |
@@ -169,6 +173,7 @@ Embedded in the server binary and applied in order at boot (`packetpulsego/pkg/c
 | `0026_2026_10_05_own_results_places_and_indexes.sql` | Whose tests a person reads, where each test was run, and the indexes the busiest reads need. |
 | `0027_2026_10_05_path_analysis_removed.sql` | Path analysis is removed: hops and fault verdicts are no longer written. |
 | `0028_2026_10_05_rename_the_partition_function.sql` | The partition function under its PacketPulse name, on every database. |
+| `0029_2026_10_07_endpoint_location_and_report_branding.sql` | Where each endpoint is, where each test was run, how a test's endpoints were chosen, and an organisation's own logo and icon. |
 
 ## Appendix D — Settings
 

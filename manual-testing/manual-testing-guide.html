@@ -233,12 +233,12 @@ nav.side .nohit.on{display:block}
 </thead>
 <tbody>
 <tr>
-<td style="text-align:center"><strong>16</strong> <br><sub>in the navigation rail</sub></td>
-<td style="text-align:center"><strong>104</strong> <br><sub>under <code>/api/v1</code></sub></td>
+<td style="text-align:center"><strong>17</strong> <br><sub>in the navigation rail</sub></td>
+<td style="text-align:center"><strong>108</strong> <br><sub>under <code>/api/v1</code></sub></td>
 <td style="text-align:center"><strong>17</strong> <br><sub>3 built-in roles</sub></td>
-<td style="text-align:center"><strong>28</strong> <br><sub>applied at boot</sub></td>
-<td style="text-align:center"><strong>927</strong> <br><sub>English, server-served</sub></td>
-<td style="text-align:center"><strong>18</strong> <br><sub>one per screen</sub></td>
+<td style="text-align:center"><strong>29</strong> <br><sub>applied at boot</sub></td>
+<td style="text-align:center"><strong>972</strong> <br><sub>English, server-served</sub></td>
+<td style="text-align:center"><strong>19</strong> <br><sub>one per screen</sub></td>
 <td style="text-align:center"><strong>11</strong> <br><sub>+ <code>load</code>, opt-in</sub></td>
 </tr>
 </tbody>
@@ -811,7 +811,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 </tr>
 <tr>
 <td>5 · Monitoring</td>
-<td>SLA targets, schedules, alerts, maintenance, SLA report</td>
+<td>SLA report; targets, schedules, alerts and maintenance through the API</td>
 <td><code>MON-*</code></td>
 </tr>
 <tr>
@@ -1513,10 +1513,10 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <p>The core of the product: what to test, testing it against a ticket, and reading what came back.</p>
 <hr>
 <h3 id="31-sites">3.1 🌐 Sites<a class="anchor" href="#31-sites" aria-label="Link to this section">#</a></h3>
-<p><strong>Screen:</strong> Configure → <strong>DNS sites</strong> · <strong>Routes:</strong> <code>GET /dnssite/list</code>, <code>POST /dnssite/add</code>, <code>POST /dnssite/bulkimport</code>, <code>PUT/DELETE /dnssite/{dnsSiteId}</code> · <strong>Capabilities:</strong> <code>dns_site_view</code>, <code>dns_site_manage</code></p>
+<p><strong>Screen:</strong> Configure → <strong>DNS sites</strong> · <strong>Routes:</strong> <code>GET /dnssite/list</code>, <code>POST /dnssite/add</code>, <code>POST /dnssite/bulkimport</code>, <code>POST /dnssite/importfile</code>, <code>PUT/DELETE /dnssite/{dnsSiteId}</code> · <strong>Capabilities:</strong> <code>dns_site_view</code>, <code>dns_site_manage</code></p>
 <ul>
-<li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: Paste a whole inventory in one go — one bad line never rejects the rest — and PacketPulse refuses to be turned against its own host: loopback, link-local and cloud-metadata addresses are never probed, whatever a site says.</li>
-<li>📖 <strong>User Guide &amp; Operational Flow</strong>: <strong>Add site</strong> with a name, an IP address or hostname, an optional circuit ID and SLA policy. <strong>Bulk import</strong> takes lines, commas or spaces; <code>Branch 12=10.0.0.1</code> names a site. Each entry is reported as added, a duplicate, or invalid with the reason.</li>
+<li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: Every city its own destinations, as many as it needs: give each endpoint its position and a field engineer's test sweeps the city they are standing in, without their choosing anything. Drop the customer's spreadsheet on the page to add or place hundreds at once — one bad row never rejects the rest — and PacketPulse refuses to be turned against its own host: loopback, link-local and cloud-metadata addresses are never probed, whatever a site says.</li>
+<li>📖 <strong>User Guide &amp; Operational Flow</strong>: <strong>Add site</strong> with a name, an IP address or hostname, an optional circuit ID, its <strong>City or region</strong>, its <strong>Latitude</strong> and <strong>Longitude</strong> (both or neither) and an SLA policy. The list shows each endpoint's position, or <em>No position</em>. <strong>Import file</strong> takes a CSV file dropped on the page or chosen, or rows pasted from a spreadsheet: the first row names the columns — <em>Name</em>, <em>Address</em>, <em>City</em>, <em>Latitude</em>, <em>Longitude</em>, only <em>Address</em> required, in any order. A row whose address is already monitored updates that endpoint with the columns given and leaves the rest; any other row adds one. Each row is reported, a refused one by its line. <strong>Bulk import</strong> still takes plain addresses by lines, commas or spaces; <code>Branch 12=10.0.0.1</code> names a site. There is no limit on how many endpoints an organisation or a city has.</li>
 <li>🧪 <strong>Manual Testing Playbook</strong>:<div class="tw"><table><thead>
 <tr>
 <th>ID</th>
@@ -1562,13 +1562,50 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>RIVAL adds <code>203.0.113.10</code> too</td>
 <td>Allowed — the endpoint is unique per organisation, not globally</td>
 </tr>
+<tr>
+<td><code>SITE-006</code></td>
+<td>Administrator</td>
+<td>A position is both halves or neither</td>
+<td>Add a site with only a latitude; then a longitude of <code>190</code>; then both blank</td>
+<td>Refused beside the field each time, nothing sent; the blank pair saves with <em>No position</em>. 🛑 <strong>Must NOT</strong> store half a position, or 0, 0 for none</td>
+</tr>
+<tr>
+<td><code>SITE-007</code></td>
+<td>Administrator</td>
+<td>A dropped spreadsheet adds and places</td>
+<td>In a browser, <strong>Import file</strong>; drag a CSV with <code>Name,Address,City,Latitude,Longitude</code> and four rows, one with no address, onto the page; <strong>Import</strong></td>
+<td><em>2 added and 1 updated, of 4 rows</em>-style summary; the row with no address named by its line; the list shows each position. 🛑 <strong>Must NOT</strong> reject the whole file for one bad row</td>
+</tr>
+<tr>
+<td><code>SITE-008</code></td>
+<td>Administrator</td>
+<td>Positions for endpoints you already have</td>
+<td>Edit a site's circuit and notes; import a file of <code>Address,Latitude,Longitude</code> naming it</td>
+<td>The site gains its position; its name, city, circuit, notes and enabled state are unchanged. 🛑 <strong>Must NOT</strong> clear what the file had no column for</td>
+</tr>
+<tr>
+<td><code>SITE-009</code></td>
+<td>Administrator</td>
+<td>Rows pasted from Excel</td>
+<td>Copy four rows (heading first) from Excel or Sheets; paste into <strong>Import file</strong>; <strong>Import</strong></td>
+<td>Read as tab-separated; each row reported. A Windows-saved CSV with <code>São Paulo</code> imports with the name intact</td>
+</tr>
+<tr>
+<td><code>SITE-010</code></td>
+<td>RIVAL administrator</td>
+<td>An import never reaches across</td>
+<td>RIVAL imports a file naming ACME's addresses with new positions</td>
+<td>RIVAL gains its own endpoints; ACME's are unchanged</td>
+</tr>
 </tbody>
 </table></div>
 </li>
 <li>⚙️ <strong>Developer Guide &amp; Release Confidence</strong>:
 <ul>
 <li>Policy: <code>packetpulsego/pkg/common/probeguard/ProbeGuardPolicy.go</code> — every address a name resolves to is checked, and one refused address refuses them all; IPv4-mapped IPv6 is judged as IPv4.</li>
-<li>Coverage: <code>packetpulsego/pkg/dnssitemicroservice/**</code>, <code>packetpulsego/pkg/common/probeguard/</code>, <code>packetpulseflutter/test/dns_site_screen_test.dart</code>.</li>
+<li>Positions: <code>latitude</code>/<code>longitude</code> on <code>dns_site</code>, both or neither, in <code>packetpulsego/pkg/common/dbclient/migrations/0029_2026_10_07_endpoint_location_and_report_branding.sql</code>. The nearest city is a pure function, <code>ChooseNearestCity</code> in <code>packetpulsego/pkg/dnssitemicroservice/dnssitedomain/shared/DnsSite.go</code>: the nearest <strong>enabled</strong> endpoint with a position names the city (its region, ignoring case), and every enabled endpoint in that city is swept; with no city, the endpoints at the nearest one's position.</li>
+<li>Import: <code>packetpulsego/pkg/dnssitemicroservice/dnssiteservice/DnsSiteImport.go</code> reads the heading row, the delimiter (tab, semicolon or comma) and a spreadsheet's byte-order mark; an existing endpoint is updated with <code>COALESCE</code>, so a column the file lacks is never cleared. Up to 5000 rows a file. The drop zone and chooser are <code>packetpulseflutter/lib/common/services/PacketPulseFileSource.dart</code>, browser-only; elsewhere the paste box alone.</li>
+<li>Coverage: <code>packetpulsego/pkg/dnssitemicroservice/**</code>, <code>packetpulsego/pkg/common/probeguard/</code>, <code>packetpulseflutter/test/dns_site_screen_test.dart</code>, <code>packetpulseflutter/test/dns_site_position_import_test.dart</code>.</li>
 <li>⚠️ <strong>TRAP</strong> — a licence carries a <strong>site limit</strong> (shown on the Platform console), but adding or importing sites does not check it yet. Do not file a site count above the limit as a regression; it is a known gap.</li>
 </ul>
 </li>
@@ -1578,7 +1615,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <p><strong>Screen:</strong> Operate → <strong>Run diagnostic</strong>, top half (<strong>From the server</strong>) · <strong>Routes:</strong> <code>POST /diagnostic/submit</code>, <code>GET /diagnostic/{requestId}</code>, <code>GET /diagnostic/{requestId}/report.pdf</code> · <strong>Capabilities:</strong> <code>diagnostic_run</code>, <code>diagnostic_view_own</code> or <code>diagnostic_view_all</code>, <code>report_export</code> · <strong>Licence:</strong> required to run</p>
 <ul>
 <li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: One form, one sweep, one report against the ticket. Every figure a NOC argues about — loss, latency, RFC 3550 jitter, MOS — from the server and, in the same screen, from the engineer's own device. A lapsed licence stops new tests but never takes away the evidence already gathered.</li>
-<li>📖 <strong>User Guide &amp; Operational Flow</strong>: <strong>Run diagnostic</strong> is one page. For anyone who may run a sweep, the sweep <strong>From the server</strong> is on top and the device test <strong>From this device</strong> (§4.1) is below it. One <strong>Customer ID</strong>, <strong>TT number</strong> and optional <strong>Notes</strong> serve both. Enter them, pick sites (or leave empty for every enabled site), and press <strong>Run diagnostic</strong>. The result shows headline cards (sites reachable, average loss, average jitter), then a row per site and family: reachable, the packet line verbatim (<em>Sent = 4, Received = 4, Lost = 0</em>), round trips, jitter, MOS with its band and SLA grade. <strong>Export PDF</strong> and <strong>Export CSV</strong> sit at the top.</li>
+<li>📖 <strong>User Guide &amp; Operational Flow</strong>: <strong>Run diagnostic</strong> is one page. For anyone who may run a sweep, the sweep <strong>From the server</strong> is on top and the device test <strong>From this device</strong> (§4.1) is below it. One <strong>Customer ID</strong>, <strong>TT number</strong> and optional <strong>Notes</strong> serve both. Enter them and press <strong>Run diagnostic</strong>. The device is asked where it is, and the server sweeps the endpoints of the city nearest it (§3.1); with no position — location refused, no fix, or no endpoint placed yet — every enabled endpoint is swept. An engineer is told the endpoints are chosen for them and offered none to pick. Whoever manages the endpoints (<code>dns_site_manage</code>) may pick some instead, or go back with <strong>Choose by my location</strong>. The result says <strong>Tested from</strong> — the device's position as the test ran, beside the sign-in place — and <strong>Endpoints</strong>: the nearest city and how far away it was, every endpoint, or chosen by hand. The result shows headline cards (sites reachable, average loss, average jitter), then a row per site and family: reachable, the packet line verbatim (<em>Sent = 4, Received = 4, Lost = 0</em>), round trips, jitter, MOS with its band and SLA grade. <strong>Export PDF</strong> and <strong>Export CSV</strong> sit at the top.</li>
 <li>🧪 <strong>Manual Testing Playbook</strong>:<div class="tw"><table><thead>
 <tr>
 <th>ID</th>
@@ -1660,6 +1697,41 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>404, as though it did not exist. 🛑 <strong>Must NOT</strong> hand an engineer someone else's evidence</td>
 </tr>
 <tr>
+<td><code>DIAG-012</code></td>
+<td>Engineer</td>
+<td>The nearest city is tested</td>
+<td>With endpoints placed in Bengaluru and Mumbai (<code>SITE-007</code>), run from a phone in Bengaluru, allowing location</td>
+<td>Only Bengaluru's endpoints in the result; <em>Endpoints: The city nearest the device, Bengaluru, N km away</em>; <em>Tested from</em> the phone's coordinates. 🛑 <strong>Must NOT</strong> sweep Mumbai</td>
+</tr>
+<tr>
+<td><code>DIAG-013</code></td>
+<td>Engineer</td>
+<td>No position, nothing lost</td>
+<td>Refuse location in the browser; run</td>
+<td>Every enabled endpoint swept; <em>Tested from: Unknown: location was refused on the device</em>; <em>Endpoints: Every enabled endpoint</em></td>
+</tr>
+<tr>
+<td><code>DIAG-014</code></td>
+<td>Engineer</td>
+<td>An engineer cannot choose</td>
+<td>As an engineer, open <strong>Run diagnostic</strong>; then <code>POST /diagnostic/submit</code> with <code>dns_site_ids</code> naming a Mumbai endpoint and a Bengaluru position</td>
+<td>No chips, only the note that endpoints are chosen; the crafted request sweeps Bengaluru's. 🛑 <strong>Must NOT</strong> honour an engineer's endpoint list</td>
+</tr>
+<tr>
+<td><code>DIAG-015</code></td>
+<td>Administrator</td>
+<td>A manager may still choose</td>
+<td>Pick one Mumbai endpoint; run from Bengaluru</td>
+<td>Only that endpoint; <em>Endpoints: Chosen by the person who ran the test</em>. <strong>Choose by my location</strong> clears the choice</td>
+</tr>
+<tr>
+<td><code>DIAG-016</code></td>
+<td>Engineer</td>
+<td>The PDF says where</td>
+<td><strong>Export PDF</strong> of <code>DIAG-012</code></td>
+<td>Under the run details: <em>Tested from 12.97…, 77.75…, within N m    |    Endpoints: the city nearest the device, Bengaluru, N km away</em></td>
+</tr>
+<tr>
 <td><code>DIAG-011</code></td>
 <td>Engineer, then Viewer</td>
 <td>One page, one ticket</td>
@@ -1675,9 +1747,10 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <li>🔒 Results are saved under their <strong>own</strong> deadline, never the sweep's: a sweep that runs long still stores everything it measured (<code>load</code> suite §4.5 proves it, and goes red with the old bug restored).</li>
 <li>The screen is <code>packetpulseflutter/lib/diagnosticmicroservice/presentation/screens/RunDiagnosticScreen.dart</code>. The sweep is <code>packetpulseflutter/lib/diagnosticmicroservice/presentation/widgets/DiagnosticSweepForm.dart</code>, and the ticket both filings use is <code>packetpulseflutter/lib/diagnosticmicroservice/presentation/widgets/DiagnosticTicket.dart</code>. The sweep and attaching a device run need an organisation and <code>diagnostic_run</code>, as the sweep's own destination used to.</li>
 <li>Path analysis was removed in <code>packetpulsego/pkg/common/dbclient/migrations/0027_2026_10_05_path_analysis_removed.sql</code>: <code>ping_hop</code> and the fault verdict columns are no longer written, and the rows already stored stay. A client built before then still sends <code>trace_failures</code>; the server accepts and ignores it, because decoding is strict and refusing it would fail every run that client made.</li>
+<li>Endpoint choice: <code>chooseEndpoints</code> in <code>packetpulsego/pkg/diagnosticmicroservice/diagnosticservice/DiagnosticService.go</code>; the handler empties <code>dns_site_ids</code> for anyone without <code>dns_site_manage</code>. The request records <code>test_location_*</code>, <code>endpoint_selection</code> (<code>chosen</code>, <code>nearest</code>, <code>all</code>), <code>selection_city</code> and <code>selection_distance_km</code> (migration 0029). The sweep form reads the position only when the person's location is recorded (<code>capture_location</code>, §2.1), through <code>PacketPulseLocationReader</code>.</li>
 <li>Ticket figures (<code>avg_loss_pct</code>, <code>max_loss_pct</code>, <code>avg_jitter_ms</code>) are computed in <code>RequestFinish</code> from the run's counted results (<code>packetpulsego/pkg/common/dbclient/migrations/0022_2026_10_03_loss_and_jitter.sql</code>).</li>
 <li>The PDF is built on the fly from the database each time it is asked for (<code>packetpulsego/pkg/pingmicroservice/pingreport/PingReportPdfBuilder.go</code>); nothing is written to disk. Its foot names the person who ran the test and the place their session checked in from.</li>
-<li>Coverage: <code>packetpulsego/pkg/diagnosticmicroservice/**</code>, <code>packetpulsego/pkg/pingmicroservice/**</code>, <code>packetpulseflutter/test/diagnostic_sweep_form_test.dart</code>, <code>packetpulseflutter/test/run_diagnostic_screen_test.dart</code>, the <code>tenancy</code> and <code>contract</code> suites.</li>
+<li>Coverage: <code>packetpulsego/pkg/diagnosticmicroservice/**</code>, <code>packetpulsego/pkg/pingmicroservice/**</code>, <code>packetpulseflutter/test/diagnostic_sweep_form_test.dart</code>, <code>packetpulseflutter/test/diagnostic_endpoint_choice_test.dart</code>, <code>packetpulseflutter/test/run_diagnostic_screen_test.dart</code>, the <code>tenancy</code> and <code>contract</code> suites.</li>
 </ul>
 </li>
 </ul>
@@ -1740,7 +1813,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <p><strong>Where:</strong> <strong>Export CSV</strong> on every result · <strong>Route:</strong> <code>GET /diagnostic/{requestId}/report.csv</code> · <strong>Capability:</strong> <code>report_export</code></p>
 <ul>
 <li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: The same results, in the columns an IT system imports, in one click — and safe to open: a site name typed as a spreadsheet formula is written as text, so an export can never run code on someone else's desk.</li>
-<li>📖 <strong>User Guide &amp; Operational Flow</strong>: <strong>Export CSV</strong> saves <code>packetpulse-&lt;TT&gt;-&lt;UTC time&gt;.csv</code> beside the PDF of the same ticket. One row per site and family; empty cells (not zeros) where a probe had no reply.</li>
+<li>📖 <strong>User Guide &amp; Operational Flow</strong>: <strong>Export CSV</strong> saves <code>packetpulse-&lt;TT&gt;-&lt;UTC time&gt;.csv</code> beside the PDF of the same ticket. One row per site and family; empty cells (not zeros) where a probe had no reply. The last two columns, <code>test_latitude</code> and <code>test_longitude</code>, say where the device was when the test ran; empty when it was not known.</li>
 <li>🧪 <strong>Manual Testing Playbook</strong>:<div class="tw"><table><thead>
 <tr>
 <th>ID</th>
@@ -1785,6 +1858,13 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>The download is on the record</td>
 <td>Export a CSV; open <strong>Activity</strong></td>
 <td>An <em>Exported</em> entry naming the diagnostic</td>
+</tr>
+<tr>
+<td><code>CSV-006</code></td>
+<td>Engineer</td>
+<td>Where the test ran, as numbers</td>
+<td>Export <code>DIAG-012</code>'s CSV; export a scheduled sweep's</td>
+<td>Six-place <code>test_latitude</code>/<code>test_longitude</code> on every row of the first; empty on the second. A longitude west of Greenwich is a plain negative number. 🛑 <strong>Must NOT</strong> be written as text starting <code>'-</code>, or as 0</td>
 </tr>
 </tbody>
 </table></div>
@@ -2010,6 +2090,13 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>Open from a dual-stack connection; then from an IPv4-only one</td>
 <td><em>IPv6 active</em> with both addresses and the nearest edge; then <em>IPv4 only</em> with <em>No IPv6 connectivity</em>. 🛑 <strong>Must NOT</strong> show an ISP or AS number, or contact <code>ipinfo.io</code></td>
 </tr>
+<tr>
+<td><code>DEV-016</code></td>
+<td>Engineer</td>
+<td>A filed run says where it was taken</td>
+<td>With location recorded for the engineer, run on a phone and <strong>Attach to a ticket</strong></td>
+<td>The ticket shows <em>Tested from</em> the phone's coordinates as it was filed, beside the sign-in place. With location refused: <em>Unknown: location was refused on the device</em></td>
+</tr>
 </tbody>
 </table></div>
 </li>
@@ -2029,18 +2116,16 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <h2 id="group-5-monitoring">Group 5 — Monitoring<a class="anchor" href="#group-5-monitoring" aria-label="Link to this section">#</a></h2>
 <p>Turning on-demand testing into a continuous watch, with alerts that mean something.</p>
 <hr>
-<h3 id="51-sla-targets-schedules-alerts-and-maintenance">5.1 📈 SLA targets, schedules, alerts and maintenance<a class="anchor" href="#51-sla-targets-schedules-alerts-and-maintenance" aria-label="Link to this section">#</a></h3>
-<p><strong>Screen:</strong> Configure → <strong>Monitoring</strong> · <strong>Routes:</strong> <code>/monitor/sla/*</code>, <code>/monitor/schedule/*</code>, <code>/monitor/channel/*</code>, <code>/monitor/maintenance/*</code>, <code>GET /monitor/alert/list</code>, <code>GET /monitor/slareport</code>, <code>GET /monitor/slareport.pdf</code>, <code>GET /monitor/trend</code> · <strong>Capabilities:</strong> <code>sla_view</code>, <code>sla_manage</code>, <code>schedule_manage</code>, <code>report_view</code>, <code>report_export</code></p>
+<h3 id="51-the-sla-report-and-the-monitoring-behind-it">5.1 📈 The SLA report, and the monitoring behind it<a class="anchor" href="#51-the-sla-report-and-the-monitoring-behind-it" aria-label="Link to this section">#</a></h3>
+<p><strong>Screen:</strong> Configure → <strong>Monitoring</strong> (the SLA report) · <strong>Routes:</strong> <code>GET /monitor/slareport</code>, <code>GET /monitor/slareport.pdf</code>, <code>GET /monitor/trend</code>; through the API only: <code>/monitor/sla/*</code>, <code>/monitor/schedule/*</code>, <code>/monitor/channel/*</code>, <code>/monitor/maintenance/*</code>, <code>GET /monitor/alert/list</code> · <strong>Capabilities:</strong> <code>report_view</code>, <code>report_export</code>; through the API: <code>sla_view</code>, <code>sla_manage</code>, <code>schedule_manage</code></p>
 <ul>
-<li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: Targets per site for latency, jitter, loss and MOS, graded <strong>OK / Degraded / Breached</strong> — Degraded warns at 80% of a threshold, before the customer notices. Alerts that do not cry wolf: a breach must persist for the sweeps you choose, then is announced once, its recovery once, and an outage that follows a warning is escalated even inside the quiet period. Planned work is excluded from the figure a customer is measured against, and the monthly SLA report — availability, loss, jitter and MOS, IPv4 and IPv6 separately — exports as the document for the customer.</li>
+<li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: The monthly SLA report — availability, loss, jitter and MOS per site, IPv4 and IPv6 separately — exports as the document for the customer. Behind it, every result is graded against targets for latency, jitter, loss and MOS: <strong>OK / Degraded / Breached</strong>, with Degraded warning at 80% of a threshold, before the customer notices. Alerts do not cry wolf: a breach must persist for the sweeps chosen, then is announced once, its recovery once, and an outage that follows a warning is escalated even inside the quiet period. Planned work is excluded from the figure a customer is measured against.</li>
 <li>📖 <strong>User Guide &amp; Operational Flow</strong>:
 <ul>
-<li><strong>Service targets:</strong> maximum latency, jitter and loss and a minimum MOS; mark one <strong>default</strong> so new sites are measured against it.</li>
-<li><strong>Schedules:</strong> every <em>N</em> minutes (five or more), over <strong>every enabled site</strong> (including ones added later) or named sites. <strong>Run now</strong> runs one at once.</li>
-<li><strong>Alert channels:</strong> an email address or an HTTPS webhook. <strong>Send a test</strong> proves it works now.</li>
-<li><strong>Alert history:</strong> what fired, when, and whether it was delivered.</li>
-<li><strong>Maintenance windows:</strong> the whole organisation, a region or named sites, in the window's own timezone. Results inside are <em>excluded</em>: no alert, no effect on availability.</li>
-<li><strong>SLA report:</strong> a month per site; a month with no measurements has no figure — never 100%. <strong>Export PDF</strong>.</li>
+<li><strong>Monitoring</strong> is the SLA report, for anyone who may read reports (<code>report_view</code>): last month first, or any of the eleven before it under <strong>Month</strong>.</li>
+<li><strong>Availability</strong>, <strong>Sites on target</strong> and <strong>Excluded by maintenance</strong> head the month; each site has a line with round-trip time, loss, jitter and MOS, and <em>On target</em> or <em>Missed target</em>. A month with no measurements has no figure — never 100%.</li>
+<li><strong>Export PDF</strong>, for those who may export reports (<code>report_export</code>).</li>
+<li>Service targets, schedules, alert channels, alert history and planned work are no longer on the screen (removed October 2026). The server still grades, runs schedules, sends alerts and excludes planned work, for what was set up before and for what is set up through the API routes above.</li>
 </ul>
 </li>
 <li>🧪 <strong>Manual Testing Playbook</strong>:<div class="tw"><table><thead>
@@ -2057,28 +2142,28 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td><code>MON-001</code></td>
 <td>Administrator</td>
 <td>Grading against a target</td>
-<td>Target: latency 100 ms; a site averaging 85 ms; another at 120 ms</td>
+<td>Through the API, a target: latency 100 ms; a site averaging 85 ms; another at 120 ms</td>
 <td>85 ms → <em>Degraded</em> (past 80% of 100); 120 ms → <em>Breached</em>; one under 80 ms → <em>OK</em></td>
 </tr>
 <tr>
 <td><code>MON-002</code></td>
 <td>Administrator</td>
 <td>The default target applies to new sites</td>
-<td>Mark a target default; add a site with no target; run</td>
+<td>Through the API, mark a target default; add a site with no target; run</td>
 <td>The new site is graded against the default</td>
 </tr>
 <tr>
 <td><code>MON-003</code></td>
 <td>Administrator</td>
 <td>Schedules run, and run now</td>
-<td>Schedule every 5 minutes; <strong>Run now</strong></td>
+<td>Through the API, a schedule every 5 minutes; <code>POST /monitor/schedule/{scheduleId}/run</code></td>
 <td>A diagnostic <code>&lt;prefix&gt;-&lt;UTC date-time&gt;</code> appears in History at once, and again every 5 minutes. An interval under 5 is refused</td>
 </tr>
 <tr>
 <td><code>MON-004</code></td>
 <td>Administrator</td>
 <td>A breach is announced once, its recovery once</td>
-<td>Webhook channel; a site that fails three sweeps then recovers, damping set to 2 consecutive breaches</td>
+<td>Through the API, a webhook channel; a site that fails three sweeps then recovers, damping set to 2 consecutive breaches</td>
 <td>One alert after the 2nd failing sweep, none on the 3rd, one recovery alert. 🛑 <strong>Must NOT</strong> alert on every failing sweep</td>
 </tr>
 <tr>
@@ -2092,14 +2177,14 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td><code>MON-006</code></td>
 <td>Administrator</td>
 <td>A webhook cannot reach the host</td>
-<td>Add a channel <code>https://127.0.0.1/hook</code>, then <code>http://example.com/hook</code></td>
+<td><code>POST /monitor/channel/add</code> with <code>https://127.0.0.1/hook</code>, then <code>http://example.com/hook</code></td>
 <td>Both refused: loopback is not a destination, and a webhook must be HTTPS</td>
 </tr>
 <tr>
 <td><code>MON-007</code></td>
 <td>Administrator</td>
 <td>Maintenance excludes and silences</td>
-<td>A window over a failing site, in <code>Asia/Kolkata</code>, viewed from a device in another timezone</td>
+<td>Through the API, a window over a failing site, in <code>Asia/Kolkata</code></td>
 <td>Results inside are <em>excluded</em>: no alert, availability unaffected; the window's hours are Kolkata wall-clock hours</td>
 </tr>
 <tr>
@@ -2107,13 +2192,13 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>Engineer</td>
 <td>The SLA report says what it measured</td>
 <td>Open a month with data and one without</td>
-<td>With data: availability, loss, jitter and MOS per site, IPv6 lines marked <code>(v6)</code>; without: no figure. 🛑 <strong>Must NOT</strong> show 100% for an unmeasured month</td>
+<td>With data: availability, loss, jitter and MOS per site, IPv6 lines marked <code>IPv6 · not counted</code>; without: no figure. 🛑 <strong>Must NOT</strong> show 100% for an unmeasured month</td>
 </tr>
 <tr>
 <td><code>MON-009</code></td>
 <td>Engineer</td>
 <td>The report exports</td>
-<td><strong>Export PDF</strong> on the SLA report</td>
+<td><strong>Export PDF</strong> on Monitoring</td>
 <td>The month's document, with the Loss column and the <code>(v6*)</code> footnote where report-only lines appear</td>
 </tr>
 <tr>
@@ -2123,6 +2208,20 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td><code>./packetpulsetest.sh monitor</code></td>
 <td>Passes — grading, damping, recovery and maintenance against a live server</td>
 </tr>
+<tr>
+<td><code>MON-011</code></td>
+<td>Administrator</td>
+<td>Monitoring is the report alone</td>
+<td>Open <strong>Monitoring</strong></td>
+<td>The month's report, and nothing else. 🛑 <strong>Must NOT</strong> offer <em>Service targets</em>, <em>Schedules</em>, <em>Alert channels</em>, <em>Alert history</em> or <em>Planned work</em></td>
+</tr>
+<tr>
+<td><code>MON-012</code></td>
+<td>Administrator</td>
+<td>Monitoring follows the right to read reports</td>
+<td>A role with <code>sla_view</code> but not <code>report_view</code>; then one with <code>report_view</code> only</td>
+<td>The first has no <strong>Monitoring</strong> in the navigation; the second has it, and the report opens. Without <code>report_export</code>, no <strong>Export PDF</strong></td>
+</tr>
 </tbody>
 </table></div>
 </li>
@@ -2131,7 +2230,8 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <li>Damping: <code>DecideAlert</code> in <code>packetpulsego/pkg/monitormicroservice/monitordomain/shared/</code> (consecutive breaches, cooldown, escalation); runner: <code>packetpulsego/pkg/monitormicroservice/monitorservice/MonitorScheduleRunner.go</code> (claims due schedules with <code>FOR UPDATE SKIP LOCKED</code>).</li>
 <li>Results are partitioned by month and rolled up daily per site <strong>and family</strong> (<code>packetpulsego/pkg/common/dbclient/migrations/0012_2026_10_01_result_partitioning_and_retention.sql</code>, <code>0023</code>); the retention runner keeps partitions three months ahead.</li>
 <li>🔒 Report-only IPv6 never enters availability (<code>NOT report_only</code> in the rollup and the SLA queries).</li>
-<li>Coverage: <code>packetpulsetest/golang/monitorconformance/</code>, <code>packetpulsego/pkg/monitormicroservice/**</code>, <code>packetpulseflutter/test/monitor_screen_test.dart</code>, <code>packetpulseflutter/test/monitor_flows_test.dart</code>.</li>
+<li>The screen: <code>packetpulseflutter/lib/monitormicroservice/presentation/screens/MonitorScreen.dart</code>; its navigation entry is gated on <code>report_view</code> in <code>packetpulseflutter/lib/common/presentation/PacketPulseShell.dart</code>.</li>
+<li>Coverage: <code>packetpulsetest/golang/monitorconformance/</code>, <code>packetpulsego/pkg/monitormicroservice/**</code>, <code>packetpulseflutter/test/monitor_screen_test.dart</code>, <code>packetpulseflutter/test/shell_test.dart</code>.</li>
 </ul>
 </li>
 </ul>
@@ -2600,6 +2700,75 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 </li>
 </ul>
 <hr>
+<h3 id="74-branding">7.4 🎨 Branding<a class="anchor" href="#74-branding" aria-label="Link to this section">#</a></h3>
+<p><strong>Screen:</strong> Configure → <strong>Branding</strong> · <strong>Routes:</strong> <code>GET /organisation/brand</code>, <code>PUT/DELETE /organisation/brand/{part}</code> · <strong>Capability:</strong> <code>staff_manage</code> to change; any member reads</p>
+<ul>
+<li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: The customer's own logo heads every report their engineers attach to a ticket — the ticket's PDF, a sweep's and the monthly availability report — and their own icon sits in every one of their people's browser tabs. Another organisation on the same service never sees either.</li>
+<li>📖 <strong>User Guide &amp; Operational Flow</strong>: <strong>Report logo</strong>: <strong>Upload image</strong> (PNG, JPEG or GIF, up to 2400 by 1200 pixels). It is printed on the report's dark band before PacketPulse's name: white lettering suits it best, and a dark logo is printed on a white panel. <strong>Browser icon</strong>: up to 512 by 512, square works best; it replaces PacketPulse's tab icon for everyone in the organisation once they sign in, and PacketPulse's returns when they sign out. <strong>Replace</strong> and <strong>Remove</strong> each part on its own. Images are uploaded from PacketPulse in a web browser. Use only a logo your organisation has the right to use.</li>
+<li>🧪 <strong>Manual Testing Playbook</strong>:<div class="tw"><table><thead>
+<tr>
+<th>ID</th>
+<th>Persona</th>
+<th>Scenario</th>
+<th>Steps</th>
+<th>Observable Expected Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>BRAND-001</code></td>
+<td>Administrator</td>
+<td>A logo heads every report</td>
+<td>Upload a white-lettered PNG logo; export a ticket's PDF, a run's PDF and the month's availability PDF</td>
+<td>The logo before <em>PacketPulse</em> on every page of all three, straight on the dark band</td>
+</tr>
+<tr>
+<td><code>BRAND-002</code></td>
+<td>Administrator</td>
+<td>A dark logo still shows</td>
+<td>Upload a dark logo on a clear background; export a PDF</td>
+<td>The logo on a white panel, readable. 🛑 <strong>Must NOT</strong> vanish into the band</td>
+</tr>
+<tr>
+<td><code>BRAND-003</code></td>
+<td>Engineer</td>
+<td>The tab wears the organisation's icon</td>
+<td>Administrator uploads an icon; an engineer signs in; then signs out</td>
+<td>The tab shows the organisation's icon after sign-in and PacketPulse's after sign-out</td>
+</tr>
+<tr>
+<td><code>BRAND-004</code></td>
+<td>Administrator</td>
+<td>What is not an image is refused</td>
+<td>Upload an SVG, a text file renamed <code>.png</code>, and a 5000-pixel-wide PNG</td>
+<td>Each refused under its own part with the reason; the stored logo unchanged</td>
+</tr>
+<tr>
+<td><code>BRAND-005</code></td>
+<td>RIVAL engineer</td>
+<td>A brand is the organisation's own</td>
+<td>Sign in to RIVAL; export a PDF</td>
+<td>No ACME logo or icon anywhere. 🛑 <strong>Must NOT</strong> show another organisation's brand</td>
+</tr>
+<tr>
+<td><code>BRAND-006</code></td>
+<td>Engineer</td>
+<td>Changing the brand needs <code>staff_manage</code></td>
+<td>As an engineer, <code>PUT /organisation/brand/logo</code></td>
+<td>403; no <strong>Branding</strong> in the rail</td>
+</tr>
+</tbody>
+</table></div>
+</li>
+<li>⚙️ <strong>Developer Guide &amp; Release Confidence</strong>:
+<ul>
+<li><code>packetpulsego/pkg/common/orgbrand/</code>: <code>Normalise</code> checks the declared size before decoding (so a small file claiming a vast canvas costs nothing) and redraws every upload as a plain RGBA PNG; <code>DrawLogo</code> prints it, and a logo the PDF writer cannot read costs the report its logo, never the report. Stored in <code>organisation_brand</code> (migration 0029), one row per organisation.</li>
+<li>Reports get the logo through <code>SetReportBranding</code> on the diagnostic, ping and monitor services. The tab icon: <code>packetpulseflutter/lib/common/services/PacketPulseFavicon.dart</code>, applied by the shell after sign-in and removed when it closes.</li>
+<li>Coverage: <code>packetpulsego/pkg/common/orgbrand/</code>, <code>packetpulsego/pkg/staffmicroservice/staffapp/</code>, <code>packetpulsego/pkg/pingmicroservice/pingreport/</code>, <code>packetpulseflutter/test/brand_screen_test.dart</code>, <code>packetpulseflutter/test/shell_branding_test.dart</code>.</li>
+</ul>
+</li>
+</ul>
+<hr>
 <h2 id="feature-coverage-matrix">Feature → Coverage Matrix<a class="anchor" href="#feature-coverage-matrix" aria-label="Link to this section">#</a></h2>
 <p>What guards each area automatically, so a manual pass can spend its time where automation cannot reach: real devices, real browsers, real file servers, and judgement.</p>
 <div class="tw"><table><thead>
@@ -2687,7 +2856,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td><code>MON-*</code></td>
 <td><code>packetpulsego/pkg/monitormicroservice/</code></td>
 <td><code>monitor</code></td>
-<td><code>packetpulseflutter/test/monitor_flows_test.dart</code></td>
+<td><code>packetpulseflutter/test/monitor_screen_test.dart</code></td>
 </tr>
 <tr>
 <td>Results API</td>
@@ -2723,6 +2892,13 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td><code>packetpulsego/pkg/initmicroservice/</code></td>
 <td><code>translation</code></td>
 <td><code>packetpulseflutter/test/settings_screen_test.dart</code></td>
+</tr>
+<tr>
+<td>Branding</td>
+<td><code>BRAND-*</code></td>
+<td><code>packetpulsego/pkg/common/orgbrand/</code></td>
+<td><code>acl</code>, <code>tenancy</code></td>
+<td><code>packetpulseflutter/test/brand_screen_test.dart</code></td>
 </tr>
 </tbody>
 </table></div>
@@ -2776,9 +2952,9 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <h3 id="jrn-005-monitoring-catches-an-outage-and-its-recovery">JRN-005 · Monitoring catches an outage and its recovery<a class="anchor" href="#jrn-005-monitoring-catches-an-outage-and-its-recovery" aria-label="Link to this section">#</a></h3>
 <p><strong>Covers:</strong> <code>MON-001</code>–<code>MON-005</code>, <code>MON-007</code></p>
 <ol>
-<li>A default target; a schedule every 5 minutes over every enabled site; a webhook channel; damping 2.</li>
+<li>Through the API: a default target; a schedule every 5 minutes over every enabled site; a webhook channel; damping 2.</li>
 <li>Black-hole one site for 15 minutes, then restore it.</li>
-<li>Declare a maintenance window over another site and break it inside the window.</li>
+<li>Through the API, declare a maintenance window over another site, and break that site inside the window.</li>
 </ol>
 <p><strong>Expected:</strong> one breach alert, one recovery; the maintenance site raises nothing and its availability is untouched.</p>
 <hr>
@@ -3258,6 +3434,14 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/packetpulse/releases/&lt;previous&gt;
 <td style="text-align:center">✅</td>
 </tr>
 <tr>
+<td><code>POST</code></td>
+<td><code>/dnssite/importfile</code></td>
+<td>member</td>
+<td><code>dns_site_manage</code></td>
+<td style="text-align:center">required</td>
+<td style="text-align:center">✅</td>
+</tr>
+<tr>
 <td><code>GET</code></td>
 <td><code>/dnssite/list</code></td>
 <td>member</td>
@@ -3552,6 +3736,30 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/packetpulse/releases/&lt;previous&gt;
 <td><code>report_view</code></td>
 <td style="text-align:center">—</td>
 <td style="text-align:center">—</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/organisation/brand</code></td>
+<td>member</td>
+<td>—</td>
+<td style="text-align:center">—</td>
+<td style="text-align:center">—</td>
+</tr>
+<tr>
+<td><code>DELETE</code></td>
+<td><code>/organisation/brand/{part}</code></td>
+<td>member</td>
+<td><code>staff_manage</code></td>
+<td style="text-align:center">—</td>
+<td style="text-align:center">✅</td>
+</tr>
+<tr>
+<td><code>PUT</code></td>
+<td><code>/organisation/brand/{part}</code></td>
+<td>member</td>
+<td><code>staff_manage</code></td>
+<td style="text-align:center">—</td>
+<td style="text-align:center">✅</td>
 </tr>
 <tr>
 <td><code>GET</code></td>
@@ -4232,6 +4440,10 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/packetpulse/releases/&lt;previous&gt;
 <tr>
 <td><code>0028_2026_10_05_rename_the_partition_function.sql</code></td>
 <td>The partition function under its PacketPulse name, on every database.</td>
+</tr>
+<tr>
+<td><code>0029_2026_10_07_endpoint_location_and_report_branding.sql</code></td>
+<td>Where each endpoint is, where each test was run, how a test's endpoints were chosen, and an organisation's own logo and icon.</td>
 </tr>
 </tbody>
 </table></div>

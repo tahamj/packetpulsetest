@@ -8,7 +8,8 @@
     "timeout_ms",
     "observations",
     "download_mbps",
-    "upload_mbps"
+    "upload_mbps",
+    "location"
   ],
   "fields": [
     "target_label",

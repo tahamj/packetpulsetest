@@ -25,6 +25,8 @@
     "sla_status",
     "fault_class",
     "error_message",
-    "checked_on_utc"
+    "checked_on_utc",
+    "test_latitude",
+    "test_longitude"
   ]
 }

@@ -70,3 +70,25 @@ The operator of PacketPulse itself, each person's own settings, and the public f
   - The deploy asserts `/` and `/app/` differ, so the nginx misroute that once served a blank app is caught by the deploy.
 
 ---
+
+### 7.4 🎨 Branding
+
+**Screen:** Configure → **Branding** · **Routes:** `GET /organisation/brand`, `PUT/DELETE /organisation/brand/{part}` · **Capability:** `staff_manage` to change; any member reads
+
+- 🌟 **Commercial Presentation & Sales Pitch**: The customer's own logo heads every report their engineers attach to a ticket — the ticket's PDF, a sweep's and the monthly availability report — and their own icon sits in every one of their people's browser tabs. Another organisation on the same service never sees either.
+- 📖 **User Guide & Operational Flow**: **Report logo**: **Upload image** (PNG, JPEG or GIF, up to 2400 by 1200 pixels). It is printed on the report's dark band before PacketPulse's name: white lettering suits it best, and a dark logo is printed on a white panel. **Browser icon**: up to 512 by 512, square works best; it replaces PacketPulse's tab icon for everyone in the organisation once they sign in, and PacketPulse's returns when they sign out. **Replace** and **Remove** each part on its own. Images are uploaded from PacketPulse in a web browser. Use only a logo your organisation has the right to use.
+- 🧪 **Manual Testing Playbook**:
+  | ID | Persona | Scenario | Steps | Observable Expected Result |
+  |---|---|---|---|---|
+  | `BRAND-001` | Administrator | A logo heads every report | Upload a white-lettered PNG logo; export a ticket's PDF, a run's PDF and the month's availability PDF | The logo before *PacketPulse* on every page of all three, straight on the dark band |
+  | `BRAND-002` | Administrator | A dark logo still shows | Upload a dark logo on a clear background; export a PDF | The logo on a white panel, readable. 🛑 **Must NOT** vanish into the band |
+  | `BRAND-003` | Engineer | The tab wears the organisation's icon | Administrator uploads an icon; an engineer signs in; then signs out | The tab shows the organisation's icon after sign-in and PacketPulse's after sign-out |
+  | `BRAND-004` | Administrator | What is not an image is refused | Upload an SVG, a text file renamed `.png`, and a 5000-pixel-wide PNG | Each refused under its own part with the reason; the stored logo unchanged |
+  | `BRAND-005` | RIVAL engineer | A brand is the organisation's own | Sign in to RIVAL; export a PDF | No ACME logo or icon anywhere. 🛑 **Must NOT** show another organisation's brand |
+  | `BRAND-006` | Engineer | Changing the brand needs `staff_manage` | As an engineer, `PUT /organisation/brand/logo` | 403; no **Branding** in the rail |
+- ⚙️ **Developer Guide & Release Confidence**:
+  - `packetpulsego/pkg/common/orgbrand/`: `Normalise` checks the declared size before decoding (so a small file claiming a vast canvas costs nothing) and redraws every upload as a plain RGBA PNG; `DrawLogo` prints it, and a logo the PDF writer cannot read costs the report its logo, never the report. Stored in `organisation_brand` (migration 0029), one row per organisation.
+  - Reports get the logo through `SetReportBranding` on the diagnostic, ping and monitor services. The tab icon: `packetpulseflutter/lib/common/services/PacketPulseFavicon.dart`, applied by the shell after sign-in and removed when it closes.
+  - Coverage: `packetpulsego/pkg/common/orgbrand/`, `packetpulsego/pkg/staffmicroservice/staffapp/`, `packetpulsego/pkg/pingmicroservice/pingreport/`, `packetpulseflutter/test/brand_screen_test.dart`, `packetpulseflutter/test/shell_branding_test.dart`.
+
+---

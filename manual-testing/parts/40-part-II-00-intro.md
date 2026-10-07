@@ -10,7 +10,7 @@ Run every case on a disposable stack (Part 0 §0.3) with **two organisations of 
 | 2 · People | Staff · Roles and permissions · Sessions and licence · Check-ins · Activity | `STF-*`, `ACL-*`, `WHO-*`, `CHK-*`, `AUD-*` |
 | 3 · Diagnostics | Sites · Diagnostics and results · IPv6 · CSV · History and dashboard | `SITE-*`, `DIAG-*`, `V6-*`, `CSV-*`, `HIST-*` |
 | 4 · The customer's side | Run diagnostic, from this device | `DEV-*` |
-| 5 · Monitoring | SLA targets, schedules, alerts, maintenance, SLA report | `MON-*` |
+| 5 · Monitoring | SLA report; targets, schedules, alerts and maintenance through the API | `MON-*` |
 | 6 · Integrations | Results API keys · Result export · Directory | `API-*`, `EXP-*`, `LDAP-*` |
 | 7 · Platform and settings | Platform console · Settings · Public site | `PLAT-*`, `SET-*`, `WEB-*` |
 

@@ -14,7 +14,7 @@
 
 | 🧭 Screens | 🔌 API routes | 🔐 Capabilities | 🗄️ Migrations | 💬 Catalogue strings | ❓ Help topics | 🧪 Guard suites |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| **16** <br><sub>in the navigation rail</sub> | **104** <br><sub>under `/api/v1`</sub> | **17** <br><sub>3 built-in roles</sub> | **28** <br><sub>applied at boot</sub> | **927** <br><sub>English, server-served</sub> | **18** <br><sub>one per screen</sub> | **11** <br><sub>+ `load`, opt-in</sub> |
+| **17** <br><sub>in the navigation rail</sub> | **108** <br><sub>under `/api/v1`</sub> | **17** <br><sub>3 built-in roles</sub> | **29** <br><sub>applied at boot</sub> | **972** <br><sub>English, server-served</sub> | **19** <br><sub>one per screen</sub> | **11** <br><sub>+ `load`, opt-in</sub> |
 
 <br>
 
@@ -259,7 +259,7 @@ Run every case on a disposable stack (Part 0 §0.3) with **two organisations of 
 | 2 · People | Staff · Roles and permissions · Sessions and licence · Check-ins · Activity | `STF-*`, `ACL-*`, `WHO-*`, `CHK-*`, `AUD-*` |
 | 3 · Diagnostics | Sites · Diagnostics and results · IPv6 · CSV · History and dashboard | `SITE-*`, `DIAG-*`, `V6-*`, `CSV-*`, `HIST-*` |
 | 4 · The customer's side | Run diagnostic, from this device | `DEV-*` |
-| 5 · Monitoring | SLA targets, schedules, alerts, maintenance, SLA report | `MON-*` |
+| 5 · Monitoring | SLA report; targets, schedules, alerts and maintenance through the API | `MON-*` |
 | 6 · Integrations | Results API keys · Result export · Directory | `API-*`, `EXP-*`, `LDAP-*` |
 | 7 · Platform and settings | Platform console · Settings · Public site | `PLAT-*`, `SET-*`, `WEB-*` |
 
@@ -473,10 +473,10 @@ The core of the product: what to test, testing it against a ticket, and reading 
 
 ### 3.1 🌐 Sites
 
-**Screen:** Configure → **DNS sites** · **Routes:** `GET /dnssite/list`, `POST /dnssite/add`, `POST /dnssite/bulkimport`, `PUT/DELETE /dnssite/{dnsSiteId}` · **Capabilities:** `dns_site_view`, `dns_site_manage`
+**Screen:** Configure → **DNS sites** · **Routes:** `GET /dnssite/list`, `POST /dnssite/add`, `POST /dnssite/bulkimport`, `POST /dnssite/importfile`, `PUT/DELETE /dnssite/{dnsSiteId}` · **Capabilities:** `dns_site_view`, `dns_site_manage`
 
-- 🌟 **Commercial Presentation & Sales Pitch**: Paste a whole inventory in one go — one bad line never rejects the rest — and PacketPulse refuses to be turned against its own host: loopback, link-local and cloud-metadata addresses are never probed, whatever a site says.
-- 📖 **User Guide & Operational Flow**: **Add site** with a name, an IP address or hostname, an optional circuit ID and SLA policy. **Bulk import** takes lines, commas or spaces; `Branch 12=10.0.0.1` names a site. Each entry is reported as added, a duplicate, or invalid with the reason.
+- 🌟 **Commercial Presentation & Sales Pitch**: Every city its own destinations, as many as it needs: give each endpoint its position and a field engineer's test sweeps the city they are standing in, without their choosing anything. Drop the customer's spreadsheet on the page to add or place hundreds at once — one bad row never rejects the rest — and PacketPulse refuses to be turned against its own host: loopback, link-local and cloud-metadata addresses are never probed, whatever a site says.
+- 📖 **User Guide & Operational Flow**: **Add site** with a name, an IP address or hostname, an optional circuit ID, its **City or region**, its **Latitude** and **Longitude** (both or neither) and an SLA policy. The list shows each endpoint's position, or *No position*. **Import file** takes a CSV file dropped on the page or chosen, or rows pasted from a spreadsheet: the first row names the columns — *Name*, *Address*, *City*, *Latitude*, *Longitude*, only *Address* required, in any order. A row whose address is already monitored updates that endpoint with the columns given and leaves the rest; any other row adds one. Each row is reported, a refused one by its line. **Bulk import** still takes plain addresses by lines, commas or spaces; `Branch 12=10.0.0.1` names a site. There is no limit on how many endpoints an organisation or a city has.
 - 🧪 **Manual Testing Playbook**:
   | ID | Persona | Scenario | Steps | Observable Expected Result |
   |---|---|---|---|---|
@@ -485,9 +485,16 @@ The core of the product: what to test, testing it against a ticket, and reading 
   | `SITE-003` | Administrator | Labels with spaces survive | Bulk import `Branch 12=10.0.0.12` | One site named `Branch 12`. 🛑 **Must NOT** split into `Branch` and `12` |
   | `SITE-004` | Engineer | The host is never a target | Add `127.0.0.1`, `169.254.169.254` and `::1`; run a diagnostic over them | Each result is a refusal (*destination refused by probe policy*), never a measurement. 🛑 **Must NOT** send traffic to loopback or cloud metadata |
   | `SITE-005` | RIVAL administrator | The same address in two organisations | RIVAL adds `203.0.113.10` too | Allowed — the endpoint is unique per organisation, not globally |
+  | `SITE-006` | Administrator | A position is both halves or neither | Add a site with only a latitude; then a longitude of `190`; then both blank | Refused beside the field each time, nothing sent; the blank pair saves with *No position*. 🛑 **Must NOT** store half a position, or 0, 0 for none |
+  | `SITE-007` | Administrator | A dropped spreadsheet adds and places | In a browser, **Import file**; drag a CSV with `Name,Address,City,Latitude,Longitude` and four rows, one with no address, onto the page; **Import** | *2 added and 1 updated, of 4 rows*-style summary; the row with no address named by its line; the list shows each position. 🛑 **Must NOT** reject the whole file for one bad row |
+  | `SITE-008` | Administrator | Positions for endpoints you already have | Edit a site's circuit and notes; import a file of `Address,Latitude,Longitude` naming it | The site gains its position; its name, city, circuit, notes and enabled state are unchanged. 🛑 **Must NOT** clear what the file had no column for |
+  | `SITE-009` | Administrator | Rows pasted from Excel | Copy four rows (heading first) from Excel or Sheets; paste into **Import file**; **Import** | Read as tab-separated; each row reported. A Windows-saved CSV with `São Paulo` imports with the name intact |
+  | `SITE-010` | RIVAL administrator | An import never reaches across | RIVAL imports a file naming ACME's addresses with new positions | RIVAL gains its own endpoints; ACME's are unchanged |
 - ⚙️ **Developer Guide & Release Confidence**:
   - Policy: `packetpulsego/pkg/common/probeguard/ProbeGuardPolicy.go` — every address a name resolves to is checked, and one refused address refuses them all; IPv4-mapped IPv6 is judged as IPv4.
-  - Coverage: `packetpulsego/pkg/dnssitemicroservice/**`, `packetpulsego/pkg/common/probeguard/`, `packetpulseflutter/test/dns_site_screen_test.dart`.
+  - Positions: `latitude`/`longitude` on `dns_site`, both or neither, in `packetpulsego/pkg/common/dbclient/migrations/0029_2026_10_07_endpoint_location_and_report_branding.sql`. The nearest city is a pure function, `ChooseNearestCity` in `packetpulsego/pkg/dnssitemicroservice/dnssitedomain/shared/DnsSite.go`: the nearest **enabled** endpoint with a position names the city (its region, ignoring case), and every enabled endpoint in that city is swept; with no city, the endpoints at the nearest one's position.
+  - Import: `packetpulsego/pkg/dnssitemicroservice/dnssiteservice/DnsSiteImport.go` reads the heading row, the delimiter (tab, semicolon or comma) and a spreadsheet's byte-order mark; an existing endpoint is updated with `COALESCE`, so a column the file lacks is never cleared. Up to 5000 rows a file. The drop zone and chooser are `packetpulseflutter/lib/common/services/PacketPulseFileSource.dart`, browser-only; elsewhere the paste box alone.
+  - Coverage: `packetpulsego/pkg/dnssitemicroservice/**`, `packetpulsego/pkg/common/probeguard/`, `packetpulseflutter/test/dns_site_screen_test.dart`, `packetpulseflutter/test/dns_site_position_import_test.dart`.
   - ⚠️ **TRAP** — a licence carries a **site limit** (shown on the Platform console), but adding or importing sites does not check it yet. Do not file a site count above the limit as a regression; it is a known gap.
 
 ---
@@ -497,7 +504,7 @@ The core of the product: what to test, testing it against a ticket, and reading 
 **Screen:** Operate → **Run diagnostic**, top half (**From the server**) · **Routes:** `POST /diagnostic/submit`, `GET /diagnostic/{requestId}`, `GET /diagnostic/{requestId}/report.pdf` · **Capabilities:** `diagnostic_run`, `diagnostic_view_own` or `diagnostic_view_all`, `report_export` · **Licence:** required to run
 
 - 🌟 **Commercial Presentation & Sales Pitch**: One form, one sweep, one report against the ticket. Every figure a NOC argues about — loss, latency, RFC 3550 jitter, MOS — from the server and, in the same screen, from the engineer's own device. A lapsed licence stops new tests but never takes away the evidence already gathered.
-- 📖 **User Guide & Operational Flow**: **Run diagnostic** is one page. For anyone who may run a sweep, the sweep **From the server** is on top and the device test **From this device** (§4.1) is below it. One **Customer ID**, **TT number** and optional **Notes** serve both. Enter them, pick sites (or leave empty for every enabled site), and press **Run diagnostic**. The result shows headline cards (sites reachable, average loss, average jitter), then a row per site and family: reachable, the packet line verbatim (*Sent = 4, Received = 4, Lost = 0*), round trips, jitter, MOS with its band and SLA grade. **Export PDF** and **Export CSV** sit at the top.
+- 📖 **User Guide & Operational Flow**: **Run diagnostic** is one page. For anyone who may run a sweep, the sweep **From the server** is on top and the device test **From this device** (§4.1) is below it. One **Customer ID**, **TT number** and optional **Notes** serve both. Enter them and press **Run diagnostic**. The device is asked where it is, and the server sweeps the endpoints of the city nearest it (§3.1); with no position — location refused, no fix, or no endpoint placed yet — every enabled endpoint is swept. An engineer is told the endpoints are chosen for them and offered none to pick. Whoever manages the endpoints (`dns_site_manage`) may pick some instead, or go back with **Choose by my location**. The result says **Tested from** — the device's position as the test ran, beside the sign-in place — and **Endpoints**: the nearest city and how far away it was, every endpoint, or chosen by hand. The result shows headline cards (sites reachable, average loss, average jitter), then a row per site and family: reachable, the packet line verbatim (*Sent = 4, Received = 4, Lost = 0*), round trips, jitter, MOS with its band and SLA grade. **Export PDF** and **Export CSV** sit at the top.
 - 🧪 **Manual Testing Playbook**:
   | ID | Persona | Scenario | Steps | Observable Expected Result |
   |---|---|---|---|---|
@@ -511,15 +518,21 @@ The core of the product: what to test, testing it against a ticket, and reading 
   | `DIAG-008` | Tester | A malformed id is refused before it is looked up | `GET /diagnostic/not-a-uuid` | 400 |
   | `DIAG-009` | Engineer | The PDF is made from the record when it is asked for | Export a ticket's PDF twice, a minute apart; look for a stored copy on the server | Both carry the same measurements, drawn from the stored results at the moment each was asked for; no PDF is kept on the server. 🛑 **Must NOT** depend on a file kept on disk |
   | `DIAG-010` | Engineer | A colleague's test cannot be exported | As an engineer, `GET /diagnostic/<colleague's request id>/report.pdf` (and `.csv`) | 404, as though it did not exist. 🛑 **Must NOT** hand an engineer someone else's evidence |
+  | `DIAG-012` | Engineer | The nearest city is tested | With endpoints placed in Bengaluru and Mumbai (`SITE-007`), run from a phone in Bengaluru, allowing location | Only Bengaluru's endpoints in the result; *Endpoints: The city nearest the device, Bengaluru, N km away*; *Tested from* the phone's coordinates. 🛑 **Must NOT** sweep Mumbai |
+  | `DIAG-013` | Engineer | No position, nothing lost | Refuse location in the browser; run | Every enabled endpoint swept; *Tested from: Unknown: location was refused on the device*; *Endpoints: Every enabled endpoint* |
+  | `DIAG-014` | Engineer | An engineer cannot choose | As an engineer, open **Run diagnostic**; then `POST /diagnostic/submit` with `dns_site_ids` naming a Mumbai endpoint and a Bengaluru position | No chips, only the note that endpoints are chosen; the crafted request sweeps Bengaluru's. 🛑 **Must NOT** honour an engineer's endpoint list |
+  | `DIAG-015` | Administrator | A manager may still choose | Pick one Mumbai endpoint; run from Bengaluru | Only that endpoint; *Endpoints: Chosen by the person who ran the test*. **Choose by my location** clears the choice |
+  | `DIAG-016` | Engineer | The PDF says where | **Export PDF** of `DIAG-012` | Under the run details: *Tested from 12.97…, 77.75…, within N m    \|    Endpoints: the city nearest the device, Bengaluru, N km away* |
   | `DIAG-011` | Engineer, then Viewer | One page, one ticket | As an engineer: open **Run diagnostic**; type Customer ID, TT `TT-MAN-011` and a note; **Run diagnostic**; then **Start test** and **Attach to a ticket**. As a Viewer: open **Run diagnostic** | The engineer sees the sweep and the device test on one page, with no mode switch. **History** for `TT-MAN-011` holds the sweep and the device run, with the same Customer ID and note. The Viewer gets the device test alone, with no ticket fields. 🛑 **Must NOT** ask for the ticket twice, or offer a separate *From the server* page or *Test from this device* entry in the rail |
 - ⚙️ **Developer Guide & Release Confidence**:
   - Engine: `packetpulsego/pkg/pingmicroservice/pingprobe/PingProbeRunner.go` (pro-bing, unprivileged ICMP, TCP fallback); jitter: `packetpulsego/pkg/pingmicroservice/pingprobe/PingVoiceQuality.go` (`InterarrivalJitter`, RFC 3550).
   - 🔒 Results are saved under their **own** deadline, never the sweep's: a sweep that runs long still stores everything it measured (`load` suite §4.5 proves it, and goes red with the old bug restored).
   - The screen is `packetpulseflutter/lib/diagnosticmicroservice/presentation/screens/RunDiagnosticScreen.dart`. The sweep is `packetpulseflutter/lib/diagnosticmicroservice/presentation/widgets/DiagnosticSweepForm.dart`, and the ticket both filings use is `packetpulseflutter/lib/diagnosticmicroservice/presentation/widgets/DiagnosticTicket.dart`. The sweep and attaching a device run need an organisation and `diagnostic_run`, as the sweep's own destination used to.
   - Path analysis was removed in `packetpulsego/pkg/common/dbclient/migrations/0027_2026_10_05_path_analysis_removed.sql`: `ping_hop` and the fault verdict columns are no longer written, and the rows already stored stay. A client built before then still sends `trace_failures`; the server accepts and ignores it, because decoding is strict and refusing it would fail every run that client made.
+  - Endpoint choice: `chooseEndpoints` in `packetpulsego/pkg/diagnosticmicroservice/diagnosticservice/DiagnosticService.go`; the handler empties `dns_site_ids` for anyone without `dns_site_manage`. The request records `test_location_*`, `endpoint_selection` (`chosen`, `nearest`, `all`), `selection_city` and `selection_distance_km` (migration 0029). The sweep form reads the position only when the person's location is recorded (`capture_location`, §2.1), through `PacketPulseLocationReader`.
   - Ticket figures (`avg_loss_pct`, `max_loss_pct`, `avg_jitter_ms`) are computed in `RequestFinish` from the run's counted results (`packetpulsego/pkg/common/dbclient/migrations/0022_2026_10_03_loss_and_jitter.sql`).
   - The PDF is built on the fly from the database each time it is asked for (`packetpulsego/pkg/pingmicroservice/pingreport/PingReportPdfBuilder.go`); nothing is written to disk. Its foot names the person who ran the test and the place their session checked in from.
-  - Coverage: `packetpulsego/pkg/diagnosticmicroservice/**`, `packetpulsego/pkg/pingmicroservice/**`, `packetpulseflutter/test/diagnostic_sweep_form_test.dart`, `packetpulseflutter/test/run_diagnostic_screen_test.dart`, the `tenancy` and `contract` suites.
+  - Coverage: `packetpulsego/pkg/diagnosticmicroservice/**`, `packetpulsego/pkg/pingmicroservice/**`, `packetpulseflutter/test/diagnostic_sweep_form_test.dart`, `packetpulseflutter/test/diagnostic_endpoint_choice_test.dart`, `packetpulseflutter/test/run_diagnostic_screen_test.dart`, the `tenancy` and `contract` suites.
 
 ---
 
@@ -547,7 +560,7 @@ The core of the product: what to test, testing it against a ticket, and reading 
 **Where:** **Export CSV** on every result · **Route:** `GET /diagnostic/{requestId}/report.csv` · **Capability:** `report_export`
 
 - 🌟 **Commercial Presentation & Sales Pitch**: The same results, in the columns an IT system imports, in one click — and safe to open: a site name typed as a spreadsheet formula is written as text, so an export can never run code on someone else's desk.
-- 📖 **User Guide & Operational Flow**: **Export CSV** saves `packetpulse-<TT>-<UTC time>.csv` beside the PDF of the same ticket. One row per site and family; empty cells (not zeros) where a probe had no reply.
+- 📖 **User Guide & Operational Flow**: **Export CSV** saves `packetpulse-<TT>-<UTC time>.csv` beside the PDF of the same ticket. One row per site and family; empty cells (not zeros) where a probe had no reply. The last two columns, `test_latitude` and `test_longitude`, say where the device was when the test ran; empty when it was not known.
 - 🧪 **Manual Testing Playbook**:
   | ID | Persona | Scenario | Steps | Observable Expected Result |
   |---|---|---|---|---|
@@ -556,6 +569,7 @@ The core of the product: what to test, testing it against a ticket, and reading 
   | `CSV-003` | Engineer | Names in any script survive | Name a site `पुणे केंद्र`; export | The name intact (UTF-8). 🛑 **Must NOT** show mojibake |
   | `CSV-004` | Viewer | No export without `report_export` | Open a result as a Viewer | No **Export CSV** or **Export PDF**; the route answers 403 |
   | `CSV-005` | Tester | The download is on the record | Export a CSV; open **Activity** | An *Exported* entry naming the diagnostic |
+  | `CSV-006` | Engineer | Where the test ran, as numbers | Export `DIAG-012`'s CSV; export a scheduled sweep's | Six-place `test_latitude`/`test_longitude` on every row of the first; empty on the second. A longitude west of Greenwich is a plain negative number. 🛑 **Must NOT** be written as text starting `'-`, or as 0 |
 - ⚙️ **Developer Guide & Release Confidence**:
   - One writer for every CSV: `packetpulsego/pkg/diagnosticmicroservice/diagnosticexport/DiagnosticExport.go`; one projection and scanner: `packetpulsego/pkg/diagnosticmicroservice/diagnosticdomain/repository/DiagnosticExportPostgres.go` (the run's organisation must match the ticket's).
   - The browser download is `text/csv` (`packetpulseflutter/lib/common/services/PacketPulseFileSaverWeb.dart`); desktop and phone use the share sheet.
@@ -619,6 +633,7 @@ Measuring from where the person is, not from where PacketPulse is.
   | `DEV-013` | Engineer | The charts | Run 25 samples; point at the round-trip chart | **Round-trips by band** counts add up to the answered samples; pointing reads *#n*, the round-trip and the jitter so far, or *unanswered* for a gap. 🛑 **Must NOT** join the line across an unanswered sample |
   | `DEV-014` | Engineer | The probe log | Set **Timeout** to 200 ms on a slow line; run; **Clear results**; then **Clear log** | Each line is stamped *[HH:MM:SS]*: replies in green, *No answer: seq=n, timed out after 200 ms* in red, then *Finished. Queries: Sent = …* (amber when anything was lost). **Clear results** keeps the log; **Clear log** empties it to *Nothing logged yet.* |
   | `DEV-015` | Engineer | The address cards | Open from a dual-stack connection; then from an IPv4-only one | *IPv6 active* with both addresses and the nearest edge; then *IPv4 only* with *No IPv6 connectivity*. 🛑 **Must NOT** show an ISP or AS number, or contact `ipinfo.io` |
+  | `DEV-016` | Engineer | A filed run says where it was taken | With location recorded for the engineer, run on a phone and **Attach to a ticket** | The ticket shows *Tested from* the phone's coordinates as it was filed, beside the sign-in place. With location refused: *Unknown: location was refused on the device* |
 - ⚙️ **Developer Guide & Release Confidence**:
   - A browser cannot send ICMP, so the web build measures DNS-over-HTTPS (Cloudflare) or an HTTPS reach to the chosen host; the app on a desktop or phone can also ping it. Jitter is RFC 3550 with the standard deviation beside it.
   - Target hidden: the *Testing against* panel, the *Target* line and the **Change target** dialog are kept and tested behind `testTargetShown = false` in `packetpulseflutter/lib/common/config/PacketPulseConfig.dart`, as the speed test is.
@@ -635,36 +650,37 @@ Turning on-demand testing into a continuous watch, with alerts that mean somethi
 
 ---
 
-### 5.1 📈 SLA targets, schedules, alerts and maintenance
+### 5.1 📈 The SLA report, and the monitoring behind it
 
-**Screen:** Configure → **Monitoring** · **Routes:** `/monitor/sla/*`, `/monitor/schedule/*`, `/monitor/channel/*`, `/monitor/maintenance/*`, `GET /monitor/alert/list`, `GET /monitor/slareport`, `GET /monitor/slareport.pdf`, `GET /monitor/trend` · **Capabilities:** `sla_view`, `sla_manage`, `schedule_manage`, `report_view`, `report_export`
+**Screen:** Configure → **Monitoring** (the SLA report) · **Routes:** `GET /monitor/slareport`, `GET /monitor/slareport.pdf`, `GET /monitor/trend`; through the API only: `/monitor/sla/*`, `/monitor/schedule/*`, `/monitor/channel/*`, `/monitor/maintenance/*`, `GET /monitor/alert/list` · **Capabilities:** `report_view`, `report_export`; through the API: `sla_view`, `sla_manage`, `schedule_manage`
 
-- 🌟 **Commercial Presentation & Sales Pitch**: Targets per site for latency, jitter, loss and MOS, graded **OK / Degraded / Breached** — Degraded warns at 80% of a threshold, before the customer notices. Alerts that do not cry wolf: a breach must persist for the sweeps you choose, then is announced once, its recovery once, and an outage that follows a warning is escalated even inside the quiet period. Planned work is excluded from the figure a customer is measured against, and the monthly SLA report — availability, loss, jitter and MOS, IPv4 and IPv6 separately — exports as the document for the customer.
+- 🌟 **Commercial Presentation & Sales Pitch**: The monthly SLA report — availability, loss, jitter and MOS per site, IPv4 and IPv6 separately — exports as the document for the customer. Behind it, every result is graded against targets for latency, jitter, loss and MOS: **OK / Degraded / Breached**, with Degraded warning at 80% of a threshold, before the customer notices. Alerts do not cry wolf: a breach must persist for the sweeps chosen, then is announced once, its recovery once, and an outage that follows a warning is escalated even inside the quiet period. Planned work is excluded from the figure a customer is measured against.
 - 📖 **User Guide & Operational Flow**:
-  - **Service targets:** maximum latency, jitter and loss and a minimum MOS; mark one **default** so new sites are measured against it.
-  - **Schedules:** every *N* minutes (five or more), over **every enabled site** (including ones added later) or named sites. **Run now** runs one at once.
-  - **Alert channels:** an email address or an HTTPS webhook. **Send a test** proves it works now.
-  - **Alert history:** what fired, when, and whether it was delivered.
-  - **Maintenance windows:** the whole organisation, a region or named sites, in the window's own timezone. Results inside are *excluded*: no alert, no effect on availability.
-  - **SLA report:** a month per site; a month with no measurements has no figure — never 100%. **Export PDF**.
+  - **Monitoring** is the SLA report, for anyone who may read reports (`report_view`): last month first, or any of the eleven before it under **Month**.
+  - **Availability**, **Sites on target** and **Excluded by maintenance** head the month; each site has a line with round-trip time, loss, jitter and MOS, and *On target* or *Missed target*. A month with no measurements has no figure — never 100%.
+  - **Export PDF**, for those who may export reports (`report_export`).
+  - Service targets, schedules, alert channels, alert history and planned work are no longer on the screen (removed October 2026). The server still grades, runs schedules, sends alerts and excludes planned work, for what was set up before and for what is set up through the API routes above.
 - 🧪 **Manual Testing Playbook**:
   | ID | Persona | Scenario | Steps | Observable Expected Result |
   |---|---|---|---|---|
-  | `MON-001` | Administrator | Grading against a target | Target: latency 100 ms; a site averaging 85 ms; another at 120 ms | 85 ms → *Degraded* (past 80% of 100); 120 ms → *Breached*; one under 80 ms → *OK* |
-  | `MON-002` | Administrator | The default target applies to new sites | Mark a target default; add a site with no target; run | The new site is graded against the default |
-  | `MON-003` | Administrator | Schedules run, and run now | Schedule every 5 minutes; **Run now** | A diagnostic `<prefix>-<UTC date-time>` appears in History at once, and again every 5 minutes. An interval under 5 is refused |
-  | `MON-004` | Administrator | A breach is announced once, its recovery once | Webhook channel; a site that fails three sweeps then recovers, damping set to 2 consecutive breaches | One alert after the 2nd failing sweep, none on the 3rd, one recovery alert. 🛑 **Must NOT** alert on every failing sweep |
+  | `MON-001` | Administrator | Grading against a target | Through the API, a target: latency 100 ms; a site averaging 85 ms; another at 120 ms | 85 ms → *Degraded* (past 80% of 100); 120 ms → *Breached*; one under 80 ms → *OK* |
+  | `MON-002` | Administrator | The default target applies to new sites | Through the API, mark a target default; add a site with no target; run | The new site is graded against the default |
+  | `MON-003` | Administrator | Schedules run, and run now | Through the API, a schedule every 5 minutes; `POST /monitor/schedule/{scheduleId}/run` | A diagnostic `<prefix>-<UTC date-time>` appears in History at once, and again every 5 minutes. An interval under 5 is refused |
+  | `MON-004` | Administrator | A breach is announced once, its recovery once | Through the API, a webhook channel; a site that fails three sweeps then recovers, damping set to 2 consecutive breaches | One alert after the 2nd failing sweep, none on the 3rd, one recovery alert. 🛑 **Must NOT** alert on every failing sweep |
   | `MON-005` | Administrator | An outage after a warning is escalated | Quiet period 60 min; a site goes *Degraded* (alert), then *Breached* 5 minutes later | A second, critical alert despite the quiet period |
-  | `MON-006` | Administrator | A webhook cannot reach the host | Add a channel `https://127.0.0.1/hook`, then `http://example.com/hook` | Both refused: loopback is not a destination, and a webhook must be HTTPS |
-  | `MON-007` | Administrator | Maintenance excludes and silences | A window over a failing site, in `Asia/Kolkata`, viewed from a device in another timezone | Results inside are *excluded*: no alert, availability unaffected; the window's hours are Kolkata wall-clock hours |
-  | `MON-008` | Engineer | The SLA report says what it measured | Open a month with data and one without | With data: availability, loss, jitter and MOS per site, IPv6 lines marked `(v6)`; without: no figure. 🛑 **Must NOT** show 100% for an unmeasured month |
-  | `MON-009` | Engineer | The report exports | **Export PDF** on the SLA report | The month's document, with the Loss column and the `(v6*)` footnote where report-only lines appear |
+  | `MON-006` | Administrator | A webhook cannot reach the host | `POST /monitor/channel/add` with `https://127.0.0.1/hook`, then `http://example.com/hook` | Both refused: loopback is not a destination, and a webhook must be HTTPS |
+  | `MON-007` | Administrator | Maintenance excludes and silences | Through the API, a window over a failing site, in `Asia/Kolkata` | Results inside are *excluded*: no alert, availability unaffected; the window's hours are Kolkata wall-clock hours |
+  | `MON-008` | Engineer | The SLA report says what it measured | Open a month with data and one without | With data: availability, loss, jitter and MOS per site, IPv6 lines marked `IPv6 · not counted`; without: no figure. 🛑 **Must NOT** show 100% for an unmeasured month |
+  | `MON-009` | Engineer | The report exports | **Export PDF** on Monitoring | The month's document, with the Loss column and the `(v6*)` footnote where report-only lines appear |
   | `MON-010` | Tester | The guard suite | `./packetpulsetest.sh monitor` | Passes — grading, damping, recovery and maintenance against a live server |
+  | `MON-011` | Administrator | Monitoring is the report alone | Open **Monitoring** | The month's report, and nothing else. 🛑 **Must NOT** offer *Service targets*, *Schedules*, *Alert channels*, *Alert history* or *Planned work* |
+  | `MON-012` | Administrator | Monitoring follows the right to read reports | A role with `sla_view` but not `report_view`; then one with `report_view` only | The first has no **Monitoring** in the navigation; the second has it, and the report opens. Without `report_export`, no **Export PDF** |
 - ⚙️ **Developer Guide & Release Confidence**:
   - Damping: `DecideAlert` in `packetpulsego/pkg/monitormicroservice/monitordomain/shared/` (consecutive breaches, cooldown, escalation); runner: `packetpulsego/pkg/monitormicroservice/monitorservice/MonitorScheduleRunner.go` (claims due schedules with `FOR UPDATE SKIP LOCKED`).
   - Results are partitioned by month and rolled up daily per site **and family** (`packetpulsego/pkg/common/dbclient/migrations/0012_2026_10_01_result_partitioning_and_retention.sql`, `0023`); the retention runner keeps partitions three months ahead.
   - 🔒 Report-only IPv6 never enters availability (`NOT report_only` in the rollup and the SLA queries).
-  - Coverage: `packetpulsetest/golang/monitorconformance/`, `packetpulsego/pkg/monitormicroservice/**`, `packetpulseflutter/test/monitor_screen_test.dart`, `packetpulseflutter/test/monitor_flows_test.dart`.
+  - The screen: `packetpulseflutter/lib/monitormicroservice/presentation/screens/MonitorScreen.dart`; its navigation entry is gated on `report_view` in `packetpulseflutter/lib/common/presentation/PacketPulseShell.dart`.
+  - Coverage: `packetpulsetest/golang/monitorconformance/`, `packetpulsego/pkg/monitormicroservice/**`, `packetpulseflutter/test/monitor_screen_test.dart`, `packetpulseflutter/test/shell_test.dart`.
 
 ---
 ## Group 6 — Integrations
@@ -820,6 +836,28 @@ The operator of PacketPulse itself, each person's own settings, and the public f
   - The deploy asserts `/` and `/app/` differ, so the nginx misroute that once served a blank app is caught by the deploy.
 
 ---
+
+### 7.4 🎨 Branding
+
+**Screen:** Configure → **Branding** · **Routes:** `GET /organisation/brand`, `PUT/DELETE /organisation/brand/{part}` · **Capability:** `staff_manage` to change; any member reads
+
+- 🌟 **Commercial Presentation & Sales Pitch**: The customer's own logo heads every report their engineers attach to a ticket — the ticket's PDF, a sweep's and the monthly availability report — and their own icon sits in every one of their people's browser tabs. Another organisation on the same service never sees either.
+- 📖 **User Guide & Operational Flow**: **Report logo**: **Upload image** (PNG, JPEG or GIF, up to 2400 by 1200 pixels). It is printed on the report's dark band before PacketPulse's name: white lettering suits it best, and a dark logo is printed on a white panel. **Browser icon**: up to 512 by 512, square works best; it replaces PacketPulse's tab icon for everyone in the organisation once they sign in, and PacketPulse's returns when they sign out. **Replace** and **Remove** each part on its own. Images are uploaded from PacketPulse in a web browser. Use only a logo your organisation has the right to use.
+- 🧪 **Manual Testing Playbook**:
+  | ID | Persona | Scenario | Steps | Observable Expected Result |
+  |---|---|---|---|---|
+  | `BRAND-001` | Administrator | A logo heads every report | Upload a white-lettered PNG logo; export a ticket's PDF, a run's PDF and the month's availability PDF | The logo before *PacketPulse* on every page of all three, straight on the dark band |
+  | `BRAND-002` | Administrator | A dark logo still shows | Upload a dark logo on a clear background; export a PDF | The logo on a white panel, readable. 🛑 **Must NOT** vanish into the band |
+  | `BRAND-003` | Engineer | The tab wears the organisation's icon | Administrator uploads an icon; an engineer signs in; then signs out | The tab shows the organisation's icon after sign-in and PacketPulse's after sign-out |
+  | `BRAND-004` | Administrator | What is not an image is refused | Upload an SVG, a text file renamed `.png`, and a 5000-pixel-wide PNG | Each refused under its own part with the reason; the stored logo unchanged |
+  | `BRAND-005` | RIVAL engineer | A brand is the organisation's own | Sign in to RIVAL; export a PDF | No ACME logo or icon anywhere. 🛑 **Must NOT** show another organisation's brand |
+  | `BRAND-006` | Engineer | Changing the brand needs `staff_manage` | As an engineer, `PUT /organisation/brand/logo` | 403; no **Branding** in the rail |
+- ⚙️ **Developer Guide & Release Confidence**:
+  - `packetpulsego/pkg/common/orgbrand/`: `Normalise` checks the declared size before decoding (so a small file claiming a vast canvas costs nothing) and redraws every upload as a plain RGBA PNG; `DrawLogo` prints it, and a logo the PDF writer cannot read costs the report its logo, never the report. Stored in `organisation_brand` (migration 0029), one row per organisation.
+  - Reports get the logo through `SetReportBranding` on the diagnostic, ping and monitor services. The tab icon: `packetpulseflutter/lib/common/services/PacketPulseFavicon.dart`, applied by the shell after sign-in and removed when it closes.
+  - Coverage: `packetpulsego/pkg/common/orgbrand/`, `packetpulsego/pkg/staffmicroservice/staffapp/`, `packetpulsego/pkg/pingmicroservice/pingreport/`, `packetpulseflutter/test/brand_screen_test.dart`, `packetpulseflutter/test/shell_branding_test.dart`.
+
+---
 ## Feature → Coverage Matrix
 
 What guards each area automatically, so a manual pass can spend its time where automation cannot reach: real devices, real browsers, real file servers, and judgement.
@@ -836,12 +874,13 @@ What guards each area automatically, so a manual pass can spend its time where a
 | Diagnostics, IPv6 | `DIAG-*`, `V6-*` | `packetpulsego/pkg/pingmicroservice/`, `packetpulsego/pkg/diagnosticmicroservice/` | `contract`, `tenancy`, `load` | `packetpulseflutter/test/diagnostic_sweep_form_test.dart` |
 | CSV | `CSV-*`, `API-003` | `packetpulsego/pkg/diagnosticmicroservice/diagnosticexport/` | `contract`, `tenancy`, `load` | `packetpulseflutter/test/diagnostic_history_screen_test.dart` |
 | Run diagnostic, device test | `DEV-*` | `packetpulsego/pkg/diagnosticmicroservice/diagnosticservice/` | `contract` | `packetpulseflutter/test/client_probe_run_test.dart`, `packetpulseflutter/test/client_probe_live_panels_test.dart`, `packetpulseflutter/test/run_diagnostic_screen_test.dart` |
-| Monitoring | `MON-*` | `packetpulsego/pkg/monitormicroservice/` | `monitor` | `packetpulseflutter/test/monitor_flows_test.dart` |
+| Monitoring | `MON-*` | `packetpulsego/pkg/monitormicroservice/` | `monitor` | `packetpulseflutter/test/monitor_screen_test.dart` |
 | Results API | `API-*` | `packetpulsego/pkg/common/apikeyauth/` | `contract`, `tenancy` | `packetpulseflutter/test/api_key_screen_test.dart` |
 | Result export | `EXP-*` | `packetpulsego/pkg/common/filedrop/`, `packetpulsego/pkg/exportmicroservice/` | `contract`, `acl`, `tenancy`, `audit` | `packetpulseflutter/test/result_export_screen_test.dart` |
 | Directory | `LDAP-*` | `packetpulsego/pkg/common/ldapclient/`, `packetpulsego/pkg/ldapmicroservice/` | — | `packetpulseflutter/test/ldap_settings_screen_test.dart` |
 | Platform | `PLAT-*` | `packetpulsego/pkg/platformmicroservice/` | `assignment` | `packetpulseflutter/test/platform_console_screen_test.dart` |
 | Settings, catalogue | `SET-*` | `packetpulsego/pkg/initmicroservice/` | `translation` | `packetpulseflutter/test/settings_screen_test.dart` |
+| Branding | `BRAND-*` | `packetpulsego/pkg/common/orgbrand/` | `acl`, `tenancy` | `packetpulseflutter/test/brand_screen_test.dart` |
 
 > [!NOTE]
 > What no suite covers, and why manual cases exist for it: a **real SMS** arriving on a phone (`AUTH-009`), a **real emailed code** arriving in an inbox (`AUTH-001`), **browser location prompts** (`CHK-001`, `LOC-002`), **real SFTP and FTPS servers** (`EXP-006`, `EXP-011`), **spreadsheet applications** opening the CSV (`CSV-002`), and **IPv6 on the live host** (`V6-001`).
@@ -910,9 +949,9 @@ Each journey crosses several chapters the way a real customer does. Run them on 
 
 **Covers:** `MON-001`–`MON-005`, `MON-007`
 
-1. A default target; a schedule every 5 minutes over every enabled site; a webhook channel; damping 2.
+1. Through the API: a default target; a schedule every 5 minutes over every enabled site; a webhook channel; damping 2.
 2. Black-hole one site for 15 minutes, then restore it.
-3. Declare a maintenance window over another site and break it inside the window.
+3. Through the API, declare a maintenance window over another site, and break that site inside the window.
 
 **Expected:** one breach alert, one recovery; the maintenance site raises nothing and its availability is untouched.
 
@@ -1101,6 +1140,7 @@ All routes are under `/api/v1`. **Access**: *public* (no session), *session* (si
 | `GET` | `/diagnostic/{requestId}/report.pdf` | member | `diagnostic_view_own` or `diagnostic_view_all` and `report_export` | — | ✅ |
 | `POST` | `/dnssite/add` | member | `dns_site_manage` | required | ✅ |
 | `POST` | `/dnssite/bulkimport` | member | `dns_site_manage` | required | ✅ |
+| `POST` | `/dnssite/importfile` | member | `dns_site_manage` | required | ✅ |
 | `GET` | `/dnssite/list` | member | `dns_site_view` | — | — |
 | `DELETE` | `/dnssite/{dnsSiteId}` | member | `dns_site_manage` | — | ✅ |
 | `PUT` | `/dnssite/{dnsSiteId}` | member | `dns_site_manage` | required | ✅ |
@@ -1138,6 +1178,9 @@ All routes are under `/api/v1`. **Access**: *public* (no session), *session* (si
 | `GET` | `/monitor/slareport` | member | `report_view` | — | — |
 | `GET` | `/monitor/slareport.pdf` | member | `report_export` | — | — |
 | `GET` | `/monitor/trend` | member | `report_view` | — | — |
+| `GET` | `/organisation/brand` | member | — | — | — |
+| `DELETE` | `/organisation/brand/{part}` | member | `staff_manage` | — | ✅ |
+| `PUT` | `/organisation/brand/{part}` | member | `staff_manage` | — | ✅ |
 | `GET` | `/organisation/settings` | member | — | — | — |
 | `PUT` | `/organisation/settings` | member | `staff_manage` | — | ✅ |
 | `GET` | `/ping/dashboard` | member | `report_view` | — | — |
@@ -1250,6 +1293,7 @@ Embedded in the server binary and applied in order at boot (`packetpulsego/pkg/c
 | `0026_2026_10_05_own_results_places_and_indexes.sql` | Whose tests a person reads, where each test was run, and the indexes the busiest reads need. |
 | `0027_2026_10_05_path_analysis_removed.sql` | Path analysis is removed: hops and fault verdicts are no longer written. |
 | `0028_2026_10_05_rename_the_partition_function.sql` | The partition function under its PacketPulse name, on every database. |
+| `0029_2026_10_07_endpoint_location_and_report_branding.sql` | Where each endpoint is, where each test was run, how a test's endpoints were chosen, and an organisation's own logo and icon. |
 
 ## Appendix D — Settings
 

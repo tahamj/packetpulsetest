@@ -43,10 +43,15 @@ func holds(grants map[string]any, capability string) bool {
 }
 
 // gatedRoutes names the capability each route is supposed to require.
+// onePixelPng is the smallest image there is, base64 as the API takes it.
+const onePixelPng = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
+
 var gatedRoutes = []routeCheck{
 	{"list sites", http.MethodGet, "/dnssite/list", nil, "dns_site_view"},
 	{"add site", http.MethodPost, "/dnssite/add",
 		map[string]any{"site_name": "acl probe", "ip_address": "203.0.113.200"}, "dns_site_manage"},
+	{"import sites from a file", http.MethodPost, "/dnssite/importfile",
+		map[string]any{"text": "address\n203.0.113.201\n"}, "dns_site_manage"},
 	// An engineer reads the tests they ran, an administrator everyone's: the
 	// list opens to either, and what it holds is the server's to scope.
 	{"list diagnostics", http.MethodGet, "/diagnostic/list", nil, "diagnostic_view_own|diagnostic_view_all"},
@@ -68,6 +73,10 @@ var gatedRoutes = []routeCheck{
 	{"list check-ins", http.MethodGet, "/staff/checkin/list", nil, "staff_manage"},
 	{"save organisation settings", http.MethodPut, "/organisation/settings",
 		map[string]any{"require_checkin_location": false, "device_test_target": ""}, "staff_manage"},
+	// The organisation's logo goes on every report its people export, so it
+	// is gated with its other settings. A one-pixel PNG, accepted as it is.
+	{"save the report logo", http.MethodPut, "/organisation/brand/logo",
+		map[string]any{"image": onePixelPng}, "staff_manage"},
 	{"list API keys", http.MethodGet, "/apikey/list", nil, "apikey_manage"},
 	// The result export hands the organisation's results to a machine, as the
 	// Results API does, so the same capability gates it.

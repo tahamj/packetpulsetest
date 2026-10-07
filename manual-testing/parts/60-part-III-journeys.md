@@ -61,9 +61,9 @@ Each journey crosses several chapters the way a real customer does. Run them on 
 
 **Covers:** `MON-001`–`MON-005`, `MON-007`
 
-1. A default target; a schedule every 5 minutes over every enabled site; a webhook channel; damping 2.
+1. Through the API: a default target; a schedule every 5 minutes over every enabled site; a webhook channel; damping 2.
 2. Black-hole one site for 15 minutes, then restore it.
-3. Declare a maintenance window over another site and break it inside the window.
+3. Through the API, declare a maintenance window over another site, and break that site inside the window.
 
 **Expected:** one breach alert, one recovery; the maintenance site raises nothing and its availability is untouched.
 
