@@ -27,6 +27,14 @@
     "stddev_rtt_ms",
     "mos_score",
     "error_message",
-    "started_on"
+    "started_on",
+    "packets_lost_up",
+    "packets_lost_down",
+    "packets_late",
+    "packets_not_sent",
+    "jitter_up_ms",
+    "jitter_down_ms",
+    "longest_burst",
+    "reflector"
   ]
 }

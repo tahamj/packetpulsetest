@@ -12,6 +12,8 @@ All routes are under `/api/v1`. **Access**: *public* (no session), *session* (si
 | `GET` | `/auditlog/list` | session | `auditlog_view` | — | — |
 | `GET` | `/auditlog/verify` | session | `auditlog_view` | — | — |
 | `POST` | `/diagnostic/clientobservation` | member | `diagnostic_run` | required | ✅ |
+| `POST` | `/diagnostic/endpoint/{dnsSiteId}/reflector-key` | member | `dns_site_manage` | required | ✅ |
+| `POST` | `/diagnostic/endpoint/{dnsSiteId}/webrtc-offer` | member | `diagnostic_run` | required | — |
 | `GET` | `/diagnostic/list` | member | `diagnostic_view_own` or `diagnostic_view_all` | — | — |
 | `POST` | `/diagnostic/submit` | member | `diagnostic_run` | required | ✅ |
 | `GET` | `/diagnostic/tt/{ttNumber}` | member | `diagnostic_view_own` or `diagnostic_view_all` | — | — |
@@ -82,6 +84,7 @@ All routes are under `/api/v1`. **Access**: *public* (no session), *session* (si
 | `GET` | `/platform/organisation/list` | superuser | — | — | — |
 | `GET` | `/platform/organisation/{organisationId}/licence` | superuser | — | — | — |
 | `GET` | `/platform/plan/list` | superuser | — | — | — |
+| `POST` | `/reflector/session` | public | — | — | — |
 | `GET` | `/result/bytt/{ttNumber}` | api key | — | — | — |
 | `GET` | `/result/export.csv` | api key | — | — | — |
 | `GET` | `/sms/gateway` | member | `staff_manage` | — | — |
@@ -174,6 +177,8 @@ Embedded in the server binary and applied in order at boot (`packetpulsego/pkg/c
 | `0027_2026_10_05_path_analysis_removed.sql` | Path analysis is removed: hops and fault verdicts are no longer written. |
 | `0028_2026_10_05_rename_the_partition_function.sql` | The partition function under its PacketPulse name, on every database. |
 | `0029_2026_10_07_endpoint_location_and_report_branding.sql` | Where each endpoint is, where each test was run, how a test's endpoints were chosen, and an organisation's own logo and icon. |
+| `0030_2026_10_08_webrtc_udp_reflector.sql` | A browser's UDP test is stored as its own measurement method, `udp-webrtc`. |
+| `0031_2026_10_09_udp_split_and_endpoint_reflector.sql` | A UDP test filed on a ticket keeps where its loss happened - up, down or late - and its jitter each way; an endpoint can name the reflector beside it. |
 
 ## Appendix D — Settings
 
@@ -211,6 +216,10 @@ Read from the environment, falling back to `.env` (see `.env.example`); defined 
 | `REVERSE_GEOCODING` | `auto` | `off` stops addresses being looked up for sign-in positions |
 | `GOOGLE_MAPS_API_KEY` | — | Google Geocoding; without it, OpenStreetMap Nominatim |
 | `GEOCODE_CONTACT` | `https://packetpulse.rummaan53.com` | Sent to Nominatim, which requires a contact |
+| `REFLECTOR_UDP_PORT` | `0` (off) | Runs the UDP reflector behind the public self-test page on this UDP port (50000 on the live host). Off, the page's UDP test says *UDP testing is not enabled on this server*. The host firewall and the cloud security list must admit the port |
+| `REFLECTOR_PUBLIC_IP` | — | The address browsers are told to send UDP to. A cloud instance sees only its private address, so the live host needs its public one here |
+| `REFLECTOR_SESSIONS_PER_MINUTE` | `6` | UDP tests one address may start in a minute on the public reflector |
+| `REFLECTOR_KEY_SECRET` | — (32+ characters) | Derives each endpoint's reflector key (§4.2). Without it the relay to customer reflectors and the key route answer 503. Changing it changes every key, so every installed reflector must be reinstalled |
 
 ## Appendix E — Response codes and actions
 

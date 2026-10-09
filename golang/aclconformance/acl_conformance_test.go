@@ -88,6 +88,14 @@ var gatedRoutes = []routeCheck{
 	{"download a ticket's CSV", http.MethodGet, "/diagnostic/00000000-0000-4000-8000-000000000000/report.csv", nil,
 		"report_export+diagnostic_view_own|diagnostic_view_all"},
 	{"view licence", http.MethodGet, "/licence/my", nil, "licence_view"},
+	// A UDP test against a customer's reflector is a test run; the key that
+	// installs a reflector is the endpoint manager's to hand out. Both name an
+	// endpoint that does not exist: 404 (or 503 where no key secret is set)
+	// to whoever may, 403 to the rest.
+	{"relay a UDP test to an endpoint", http.MethodPost, "/diagnostic/endpoint/00000000-0000-4000-8000-000000000000/webrtc-offer",
+		map[string]any{"sdp": "v=0"}, "diagnostic_run"},
+	{"issue an endpoint's reflector key", http.MethodPost, "/diagnostic/endpoint/00000000-0000-4000-8000-000000000000/reflector-key",
+		nil, "dns_site_manage"},
 }
 
 func TestEveryRoleGetsExactlyItsCapabilities(t *testing.T) {

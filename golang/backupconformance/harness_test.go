@@ -218,6 +218,12 @@ func (f fixture) env(extra map[string]string) map[string]string {
 		// No key unless a test supplies one, so most tests do not need gpg keys.
 		"PACKETPULSE_BACKUP_KEY_FILE": filepath.Join(f.root, "no-key-configured.asc"),
 		"PACKETPULSE_DRILL_ADMIN_URL": adminURL(),
+		// No disk pressure unless a test asks for it. The script's own
+		// default (2048 MB) would read this machine's free space, so a nearly
+		// full disk turned the retention tests' verdicts into the disk's
+		// (2026-10-09: 647 MB free pruned an unpulled backup). The pressure
+		// rule has its own test, which sets this.
+		"PACKETPULSE_BACKUP_MIN_FREE_MB": "0",
 	}
 	for key, value := range extra {
 		env[key] = value

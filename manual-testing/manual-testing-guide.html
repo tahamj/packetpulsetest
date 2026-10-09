@@ -234,10 +234,10 @@ nav.side .nohit.on{display:block}
 <tbody>
 <tr>
 <td style="text-align:center"><strong>17</strong> <br><sub>in the navigation rail</sub></td>
-<td style="text-align:center"><strong>108</strong> <br><sub>under <code>/api/v1</code></sub></td>
+<td style="text-align:center"><strong>111</strong> <br><sub>under <code>/api/v1</code></sub></td>
 <td style="text-align:center"><strong>17</strong> <br><sub>3 built-in roles</sub></td>
-<td style="text-align:center"><strong>29</strong> <br><sub>applied at boot</sub></td>
-<td style="text-align:center"><strong>980</strong> <br><sub>English, server-served</sub></td>
+<td style="text-align:center"><strong>31</strong> <br><sub>applied at boot</sub></td>
+<td style="text-align:center"><strong>1014</strong> <br><sub>English, server-served</sub></td>
 <td style="text-align:center"><strong>19</strong> <br><sub>one per screen</sub></td>
 <td style="text-align:center"><strong>11</strong> <br><sub>+ <code>load</code>, opt-in</sub></td>
 </tr>
@@ -403,6 +403,24 @@ nav.side .nohit.on{display:block}
 <td>The sweep <strong>From the server</strong> left the page; <strong>Run diagnostic</strong> is the test from this device. Customer ID, TT number and <strong>Endpoint</strong> are required before <strong>Start test</strong>; the endpoint nearest the device is chosen from each endpoint's latitude and longitude, an engineer cannot change it, and a manager can. The run measures that endpoint and is filed, and named, under it; the server refuses another organisation's (since 2026-10-07).</td>
 <td><code>DEV-017</code>–<code>DEV-022</code>, <code>DEV-006</code></td>
 <td><code>packetpulseflutter/lib/diagnosticmicroservice/presentation/widgets/DiagnosticEndpointField.dart</code><br><code>packetpulsego/pkg/diagnosticmicroservice/diagnosticservice/DiagnosticService.go</code></td>
+</tr>
+<tr>
+<td><strong>UDP test in Run diagnostic</strong></td>
+<td>In a browser, <strong>Run diagnostic</strong> measures the ticket's endpoint with <strong>UDP, like a call</strong> by default (or <strong>HTTPS to the endpoint</strong>), for 10, 30 or 60 seconds, and files where each lost packet went - up, down or late - with jitter each way, on the ticket, its page and its PDF. It measures to the reflector beside the endpoint when the endpoint names one (<strong>UDP reflector address</strong>, §3.1), and otherwise to the PacketPulse network, filed as <em>PacketPulse network</em>: the customer's access line, never the endpoint. The desktop and phone apps keep ICMP (since 2026-10-09).</td>
+<td><code>UDP-016</code>–<code>UDP-026</code>, <code>SITE-011</code>–<code>SITE-013</code></td>
+<td><code>packetpulseflutter/lib/diagnosticmicroservice/service/udp/UdpProbeRun.dart</code><br><code>packetpulsego/pkg/diagnosticmicroservice/diagnosticservice/DiagnosticUdpObservation.go</code></td>
+</tr>
+<tr>
+<td><strong>The demo's ticket filled in</strong></td>
+<td>On the public demo, <strong>Run diagnostic</strong> opens with the Customer ID and TT number already filled in with the example the fields show (<code>CUST-88412</code>, <code>TT-2026-00731</code>); a walkthrough can change them. The session and <code>GET /user/me</code> say <code>is_demo</code>, true only for the demo organisation, so no other organisation's ticket is filled in (since 2026-10-09).</td>
+<td><code>DEMO-006</code></td>
+<td><code>packetpulseflutter/lib/diagnosticmicroservice/presentation/screens/RunDiagnosticScreen.dart</code><br><code>packetpulsego/pkg/usermicroservice/userservice/UserService.go</code></td>
+</tr>
+<tr>
+<td><strong>DNS sites for endpoint managers</strong></td>
+<td><strong>DNS sites</strong> is in the rail only for whoever manages the endpoints (<code>dns_site_manage</code>). Engineers and Viewers no longer see the inventory; <strong>Run diagnostic</strong> still offers them the endpoints (since 2026-10-09).</td>
+<td><code>SITE-014</code></td>
+<td><code>packetpulseflutter/lib/common/presentation/PacketPulseShell.dart</code></td>
 </tr>
 <tr>
 <td><strong>Device test, live</strong></td>
@@ -964,6 +982,13 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>Sessions and Activity show the real peer address. 🛑 <strong>Must NOT</strong> record <code>6.6.6.6</code></td>
 </tr>
 <tr>
+<td><code>AUTH-016</code></td>
+<td>Tester</td>
+<td>A password is checked in characters, and one too long to keep is a field error</td>
+<td>Set a password of nine Devanagari letters and a digit; then one of 80 characters (<code>a1</code> forty times), at sign-up, <strong>Staff → Add</strong> and <strong>Change password</strong></td>
+<td>The first is refused as <em>at least 10 characters</em>; the second as <em>at most 72 characters, fewer if it has accented or non-Latin letters</em>, on the password field. 🛑 <strong>Must NOT</strong> answer either with <em>Something went wrong</em>, or keep the long one by cutting it</td>
+</tr>
+<tr>
 <td><code>DEMO-001</code></td>
 <td>Visitor</td>
 <td>The public demo signs in through the real two-step flow</td>
@@ -997,6 +1022,13 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>The shared demo cannot be hijacked or turned on the network</td>
 <td>As a demo account try <strong>Change password</strong>; then run a diagnostic against a private/internal address added to the demo inventory</td>
 <td>Password change refused (<code>demo_read_only</code>); the private target is refused by the probe policy. 🛑 <strong>Must NOT</strong> let a visitor change a shared credential or probe <code>10.x</code>/internal space</td>
+</tr>
+<tr>
+<td><code>DEMO-006</code></td>
+<td>Visitor, then Engineer</td>
+<td>A walkthrough is given the example ticket</td>
+<td>Sign in to the demo (<code>DEMO-001</code>, or any account in the <code>DEMO_ORGANISATION_CODE</code> organisation); open <strong>Run diagnostic</strong>; change the TT number to <code>TT-DEMO-2</code>; <strong>Start test</strong>; <strong>Attach to a ticket</strong>. Then sign in as an engineer of a non-demo organisation and open <strong>Run diagnostic</strong></td>
+<td>The demo's <strong>Customer ID</strong> reads <code>CUST-88412</code> and its <strong>TT number</strong> <code>TT-2026-00731</code> as the page opens; the run is filed under <code>CUST-88412</code> and <code>TT-DEMO-2</code>. The other organisation's fields are empty. 🛑 <strong>Must NOT</strong> fill in a ticket for any organisation but the demo, or put back the example over what the visitor typed</td>
 </tr>
 </tbody>
 </table></div>
@@ -1267,6 +1299,13 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>Two engineers each run a diagnostic; each opens <strong>History</strong>; then the administrator does</td>
 <td>Each engineer sees only their own, with <em>These are the tests you ran</em>; the administrator sees both (<code>HIST-005</code>). 🛑 <strong>Must NOT</strong> show an engineer a colleague's test, in the list, by its id or by its ticket</td>
 </tr>
+<tr>
+<td><code>ACL-007</code></td>
+<td>Administrator</td>
+<td>A role held only by someone deleted is still in use</td>
+<td>Give <em>Shift lead</em> to a person, delete them, then delete <em>Shift lead</em></td>
+<td>Refused, naming that people hold it - the deleted person's records keep their role. 🛑 <strong>Must NOT</strong> answer <em>Something went wrong</em></td>
+</tr>
 </tbody>
 </table></div>
 </li>
@@ -1519,10 +1558,15 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <p>The core of the product: what to test, testing it against a ticket, and reading what came back.</p>
 <hr>
 <h3 id="31-sites">3.1 🌐 Sites<a class="anchor" href="#31-sites" aria-label="Link to this section">#</a></h3>
-<p><strong>Screen:</strong> Configure → <strong>DNS sites</strong> · <strong>Routes:</strong> <code>GET /dnssite/list</code>, <code>POST /dnssite/add</code>, <code>POST /dnssite/bulkimport</code>, <code>POST /dnssite/importfile</code>, <code>PUT/DELETE /dnssite/{dnsSiteId}</code> · <strong>Capabilities:</strong> <code>dns_site_view</code>, <code>dns_site_manage</code></p>
+<p><strong>Screen:</strong> Configure → <strong>DNS sites</strong> · <strong>Routes:</strong> <code>GET /dnssite/list</code>, <code>POST /dnssite/add</code>, <code>POST /dnssite/bulkimport</code>, <code>POST /dnssite/importfile</code>, <code>PUT/DELETE /dnssite/{dnsSiteId}</code> · <strong>Capabilities:</strong> <code>dns_site_view</code>, <code>dns_site_manage</code> — the page is offered only to whoever holds both</p>
 <ul>
-<li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: Every city its own destinations, as many as it needs: give each endpoint its position and a field engineer's test sweeps the city they are standing in, without their choosing anything. Drop the customer's spreadsheet on the page to add or place hundreds at once — one bad row never rejects the rest — and PacketPulse refuses to be turned against its own host: loopback, link-local and cloud-metadata addresses are never probed, whatever a site says.</li>
-<li>📖 <strong>User Guide &amp; Operational Flow</strong>: <strong>Add site</strong> with a name, an IP address or hostname, an optional circuit ID, its <strong>City or region</strong>, its <strong>Latitude</strong> and <strong>Longitude</strong> (both or neither) and an SLA policy. The list shows each endpoint's position, or <em>No position</em>. <strong>Import file</strong> takes a CSV file dropped on the page or chosen, or rows pasted from a spreadsheet: the first row names the columns — <em>Name</em>, <em>Address</em>, <em>City</em>, <em>Latitude</em>, <em>Longitude</em>, only <em>Address</em> required, in any order. A row whose address is already monitored updates that endpoint with the columns given and leaves the rest; any other row adds one. Each row is reported, a refused one by its line. <strong>Bulk import</strong> still takes plain addresses by lines, commas or spaces; <code>Branch 12=10.0.0.1</code> names a site. There is no limit on how many endpoints an organisation or a city has.</li>
+<li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: Every city its own destinations, as many as it needs: give each endpoint its position and a field engineer's test sweeps the city they are standing in, without their choosing anything. Name the reflector beside an endpoint and a ticket's UDP test measures the path to it. Drop the customer's spreadsheet on the page to add or place hundreds at once — one bad row never rejects the rest — and PacketPulse refuses to be turned against its own host: loopback, link-local and cloud-metadata addresses are never probed, whatever a site says.</li>
+<li>📖 <strong>User Guide &amp; Operational Flow</strong>: <strong>Add site</strong> with a name, an IP address or hostname, an optional circuit ID, its <strong>City or region</strong>, its <strong>Latitude</strong> and <strong>Longitude</strong> (both or neither) and an SLA policy. The list shows each endpoint's position, or <em>No position</em>. <strong>Import file</strong> takes a CSV file dropped on the page or chosen, or rows pasted from a spreadsheet: the first row names the columns — <em>Name</em>, <em>Address</em>, <em>City</em>, <em>Latitude</em>, <em>Longitude</em>, only <em>Address</em> required, in any order. A row whose address is already monitored updates that endpoint with the columns given and leaves the rest; any other row adds one. Each row is reported, a refused one by its line. <strong>Bulk import</strong> still takes plain addresses by lines, commas or spaces; <code>Branch 12=10.0.0.1</code> names a site. There is no limit on how many endpoints an organisation or a city has.
+<ul>
+<li><strong>Who is given the page:</strong> the endpoints are configuration, so <strong>DNS sites</strong> is in the rail only for whoever manages them (<code>dns_site_manage</code>, with <code>dns_site_view</code> to read the list). An engineer or a viewer reads the endpoints under <code>dns_site_view</code> alone, which is what lets <strong>Run diagnostic</strong> offer them (§4.1), and is not given the page (since 2026-10-09).</li>
+<li><strong>UDP reflector address</strong> (optional) is where the endpoint's PacketPulse reflector answers: a host or IP, with <code>:port</code> when its signalling port is not 50000. Often not the endpoint's own address — a router cannot run the daemon, a small host beside it can. Left blank, a ticket's UDP test measures to the PacketPulse network instead (§4.2). PacketPulse's own address there does the same: this server's reflector answers through the app, never on port 50000 (<code>UDP-026</code>). Whoever manages the endpoints gets a key icon on each row, <strong>Reflector install key</strong>, with the key and the install command to copy; the reflector answers only tests this organisation signs for this endpoint.</li>
+</ul>
+</li>
 <li>🧪 <strong>Manual Testing Playbook</strong>:<div class="tw"><table><thead>
 <tr>
 <th>ID</th>
@@ -1603,6 +1647,34 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>RIVAL imports a file naming ACME's addresses with new positions</td>
 <td>RIVAL gains its own endpoints; ACME's are unchanged</td>
 </tr>
+<tr>
+<td><code>SITE-011</code></td>
+<td>Administrator</td>
+<td>A reflector address is kept</td>
+<td>Edit a site: <strong>UDP reflector address</strong> <code>Reflector.Pune.Example:50001</code>; save; edit only its notes; save; then <code>PUT /dnssite/{id}</code> without <code>reflector_address</code>, as an app from before 2026-10-09 sends it</td>
+<td>Stored as <code>reflector.pune.example:50001</code> and still there after both edits; <em>Optional</em> — no <code>*</code> on the label. Clearing the field and saving clears it. 🛑 <strong>Must NOT</strong> clear the address on an edit that did not touch it</td>
+</tr>
+<tr>
+<td><code>SITE-012</code></td>
+<td>Administrator</td>
+<td>A wrong reflector address is refused on its field</td>
+<td>Enter <code>not an address</code>, then <code>203.0.113.20:70000</code></td>
+<td>Refused under the field, the rest of the edit not saved</td>
+</tr>
+<tr>
+<td><code>SITE-013</code></td>
+<td>Administrator</td>
+<td>The install key</td>
+<td>Press the key icon on a site; <strong>Copy</strong> the install command; press it again</td>
+<td>The key and the <code>install-reflector.sh --key …</code> line, copied with <em>Copied to the clipboard.</em>; the same key every time for that site. An engineer never reaches the key: no <strong>DNS sites</strong> in their rail (<code>SITE-014</code>), and the API refuses them (<code>UDP-010</code>)</td>
+</tr>
+<tr>
+<td><code>SITE-014</code></td>
+<td>Engineer, then Viewer, then Administrator</td>
+<td>The inventory is the endpoint managers'</td>
+<td>Sign in as an engineer; look for <strong>DNS sites</strong> in the rail, then open <strong>Run diagnostic</strong>; repeat as a Viewer; then as an administrator</td>
+<td>No <strong>DNS sites</strong> for the engineer or the Viewer, while <strong>Run diagnostic</strong> still lists the endpoints for the engineer; the administrator has <strong>DNS sites</strong> under Configure. 🛑 <strong>Must NOT</strong> offer an engineer the endpoint inventory, or take the endpoints off their <strong>Run diagnostic</strong></td>
+</tr>
 </tbody>
 </table></div>
 </li>
@@ -1611,7 +1683,9 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <li>Policy: <code>packetpulsego/pkg/common/probeguard/ProbeGuardPolicy.go</code> — every address a name resolves to is checked, and one refused address refuses them all; IPv4-mapped IPv6 is judged as IPv4.</li>
 <li>Positions: <code>latitude</code>/<code>longitude</code> on <code>dns_site</code>, both or neither, in <code>packetpulsego/pkg/common/dbclient/migrations/0029_2026_10_07_endpoint_location_and_report_branding.sql</code>. The nearest city is a pure function, <code>ChooseNearestCity</code> in <code>packetpulsego/pkg/dnssitemicroservice/dnssitedomain/shared/DnsSite.go</code>: the nearest <strong>enabled</strong> endpoint with a position names the city (its region, ignoring case), and every enabled endpoint in that city is swept; with no city, the endpoints at the nearest one's position.</li>
 <li>Import: <code>packetpulsego/pkg/dnssitemicroservice/dnssiteservice/DnsSiteImport.go</code> reads the heading row, the delimiter (tab, semicolon or comma) and a spreadsheet's byte-order mark; an existing endpoint is updated with <code>COALESCE</code>, so a column the file lacks is never cleared. Up to 5000 rows a file. The drop zone and chooser are <code>packetpulseflutter/lib/common/services/PacketPulseFileSource.dart</code>, browser-only; elsewhere the paste box alone.</li>
-<li>Coverage: <code>packetpulsego/pkg/dnssitemicroservice/**</code>, <code>packetpulsego/pkg/common/probeguard/</code>, <code>packetpulseflutter/test/dns_site_screen_test.dart</code>, <code>packetpulseflutter/test/dns_site_position_import_test.dart</code>.</li>
+<li>Reflector address: <code>dns_site.reflector_address</code> in <code>packetpulsego/pkg/common/dbclient/migrations/0031_2026_10_09_udp_split_and_endpoint_reflector.sql</code>, validated by <code>ValidateReflectorAddress</code> in <code>packetpulsego/pkg/dnssitemicroservice/dnssiteservice/DnsSiteAddressValidator.go</code>. The edit is whole-row, so an edit that does not name the field — from an app that predates it — keeps the stored address (<code>DnsSiteUpdate</code> in <code>packetpulsego/pkg/dnssitemicroservice/dnssiteservice/DnsSiteService.go</code>); imports never touch it.</li>
+<li>Who is offered the page: the <code>dns_sites</code> destination in <code>packetpulseflutter/lib/common/presentation/PacketPulseShell.dart</code> asks for <code>dns_site_manage</code> and <code>dns_site_view</code>, so <code>DnsSiteScreen</code> has no read-only mode: it always offers adding, importing, editing, the key and removal. The rail only hides it; the server still refuses every change without <code>dns_site_manage</code> (Appendix A).</li>
+<li>Coverage: <code>packetpulsego/pkg/dnssitemicroservice/**</code>, <code>packetpulsego/pkg/common/probeguard/</code>, <code>packetpulseflutter/test/dns_site_screen_test.dart</code>, <code>packetpulseflutter/test/dns_site_position_import_test.dart</code>, <code>packetpulseflutter/test/shell_test.dart</code>.</li>
 <li>⚠️ <strong>TRAP</strong> — a licence carries a <strong>site limit</strong> (shown on the Platform console), but adding or importing sites does not check it yet. Do not file a site count above the limit as a regression; it is a known gap.</li>
 </ul>
 </li>
@@ -1967,10 +2041,10 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <p><strong>Screen:</strong> Operate → <strong>Run diagnostic</strong> · <strong>Routes:</strong> <code>GET /dnssite/list</code> (<code>dns_site_view</code>), <code>POST /diagnostic/clientobservation</code> (<code>diagnostic_run</code>, licensed), and <code>GET /organisation/settings</code> for the test with no ticket; that test's target is set with <code>PUT /organisation/settings</code> (<code>staff_manage</code>), not on this screen</p>
 <ul>
 <li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: &quot;Is it slow for me?&quot; answered from the customer's own connection, to the customer's own endpoint: the engineer opens the page and the endpoint nearest them is already chosen, from the position entered for each endpoint. It shows the device's IPv4 <strong>and</strong> IPv6 addresses, then files the run against the ticket, under the endpoint it measured — labelled as measured on a device.</li>
-<li>📖 <strong>User Guide &amp; Operational Flow</strong>: <strong>Run diagnostic</strong> is the test from this device, filed against a ticket (since 2026-10-07 the page no longer sweeps from the server). The ticket comes first: <strong>Customer ID</strong>, <strong>TT number</strong>, optional <strong>Notes</strong> and the <strong>Endpoint</strong>; <strong>Start test</strong> does nothing until the customer, the TT number and the endpoint are given, and marks the one missing. As the page opens the device is asked where it is, and the endpoint nearest it — by the latitude and longitude entered under DNS sites (§3.1) — is chosen, with <em>Nearest to this device, N km away</em>. An engineer is given that endpoint and cannot change it (<em>Chosen for you: the endpoint nearest where this device is.</em>). Whoever manages the endpoints (<code>dns_site_manage</code>) may pick another, and go back with <strong>Choose by my location</strong>. With no position to go by — location refused or unknown, or no endpoint placed — everyone picks by hand, and the page says why. Choosing another endpoint empties a finished run, and stops one under way. The position chooses; it is filed with a run only for people whose location is recorded (§2.1). Someone who may not run diagnostics, or has no organisation, gets the device test alone, with no ticket, against the organisation's internal host or Cloudflare DNS, which the screen does not name. The line-speed test is hidden.
+<li>📖 <strong>User Guide &amp; Operational Flow</strong>: <strong>Run diagnostic</strong> is the test from this device, filed against a ticket (since 2026-10-07 the page no longer sweeps from the server). The ticket comes first: <strong>Customer ID</strong>, <strong>TT number</strong>, optional <strong>Notes</strong> and the <strong>Endpoint</strong>; <strong>Start test</strong> does nothing until the customer, the TT number and the endpoint are given, and marks the one missing. As the page opens the device is asked where it is, and the endpoint nearest it — by the latitude and longitude entered under DNS sites (§3.1) — is chosen, with <em>Nearest to this device, N km away</em>. An engineer is given that endpoint and cannot change it (<em>Chosen for you: the endpoint nearest where this device is.</em>). Whoever manages the endpoints (<code>dns_site_manage</code>) may pick another, and go back with <strong>Choose by my location</strong>. With no position to go by — location refused or unknown, or no endpoint placed — everyone picks by hand, and the page says why. Choosing another endpoint empties a finished run, and stops one under way. The position chooses; it is filed with a run only for people whose location is recorded (§2.1). Someone who may not run diagnostics, or has no organisation, gets the device test alone, with no ticket, against the organisation's internal host or Cloudflare DNS, which the screen does not name. The line-speed test is hidden. On the public demo the <strong>Customer ID</strong> and <strong>TT number</strong> open filled in with the example the fields show, <code>CUST-88412</code> and <code>TT-2026-00731</code>, so a walkthrough goes straight to <strong>Start test</strong>; they can be changed, and what is in them is what is filed (since 2026-10-09).
 <ul>
 <li>Above the controls, three cards: the <strong>IPv4</strong> address, the <strong>IPv6</strong> address (or <em>No IPv6 connectivity</em>) and the <strong>Nearest edge</strong> that answered, with an <em>IPv6 active</em> or <em>IPv4 only</em> badge. No network operator or AS number is shown: finding one would send the engineer's address to a third party.</li>
-<li>In a browser an endpoint is reached by an HTTPS request to its address, timed end to end; the app on a desktop or phone sends a real ICMP echo where the device allows it. An endpoint that does not serve HTTPS — most routers and resolvers do not — shows every sample unanswered in a browser, even when it is up, and the note beside the figures says so.</li>
+<li>In a browser the test is <strong>UDP, like a call</strong> by default (§4.2), or <strong>HTTPS to the endpoint</strong>: an HTTPS request to its address, timed end to end. The app on a desktop or phone sends a real ICMP echo where the device allows it, and offers no UDP test. An endpoint that does not serve HTTPS — most routers and resolvers do not — shows every sample unanswered in a browser, even when it is up, and the note beside the figures says so.</li>
 <li><strong>IP version</strong> — <em>Auto</em>, <em>IPv4 only</em>, <em>IPv6 only</em> — holds a run against the default target to one address family, to compare the two paths. It is offered only on the test with no ticket, when the organisation tests the default over HTTPS: an endpoint is reached at its own address, a browser cannot choose the family a hostname resolves to, and the native ping is IPv4.</li>
 <li>While a run goes, eight figures fill in — average, fastest, slowest, jitter, standard deviation, loss, MOS and progress — with <strong>Round-trip, sample by sample</strong> (jitter as a band, the average dashed, a red mark per unanswered sample; point at it to read one), <strong>Round-trips by band</strong> (under 20, 20–50, 50–100, 100–200, 200 ms and over) and a <strong>Probe log</strong> of every reply. <strong>Clear results</strong> empties the figures and charts and keeps the log; <strong>Clear log</strong> empties the log.</li>
 </ul>
@@ -2153,6 +2227,228 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <li>Speed, hidden: <code>packetpulseflutter/lib/diagnosticmicroservice/service/ClientThroughput.dart</code> (Cloudflare <code>__down</code>/<code>__up</code>, median after a warm-up) is kept and tested behind <code>speedTestEnabled = false</code> in <code>packetpulseflutter/lib/common/config/PacketPulseConfig.dart</code>; turning it back on is that one line. Egress: <code>packetpulseflutter/lib/diagnosticmicroservice/service/ClientEgress.dart</code>.</li>
 <li>Live panels: the address cards in <code>packetpulseflutter/lib/diagnosticmicroservice/presentation/widgets/ClientEgressPanel.dart</code>; the timeline, the bands, <code>runningJitter</code> and <code>latencyBands</code> in <code>packetpulseflutter/lib/diagnosticmicroservice/presentation/widgets/ClientProbeCharts.dart</code>; the log in <code>packetpulseflutter/lib/diagnosticmicroservice/presentation/widgets/ClientProbeConsole.dart</code>. The figures are <code>ClientProbeSummary.from</code> over the samples so far, so the live numbers and the filed ones are one calculation. <strong>IPv6 only</strong> is <code>ClientProbeTarget.resolverV6</code> (<code>ClientProbeTarget.defaultFor</code>) in <code>packetpulseflutter/lib/diagnosticmicroservice/service/ClientProbeEngine.dart</code>; a filed run keeps the IPv6 address in <code>ping_result</code>, hidden on read like any device target. The new strings are held to naming no host, the IPv6 literals included, by the same Go test.</li>
 <li>Coverage: <code>packetpulsego/pkg/diagnosticmicroservice/diagnosticservice/EndpointDeviceRun_test.go</code>, the <code>contract</code> suite's <code>client_observation_test.go</code>, <code>packetpulseflutter/test/dns_site_nearest_test.dart</code>, <code>packetpulseflutter/test/client_probe_screen_test.dart</code>, <code>packetpulseflutter/test/client_probe_run_test.dart</code>, <code>packetpulseflutter/test/client_probe_live_panels_test.dart</code>, <code>packetpulseflutter/test/run_diagnostic_screen_test.dart</code>, <code>packetpulseflutter/test/https_probe_transport_test.dart</code>, <code>packetpulseflutter/test/client_throughput_test.dart</code>, <code>packetpulseflutter/test/client_egress_test.dart</code>.</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h3 id="42-udp-test-and-reflectors">4.2 📶 UDP test and reflectors<a class="anchor" href="#42-udp-test-and-reflectors" aria-label="Link to this section">#</a></h3>
+<p><strong>Pages:</strong> Operate → <strong>Run diagnostic</strong>, in a browser; <code>/selftest.html</code> → <strong>PacketPulse network — UDP, like a call</strong> · <strong>Routes:</strong> <code>POST /reflector/session</code> (public, limited per address), <code>POST /diagnostic/endpoint/{dnsSiteId}/webrtc-offer</code> (<code>diagnostic_run</code>, licensed), <code>POST /diagnostic/endpoint/{dnsSiteId}/reflector-key</code> (<code>dns_site_manage</code>, licensed, audited)</p>
+<ul>
+<li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: The only browser test that sees real packet loss, and says which way it was lost. A customer opens a page, and in 30 seconds the engineer knows whether the customer's uplink drops packets, their downlink does, or packets arrive too late to play — the three causes of a choppy call, told apart from where the customer sits.</li>
+<li>📖 <strong>User Guide &amp; Operational Flow</strong>: On the self-test, <strong>Target → PacketPulse network — UDP, like a call</strong> replaces Samples, Interval and Timeout with <strong>Duration</strong> (10, 30 or 60 seconds) and sends 50 packets a second, 200 bytes each, to PacketPulse's own reflector. The tiles read <strong>UDP round-trip</strong>, <strong>Jitter</strong> with <em>Up … ms · down … ms</em> under it, and <strong>Packet loss</strong> with <em>Up …% · down …% · late …%</em>. Loss is counted at the end, per packet, when the reflector says which packets reached it; until then the loss tile shows a dash. A packet back more than a second after it was sent is <em>late</em>, and counts in the loss figure and the MOS, because a call would have played silence. <em>Not sent (device busy)</em> counts slots the browser could not keep; they are left out of every percentage. Keep the tab in front: a hidden tab stops the test.
+<ul>
+<li>When UDP cannot get through, the page says <em>UDP is blocked on this network</em> and points at the DNS-over-HTTPS test, which still works. It never shows that as 100% loss.</li>
+<li>A customer's own reflector (<code>packetpulsereflector</code>, on a PoP, an SBC's neighbour or a VPS) is installed with its endpoint's key: <code>POST /diagnostic/endpoint/{dnsSiteId}/reflector-key</code> returns the key and the install line, <code>sudo ./install-reflector.sh --key &lt;key&gt; [--public-ip &lt;address&gt;]</code>. Sessions on it are then opened only through <code>POST /diagnostic/endpoint/{dnsSiteId}/webrtc-offer</code>, which signs the request and checks that the answer is signed back.</li>
+<li><strong>In Run diagnostic</strong> (since 2026-10-09), in a browser with a ticket, the test is <strong>UDP, like a call</strong> by default, with <strong>Test length</strong> 10, 30 or 60 seconds in place of the HTTPS steppers. It is set up through the signed-in relay, so the person's session caps it, not the office's address. It measures to the reflector beside the ticket's endpoint when the endpoint has a <strong>UDP reflector address</strong> (§3.1), and otherwise to the PacketPulse network. <em>What this run found</em> says which: <em>The reflector beside Pune Edge</em>, or <em>The PacketPulse network: the customer's access line, not the path to the endpoint</em> — and then no endpoint line. <strong>Lost up · down</strong> and <em>n late</em> sit with the figures; <em>Where packets went</em> reads, for example, <em>Upstream lost 4 (0.3%); Downstream lost 2 (0.1%); Late 4; Jitter up 9.4 ms, down 4.6 ms</em>. <strong>Attach to a ticket</strong> files it with the split; the ticket's page and PDF print the same line. A test to the PacketPulse network is filed as <em>PacketPulse network</em> at PacketPulse's address, never under the endpoint.</li>
+<li>When the endpoint's reflector cannot run the test — down, busy, or installed with another key — the page shows the server's reason and offers <strong>Test to the PacketPulse network instead</strong>. <em>UDP is blocked on this network</em> offers <strong>Run the HTTPS test</strong>. A refusal for who the person is (signed out, no permission, no licence) offers nothing else. <strong>Stop</strong> ends sending early; the packets already sent are still waited for, so a stopped run is a shorter run, not a lossy one.</li>
+</ul>
+</li>
+<li>🧪 <strong>Manual Testing Playbook</strong>:<div class="tw"><table><thead>
+<tr>
+<th>ID</th>
+<th>Persona</th>
+<th>Scenario</th>
+<th>Steps</th>
+<th>Observable Expected Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>UDP-001</code></td>
+<td>Visitor</td>
+<td>A clean line reads clean</td>
+<td>On <code>/selftest.html</code> choose <strong>PacketPulse network — UDP, like a call</strong>, 30 seconds; <strong>Start test</strong></td>
+<td><em>Finished. 1500/1500 on time</em>, <strong>Packet loss</strong> <em>0.0%</em> with <em>Up 0.0% · down 0.0% · late 0.0%</em>, the jitter tile's <em>Up … ms · down … ms</em>. 🛑 <strong>Must NOT</strong> show any downstream loss on a clean line (the first cut showed 4.8%)</td>
+</tr>
+<tr>
+<td><code>UDP-002</code></td>
+<td>Visitor</td>
+<td>Loss is placed by direction</td>
+<td>Drop 2% of outbound UDP to the reflector (macOS <code>dnctl pipe 1 config plr 0.02</code> with a <code>pfctl</code> rule on <code>out proto udp to port 50000</code>; Linux <code>tc qdisc add dev &lt;if&gt; root netem loss 2%</code>); run 30 s; repeat dropping inbound instead</td>
+<td>About 2% loss, all of it under <em>Up</em>, <em>down 0.0%</em>; then the same under <em>Down</em>. 🛑 <strong>Must NOT</strong> split one direction's loss across both</td>
+</tr>
+<tr>
+<td><code>UDP-003</code></td>
+<td>Visitor</td>
+<td>Late is not lost</td>
+<td>Add 1500 ms delay to inbound UDP for a few seconds of a run (<code>dnctl pipe 1 config delay 1500</code>)</td>
+<td>Those packets under <em>late</em>, not <em>down</em>; the loss figure includes them</td>
+</tr>
+<tr>
+<td><code>UDP-004</code></td>
+<td>Visitor</td>
+<td>UDP blocked</td>
+<td>Block outbound UDP to port 50000 (a <code>pf</code> rule, or a network that blocks UDP); run</td>
+<td>The <em>UDP is blocked on this network</em> notice and the log line; no loss figure. 🛑 <strong>Must NOT</strong> show 100% loss</td>
+</tr>
+<tr>
+<td><code>UDP-005</code></td>
+<td>Visitor</td>
+<td>UDP testing off</td>
+<td>Against a server without <code>REFLECTOR_UDP_PORT</code>, run the UDP test</td>
+<td><em>UDP testing is not enabled on this server.</em> in the log</td>
+</tr>
+<tr>
+<td><code>UDP-006</code></td>
+<td>Visitor</td>
+<td>A hidden tab stops the run</td>
+<td>Start a 60 s run; switch to another tab for five seconds; come back</td>
+<td><em>The page was hidden, so the browser slowed its timers and the test stopped.</em> No figures presented as a finished run</td>
+</tr>
+<tr>
+<td><code>UDP-007</code></td>
+<td>Visitor</td>
+<td>One address, limited</td>
+<td>Start seven UDP tests within a minute from one address (<code>REFLECTOR_SESSIONS_PER_MINUTE</code> 6)</td>
+<td>The seventh: <em>Too many UDP tests from this address. Try again in a minute.</em></td>
+</tr>
+<tr>
+<td><code>UDP-008</code></td>
+<td>Administrator</td>
+<td>An endpoint's reflector key</td>
+<td><code>POST /diagnostic/endpoint/{dnsSiteId}/reflector-key</code> for one of the organisation's endpoints, twice; then for another endpoint</td>
+<td>200 with a 43-character <code>key</code> and the <code>install</code> line, the same key both times; another endpoint, another key. <strong>Activity</strong> shows an <em>issue</em> against the endpoint</td>
+</tr>
+<tr>
+<td><code>UDP-009</code></td>
+<td>RIVAL tester</td>
+<td>Another organisation's endpoint</td>
+<td><code>POST …/reflector-key</code> and <code>POST …/webrtc-offer</code> with ACME's <code>dns_site_id</code></td>
+<td>404 <em>That endpoint does not exist.</em> for both, naming nothing. 🛑 <strong>Must NOT</strong> reach ACME's reflector or derive its key</td>
+</tr>
+<tr>
+<td><code>UDP-010</code></td>
+<td>Engineer</td>
+<td>Keys are the endpoint manager's</td>
+<td>As an engineer (no <code>dns_site_manage</code>), <code>POST …/reflector-key</code></td>
+<td>403</td>
+</tr>
+<tr>
+<td><code>UDP-011</code></td>
+<td>Operator</td>
+<td>Install a customer reflector</td>
+<td>On a Linux VPS: <code>sudo ./install-reflector.sh --key &lt;key&gt; --public-ip &lt;its public address&gt;</code>; <code>curl -s http://127.0.0.1:50000/healthz</code></td>
+<td><code>&quot;signed&quot;:true</code>, <code>&quot;udp_port&quot;:50000</code>; <code>/etc/default/packetpulsereflector</code> is <code>0600</code> root. Without <code>--key</code> or <code>--open</code> the installer refuses and installs nothing</td>
+</tr>
+<tr>
+<td><code>UDP-012</code></td>
+<td>Operator</td>
+<td>A signed reflector refuses strangers</td>
+<td><code>curl -X POST http://&lt;reflector&gt;:50000/api/v1/reflector/session -d '{&quot;sdp&quot;:&quot;v=0&quot;}'</code></td>
+<td>401 <em>This reflector accepts only signed requests.</em></td>
+</tr>
+<tr>
+<td><code>UDP-013</code></td>
+<td>Administrator</td>
+<td>The relay reaches the right reflector only</td>
+<td><code>POST …/webrtc-offer</code> with a browser's offer for the endpoint with the reflector; then reinstall it with another endpoint's key and repeat</td>
+<td>200 with an <code>sdp</code> holding <code>a=ice-lite</code> and the session's <code>limits</code>; then 409 <em>…installed with a different key. Reinstall it with this endpoint's key.</em></td>
+</tr>
+<tr>
+<td><code>UDP-014</code></td>
+<td>Administrator</td>
+<td>The relay obeys the probe policy</td>
+<td>With <code>PING_ALLOW_PRIVATE=false</code>, <code>POST …/webrtc-offer</code> for an endpoint at <code>10.x</code>; then as the demo organisation for one at <code>192.168.x</code> with private addresses allowed</td>
+<td>400 <em>That endpoint's address is not one this server may send to.</em>, both times. 🛑 <strong>Must NOT</strong> send anything to the private address</td>
+</tr>
+<tr>
+<td><code>UDP-016</code></td>
+<td>Engineer</td>
+<td>UDP is the browser's default</td>
+<td>In a browser open <strong>Run diagnostic</strong>; fill the ticket; then open it in the desktop app</td>
+<td><strong>UDP, like a call</strong> chosen, <strong>Test length</strong> <em>10 s · 30 s · 60 s</em>, no Samples, Interval or Timeout. The desktop app has no UDP choice and keeps <strong>ICMP echo</strong></td>
+</tr>
+<tr>
+<td><code>UDP-017</code></td>
+<td>Engineer</td>
+<td>A test to the PacketPulse network is the access line's</td>
+<td>Endpoint with no reflector address; <strong>Start test</strong> (10 s); <strong>Attach to a ticket</strong>; open the ticket and its PDF</td>
+<td><em>Measured to: The PacketPulse network: the customer's access line…</em>, no <em>Pune Edge · …</em> line; the ticket's row is <em>PacketPulse network</em> at PacketPulse's address, with <em>Where packets went</em>; the PDF prints the same line. 🛑 <strong>Must NOT</strong> name or file it under the endpoint</td>
+</tr>
+<tr>
+<td><code>UDP-018</code></td>
+<td>Engineer</td>
+<td>A test to the endpoint's reflector</td>
+<td>Endpoint with a reflector (<code>SITE-011</code>, <code>UDP-011</code>); run; attach</td>
+<td><em>Measured to: The reflector beside Pune Edge</em>; filed under the endpoint. The reflector's <code>/healthz</code> shows an active session during the run</td>
+</tr>
+<tr>
+<td><code>UDP-019</code></td>
+<td>Engineer</td>
+<td>Loss placed on the ticket</td>
+<td>As <code>UDP-002</code>, through <strong>Run diagnostic</strong>, dropping 2% outbound</td>
+<td>The ticket's <em>Upstream lost</em> is about 2% and <em>Downstream lost</em> about 0%; the figures match the screen's. 🛑 <strong>Must NOT</strong> split one direction's loss across both</td>
+</tr>
+<tr>
+<td><code>UDP-020</code></td>
+<td>Engineer</td>
+<td>The endpoint's reflector is down</td>
+<td>Stop the endpoint's reflector; run</td>
+<td><em>The reflector on that endpoint did not answer.</em> with <strong>Try again</strong>, and <strong>Test to the PacketPulse network instead</strong>; taking it runs and files as <code>UDP-017</code>. Another endpoint chosen afterwards tries its own reflector first</td>
+</tr>
+<tr>
+<td><code>UDP-026</code></td>
+<td>Engineer</td>
+<td>An endpoint naming PacketPulse's own reflector</td>
+<td>Edit an endpoint: <strong>UDP reflector address</strong> PacketPulse's address (<code>REFLECTOR_PUBLIC_IP</code>, live <code>140.245.28.232</code>), then <code>140.245.28.232:50000</code>; run each time; attach</td>
+<td>The test runs at once, with no <em>did not answer</em>; <em>Measured to: The PacketPulse network…</em> and filed as <code>UDP-017</code>. 🛑 <strong>Must NOT</strong> fail with <em>The reflector on that endpoint did not answer.</em>, nor file PacketPulse's reflector under the endpoint</td>
+</tr>
+<tr>
+<td><code>UDP-021</code></td>
+<td>Engineer</td>
+<td>UDP blocked</td>
+<td>As <code>UDP-004</code>, through <strong>Run diagnostic</strong></td>
+<td><em>UDP is blocked on this network…</em> with <strong>Run the HTTPS test</strong>, which runs the HTTPS test at once. No figures, nothing to attach. 🛑 <strong>Must NOT</strong> offer a 100% loss run for filing</td>
+</tr>
+<tr>
+<td><code>UDP-022</code></td>
+<td>Engineer</td>
+<td>A lapsed licence</td>
+<td>As a licence-expired organisation's engineer, start a UDP test</td>
+<td>The licence message with who can renew it. 🛑 <strong>Must NOT</strong> offer the PacketPulse network as a way round it</td>
+</tr>
+<tr>
+<td><code>UDP-023</code></td>
+<td>Engineer</td>
+<td>Stopped part-way</td>
+<td>Start a 60 s test; <strong>Stop</strong> after ten seconds</td>
+<td>The figures for what was sent, loss as on the line (no packets in flight counted lost); it can be attached</td>
+</tr>
+<tr>
+<td><code>UDP-024</code></td>
+<td>Engineer</td>
+<td>A hidden tab</td>
+<td>Start a test; switch tabs for five seconds</td>
+<td><em>The test stopped because this tab was hidden…</em> with <strong>Try again</strong></td>
+</tr>
+<tr>
+<td><code>UDP-025</code></td>
+<td>RIVAL tester</td>
+<td>A split the test could not have measured</td>
+<td><code>POST /diagnostic/clientobservation</code> with an <code>https-reach</code> observation carrying <code>packets_lost_up</code>; then a <code>udp-webrtc</code> one with <code>reflector: &quot;endpoint&quot;</code> for an endpoint with no reflector address; then one whose up + down + late exceed what was lost</td>
+<td>422 on <code>observations</code> each time; nothing filed</td>
+</tr>
+<tr>
+<td><code>UDP-015</code></td>
+<td>Developer</td>
+<td>The development loop</td>
+<td>Serve <code>packetpulseweb/</code> on <code>http://localhost:8000</code>; run <code>packetpulsereflector -open -bind-ip 127.0.0.1</code>; open <code>/selftest.html?reflector=http://127.0.0.1:50000</code></td>
+<td>The UDP test runs against the local reflector. The same <code>?reflector=</code> on the live site is ignored and the test uses the live host's own reflector</td>
+</tr>
+</tbody>
+</table></div>
+</li>
+<li>⚙️ <strong>Developer Guide &amp; Release Confidence</strong>:
+<ul>
+<li>The reflector: <code>packetpulsego/pkg/reflectormicroservice/reflectorcore/ReflectorEngine.go</code> (pion, ICE-lite, passive DTLS, multicast DNS off, one multiplexed UDP port), <code>packetpulsego/pkg/reflectormicroservice/reflectorcore/ReflectorSession.go</code> (the caps and the per-sequence bitmap) and <code>packetpulsego/pkg/reflectormicroservice/reflectorcore/ReflectorProtocol.go</code> (the frames). An echo is exactly as long as its probe, so the reflector cannot amplify. Offers declaring <code>a=ice-lite</code> are refused: with both ends lite, pion selects a pair without any check and sends to it, and <code>TestALiteOfferNeverMakesTheReflectorSendToACallerChosenAddress</code> proves a caller-chosen address hears nothing.</li>
+<li>Real loss: <code>TestRealLossIsSplitExactlyByDirection</code> in <code>packetpulsego/pkg/reflectormicroservice/reflectorcore/ReflectorLoss_test.go</code> drops real datagrams through a UDP proxy and checks the bitmap and the echoes against the drops; it also fails if the probe channel ever retransmits.</li>
+<li>Signalling: <code>packetpulsego/pkg/reflectormicroservice/reflectorapp/ReflectorRouteHandler.go</code> (per-address limit, signatures, replay refusal, the signed answer) with <code>packetpulsego/pkg/reflectormicroservice/reflectorsign/ReflectorSign.go</code> (keys derived from <code>REFLECTOR_KEY_SECRET</code>, never stored). The hosted reflector: <code>packetpulsego/cmd/packetpulseserver/PacketPulseReflector.go</code>. The customer daemon: <code>packetpulsego/cmd/packetpulsereflector/main.go</code>, <code>scripts/reflector/install-reflector.sh</code>, <code>scripts/reflector/packetpulsereflector.service</code>.</li>
+<li>The relay: <code>packetpulsego/pkg/diagnosticmicroservice/diagnosticservice/DiagnosticReflectorRelay.go</code>, through the sweep's probe policy and the demo's public-only confinement; tenancy, policy and every reflector failure in <code>packetpulsego/pkg/diagnosticmicroservice/diagnosticservice/DiagnosticReflectorRelay_test.go</code>. An endpoint whose reflector address is PacketPulse's own (<code>REFLECTOR_PUBLIC_IP</code>, or a name resolving to it, any port) is answered by the hosted reflector in-process and named the PacketPulse network: the relay would otherwise post to TCP 50000 on this host, where nothing listens (<code>namesHostedReflector</code>, <code>TestAnEndpointNamingPacketPulsesReflectorIsTestedToIt</code>).</li>
+<li>In the app: the engine is the self-test's own, copied to <code>packetpulseflutter/web/engine/</code> (<code>packetpulseflutter/test/udp_probe_run_test.dart</code> fails if either copy differs from <code>packetpulseweb/assets/</code>). <code>packetpulseflutter/lib/diagnosticmicroservice/service/udp/UdpProbeRun.dart</code> maps its result to samples and the split, checked against <code>packetpulsetest/contracts/udp_run_fixture.json</code>, which the engine's own test regenerates; <code>UdpProbeRunnerWeb.dart</code> is the browser bridge, <code>UdpProbeRunnerNative.dart</code> says no. The screen: <code>packetpulseflutter/lib/diagnosticmicroservice/presentation/screens/ClientProbeScreen.dart</code>; the split line, worded as the PDF's, <code>packetpulseflutter/lib/diagnosticmicroservice/presentation/widgets/UdpSplitLine.dart</code>.</li>
+<li>Filing: <code>udpProblem</code> and <code>namePacketPulseNetwork</code> in <code>packetpulsego/pkg/diagnosticmicroservice/diagnosticservice/DiagnosticUdpObservation.go</code> refuse a split on any other method, an unknown reflector, negative counts and a split larger than the loss, and name a PacketPulse-network result from the server's own <code>REFLECTOR_PUBLIC_IP</code>. The split's columns and their CHECK are in <code>packetpulsego/pkg/common/dbclient/migrations/0031_2026_10_09_udp_split_and_endpoint_reflector.sql</code>; the PDF line is <code>SplitLine</code> in <code>packetpulsego/pkg/pingmicroservice/pingdomain/shared/PingResult.go</code>. The CSV export's columns are unchanged. Signed in, the hosted reflector counts sessions per person (<code>user:&lt;id&gt;</code>), not per address.</li>
+<li>Coverage, in-app: <code>packetpulsego/pkg/diagnosticmicroservice/diagnosticservice/DiagnosticUdpObservation_test.go</code>, the <code>contract</code> suite's <code>udp_observation_test.go</code>, <code>packetpulseflutter/test/run_diagnostic_udp_test.dart</code>, <code>packetpulseflutter/test/udp_probe_run_test.dart</code>.</li>
+<li>The page's half: <code>packetpulseweb/assets/packetpulse-udp.js</code> (pacing that skips a missed slot rather than bursting, the per-sequence split, per-direction RFC 3550 jitter from the reflector's stamps), tested on a virtual clock in <code>packetpulseweb/assets/packetpulse-udp.test.mjs</code> (part of <code>unit</code>).</li>
+<li>Live: <code>REFLECTOR_UDP_PORT=50000</code> and <code>REFLECTOR_PUBLIC_IP</code> on the server; UDP 50000 open in the Oracle security list and the host firewall; <code>AF_NETLINK</code> in <code>scripts/deploy/packetpulse.service</code> (the reflector lists the host's interfaces through it). nginx needs nothing: the session route is under <code>/api/</code>, and the packets go straight to the UDP port.</li>
 </ul>
 </li>
 </ul>
@@ -2608,6 +2904,13 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>ACME has a licence for 3 people, full. Change it to 5 people (its end date stays), download the file and save it <strong>beside</strong> the installed one under a name that sorts after it, e.g. <code>zz-acme.licence</code>. Add people until one is refused</td>
 <td>The 4th and 5th are added and the 6th is refused: of two files ending the same day the later issue is the licence, and the two files' people are not added together. 🛑 <strong>Must NOT</strong> let the file names decide, or allow 8</td>
 </tr>
+<tr>
+<td><code>PLAT-010</code></td>
+<td>Superuser</td>
+<td>A price with no digits is not free</td>
+<td>Issue a licence with the amount typed as <code>.</code>, <code>-</code> or <code>+</code></td>
+<td>Refused on the amount. 🛑 <strong>Must NOT</strong> issue the licence at zero without <em>Complimentary</em> ticked</td>
+</tr>
 </tbody>
 </table></div>
 </li>
@@ -2717,7 +3020,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>Visitor</td>
 <td>The self-test runs in the browser</td>
 <td><strong>Test my connection</strong> → run</td>
-<td>Round trips, jitter and loss for each resolver, measured from the visitor's connection</td>
+<td>Round trips, jitter and loss for each resolver, measured from the visitor's connection; the UDP test is §4.2</td>
 </tr>
 <tr>
 <td><code>WEB-004</code></td>
@@ -2733,12 +3036,19 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>Open <code>/</code> at 360 px wide</td>
 <td>Logo, theme switch and <strong>Sign in</strong> on one line, no sideways scrolling</td>
 </tr>
+<tr>
+<td><code>WEB-006</code></td>
+<td>Visitor</td>
+<td>Only the fields the method uses</td>
+<td>Open <code>/selftest.html</code>; switch <strong>Target</strong> between a resolver, <strong>Another HTTPS host…</strong> and the UDP test</td>
+<td><strong>Host or URL</strong> only for another host; Samples, Interval and Timeout for the HTTPS tests, <strong>Duration</strong> for UDP. 🛑 <strong>Must NOT</strong> show a hidden field or the <em>UDP is blocked</em> notice (the page's CSS once overrode <code>hidden</code>)</td>
+</tr>
 </tbody>
 </table></div>
 </li>
 <li>⚙️ <strong>Developer Guide &amp; Release Confidence</strong>:
 <ul>
-<li><code>packetpulseweb/index.html</code>, <code>packetpulseweb/selftest.html</code>; the probe engine's tests: <code>packetpulseweb/assets/packetpulse-probe.test.mjs</code> (part of <code>unit</code>). The theme switch: <code>packetpulseweb/assets/packetpulse-theme.js</code>, which keeps the mode under the app's own appearance key; its tests, <code>packetpulseweb/assets/packetpulse-theme.test.mjs</code>, are part of <code>unit</code> too.</li>
+<li><code>packetpulseweb/index.html</code>, <code>packetpulseweb/selftest.html</code>; the probe engine's tests: <code>packetpulseweb/assets/packetpulse-probe.test.mjs</code> (part of <code>unit</code>); the UDP test's engine and tests: <code>packetpulseweb/assets/packetpulse-udp.js</code>, <code>packetpulseweb/assets/packetpulse-udp.test.mjs</code> (§4.2). The theme switch: <code>packetpulseweb/assets/packetpulse-theme.js</code>, which keeps the mode under the app's own appearance key; its tests, <code>packetpulseweb/assets/packetpulse-theme.test.mjs</code>, are part of <code>unit</code> too.</li>
 <li>The deploy asserts <code>/</code> and <code>/app/</code> differ, so the nginx misroute that once served a blank app is caught by the deploy.</li>
 </ul>
 </li>
@@ -2872,7 +3182,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td><code>SITE-*</code></td>
 <td><code>packetpulsego/pkg/dnssitemicroservice/</code>, <code>packetpulsego/pkg/common/probeguard/</code></td>
 <td><code>tenancy</code></td>
-<td><code>packetpulseflutter/test/dns_site_screen_test.dart</code></td>
+<td><code>packetpulseflutter/test/dns_site_screen_test.dart</code>, <code>packetpulseflutter/test/shell_test.dart</code></td>
 </tr>
 <tr>
 <td>Diagnostics, IPv6</td>
@@ -2894,6 +3204,13 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td><code>packetpulsego/pkg/diagnosticmicroservice/diagnosticservice/</code></td>
 <td><code>contract</code></td>
 <td><code>packetpulseflutter/test/run_diagnostic_screen_test.dart</code>, <code>packetpulseflutter/test/client_probe_run_test.dart</code>, <code>packetpulseflutter/test/client_probe_live_panels_test.dart</code>, <code>packetpulseflutter/test/dns_site_nearest_test.dart</code></td>
+</tr>
+<tr>
+<td>UDP test, reflectors</td>
+<td><code>UDP-*</code>, <code>WEB-006</code></td>
+<td><code>packetpulsego/pkg/reflectormicroservice/</code>, <code>packetpulsego/pkg/diagnosticmicroservice/diagnosticservice/</code></td>
+<td><code>contract</code>, <code>tenancy</code>, <code>acl</code>, <code>audit</code></td>
+<td><code>packetpulseflutter/test/run_diagnostic_udp_test.dart</code>, <code>packetpulseflutter/test/udp_probe_run_test.dart</code> (the page: <code>packetpulseweb/assets/packetpulse-udp.test.mjs</code>, in <code>unit</code>)</td>
 </tr>
 <tr>
 <td>Monitoring</td>
@@ -3163,6 +3480,11 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>Production configuration</td>
 <td>Production refuses <code>OTP_OUTBOX_FILE</code>, a <code>LICENCE_PUBLIC_KEY</code> override, <code>LDAP_ALLOW_LOOPBACK</code>, <code>EXPORT_ALLOW_LOOPBACK</code> and open CORS, and will not boot without an SMTP account</td>
 </tr>
+<tr>
+<td><code>NFR-019</code></td>
+<td>Text the database cannot hold</td>
+<td>A NUL character (<code>\u0000</code>) in any field of a JSON request - a site name, a note, a password - is refused with <em>Text in the request cannot contain a NUL character</em> (400). 🛑 <strong>Must NOT</strong> answer 500 <em>try again</em> for input that can never be stored</td>
+</tr>
 </tbody>
 </table></div>
 <h2 id="45-performance-the-load-suite">4.5 Performance — the load suite<a class="anchor" href="#45-performance-the-load-suite" aria-label="Link to this section">#</a></h2>
@@ -3412,6 +3734,22 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/packetpulse/releases/&lt;previous&gt;
 <td><code>diagnostic_run</code></td>
 <td style="text-align:center">required</td>
 <td style="text-align:center">✅</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/diagnostic/endpoint/{dnsSiteId}/reflector-key</code></td>
+<td>member</td>
+<td><code>dns_site_manage</code></td>
+<td style="text-align:center">required</td>
+<td style="text-align:center">✅</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/diagnostic/endpoint/{dnsSiteId}/webrtc-offer</code></td>
+<td>member</td>
+<td><code>diagnostic_run</code></td>
+<td style="text-align:center">required</td>
+<td style="text-align:center">—</td>
 </tr>
 <tr>
 <td><code>GET</code></td>
@@ -3974,6 +4312,14 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/packetpulse/releases/&lt;previous&gt;
 <td style="text-align:center">—</td>
 </tr>
 <tr>
+<td><code>POST</code></td>
+<td><code>/reflector/session</code></td>
+<td>public</td>
+<td>—</td>
+<td style="text-align:center">—</td>
+<td style="text-align:center">—</td>
+</tr>
+<tr>
 <td><code>GET</code></td>
 <td><code>/result/bytt/{ttNumber}</code></td>
 <td>api key</td>
@@ -4489,6 +4835,14 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/packetpulse/releases/&lt;previous&gt;
 <td><code>0029_2026_10_07_endpoint_location_and_report_branding.sql</code></td>
 <td>Where each endpoint is, where each test was run, how a test's endpoints were chosen, and an organisation's own logo and icon.</td>
 </tr>
+<tr>
+<td><code>0030_2026_10_08_webrtc_udp_reflector.sql</code></td>
+<td>A browser's UDP test is stored as its own measurement method, <code>udp-webrtc</code>.</td>
+</tr>
+<tr>
+<td><code>0031_2026_10_09_udp_split_and_endpoint_reflector.sql</code></td>
+<td>A UDP test filed on a ticket keeps where its loss happened - up, down or late - and its jitter each way; an endpoint can name the reflector beside it.</td>
+</tr>
 </tbody>
 </table></div>
 <h2 id="appendix-d-settings">Appendix D — Settings<a class="anchor" href="#appendix-d-settings" aria-label="Link to this section">#</a></h2>
@@ -4650,6 +5004,26 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/packetpulse/releases/&lt;previous&gt;
 <td><code>GEOCODE_CONTACT</code></td>
 <td><code>https://packetpulse.rummaan53.com</code></td>
 <td>Sent to Nominatim, which requires a contact</td>
+</tr>
+<tr>
+<td><code>REFLECTOR_UDP_PORT</code></td>
+<td><code>0</code> (off)</td>
+<td>Runs the UDP reflector behind the public self-test page on this UDP port (50000 on the live host). Off, the page's UDP test says <em>UDP testing is not enabled on this server</em>. The host firewall and the cloud security list must admit the port</td>
+</tr>
+<tr>
+<td><code>REFLECTOR_PUBLIC_IP</code></td>
+<td>—</td>
+<td>The address browsers are told to send UDP to. A cloud instance sees only its private address, so the live host needs its public one here</td>
+</tr>
+<tr>
+<td><code>REFLECTOR_SESSIONS_PER_MINUTE</code></td>
+<td><code>6</code></td>
+<td>UDP tests one address may start in a minute on the public reflector</td>
+</tr>
+<tr>
+<td><code>REFLECTOR_KEY_SECRET</code></td>
+<td>— (32+ characters)</td>
+<td>Derives each endpoint's reflector key (§4.2). Without it the relay to customer reflectors and the key route answer 503. Changing it changes every key, so every installed reflector must be reinstalled</td>
 </tr>
 </tbody>
 </table></div>

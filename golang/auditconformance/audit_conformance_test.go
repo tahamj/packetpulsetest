@@ -132,15 +132,17 @@ func TestEveryMutationRouteIsRegistered(t *testing.T) {
 
 	// Routes that mutate but are deliberately not audited, each with a reason.
 	excluded := map[string]string{
-		"RouteSignUp":        "public, before any principal exists; the owner's sign-in is recorded at verify, with the principal it creates",
-		"RouteSignIn":        "the password step: public, and it opens no session",
-		"RouteSignInVerify":  "public; an administrator's completed sign-in is recorded by UserMS with the principal it creates",
-		"RouteSignInResend":  "public, before any principal exists; it sends a code and changes nothing",
-		"RouteSignOut":       "recorded by UserMS itself, administrators' only; a field engineer's is their check-out",
-		"RouteRunSweep":      "superseded by /diagnostic/submit, which is audited",
-		"RouteConfigTest":    "a read-only connection test",
-		"RouteSetLanguage":   "a personal display preference, not authority",
-		"RouteSetAppearance": "a personal theme preference, not authority",
+		"RouteSignUp":              "public, before any principal exists; the owner's sign-in is recorded at verify, with the principal it creates",
+		"RouteSignIn":              "the password step: public, and it opens no session",
+		"RouteSignInVerify":        "public; an administrator's completed sign-in is recorded by UserMS with the principal it creates",
+		"RouteSignInResend":        "public, before any principal exists; it sends a code and changes nothing",
+		"RouteSignOut":             "recorded by UserMS itself, administrators' only; a field engineer's is their check-out",
+		"RouteRunSweep":            "superseded by /diagnostic/submit, which is audited",
+		"RouteConfigTest":          "a read-only connection test",
+		"RouteSetLanguage":         "a personal display preference, not authority",
+		"RouteSetAppearance":       "a personal theme preference, not authority",
+		"RouteReflectorSession":    "public: an anonymous UDP test on the self-test page; it changes nothing and names nobody",
+		"RouteEndpointWebRtcOffer": "relays a test's offer and changes nothing; attaching its result is /diagnostic/clientobservation, audited",
 	}
 
 	// The registry matches on a path SUFFIX, so collect the suffixes it

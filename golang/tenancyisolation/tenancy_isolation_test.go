@@ -54,6 +54,25 @@ func TestOneTenantCannotReachAnother(t *testing.T) {
 		}
 	})
 
+	// The UDP relay and the reflector key both name an endpoint. Alpha's own
+	// requests get past the tenant check (200, or 503 where the server has no
+	// key secret), so beta's 404 is the predicate, not a missing endpoint.
+	for _, route := range []struct{ name, path string }{
+		{"relay a UDP test to", "/diagnostic/endpoint/" + alphaSiteId + "/webrtc-offer"},
+		{"take the reflector key of", "/diagnostic/endpoint/" + alphaSiteId + "/reflector-key"},
+	} {
+		t.Run("beta cannot "+route.name+" alpha's endpoint", func(t *testing.T) {
+			own := packetpulsetest.Call(t, http.MethodPost, route.path, alphaToken, map[string]any{"sdp": "v=0"})
+			if own.Status == http.StatusNotFound || own.Status == http.StatusForbidden {
+				t.Fatalf("alpha's own request was refused (%d %s); the test proves nothing", own.Status, own.Raw)
+			}
+			response := packetpulsetest.Call(t, http.MethodPost, route.path, betaToken, map[string]any{"sdp": "v=0"})
+			if response.Status != http.StatusNotFound {
+				t.Errorf("expected 404, got %d: a cross-tenant endpoint must not resolve", response.Status)
+			}
+		})
+	}
+
 	t.Run("beta cannot delete alpha's site", func(t *testing.T) {
 		response := packetpulsetest.Call(t, http.MethodDelete, "/dnssite/"+alphaSiteId, betaToken, nil)
 		if response.Status != http.StatusNotFound {

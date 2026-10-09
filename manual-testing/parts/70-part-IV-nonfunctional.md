@@ -41,6 +41,7 @@ The app runs on the web (the live build), macOS, Windows, Android and iOS from o
 | `NFR-016` | Secrets at rest | SMS tokens, bind passwords and export credentials sealed with the server's secret box; API keys stored as hashes; never returned |
 | `NFR-017` | CSV injection | Cells starting `=`, `+`, `-`, `@`, tab or carriage return are written as text |
 | `NFR-018` | Production configuration | Production refuses `OTP_OUTBOX_FILE`, a `LICENCE_PUBLIC_KEY` override, `LDAP_ALLOW_LOOPBACK`, `EXPORT_ALLOW_LOOPBACK` and open CORS, and will not boot without an SMTP account |
+| `NFR-019` | Text the database cannot hold | A NUL character (`\u0000`) in any field of a JSON request - a site name, a note, a password - is refused with *Text in the request cannot contain a NUL character* (400). 🛑 **Must NOT** answer 500 *try again* for input that can never be stored |
 
 ## 4.5 Performance — the load suite
 
