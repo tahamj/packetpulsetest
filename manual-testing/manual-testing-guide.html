@@ -2798,7 +2798,13 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <p><strong>Screen:</strong> Configure → <strong>Directory</strong> · <strong>Routes:</strong> <code>GET/PUT /ldap/config</code>, <code>POST /ldap/config/test</code>, <code>/ldap/groupmap/*</code> · <strong>Capability:</strong> <code>ldap_manage</code></p>
 <ul>
 <li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: Staff sign in with their existing network password over LDAP or Active Directory, and their directory group decides their PacketPulse role — after the second step, so a directory password alone still opens nothing. The owner always keeps a local password, so a directory outage cannot lock out the person who fixes it.</li>
-<li>📖 <strong>User Guide &amp; Operational Flow</strong>: Host and port (389 LDAP/StartTLS, 636 LDAPS), encryption, the CA certificate of your own authority, a read-only bind account, the base DN; then <strong>Test connection</strong> before enabling. <strong>Group mappings</strong> give each directory group a role.</li>
+<li>📖 <strong>User Guide &amp; Operational Flow</strong>: Host and port (389 LDAP/StartTLS, 636 LDAPS), encryption, the CA certificate of your own authority, a read-only bind account, the base DN; then <strong>Test connection</strong> before enabling. <strong>Group mappings</strong> give each directory group a role.
+<ul>
+<li><strong>Who is looked up:</strong> the person's PacketPulse email address up to the <code>@</code> is what replaces each <code>%s</code> in the <strong>User filter</strong>. Where directory account names match email addresses, <code>(sAMAccountName=%s)</code> (Active Directory) or <code>(uid=%s)</code> (OpenLDAP, FreeIPA) works; where they do not (staff numbers), search by mail: <code>(mail=%s@corp.example.com)</code>.</li>
+<li><strong>Group filter:</strong> each <code>%s</code> is the person's DN; for groups that list members by user name, <code>%u</code> is their user name — <code>(&amp;(objectClass=posixGroup)(memberUid=%u))</code>. One of the two is required — without it every person would be in every group. Active Directory's <code>(&amp;(objectClass=group)(member:1.2.840.113556.1.4.1941:=%s))</code> also follows nested groups. A filter may use a placeholder more than once: <code>(|(uid=%s)(mail=%s@corp.example.com))</code>.</li>
+<li>Settings for Active Directory, OpenLDAP, OpenLDAP with <code>groupOfUniqueNames</code> or <code>posixGroup</code>, and FreeIPA are each proven end to end, using only the screen's fields, by <code>packetpulsego/pkg/ldapmicroservice/ldapservice/LdapDirectoryProducts_test.go</code>.</li>
+</ul>
+</li>
 <li>🧪 <strong>Manual Testing Playbook</strong>:<div class="tw"><table><thead>
 <tr>
 <th>ID</th>
@@ -2837,13 +2843,81 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>Directory down; an administrator signs in</td>
 <td>No <em>Sign-in failed</em> entry in Activity — nobody got the password wrong</td>
 </tr>
+<tr>
+<td><code>LDAP-005</code></td>
+<td>Administrator</td>
+<td>A group filter must name the person</td>
+<td>Group filter <code>(objectClass=group)</code>; <strong>Save</strong></td>
+<td>Refused against <strong>Group filter</strong>: <em>The group filter needs a %s where the person's DN goes, or a %u where their user name goes.</em> 🛑 <strong>Must NOT</strong> save a filter that puts everyone in every group</td>
+</tr>
+<tr>
+<td><code>LDAP-006</code></td>
+<td>Directory user</td>
+<td>Nested Active Directory groups grant the role</td>
+<td>Map <code>PacketPulse NOC</code> → <em>NOC Engineer</em>; the person is in <code>NOC Shift A</code>, itself a member of <code>PacketPulse NOC</code>; group filter <code>(&amp;(objectClass=group)(member:1.2.840.113556.1.4.1941:=%s))</code>; sign in</td>
+<td><em>NOC Engineer</em> after the second step</td>
+</tr>
+<tr>
+<td><code>LDAP-007</code></td>
+<td>Directory user</td>
+<td>Account names that are not email addresses</td>
+<td>AD account <code>E10442</code>, PacketPulse email <code>asha.rao@corp.example.com</code>; user filter <code>(&amp;(objectCategory=person)(objectClass=user)(mail=%s@corp.example.com))</code></td>
+<td>Signed in with the directory password. With <code>(sAMAccountName=%s)</code> instead: <em>incorrect email address or password</em></td>
+</tr>
+<tr>
+<td><code>LDAP-008</code></td>
+<td>Administrator</td>
+<td>A silent firewall does not hang the screen</td>
+<td>Point <strong>Host/Port</strong> at an address that accepts the connection and never answers (a firewall that drops after the handshake, or <code>nc -lk 3890</code> on a test host); StartTLS; <strong>Test connection</strong></td>
+<td>Within about the connection timeout (10 s): <em>Could not reach a directory server at that host and port. Check the hostname, the port, and the encryption mode.</em> 🛑 <strong>Must NOT</strong> spin indefinitely, and <strong>must NOT</strong> say <em>The directory refused the service account</em></td>
+</tr>
+<tr>
+<td><code>LDAP-009</code></td>
+<td>Directory user</td>
+<td>A person in hundreds of groups keeps them all</td>
+<td>In a large AD, a person in several hundred groups, one of them mapped; sign in</td>
+<td>The mapped role. 🛑 <strong>Must NOT</strong> fall back to the default role because the person has many groups</td>
+</tr>
+<tr>
+<td><code>LDAP-010</code></td>
+<td>Tester</td>
+<td>A filter that matches several people is named, not guessed</td>
+<td>User filter <code>(uid=a*%s)</code>; a person signs in</td>
+<td>The person is told <em>Your organisation's directory server could not be reached. Please retry.</em>; the server log reads <em>the user filter matched more than one entry</em>. 🛑 <strong>Must NOT</strong> sign in as whichever entry came first</td>
+</tr>
+<tr>
+<td><code>LDAP-011</code></td>
+<td>Directory user</td>
+<td>Groups that list members by user name</td>
+<td>OpenLDAP <code>posixGroup</code> <code>netops</code> with <code>memberUid: asha.rao</code>, mapped to <em>NOC Engineer</em>; group filter <code>(&amp;(objectClass=posixGroup)(memberUid=%u))</code>; <code>asha.rao</code> signs in</td>
+<td><em>NOC Engineer</em>. With <code>%s</code> instead of <code>%u</code>: no group, the role unchanged</td>
+</tr>
+<tr>
+<td><code>LDAP-012</code></td>
+<td>Directory user</td>
+<td>A filter that names the person twice</td>
+<td>User filter <code>(&amp;(objectClass=person)(|(uid=%s)(mail=%s@corp.example.com)))</code>; a person whose <code>uid</code> is a staff number but whose mail is their PacketPulse address signs in</td>
+<td>Signed in. 🛑 <strong>Must NOT</strong> fail because only the first <code>%s</code> was filled</td>
+</tr>
+<tr>
+<td><code>LDAP-013</code></td>
+<td>Tester</td>
+<td>The recorded test result says nothing about the network</td>
+<td><strong>Test connection</strong> against a closed port, then against a host that accepts and never answers; after each, <code>GET /api/v1/ldap/config</code></td>
+<td><code>last_test_result</code> is the same sentence both times — <em>Could not reach a directory server at that host and port…</em> 🛑 <strong>Must NOT</strong> contain <em>refused</em>, <em>timed out</em>, <em>dial</em> or the port — that difference is a port scan</td>
+</tr>
 </tbody>
 </table></div>
 </li>
 <li>⚙️ <strong>Developer Guide &amp; Release Confidence</strong>:
 <ul>
 <li><code>packetpulsego/pkg/common/ldapclient/</code>, <code>packetpulsego/pkg/ldapmicroservice/</code>; the bind password is sealed like every secret; the directory is dialled through the directory policy (private yes; loopback only with <code>LDAP_ALLOW_LOOPBACK</code>, refused in production).</li>
-<li>Coverage: <code>packetpulsego/pkg/common/ldaptest/</code> (an in-process directory), <code>packetpulseflutter/test/ldap_settings_screen_test.dart</code>.</li>
+<li>The connection is set up — LDAPS handshake, or StartTLS and its handshake — inside one deadline, the connection timeout; go-ldap puts none on a StartTLS handshake, so a middlebox that accepted the connection and went quiet used to hold a sign-in open indefinitely.</li>
+<li>Only <code>invalidCredentials</code> (49) is a wrong password. A timeout, a dropped connection, or a domain controller answering <code>busy</code> / <code>unavailable</code> is <em>could not be reached</em> — for the person signing in and for <strong>Test connection</strong> — so an outage is never recorded as a failed sign-in.</li>
+<li>🔒 <strong>Test connection</strong> answers, and records as <code>last_test_result</code>, one authored sentence per kind of failure (<code>ConnectionTestMessage</code> in <code>packetpulsego/pkg/ldapmicroservice/ldapservice/LdapService.go</code>), never the raw error. Until October 2026 the raw error was recorded and <code>GET /ldap/config</code> returned it, so refused, timed out and the port could still be read. A result stored before then is shown as the generic failure.</li>
+<li>Filters are filled by <code>fillFilter</code> in <code>packetpulsego/pkg/common/ldapclient/LdapClient.go</code>: every <code>%s</code> (not only the first, as <code>fmt.Sprintf</code> did), <code>%u</code> in a group filter, <code>%%</code> as a percent sign; each value escaped.</li>
+<li>A user search answered with <code>sizeLimitExceeded</code> is the ambiguity (<code>ErrAmbiguousUser</code>), not an outage. Groups are read in pages of 500 with no cap on the count; a cap of 100 used to lose every group past it. Directory failures at sign-in are logged with their reason (<em>directory sign-in could not be completed</em>).</li>
+<li>Coverage: <code>packetpulsego/pkg/common/ldaptest/</code> (an in-process directory that answers as OpenLDAP or Active Directory: DN matching, AD's matching rules and sign-in names, size limits and paging, per-connection identity and access rules, unavailable binds, stalled StartTLS, silent hosts), <code>packetpulsego/pkg/common/ldapclient/LdapCustomerDirectory_test.go</code>, <code>packetpulsego/pkg/ldapmicroservice/ldapservice/LdapDirectoryProducts_test.go</code>, <code>packetpulsego/pkg/usermicroservice/userservice/UserDirectorySignIn_test.go</code>, <code>packetpulseflutter/test/ldap_settings_screen_test.dart</code>.</li>
 </ul>
 </li>
 </ul>
@@ -3261,7 +3335,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <tr>
 <td>Directory</td>
 <td><code>LDAP-*</code></td>
-<td><code>packetpulsego/pkg/common/ldapclient/</code>, <code>packetpulsego/pkg/ldapmicroservice/</code></td>
+<td><code>packetpulsego/pkg/common/ldapclient/</code>, <code>packetpulsego/pkg/ldapmicroservice/</code>, <code>packetpulsego/pkg/usermicroservice/userservice/UserDirectorySignIn_test.go</code></td>
 <td>—</td>
 <td><code>packetpulseflutter/test/ldap_settings_screen_test.dart</code></td>
 </tr>

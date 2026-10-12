@@ -18,7 +18,7 @@ What guards each area automatically, so a manual pass can spend its time where a
 | Monitoring | `MON-*` | `packetpulsego/pkg/monitormicroservice/` | `monitor` | `packetpulseflutter/test/monitor_screen_test.dart` |
 | Results API | `API-*` | `packetpulsego/pkg/common/apikeyauth/` | `contract`, `tenancy` | `packetpulseflutter/test/api_key_screen_test.dart` |
 | Result export | `EXP-*` | `packetpulsego/pkg/common/filedrop/`, `packetpulsego/pkg/exportmicroservice/` | `contract`, `acl`, `tenancy`, `audit` | `packetpulseflutter/test/result_export_screen_test.dart` |
-| Directory | `LDAP-*` | `packetpulsego/pkg/common/ldapclient/`, `packetpulsego/pkg/ldapmicroservice/` | — | `packetpulseflutter/test/ldap_settings_screen_test.dart` |
+| Directory | `LDAP-*` | `packetpulsego/pkg/common/ldapclient/`, `packetpulsego/pkg/ldapmicroservice/`, `packetpulsego/pkg/usermicroservice/userservice/UserDirectorySignIn_test.go` | — | `packetpulseflutter/test/ldap_settings_screen_test.dart` |
 | Platform | `PLAT-*` | `packetpulsego/pkg/platformmicroservice/` | `assignment` | `packetpulseflutter/test/platform_console_screen_test.dart` |
 | Settings, catalogue | `SET-*` | `packetpulsego/pkg/initmicroservice/` | `translation` | `packetpulseflutter/test/settings_screen_test.dart` |
 | Branding | `BRAND-*` | `packetpulsego/pkg/common/orgbrand/` | `acl`, `tenancy` | `packetpulseflutter/test/brand_screen_test.dart` |
