@@ -11,7 +11,7 @@ PACKETPULSE_TEST_URL=http://localhost:18080 PACKETPULSE_TEST_REQUIRE_SUPERUSER=1
 ./packetpulsetest.sh load          # before a release that touches sweeps, sign-in or exports
 ```
 
-`./packetpulsetest.sh` runs `tenancy assignment acl audit translation contract monitor unit client backup docs`. Coverage floors are a ratchet (`scripts/PacketPulseCoverageFloor.py`, `scripts/PacketPulseFlutterCoverageFloor.py`): raised when real coverage rises, never lowered to make a build pass.
+`./packetpulsetest.sh` runs `tenancy assignment acl audit translation contract grading unit client backup docs`. Coverage floors are a ratchet (`scripts/PacketPulseCoverageFloor.py`, `scripts/PacketPulseFlutterCoverageFloor.py`): raised when real coverage rises, never lowered to make a build pass.
 
 ## 5.2 What blocks a release
 

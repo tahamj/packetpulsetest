@@ -39,27 +39,10 @@ All routes are under `/api/v1`. **Access**: *public* (no session), *session* (si
 | `GET` | `/ldap/groupmap/list` | member | `ldap_manage` | — | — |
 | `DELETE` | `/ldap/groupmap/{mapId}` | member | `ldap_manage` | — | ✅ |
 | `GET` | `/licence/my` | member | `licence_view` | — | — |
-| `GET` | `/monitor/alert/list` | member | `sla_view` | — | — |
-| `POST` | `/monitor/channel/add` | member | `sla_manage` | required | ✅ |
-| `GET` | `/monitor/channel/list` | member | `sla_view` | — | — |
-| `DELETE` | `/monitor/channel/{channelId}` | member | `sla_manage` | — | ✅ |
-| `POST` | `/monitor/channel/{channelId}/test` | member | `sla_manage` | required | ✅ |
-| `POST` | `/monitor/maintenance/add` | member | `schedule_manage` | required | ✅ |
-| `GET` | `/monitor/maintenance/list` | member | `sla_view` | — | — |
-| `DELETE` | `/monitor/maintenance/{windowId}` | member | `schedule_manage` | required | ✅ |
-| `PUT` | `/monitor/maintenance/{windowId}` | member | `schedule_manage` | required | ✅ |
-| `POST` | `/monitor/schedule/add` | member | `schedule_manage` | required | ✅ |
-| `GET` | `/monitor/schedule/list` | member | `schedule_manage` | — | — |
-| `DELETE` | `/monitor/schedule/{scheduleId}` | member | `schedule_manage` | — | ✅ |
-| `PUT` | `/monitor/schedule/{scheduleId}` | member | `schedule_manage` | required | ✅ |
-| `POST` | `/monitor/schedule/{scheduleId}/run` | member | `schedule_manage` | required | ✅ |
 | `POST` | `/monitor/sla/add` | member | `sla_manage` | required | ✅ |
 | `GET` | `/monitor/sla/list` | member | `sla_view` | — | — |
 | `DELETE` | `/monitor/sla/{slaPolicyId}` | member | `sla_manage` | — | ✅ |
 | `PUT` | `/monitor/sla/{slaPolicyId}` | member | `sla_manage` | required | ✅ |
-| `GET` | `/monitor/slareport` | member | `report_view` | — | — |
-| `GET` | `/monitor/slareport.pdf` | member | `report_export` | — | — |
-| `GET` | `/monitor/trend` | member | `report_view` | — | — |
 | `GET` | `/organisation/brand` | member | — | — | — |
 | `DELETE` | `/organisation/brand/{part}` | member | `staff_manage` | — | ✅ |
 | `PUT` | `/organisation/brand/{part}` | member | `staff_manage` | — | ✅ |
@@ -128,8 +111,7 @@ All routes are under `/api/v1`. **Access**: *public* (no session), *session* (si
 | `diagnostic_view_own` | View diagnostics this person submitted. | ✅ | ✅ | ✅ |
 | `diagnostic_view_all` | View every diagnostic in the organisation. | ✅ | — | ✅ |
 | `sla_view` | View SLA policies and breach status. | ✅ | ✅ | ✅ |
-| `sla_manage` | Create and edit SLA policies and alert channels. | ✅ | — | — |
-| `schedule_manage` | Create and edit scheduled monitoring. | ✅ | ✅ | — |
+| `sla_manage` | Create and edit SLA policies. | ✅ | — | — |
 | `report_view` | View reports and analytics. | ✅ | ✅ | ✅ |
 | `report_export` | Download PDF and CSV reports. | ✅ | ✅ | — |
 | `user_manage` | Invite and deactivate user accounts. | ✅ | — | — |
@@ -179,6 +161,8 @@ Embedded in the server binary and applied in order at boot (`packetpulsego/pkg/c
 | `0029_2026_10_07_endpoint_location_and_report_branding.sql` | Where each endpoint is, where each test was run, how a test's endpoints were chosen, and an organisation's own logo and icon. |
 | `0030_2026_10_08_webrtc_udp_reflector.sql` | A browser's UDP test is stored as its own measurement method, `udp-webrtc`. |
 | `0031_2026_10_09_udp_split_and_endpoint_reflector.sql` | A UDP test filed on a ticket keeps where its loss happened - up, down or late - and its jitter each way; an endpoint can name the reflector beside it. |
+| `0032_2026_10_14_sla_breach_reasons.sql` | A graded result keeps why it was graded so: each service target it missed, with what was measured and the target (`ping_result.sla_breaches`). |
+| `0033_2026_10_14_sla_checks.sql` | Every figure of a graded result is kept against its target, with where Degraded begins and its own verdict: `sla_breaches` becomes `sla_checks`, its entries marked breached. |
 
 ## Appendix D — Settings
 

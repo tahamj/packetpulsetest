@@ -27,6 +27,7 @@ The app runs on the web (the live build), macOS, Windows, Android and iOS from o
 | ID | Check | Expected |
 |---|---|---|
 | `NFR-009` | Each of the five themes in light and dark | Text contrast passes; status colours unchanged in meaning |
+| `NFR-020` | A chosen chip or segment in each theme, light and dark — *SFTP (recommended)* on **Result export**, an endpoint chip, **Packets per second** | The label is white (dark navy in dark mode) on the blue fill, as legible as its tick; an unchosen chip keeps the page's text colour. Held by `packetpulseflutter/test/packetpulse_theme_test.dart` at 4.5:1 (review of 14 October 2026). 🛑 **Must NOT** draw dark text on the dark fill |
 | `NFR-010` | Reduce motion on (app setting or the device's) | No transitions |
 | `NFR-011` | Status by colour alone | Every pill carries an icon as well as a colour |
 | `NFR-012` | Every user-visible sentence | From the catalogue: no English hard-coded in a widget, no raw key shown |

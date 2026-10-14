@@ -23,7 +23,7 @@ Each journey crosses several chapters the way a real customer does. Run them on 
 **Covers:** `DIAG-001`–`DIAG-005`, `HIST-001`, `V6-001`
 
 1. Ticket `TT-JRN-002` arrives: Customer `CUST-88412`, slow calls.
-2. Run against the customer's sites. Read loss, jitter and MOS on each row.
+2. Run against the customer's sites. Read loss and jitter on each row.
 3. Re-run after the carrier's fix.
 4. In **History**, compare both attempts.
 
@@ -54,18 +54,6 @@ Each journey crosses several chapters the way a real customer does. Run them on 
 4. The SFTP password is changed on the server for one interval, then restored.
 
 **Expected:** a file per interval with results; the interval with the wrong password shows *Not delivered*, and the next file holds that period's results too; every `result_id` appears exactly once across all the files — a failed delivery sent nothing, so nothing is sent twice.
-
----
-
-### JRN-005 · Monitoring catches an outage and its recovery
-
-**Covers:** `MON-001`–`MON-005`, `MON-007`
-
-1. Through the API: a default target; a schedule every 5 minutes over every enabled site; a webhook channel; damping 2.
-2. Black-hole one site for 15 minutes, then restore it.
-3. Through the API, declare a maintenance window over another site, and break that site inside the window.
-
-**Expected:** one breach alert, one recovery; the maintenance site raises nothing and its availability is untouched.
 
 ---
 

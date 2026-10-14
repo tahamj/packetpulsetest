@@ -93,8 +93,9 @@ func TestClientObservationIsRecordedAsClientSourced(t *testing.T) {
 		if method != "https-dns" && method != "https-reach" {
 			t.Errorf("method = %q, want an https method", method)
 		}
-		// 'unknown' is the honest value: this server applied no SLA to a
-		// measurement it did not take.
+		// 'unknown' is the honest value: an HTTPS round-trip is never graded,
+		// because the targets are set for packets and TCP turns loss into
+		// delay. (A device's UDP test is graded: the grading suite.)
 		if result["sla_status"] != "unknown" {
 			t.Errorf("sla_status = %v, want unknown", result["sla_status"])
 		}

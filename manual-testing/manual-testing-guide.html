@@ -180,7 +180,7 @@ nav.side .nohit.on{display:block}
     <a class="n2" href="#group-2-people">Group 2 — People</a>
     <a class="n2" href="#group-3-diagnostics">Group 3 — Diagnostics</a>
     <a class="n2" href="#group-4-the-customers-side">Group 4 — The Customer's Side</a>
-    <a class="n2" href="#group-5-monitoring">Group 5 — Monitoring</a>
+    <a class="n2" href="#group-5-service-targets-and-grading">Group 5 — Service targets and grading</a>
     <a class="n2" href="#group-6-integrations">Group 6 — Integrations</a>
     <a class="n2" href="#group-7-platform-and-settings">Group 7 — Platform and Settings</a>
     <a class="n2" href="#feature-coverage-matrix">Feature → Coverage Matrix</a>
@@ -233,11 +233,11 @@ nav.side .nohit.on{display:block}
 </thead>
 <tbody>
 <tr>
-<td style="text-align:center"><strong>17</strong> <br><sub>in the navigation rail</sub></td>
-<td style="text-align:center"><strong>111</strong> <br><sub>under <code>/api/v1</code></sub></td>
-<td style="text-align:center"><strong>17</strong> <br><sub>3 built-in roles</sub></td>
-<td style="text-align:center"><strong>31</strong> <br><sub>applied at boot</sub></td>
-<td style="text-align:center"><strong>1042</strong> <br><sub>English, server-served</sub></td>
+<td style="text-align:center"><strong>16</strong> <br><sub>in the navigation rail</sub></td>
+<td style="text-align:center"><strong>94</strong> <br><sub>under <code>/api/v1</code></sub></td>
+<td style="text-align:center"><strong>16</strong> <br><sub>3 built-in roles</sub></td>
+<td style="text-align:center"><strong>33</strong> <br><sub>applied at boot</sub></td>
+<td style="text-align:center"><strong>1093</strong> <br><sub>English, server-served</sub></td>
 <td style="text-align:center"><strong>19</strong> <br><sub>one per screen</sub></td>
 <td style="text-align:center"><strong>11</strong> <br><sub>+ <code>load</code>, opt-in</sub></td>
 </tr>
@@ -406,8 +406,8 @@ nav.side .nohit.on{display:block}
 </tr>
 <tr>
 <td><strong>UDP test in Run diagnostic</strong></td>
-<td>In a browser, <strong>Run diagnostic</strong> measures the ticket's endpoint with <strong>UDP, like a call</strong> by default (or <strong>HTTPS to the endpoint</strong>), for 10, 30 or 60 seconds, and files where each lost packet went - up, down or late - with jitter each way, on the ticket, its page and its PDF. It measures to the reflector beside the endpoint when the endpoint names one (<strong>UDP reflector address</strong>, §3.1), and otherwise to the PacketPulse network, filed as <em>PacketPulse network</em>: the customer's access line, never the endpoint. The desktop and phone apps keep ICMP (since 2026-10-09).</td>
-<td><code>UDP-016</code>–<code>UDP-026</code>, <code>SITE-011</code>–<code>SITE-013</code></td>
+<td>In a browser, <strong>Run diagnostic</strong> measures the ticket's endpoint with <strong>UDP, like a call</strong> — the only method offered there since 13 October 2026 — for 10, 30 or 60 seconds at 10, 25, 50 or 100 packets a second, grades it against the organisation's targets, and files where each lost packet went - up, down or late - with jitter each way, on the ticket, its page and its PDF. It measures to the reflector beside the endpoint when the endpoint names one (<strong>UDP reflector address</strong>, §3.1), and otherwise to the PacketPulse network, filed as <em>PacketPulse network</em>: the customer's access line, never the endpoint. The desktop and phone apps keep ICMP (since 2026-10-09).</td>
+<td><code>UDP-016</code>–<code>UDP-031</code>, <code>SITE-011</code>–<code>SITE-013</code></td>
 <td><code>packetpulseflutter/lib/diagnosticmicroservice/service/udp/UdpProbeRun.dart</code><br><code>packetpulsego/pkg/diagnosticmicroservice/diagnosticservice/DiagnosticUdpObservation.go</code></td>
 </tr>
 <tr>
@@ -469,7 +469,7 @@ nav.side .nohit.on{display:block}
 </tr>
 <tr>
 <td><strong>5. Loss and jitter</strong></td>
-<td>Loss and RFC 3550 jitter on every result, ticket, history row, dashboard row, PDF and SLA report.</td>
+<td>Loss and RFC 3550 jitter on every result, ticket, history row, dashboard row and PDF.</td>
 <td><code>DIAG-005</code>, <code>HIST-*</code>, <code>MON-*</code></td>
 <td><code>packetpulsego/pkg/pingmicroservice/pingprobe/PingVoiceQuality.go</code><br><code>packetpulsego/pkg/common/dbclient/migrations/0022_2026_10_03_loss_and_jitter.sql</code></td>
 </tr>
@@ -679,8 +679,8 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>server</td>
 </tr>
 <tr>
-<td><code>monitor</code></td>
-<td>SLA grading, schedules, alert damping, maintenance windows</td>
+<td><code>grading</code></td>
+<td>A device's UDP test is graded and its breach counted; an HTTPS round-trip never is; automatic monitoring answers nothing</td>
 <td>server</td>
 </tr>
 <tr>
@@ -760,9 +760,9 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 </tbody>
 </table></div>
 <h2 id="l4-ipv4-ipv6-and-not-counted">L.4 IPv4, IPv6 and &quot;not counted&quot;<a class="anchor" href="#l4-ipv4-ipv6-and-not-counted" aria-label="Link to this section">#</a></h2>
-<p>A site whose name resolves to both an IPv4 and an IPv6 address is measured over <strong>both</strong>. The IPv6 result is shown, kept and exported, but marked <strong>not counted</strong>: the site's totals, alerts and SLA availability are carried by IPv4, because the customer's agreement is for the service and IPv4 still carries it. A site that is IPv6 <em>only</em> counts over IPv6 — otherwise it could never fail. When the server itself has no IPv6 route, an IPv6 address is reported as <em>could not be tested from here</em> rather than as an outage.</p>
+<p>A site whose name resolves to both an IPv4 and an IPv6 address is measured over <strong>both</strong>. The IPv6 result is shown, kept and exported, but marked <strong>not counted</strong>: the site's totals and breaches are carried by IPv4, because the customer's agreement is for the service and IPv4 still carries it. A site that is IPv6 <em>only</em> counts over IPv6 — otherwise it could never fail. When the server itself has no IPv6 route, an IPv6 address is reported as <em>could not be tested from here</em> rather than as an outage.</p>
 <h2 id="l5-two-vantage-points">L.5 Two vantage points<a class="anchor" href="#l5-two-vantage-points" aria-label="Link to this section">#</a></h2>
-<p>PacketPulse measures from two places. Its server sweeps the organisation's endpoints from PacketPulse's data centre, on a schedule and for the Results API. <strong>Run diagnostic</strong> measures from wherever the person is, over their own connection, to the endpoint nearest them — the right tool for &quot;is it slow for me?&quot;. The two will not match, and both are correct: they measure different layers from different places. A device test is <strong>attached</strong> to a ticket, under the endpoint it measured, labelled as measured on a device.</p>
+<p>PacketPulse measures from two places. Its server sweeps the organisation's endpoints from PacketPulse's data centre when the API asks it to. <strong>Run diagnostic</strong> measures from wherever the person is, over their own connection, to the endpoint nearest them — the right tool for &quot;is it slow for me?&quot;. The two will not match, and both are correct: they measure different layers from different places. A device test is <strong>attached</strong> to a ticket, under the endpoint it measured, labelled as measured on a device.</p>
 <h2 id="l6-two-step-sign-in">L.6 Two-step sign-in<a class="anchor" href="#l6-two-step-sign-in" aria-label="Link to this section">#</a></h2>
 <p>After the password, everyone enters a one-time <strong>6-digit code</strong>. It is <strong>emailed</strong> to their sign-in address, or <strong>texted</strong> to their mobile when an administrator chose text for them and the organisation's own SMS gateway is on. An owner's code is always emailed, so the account that runs the organisation never depends on a gateway. A code is good for ten minutes and five tries; ten wrong codes in all lock the account for fifteen minutes, and nobody is sent more than ten codes an hour. A wrong <em>password</em> never locks anything, so a stranger cannot lock someone out by typing their address. A lost phone is handled by an administrator, who signs that device out and switches the person to email.</p>
 <h2 id="l7-location-at-sign-in">L.7 Location at sign-in<a class="anchor" href="#l7-location-at-sign-in" aria-label="Link to this section">#</a></h2>
@@ -834,8 +834,8 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td><code>DEV-*</code></td>
 </tr>
 <tr>
-<td>5 · Monitoring</td>
-<td>SLA report; targets, schedules, alerts and maintenance through the API</td>
+<td>5 · Service targets and grading</td>
+<td>Targets through the API; how every result, a device's UDP test included, is graded</td>
 <td><code>MON-*</code></td>
 </tr>
 <tr>
@@ -1269,7 +1269,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>Administrator</td>
 <td>A custom role grants exactly what is ticked</td>
 <td>Add <em>Shift lead</em> with <code>diagnostic_run</code> and <code>report_view</code> only; give it to an engineer</td>
-<td>They can run diagnostics and see the dashboard; <strong>Staff</strong>, <strong>Monitoring</strong> edits and <strong>API keys</strong> are absent. Each refused route answers 403</td>
+<td>They can run diagnostics and see the dashboard; <strong>Staff</strong> and <strong>API keys</strong> are absent. Each refused route answers 403</td>
 </tr>
 <tr>
 <td><code>ACL-003</code></td>
@@ -1694,8 +1694,8 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <h3 id="32-diagnostics-and-results">3.2 🩺 Diagnostics and results<a class="anchor" href="#32-diagnostics-and-results" aria-label="Link to this section">#</a></h3>
 <p><strong>Screen:</strong> a ticket's result, from <strong>History</strong>; no screen starts a sweep (since 2026-10-07: <strong>Run diagnostic</strong> is the test from this device, §4.1) · <strong>Routes:</strong> <code>POST /diagnostic/submit</code>, <code>GET /diagnostic/{requestId}</code>, <code>GET /diagnostic/{requestId}/report.pdf</code> · <strong>Capabilities:</strong> <code>diagnostic_run</code>, <code>diagnostic_view_own</code> or <code>diagnostic_view_all</code>, <code>report_export</code> · <strong>Licence:</strong> required to run</p>
 <ul>
-<li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: One ticket, one report. Every figure a NOC argues about — loss, latency, RFC 3550 jitter, MOS — from PacketPulse's server on its schedule, and from the engineer's own device on <strong>Run diagnostic</strong>. A lapsed licence stops new tests but never takes away the evidence already gathered.</li>
-<li>📖 <strong>User Guide &amp; Operational Flow</strong>: A sweep runs on PacketPulse's server: on a schedule (§5.1), from the Results API, or with <code>POST /diagnostic/submit</code>. <strong>Run diagnostic</strong> no longer starts one (since 2026-10-07); it is the test from this device against one endpoint (§4.1). A sweep given a position tests the endpoints of the city nearest it (§3.1); with no position — location refused, no fix, or no endpoint placed yet — every enabled endpoint is swept. Only whoever manages the endpoints (<code>dns_site_manage</code>) may name endpoints instead; an engineer's list is ignored. The result says <strong>Tested from</strong> — the device's position as the test ran, beside the sign-in place — and <strong>Endpoints</strong>: the nearest city and how far away it was, every endpoint, or chosen by hand. The result shows headline cards (sites reachable, average loss, average jitter), then a row per site and family: reachable, the packet line verbatim (<em>Sent = 4, Received = 4, Lost = 0</em>), round trips, jitter, MOS with its band and SLA grade. <strong>Export PDF</strong> and <strong>Export CSV</strong> sit at the top.</li>
+<li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: One ticket, one report. Every figure a NOC argues about — loss, latency, RFC 3550 jitter — from PacketPulse's server, and from the engineer's own device on <strong>Run diagnostic</strong>. A lapsed licence stops new tests but never takes away the evidence already gathered.</li>
+<li>📖 <strong>User Guide &amp; Operational Flow</strong>: A sweep runs on PacketPulse's server when <code>POST /diagnostic/submit</code> asks for one; nothing sweeps on a schedule since automatic monitoring was removed (§5.1). <strong>Run diagnostic</strong> no longer starts one (since 2026-10-07); it is the test from this device against one endpoint (§4.1). A sweep given a position tests the endpoints of the city nearest it (§3.1); with no position — location refused, no fix, or no endpoint placed yet — every enabled endpoint is swept. Only whoever manages the endpoints (<code>dns_site_manage</code>) may name endpoints instead; an engineer's list is ignored. The result says <strong>Tested from</strong> — the device's position as the test ran, beside the sign-in place — and <strong>Endpoints</strong>: the nearest city and how far away it was, every endpoint, or chosen by hand. The result shows headline cards (sites reachable, average loss, average jitter), then a row per site and family: reachable, the packet line verbatim (<em>Sent = 4, Received = 4, Lost = 0</em>), round trips, jitter and SLA grade. A result that was not graded reads <em>Not graded</em>, and a note under the table says what that means and why for each reason present: an HTTPS test from a device (HTTPS resends what the network drops), a device test filed before 14 October 2026 (before device tests were graded), or an address PacketPulse could not test. A result filed under planned work before October 2026 reads <em>Excluded</em>, with its own line. The voice-quality estimate (MOS) is not shown (§4.1). <strong>Export PDF</strong> and <strong>Export CSV</strong> sit at the top.</li>
 <li>🧪 <strong>Manual Testing Playbook</strong>:<div class="tw"><table><thead>
 <tr>
 <th>ID</th>
@@ -1732,7 +1732,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>Engineer</td>
 <td>The PDF is evidence</td>
 <td><strong>Export PDF</strong></td>
-<td>Named <code>packetpulse-&lt;TT&gt;-&lt;UTC time&gt;.pdf</code>; Customer ID, TT, UTC timestamps, Jitter and MOS columns, average loss and jitter cards; a long IPv6 address wraps onto two lines; the foot names who ran it and where — <em>Triggered by Asha Rao  -  at MG Road, Pune</em>. 🛑 <strong>Must NOT</strong> truncate an address</td>
+<td>Named <code>packetpulse-&lt;TT&gt;-&lt;UTC time&gt;.pdf</code>; Customer ID, TT, UTC timestamps, a Jitter column and no MOS column, average loss and jitter cards; a long IPv6 address wraps onto two lines; the foot names who ran it and where — <em>Triggered by Asha Rao  -  at MG Road, Pune</em>. 🛑 <strong>Must NOT</strong> truncate an address</td>
 </tr>
 <tr>
 <td><code>DIAG-005</code></td>
@@ -1761,6 +1761,34 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>A malformed id is refused before it is looked up</td>
 <td><code>GET /diagnostic/not-a-uuid</code></td>
 <td>400</td>
+</tr>
+<tr>
+<td><code>DIAG-018</code></td>
+<td>Customer</td>
+<td>A device UDP ticket reads as the test</td>
+<td>File a 30 s UDP test that loses 16 of 1494 packets against the built-in 1% target; open it in <strong>History</strong>; <strong>Export PDF</strong></td>
+<td>Heading <em>TT-…</em> (not <em>TT TT-…</em>) and <em>… 1 endpoint(s) in 3x.x s</em>; <strong>Average loss</strong> (not <em>query loss</em>) <em>1.1%</em>; the packet line <em>Lost = 16 (1.1% loss)</em> and the PDF's Loss column <em>1.1%</em> beside <em>Breached</em>; the <strong>Round-trip time</strong> bar blue, not red; the <strong>Packet loss</strong> chart scaled to 4%, its bar named <em>PacketPulse network</em>. An HTTPS device ticket still reads <em>Average query loss</em>. 🛑 <strong>Must NOT</strong> print <em>1%</em> beside a breach of a 1% target</td>
+</tr>
+<tr>
+<td><code>DIAG-019</code></td>
+<td>Customer</td>
+<td>Every grade says why, in numbers</td>
+<td>With no targets of the organisation's own, file a UDP test from a line around 90 ms (Bengaluru to the PacketPulse network, 14 October 2026: 89.7 ms, 0.6% loss, 20.1 ms jitter) and one over 100 ms (Dubai: 117.6 ms); open each in <strong>History</strong>, and in <strong>View ticket</strong>; <strong>Export PDF</strong></td>
+<td><strong>Service targets</strong> under the results: per result its grade, name and <em>Degraded: round trip 89.7 ms is close to the 100 ms target.</em> (or <em>Breached: round trip 117.6 ms is over the 100 ms target.</em>), then a row per figure - <em>Round trip 89.7 ms</em>, a gauge marked at the target with the Degraded band shaded, <em>Target 100 ms or less</em> / <em>Degraded from 80 ms</em>, <em>Close to target</em> in amber; <em>Packet loss 0.6%</em>, <em>Target 1% or less</em>, <em>Within target</em> in green. The PDF: an <strong>SLA</strong> column, <em>SLA targets: round trip 100 ms or less; …</em> under the table, and under each entry <em>SLA: Degraded - …</em> with a table <em>Figure / Measured / Target / Degraded from / Verdict</em>. The loss tile, the loss bar and the PDF's Loss cell are coloured by the loss's own verdict - 0.6% is not red. A result graded before 14 October 2026 reads <em>Graded before PacketPulse kept the figures behind a grade.</em> 🛑 <strong>Must NOT</strong> show a grade with nothing to say why</td>
+</tr>
+<tr>
+<td><code>DIAG-020</code></td>
+<td>Customer</td>
+<td>The results table fits its window</td>
+<td>Open a device ticket from <strong>View ticket</strong> on a laptop, and in <strong>History</strong></td>
+<td>The table is as wide as its card, with a scrollbar under it when its columns need more; the packet line, round trip and jitter can be scrolled to. 🛑 <strong>Must NOT</strong> run the columns off the dialog's edge</td>
+</tr>
+<tr>
+<td><code>DIAG-017</code></td>
+<td>Customer</td>
+<td>An ungraded result says why</td>
+<td>In <strong>History</strong>, open a device UDP test filed before 14 October 2026, a device HTTPS test, and a sweep with a refused address</td>
+<td>Each row's status reads <em>Not graded</em>, not <em>Unknown</em>; under the table <em>Not graded: this result was not held to your service targets…</em>, then one line per reason present — <em>Tests from a device were not graded before 14 October 2026…</em>, <em>An HTTPS test from a device is not graded…</em>, <em>PacketPulse could not test this address…</em> — each once however many rows share it. A ticket graded throughout has no such note. 🛑 <strong>Must NOT</strong> show a bare <em>Unknown</em> with no explanation</td>
 </tr>
 <tr>
 <td><code>DIAG-009</code></td>
@@ -1818,21 +1846,23 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <ul>
 <li>Engine: <code>packetpulsego/pkg/pingmicroservice/pingprobe/PingProbeRunner.go</code> (pro-bing, unprivileged ICMP, TCP fallback); jitter: <code>packetpulsego/pkg/pingmicroservice/pingprobe/PingVoiceQuality.go</code> (<code>InterarrivalJitter</code>, RFC 3550).</li>
 <li>🔒 Results are saved under their <strong>own</strong> deadline, never the sweep's: a sweep that runs long still stores everything it measured (<code>load</code> suite §4.5 proves it, and goes red with the old bug restored).</li>
-<li>No screen starts a sweep: the app's sweep form was removed when <strong>Run diagnostic</strong> became the test from this device (2026-10-07, §4.1), and the client no longer calls <code>POST /diagnostic/submit</code>. The route stays, for the scheduler's runs, the Results API and scripts. The case for one page holding the sweep and the device test is retired, its number left vacant.</li>
+<li>No screen starts a sweep: the app's sweep form was removed when <strong>Run diagnostic</strong> became the test from this device (2026-10-07, §4.1), and the client no longer calls <code>POST /diagnostic/submit</code>. The route stays, for the API and scripts. The case for one page holding the sweep and the device test is retired, its number left vacant.</li>
 <li>Path analysis was removed in <code>packetpulsego/pkg/common/dbclient/migrations/0027_2026_10_05_path_analysis_removed.sql</code>: <code>ping_hop</code> and the fault verdict columns are no longer written, and the rows already stored stay. A client built before then still sends <code>trace_failures</code>; the server accepts and ignores it, because decoding is strict and refusing it would fail every run that client made.</li>
 <li>Endpoint choice: <code>chooseEndpoints</code> in <code>packetpulsego/pkg/diagnosticmicroservice/diagnosticservice/DiagnosticService.go</code>; the handler empties <code>dns_site_ids</code> for anyone without <code>dns_site_manage</code>. The request records <code>test_location_*</code>, <code>endpoint_selection</code> (<code>chosen</code>, <code>nearest</code>, <code>all</code>), <code>selection_city</code> and <code>selection_distance_km</code> (migration 0029).</li>
 <li>Ticket figures (<code>avg_loss_pct</code>, <code>max_loss_pct</code>, <code>avg_jitter_ms</code>) are computed in <code>RequestFinish</code> from the run's counted results (<code>packetpulsego/pkg/common/dbclient/migrations/0022_2026_10_03_loss_and_jitter.sql</code>).</li>
 <li>The PDF is built on the fly from the database each time it is asked for (<code>packetpulsego/pkg/pingmicroservice/pingreport/PingReportPdfBuilder.go</code>); nothing is written to disk. Its foot names the person who ran the test and the place their session checked in from.</li>
+<li>Service targets: <code>EvaluateSla</code> in <code>packetpulsego/pkg/pingmicroservice/pingservice/PingSlaEvaluator.go</code> returns a check per figure, stored in <code>ping_result.sla_checks</code> (<code>packetpulsego/pkg/common/dbclient/migrations/0033_2026_10_14_sla_checks.sql</code>); the app's card, gauge and attach-card summary are <code>packetpulseflutter/lib/diagnosticmicroservice/presentation/widgets/SlaChecks.dart</code> (<code>packetpulseflutter/test/sla_checks_test.dart</code>); the PDF's are <code>SlaHeadline</code>, <code>SlaRows</code> and <code>TargetsKey</code> in <code>packetpulsego/pkg/pingmicroservice/pingreport/PingReportPdfBuilder.go</code>.</li>
+<li><em>Not graded</em>: <code>notGradedReason</code> in <code>packetpulseflutter/lib/diagnosticmicroservice/presentation/screens/DiagnosticResultView.dart</code> names one reason per result from its grade, method and packets sent; the note under the table lists each reason once (<code>diagnostic_result_selection_test.dart</code>).</li>
 <li>Coverage: <code>packetpulsego/pkg/diagnosticmicroservice/**</code>, <code>packetpulsego/pkg/pingmicroservice/**</code>, <code>packetpulseflutter/test/diagnostic_result_selection_test.dart</code>, <code>packetpulseflutter/test/diagnostic_history_screen_test.dart</code>, the <code>tenancy</code> and <code>contract</code> suites.</li>
 </ul>
 </li>
 </ul>
 <hr>
 <h3 id="33-ipv4-and-ipv6">3.3 🌍 IPv4 and IPv6<a class="anchor" href="#33-ipv4-and-ipv6" aria-label="Link to this section">#</a></h3>
-<p><strong>Where:</strong> every result list, the PDF, the SLA report, the Results API and the CSV</p>
+<p><strong>Where:</strong> every result list, the PDF, the Results API and the CSV</p>
 <ul>
 <li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: A site healthy over IPv4 and dark over IPv6 is a real, common, hard-to-prove fault. PacketPulse measures both, side by side, without letting an IPv6 problem the customer did not buy an SLA for change their availability figure.</li>
-<li>📖 <strong>User Guide &amp; Operational Flow</strong>: A dual-stack site has two rows. The IPv6 one carries a <strong>not counted</strong> tag (hover for why). The PDF marks it <code>icmp v6 *</code> with a footnote; the SLA report lists <code>(v6)</code> lines separately and <code>(v6*)</code> for report-only ones.</li>
+<li>📖 <strong>User Guide &amp; Operational Flow</strong>: A dual-stack site has two rows. The IPv6 one carries a <strong>not counted</strong> tag (hover for why). The PDF marks it <code>icmp v6 *</code> with a footnote.</li>
 <li>🧪 <strong>Manual Testing Playbook</strong>:<div class="tw"><table><thead>
 <tr>
 <th>ID</th>
@@ -1855,14 +1885,14 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>Engineer</td>
 <td>An IPv6 failure does not breach the site</td>
 <td>A dual-stack site whose IPv6 fails while IPv4 answers</td>
-<td>No alert; the site counts as reachable; availability unchanged. 🛑 <strong>Must NOT</strong> raise an alert for report-only IPv6</td>
+<td>The IPv6 row is graded but not counted: the site counts as reachable, and the ticket's breach count is the IPv4's. 🛑 <strong>Must NOT</strong> count a breach for report-only IPv6</td>
 </tr>
 <tr>
 <td><code>V6-003</code></td>
 <td>Engineer</td>
 <td>IPv6-only counts</td>
 <td>A site with only an IPv6 address that fails</td>
-<td>Counted as a failure, alerting and grading as usual</td>
+<td>Counted as a failure, and graded as usual</td>
 </tr>
 <tr>
 <td><code>V6-004</code></td>
@@ -1936,7 +1966,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td><code>CSV-006</code></td>
 <td>Engineer</td>
 <td>Where the test ran, as numbers</td>
-<td>Export <code>DIAG-012</code>'s CSV; export a scheduled sweep's</td>
+<td>Export <code>DIAG-012</code>'s CSV; export one of a sweep submitted with no <code>location</code></td>
 <td>Six-place <code>test_latitude</code>/<code>test_longitude</code> on every row of the first; empty on the second. A longitude west of Greenwich is a plain negative number. 🛑 <strong>Must NOT</strong> be written as text starting <code>'-</code>, or as 0</td>
 </tr>
 </tbody>
@@ -1989,9 +2019,9 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <tr>
 <td><code>HIST-004</code></td>
 <td>Engineer</td>
-<td>A quiet day is a gap</td>
-<td>A schedule paused for a day; open <strong>Dashboard</strong></td>
-<td>The availability line has a gap. 🛑 <strong>Must NOT</strong> plot 0% for a day with nothing measured</td>
+<td>No availability line</td>
+<td>Open <strong>Dashboard</strong> with the browser's network panel open</td>
+<td>No <em>Availability, last 30 days</em> card, and no request to <code>/monitor/trend</code>: the trend was automatic monitoring's, removed in October 2026 (§5.1). 🛑 <strong>Must NOT</strong> draw a line from tickets alone</td>
 </tr>
 <tr>
 <td><code>HIST-005</code></td>
@@ -2044,10 +2074,12 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <li>📖 <strong>User Guide &amp; Operational Flow</strong>: <strong>Run diagnostic</strong> is the test from this device, filed against a ticket (since 2026-10-07 the page no longer sweeps from the server). The ticket comes first: <strong>Customer ID</strong>, <strong>TT number</strong>, optional <strong>Notes</strong> and the <strong>Endpoint</strong>; <strong>Start test</strong> does nothing until the customer, the TT number and the endpoint are given, and marks the one missing. As the page opens the device is asked where it is, and the endpoint nearest it — by the latitude and longitude entered under DNS sites (§3.1) — is chosen, with <em>Nearest to this device, N km away</em>. An engineer is given that endpoint and cannot change it (<em>Chosen for you: the endpoint nearest where this device is.</em>). Whoever manages the endpoints (<code>dns_site_manage</code>) may pick another, and go back with <strong>Choose by my location</strong>. With no position to go by — location refused or unknown, or no endpoint placed — everyone picks by hand, and the page says why. Choosing another endpoint empties a finished run, and stops one under way. The position chooses; it is filed with a run only for people whose location is recorded (§2.1). Someone who may not run diagnostics, or has no organisation, gets the device test alone, with no ticket, against the organisation's internal host or Cloudflare DNS, which the screen does not name. The line-speed test is hidden. On the public demo the <strong>Customer ID</strong> and <strong>TT number</strong> open filled in with the example the fields show, <code>CUST-88412</code> and <code>TT-2026-00731</code>, so a walkthrough goes straight to <strong>Start test</strong>; they can be changed, and what is in them is what is filed (since 2026-10-09).
 <ul>
 <li>Above the controls, three cards: the <strong>IPv4</strong> address, the <strong>IPv6</strong> address (or <em>No IPv6 connectivity</em>) and the <strong>Nearest edge</strong> that answered, with an <em>IPv6 active</em> or <em>IPv4 only</em> badge. No network operator or AS number is shown: finding one would send the engineer's address to a third party.</li>
-<li>In a browser the test is <strong>UDP, like a call</strong> by default (§4.2), or <strong>HTTPS to the endpoint</strong>: an HTTPS request to its address, timed end to end. The app on a desktop or phone sends a real ICMP echo where the device allows it, and offers no UDP test. An endpoint that does not serve HTTPS — most routers and resolvers do not — shows every sample unanswered in a browser, even when it is up, and the note beside the figures says so.</li>
+<li>In a browser the test is <strong>UDP, like a call</strong> (§4.2), and nothing else: since the review of 13 October 2026 there is no <strong>Measurement method</strong> choice and no <em>HTTPS to the endpoint</em> beside it. The app on a desktop or phone sends a real ICMP echo where the device allows it, and offers no UDP test. Only a browser without WebRTC falls back to an HTTPS request to the endpoint's address; an endpoint that does not serve HTTPS — most routers and resolvers do not — then shows every sample unanswered, even when it is up, and the note beside the figures says so.</li>
 <li>Below the controls, the route says what the test goes to (since 2026-10-09): <em>Start will test</em>, then <em>Testing now</em>, then <em>This run tested</em>, over <em>This device → method → destination</em>. With a ticket it is marked <strong>Path to the endpoint</strong> (green, a tick) or <strong>Not the endpoint</strong> (amber, a warning sign) and says why in one sentence: <em>HTTPS requests from this device to Pune Edge…</em>, <em>A real ping from this device to Pune Edge…</em>, or, for the UDP test, the reflector beside the endpoint or the PacketPulse network (§4.2). With no ticket it reads <em>The test target</em>, naming no host, and carries no mark.</li>
 <li><strong>IP version</strong> — <em>Auto</em>, <em>IPv4 only</em>, <em>IPv6 only</em> — holds a run against the default target to one address family, to compare the two paths. It is offered only on the test with no ticket, when the organisation tests the default over HTTPS: an endpoint is reached at its own address, a browser cannot choose the family a hostname resolves to, and the native ping is IPv4.</li>
-<li>While a run goes, eight figures fill in — average, fastest, slowest, jitter, standard deviation, loss, MOS and progress — with <strong>Round-trip, sample by sample</strong> (jitter as a band, the average dashed, a red mark per unanswered sample; point at it to read one), <strong>Round-trips by band</strong> (under 20, 20–50, 50–100, 100–200, 200 ms and over) and a <strong>Probe log</strong> of every reply. <strong>Clear results</strong> empties the figures and charts and keeps the log; <strong>Clear log</strong> empties the log.</li>
+<li>While a run goes, six figures fill in — average, fastest, slowest, jitter, loss and progress, and for the UDP test <strong>Lost up · down</strong> — with <strong>Round-trip, sample by sample</strong> (jitter as a band, the average dashed, a red mark per unanswered sample; point at it to read one), <strong>Round-trips by band</strong> (under 20, 20–50, 50–100, 100–200, 200 ms and over) and a <strong>Probe log</strong> of every reply. <strong>Clear results</strong> empties the figures and charts and keeps the log; <strong>Clear log</strong> empties the log. No standard deviation is shown, here or on the public self-test (review of 13 October 2026): beside jitter it read as a second figure for the same thing. It is still measured and filed. Nor is the voice-quality estimate (MOS), on any screen or report or on the self-test (review of 13 October 2026): it is still computed, filed, graded against a MOS target and exported in the CSV, and one switch shows it again — <code>PacketPulseConfig.voiceQualityShown</code> in the app, <code>ReportOptions.ShowVoiceQuality</code> for the PDF.</li>
+<li><strong>Attach to a ticket</strong> files the finished run against the ticket at the top of the page and says <em>Attached to ticket TT-…</em> beside the button, with <strong>View ticket</strong> (since 14 October 2026). It opens the ticket as <strong>History</strong> shows it — its results and grades, the notes, <strong>Export PDF</strong> and <strong>Export CSV</strong> — over the test, from what the server returned on filing, so nothing more is fetched; on a phone it takes the whole screen. Closing it leaves the run on screen as it was. Running again clears the confirmation and the button with it.</li>
+<li><strong>Notes</strong>, typed at the top of the page, are filed with the run and shown with the ticket in History (<em>Notes</em> beside <em>Tested from</em>) and on its PDF (<em>Notes: …</em> under the run's details). Until the review of 13 October 2026 they were stored and shown nowhere.</li>
 </ul>
 </li>
 <li>🧪 <strong>Manual Testing Playbook</strong>:<div class="tw"><table><thead>
@@ -2100,7 +2132,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>Engineer</td>
 <td>Attach to a ticket</td>
 <td>Type a Customer ID and TT <code>TT-MAN-002</code> at the top of the page; keep the endpoint chosen; <strong>Start test</strong>; <strong>Attach to a ticket</strong></td>
-<td>The ticket shows the device run, <em>measured on a device</em>, named after the endpoint with its address, and no line speed; loss is <em>query</em> loss. Its <strong>Export PDF</strong> and <strong>Export CSV</strong> name it the same way. A device run filed before 2026-10-07, with no endpoint, still reads <em>Device test</em> with no address. 🛑 <strong>Must NOT</strong> show the internal target's host for a run that had no endpoint</td>
+<td>The ticket shows the device run, <em>measured on a device</em>, named after the endpoint with its address, and no line speed; in a browser it is the UDP test, so loss is <em>packet</em> loss and the run is graded against the organisation's targets (§5.1). Its <strong>Export PDF</strong> and <strong>Export CSV</strong> name it the same way. A device run filed before 2026-10-07, with no endpoint, still reads <em>Device test</em> with no address. 🛑 <strong>Must NOT</strong> show the internal target's host for a run that had no endpoint</td>
 </tr>
 <tr>
 <td><code>DEV-007</code></td>
@@ -2203,16 +2235,44 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <tr>
 <td><code>DEV-021</code></td>
 <td>Engineer</td>
-<td>A browser cannot ping an endpoint</td>
-<td>In a browser, run against an endpoint that answers ping but serves no HTTPS</td>
-<td>Every sample <em>No answer</em>, and the note beside the figures says an endpoint that does not serve HTTPS shows unanswered here and that the app sends a real ping. The desktop app with <strong>ICMP echo</strong> answers</td>
+<td>A browser tests UDP, never HTTPS</td>
+<td>In a browser, open <strong>Run diagnostic</strong>, fill the ticket, and run against an endpoint that answers ping but serves no HTTPS; then the desktop app</td>
+<td>The browser: no <strong>Measurement method</strong> row, the UDP test with <strong>Test length</strong> and <strong>Packets per second</strong>, and figures from the reflector. The desktop app with <strong>ICMP echo</strong> answers. 🛑 <strong>Must NOT</strong> offer <em>HTTPS to the endpoint</em>, or <strong>Run the HTTPS test</strong> after a failure</td>
 </tr>
 <tr>
 <td><code>DEV-023</code></td>
 <td>Engineer, then Viewer</td>
 <td>The route says what is tested</td>
-<td>In a browser choose <strong>HTTPS to the endpoint</strong>; read the route; <strong>Start test</strong>; then open the desktop app; then sign in as a Viewer (no ticket)</td>
-<td><em>Start will test</em>, <em>This device → HTTPS reachability → Pune Edge · its address</em>, <strong>Path to the endpoint</strong>; <em>This run tested</em> when it ends. The app: <em>ICMP echo</em> and <em>A real ping from this device to Pune Edge…</em>. The Viewer: the method and <em>The test target</em>, no mark. Choosing another endpoint changes the destination at once. 🛑 <strong>Must NOT</strong> name the internal target or a resolver in the route</td>
+<td>In the desktop app read the route; <strong>Start test</strong>; then sign in as a Viewer (no ticket)</td>
+<td><em>Start will test</em>, <em>This device → ICMP echo → Pune Edge · its address</em>, <strong>Path to the endpoint</strong> and <em>A real ping from this device to Pune Edge…</em>; <em>This run tested</em> when it ends. In a browser the route is the UDP test's (<code>UDP-027</code>). The Viewer: the method and <em>The test target</em>, no mark. Choosing another endpoint changes the destination at once. 🛑 <strong>Must NOT</strong> name the internal target or a resolver in the route</td>
+</tr>
+<tr>
+<td><code>DEV-024</code></td>
+<td>Engineer</td>
+<td>The notes reach the report</td>
+<td>Type <em>Calls drop every evening</em> in <strong>Notes</strong>; run; <strong>Attach to a ticket</strong>; open the ticket in <strong>History</strong>; <strong>Export PDF</strong></td>
+<td><em>Notes  Calls drop every evening</em> beside <em>Tested from</em>; the PDF prints <em>Notes: Calls drop every evening</em> under the run's details. A ticket filed with no notes shows no Notes line on either. 🛑 <strong>Must NOT</strong> drop the notes the engineer typed</td>
+</tr>
+<tr>
+<td><code>DEV-025</code></td>
+<td>Engineer</td>
+<td>No standard deviation</td>
+<td>Run a test; look at the figures, then at <code>/selftest.html</code>'s jitter tile</td>
+<td>No <em>Standard deviation</em> figure and no <em>Spread of all round-trips</em>; the self-test's jitter caption is <em>Variation between consecutive replies</em>. 🛑 <strong>Must NOT</strong> show a standard deviation anywhere a person reads</td>
+</tr>
+<tr>
+<td><code>DEV-026</code></td>
+<td>Engineer</td>
+<td>No voice-quality estimate</td>
+<td>Run a UDP test; read the figures; <strong>Attach to a ticket</strong>; open it in <strong>History</strong>; <strong>Export PDF</strong>; <strong>Export CSV</strong>; open <code>/selftest.html</code> and run its UDP test</td>
+<td>Six figures, no <em>Voice quality (MOS)</em> tile; no <em>MOS</em> column on the ticket or in the PDF; the self-test shows no MOS tile. The CSV still has <code>mos_score</code>. A MOS target still grades: a result under it is <em>Breached</em>. 🛑 <strong>Must NOT</strong> show MOS on any screen or report</td>
+</tr>
+<tr>
+<td><code>DEV-027</code></td>
+<td>Engineer</td>
+<td>The ticket from where it was filed</td>
+<td>Fill the ticket with notes; run; <strong>Attach to a ticket</strong>; <strong>View ticket</strong>; <strong>Export PDF</strong>; close it; then on a phone</td>
+<td><em>Attached to ticket TT-…</em> and <strong>View ticket</strong> beside <strong>Attach to a ticket</strong>; the ticket opens over the test with its results, grade, notes and export buttons, and opens at once with no request in the network panel; the PDF downloads from there; closing it leaves the run's figures and log as they were. On a phone it fills the screen, its export buttons under its heading. Before a run is filed there is no <strong>View ticket</strong>. 🛑 <strong>Must NOT</strong> leave the page, or lose the run, to show the ticket</td>
 </tr>
 <tr>
 <td><code>DEV-022</code></td>
@@ -2228,7 +2288,10 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <ul>
 <li>The page: <code>packetpulseflutter/lib/diagnosticmicroservice/presentation/screens/RunDiagnosticScreen.dart</code>, with the ticket in <code>packetpulseflutter/lib/diagnosticmicroservice/presentation/widgets/DiagnosticTicket.dart</code> and the endpoint in <code>packetpulseflutter/lib/diagnosticmicroservice/presentation/widgets/DiagnosticEndpointField.dart</code>. The nearest endpoint is <code>nearestEndpoint</code> in <code>packetpulseflutter/lib/dnssitemicroservice/domain/shared/DnsSite.dart</code>, the same haversine on the same radius as the server's <code>DistanceKm</code>. An endpoint's probe target is <code>ClientProbeTarget.endpoint</code> in <code>packetpulseflutter/lib/diagnosticmicroservice/service/ClientProbeEngine.dart</code>.</li>
 <li>Filing: the client sends <code>dns_site_id</code>. <code>ClientObservationRecord</code> in <code>packetpulsego/pkg/diagnosticmicroservice/diagnosticservice/DiagnosticService.go</code> reads it among the caller's organisation's <strong>enabled</strong> endpoints only, refuses anything else on <code>dns_site_id</code> (422), and stores each result against the endpoint, named as the inventory names it. The server does not demand one: a client older than the change still files, as the internal target.</li>
-<li>A browser cannot send ICMP, so the web build measures an HTTPS reach to the endpoint, or DNS-over-HTTPS (Cloudflare) or an HTTPS reach to the organisation's host on the test with no ticket; the app on a desktop or phone can also ping. Jitter is RFC 3550 with the standard deviation beside it.</li>
+<li>A browser cannot send ICMP, so the web build measures the endpoint with UDP over WebRTC (§4.2) — over HTTPS only where WebRTC is missing — and DNS-over-HTTPS (Cloudflare) or an HTTPS reach to the organisation's host on the test with no ticket; the app on a desktop or phone can also ping. Jitter is RFC 3550. The standard deviation is computed and filed (<code>stddev_rtt_ms</code>) but shown nowhere: <code>packetpulseflutter/test/client_probe_live_panels_test.dart</code> holds the page to it.</li>
+<li>Notes: filed as the request's <code>notes</code>, read back by <code>DiagnosticRequest.fromJson</code> in <code>packetpulseflutter/lib/diagnosticmicroservice/domain/shared/Diagnostic.dart</code>, shown by <code>packetpulseflutter/lib/diagnosticmicroservice/presentation/screens/DiagnosticResultView.dart</code> and printed by <code>ReportOptions.Notes</code> in <code>packetpulsego/pkg/pingmicroservice/pingreport/PingReportPdfBuilder.go</code>; <code>TestTheTicketsNotesArePrintedOnItsReport</code> and <code>packetpulseflutter/test/diagnostic_result_selection_test.dart</code> hold them there.</li>
+<li>Voice quality hidden: the MOS tile, the results' MOS column and the PDF's are kept and tested behind <code>voiceQualityShown = false</code> in <code>packetpulseflutter/lib/common/config/PacketPulseConfig.dart</code> (<code>packetpulseflutter/test/client_probe_live_panels_test.dart</code>, <code>packetpulseflutter/test/diagnostic_result_selection_test.dart</code>) and <code>ReportOptions.ShowVoiceQuality</code> in <code>packetpulsego/pkg/pingmicroservice/pingreport/PingReportPdfBuilder.go</code>, whose hidden column's width goes to the site (<code>PingReportPdfBuilder_test.go</code>). <code>EvaluateSla</code> still grades <code>mos_score</code>.</li>
+<li>View ticket: <code>_viewTicket</code> in <code>packetpulseflutter/lib/diagnosticmicroservice/presentation/screens/ClientProbeScreen.dart</code> shows the <code>DiagnosticDetail</code> the filing returned in a dialog (full screen under 720 px) through <code>DiagnosticResultView</code>, the view <strong>History</strong> uses; held by <code>packetpulseflutter/test/client_probe_run_test.dart</code>. Below 560 px <code>PacketPulseSectionHeader</code> puts its action under the heading, which keeps the ticket's export buttons on a phone screen.</li>
 <li>Target hidden: the <em>Testing against</em> panel, the <em>Target</em> line and the <strong>Change target</strong> dialog are kept and tested behind <code>testTargetShown = false</code> in <code>packetpulseflutter/lib/common/config/PacketPulseConfig.dart</code>, as the speed test is.</li>
 <li>A filed device run with no endpoint keeps its host in <code>ping_result</code>. It is replaced when read back — the diagnostic detail, the Results API's ticket, the PDF, and every CSV (ticket, pulled, scheduled push) — by <code>hideDeviceTargets</code> in <code>packetpulsego/pkg/diagnosticmicroservice/diagnosticservice/DiagnosticService.go</code> and <code>Row.shown</code> in <code>packetpulsego/pkg/diagnosticmicroservice/diagnosticexport/DiagnosticExport.go</code>; a result with a <code>dns_site_id</code> measured the organisation's own endpoint and is shown as stored. The raw <code>/ping/run/{runId}</code> routes, which the app does not call, still show it. The page's wording is held to naming no host by <code>TestTheRunDiagnosticPageNamesNoDeviceTarget</code> in <code>packetpulsego/pkg/initmicroservice/initconstants/PacketPulseStrings_test.go</code>.</li>
 <li>Target normalisation (pasted URL → host, lower case, canonical IPs, zones refused): <code>NormaliseTestTarget</code> in <code>packetpulsego/pkg/staffmicroservice/staffservice/StaffCheckinService.go</code>.</li>
@@ -2245,13 +2308,15 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <p><strong>Pages:</strong> Operate → <strong>Run diagnostic</strong>, in a browser; <code>/selftest.html</code> → <strong>PacketPulse network — UDP, like a call</strong> · <strong>Routes:</strong> <code>POST /reflector/session</code> (public, limited per address), <code>POST /diagnostic/endpoint/{dnsSiteId}/webrtc-offer</code> (<code>diagnostic_run</code>, licensed), <code>POST /diagnostic/endpoint/{dnsSiteId}/reflector-key</code> (<code>dns_site_manage</code>, licensed, audited)</p>
 <ul>
 <li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: The only browser test that sees real packet loss, and says which way it was lost. A customer opens a page, and in 30 seconds the engineer knows whether the customer's uplink drops packets, their downlink does, or packets arrive too late to play — the three causes of a choppy call, told apart from where the customer sits.</li>
-<li>📖 <strong>User Guide &amp; Operational Flow</strong>: On the self-test, <strong>Target → PacketPulse network — UDP, like a call</strong> replaces Samples, Interval and Timeout with <strong>Duration</strong> (10, 30 or 60 seconds) and sends 50 packets a second, 200 bytes each, to PacketPulse's own reflector. The tiles read <strong>UDP round-trip</strong>, <strong>Jitter</strong> with <em>Up … ms · down … ms</em> under it, and <strong>Packet loss</strong> with <em>Up …% · down …% · late …%</em>. Loss is counted at the end, per packet, when the reflector says which packets reached it; until then the loss tile shows a dash. A packet back more than a second after it was sent is <em>late</em>, and counts in the loss figure and the MOS, because a call would have played silence. <em>Not sent (device busy)</em> counts slots the browser could not keep; they are left out of every percentage. Keep the tab in front: a hidden tab stops the test.
+<li>📖 <strong>User Guide &amp; Operational Flow</strong>: On the self-test, <strong>Target → PacketPulse network — UDP, like a call</strong> replaces Samples, Interval and Timeout with <strong>Duration</strong> (10, 30 or 60 seconds) and sends 50 packets a second, 200 bytes each, to PacketPulse's own reflector. The tiles read <strong>UDP round-trip</strong>, <strong>Jitter</strong> with <em>Up … ms · down … ms</em> under it, and <strong>Packet loss</strong> with <em>Up …% · down …% · late …%</em>. Loss is counted at the end, per packet, when the reflector says which packets reached it; until then the loss tile shows a dash. A packet back more than a second after it was sent is <em>late</em>, and counts in the loss figure, because a call would have played silence. <em>Not sent (device busy)</em> counts slots the browser could not keep; they are left out of every percentage. Keep the tab in front: a hidden tab stops the test.
 <ul>
-<li>When UDP cannot get through, the page says <em>UDP is blocked on this network</em> and points at the DNS-over-HTTPS test, which still works. It never shows that as 100% loss.</li>
+<li>When UDP cannot get through, the page says <em>UDP is blocked on this network</em> and points at the DNS-over-HTTPS test, which still works. It never shows that as 100% loss. It says so only after a second, fresh connection got nothing through either (since 14 October 2026): a first connection that gets no answer is retried at once, with <em>No UDP came back on that connection; trying once more on a fresh one.</em> in the log, and a run that then measures logs <em>The first connection got no UDP through and the second did…</em> beside its figures. A browser that sent no UDP at all — a setting, an extension or a VPN keeping WebRTC off it — is told <em>This browser sent no UDP, so the network was not tested…</em>, not that the network blocks UDP.</li>
+<li>The reflector logs how each session ended (<code>/opt/packetpulse/logs/packetpulse.log</code>, <em>reflector session ended</em>): <code>connected</code>, <code>checks_received</code> (the browser's connectivity checks that reached it), <code>answers_sent</code>, <code>probes_received</code> and <code>lifetime_ms</code>. For a run told <em>UDP is blocked</em>, <code>checks_received=0</code> means the network dropped the browser's packets on the way in; checks received and answered with <code>connected=false</code> means the answers were lost on the way back. It was added for a laptop in Dubai that was intermittently told UDP was blocked while one in Bengaluru was not.</li>
 <li>A customer's own reflector (<code>packetpulsereflector</code>, on a PoP, an SBC's neighbour or a VPS) is installed with its endpoint's key: <code>POST /diagnostic/endpoint/{dnsSiteId}/reflector-key</code> returns the key and the install line, <code>sudo ./install-reflector.sh --key &lt;key&gt; [--public-ip &lt;address&gt;]</code>. Sessions on it are then opened only through <code>POST /diagnostic/endpoint/{dnsSiteId}/webrtc-offer</code>, which signs the request and checks that the answer is signed back.</li>
-<li><strong>In Run diagnostic</strong> (since 2026-10-09), in a browser with a ticket, the test is <strong>UDP, like a call</strong> by default, with <strong>Test length</strong> 10, 30 or 60 seconds in place of the HTTPS steppers. It is set up through the signed-in relay, so the person's session caps it, not the office's address. It measures to the reflector beside the ticket's endpoint when the endpoint has a <strong>UDP reflector address</strong> (§3.1), and otherwise to the PacketPulse network. The route below the controls (§4.1) says which before <strong>Start test</strong>, while the test runs and after it: <em>UDP over WebRTC → The reflector beside Pune Edge</em>, <strong>Path to the endpoint</strong>; or <em>UDP over WebRTC → The PacketPulse network</em>, <strong>Not the endpoint</strong>, in amber, with <em>Pune Edge has no UDP reflector, so this test goes to the PacketPulse network instead…</em> — or <em>…rather than to Pune Edge…</em> when the PacketPulse network was chosen after the endpoint's reflector failed, or when the endpoint's reflector address is PacketPulse's own. The route follows the server: once it answers, the route shows the reflector that answered, and the probe log says <em>Answered by the PacketPulse network, not Pune Edge</em> or <em>Answered by the reflector beside Pune Edge</em>. <em>What this run found</em> says which: <em>The reflector beside Pune Edge</em>, or <em>The PacketPulse network: the customer's access line, not the path to the endpoint</em> — and then no endpoint line. <strong>Lost up · down</strong> and <em>n late</em> sit with the figures; <em>Where packets went</em> reads, for example, <em>Upstream lost 4 (0.3%); Downstream lost 2 (0.1%); Late 4; Jitter up 9.4 ms, down 4.6 ms</em>. <strong>Attach to a ticket</strong> files it with the split; the ticket's page and PDF print the same line. A test to the PacketPulse network is filed as <em>PacketPulse network</em> at PacketPulse's address, never under the endpoint.</li>
+<li><strong>In Run diagnostic</strong> (since 2026-10-09), in a browser with a ticket, the test is <strong>UDP, like a call</strong>, the only method offered, with <strong>Test length</strong> 10, 30 or 60 seconds and <strong>Packets per second</strong> 10, 25, 50 or 100 (a call's 50 unless chosen; since 13 October 2026) in place of the HTTPS steppers. The note under the figures says the rate run: <em>…100 packets a second from this browser…</em>. It is set up through the signed-in relay, so the person's session caps it, not the office's address. It measures to the reflector beside the ticket's endpoint when the endpoint has a <strong>UDP reflector address</strong> (§3.1), and otherwise to the PacketPulse network. The route below the controls (§4.1) says which before <strong>Start test</strong>, while the test runs and after it: <em>UDP over WebRTC → The reflector beside Pune Edge</em>, <strong>Path to the endpoint</strong>; or <em>UDP over WebRTC → The PacketPulse network</em>, <strong>Not the endpoint</strong>, in amber, with <em>Pune Edge has no UDP reflector, so this test goes to the PacketPulse network instead…</em> — or <em>…rather than to Pune Edge…</em> when the PacketPulse network was chosen after the endpoint's reflector failed, or when the endpoint's reflector address is PacketPulse's own. The route follows the server: once it answers, the route shows the reflector that answered, and the probe log says <em>Answered by the PacketPulse network, not Pune Edge</em> or <em>Answered by the reflector beside Pune Edge</em>. <em>What this run found</em> says which: <em>The reflector beside Pune Edge</em>, or <em>The PacketPulse network: the customer's access line, not the path to the endpoint</em> — and then no endpoint line. <strong>Lost up · down</strong> and <em>n late</em> sit with the figures; <em>Where packets went</em> reads, for example, <em>Upstream lost 4 (0.3%); Downstream lost 2 (0.1%); Late 4; Jitter up 9.4 ms, down 4.6 ms</em>. <strong>Attach to a ticket</strong> files it with the split; the ticket's page and PDF print the same line. A test to the PacketPulse network is filed as <em>PacketPulse network</em> at PacketPulse's address, never under the endpoint.</li>
 <li><strong>Progress</strong> counts the run's packet slots against what the reflector allows, not against what was asked for: <em>Testing 383/1500</em> and <em>Packet 383 of 1500</em> while it runs. A slot this device was too busy to keep is skipped, not sent late, and still counts, so a finished run reads <strong>100%</strong> with <em>1492 sent · 8 skipped</em> (since 2026-10-09; it used to stop at <em>99%</em>). Under the figures, <strong>What happened</strong> says the run in words: <em>The test ran its full 30 s, with room for 1500 packets at 50 a second. This device sent 1492. The other 8 were skipped: the device was too busy to send them on time… Skipped packets are not counted as lost, and say nothing about the network. All 1492 came back in time.</em> A stopped run says <em>The test was stopped part-way: n of its 1500 packets had their turn.</em>; a run the reflector's limits cut down adds <em>That is what the reflector's limits allowed, rather than the 1500 packets asked for.</em> The log adds <em>Pacing: 1500 packets, 50 a second</em> and, when any were skipped, <em>Skipped: 8 of 1500 packets, this device was busy</em>.</li>
-<li>When the endpoint's reflector cannot run the test — down, busy, or installed with another key — the page shows the server's reason and offers <strong>Test to the PacketPulse network instead</strong>. <em>UDP is blocked on this network</em> offers <strong>Run the HTTPS test</strong>. A refusal for who the person is (signed out, no permission, no licence) offers nothing else. <strong>Stop</strong> ends sending early; the packets already sent are still waited for, so a stopped run is a shorter run, not a lossy one.</li>
+<li>When the endpoint's reflector cannot run the test — down, busy, or installed with another key — the page shows the server's reason and offers <strong>Test to the PacketPulse network instead</strong>. <em>UDP is blocked on this network</em> is said only when not one UDP packet got through — the browser's ICE checks never answered within 8 s — and offers <strong>Try again</strong>; there is no HTTPS test in its place. When UDP got through but the connection over it did not open within 14 s — DTLS and SCTP shake hands after ICE, and on a lossy line each lost handshake packet waits out a retransmission timer — the page says <em>UDP got through, but the connection over it could not be completed…</em> instead, also with <strong>Try again</strong>. Until 13 October 2026 both were called blocked after 8 s. A refusal for who the person is (signed out, no permission, no licence) offers nothing else. <strong>Stop</strong> ends sending early; the packets already sent are still waited for, so a stopped run is a shorter run, not a lossy one.</li>
+<li>A filed UDP test is graded against the organisation's targets like a sweep (§5.1), and a breach is counted on the ticket.</li>
 </ul>
 </li>
 <li>🧪 <strong>Manual Testing Playbook</strong>:<div class="tw"><table><thead>
@@ -2365,9 +2430,9 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <tr>
 <td><code>UDP-016</code></td>
 <td>Engineer</td>
-<td>UDP is the browser's default</td>
+<td>UDP is the browser's only method</td>
 <td>In a browser open <strong>Run diagnostic</strong>; fill the ticket; then open it in the desktop app</td>
-<td><strong>UDP, like a call</strong> chosen, <strong>Test length</strong> <em>10 s · 30 s · 60 s</em>, no Samples, Interval or Timeout. The desktop app has no UDP choice and keeps <strong>ICMP echo</strong></td>
+<td>No <strong>Measurement method</strong> row; <strong>Test length</strong> <em>10 s · 30 s · 60 s</em> with 30 chosen and <strong>Packets per second</strong> <em>10 · 25 · 50 · 100</em> with 50 chosen; no Samples, Interval or Timeout. The desktop app has no UDP choice and keeps <strong>ICMP echo</strong>. 🛑 <strong>Must NOT</strong> offer <em>HTTPS to the endpoint</em></td>
 </tr>
 <tr>
 <td><code>UDP-017</code></td>
@@ -2423,7 +2488,49 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>Engineer</td>
 <td>UDP blocked</td>
 <td>As <code>UDP-004</code>, through <strong>Run diagnostic</strong></td>
-<td><em>UDP is blocked on this network…</em> with <strong>Run the HTTPS test</strong>, which runs the HTTPS test at once. No figures, nothing to attach. 🛑 <strong>Must NOT</strong> offer a 100% loss run for filing</td>
+<td>After about 16 s, and <em>No UDP came back on that connection; trying once more on a fresh one.</em> in the log at about 8 s: <em>UDP is blocked on this network: … tried on two fresh connections, but no UDP packet got through. Calls and games on this connection will fail the same way.</em> with <strong>Try again</strong>, which runs the UDP test again. No figures, nothing to attach. The server log has two <em>reflector session ended</em> lines for the person with <code>connected=false checks_received=0</code>. 🛑 <strong>Must NOT</strong> offer the HTTPS test, nor a 100% loss run for filing</td>
+</tr>
+<tr>
+<td><code>UDP-032</code></td>
+<td>Engineer</td>
+<td>A first connection that gets nothing through is retried</td>
+<td>Block outbound UDP to port 50000; <strong>Start test</strong>; lift the block within 6 seconds</td>
+<td>The log says <em>No UDP came back on that connection; trying once more on a fresh one.</em>, the run measures, and <em>The first connection got no UDP through and the second did…</em> is logged with its figures. No <em>UDP is blocked</em> banner. 🛑 <strong>Must NOT</strong> call UDP blocked on one failed connection</td>
+</tr>
+<tr>
+<td><code>UDP-033</code></td>
+<td>Engineer</td>
+<td>A browser that sends no UDP is told so</td>
+<td>In Chrome, set <strong>WebRTC IP handling policy</strong> to <em>disable_non_proxied_udp</em> (an extension or enterprise policy), or in Firefox set <code>media.peerconnection.ice.relay_only</code> with no relay; <strong>Start test</strong></td>
+<td><em>This browser sent no UDP, so the network was not tested: a browser setting, an extension or a VPN is keeping WebRTC off UDP…</em> with <strong>Try again</strong>, after one attempt. 🛑 <strong>Must NOT</strong> say the network blocks UDP</td>
+</tr>
+<tr>
+<td><code>UDP-034</code></td>
+<td>Engineer</td>
+<td>The ticket says how long the test took</td>
+<td>Run a 30 s UDP test; <strong>Attach to a ticket</strong>; open it in <strong>History</strong></td>
+<td>The heading's subtitle reads <em>… 1 endpoint(s) in 3x.x s</em>, the run's own duration. A run filed by an older client reads as before. 🛑 <strong>Must NOT</strong> read <em>in 0 ms</em></td>
+</tr>
+<tr>
+<td><code>UDP-029</code></td>
+<td>Engineer</td>
+<td>The rate is a choice</td>
+<td>Choose <strong>Packets per second</strong> <em>100</em> and <strong>Test length</strong> <em>10 s</em>; <strong>Start test</strong>; then <em>10</em> and run again</td>
+<td>The log's <em>Pacing: 1000 packets, 100 a second</em>, <strong>What happened</strong> <em>…room for 1000 packets at 100 a second</em>, the note <em>…100 packets a second…</em>; then <em>100 packets, 10 a second</em>. Changing the rate while a test runs is not possible. 🛑 <strong>Must NOT</strong> clamp 100 a second on PacketPulse's network (it allows 120 a second and 6000 packets)</td>
+</tr>
+<tr>
+<td><code>UDP-030</code></td>
+<td>Engineer</td>
+<td>A slow handshake is not called blocked</td>
+<td>Drop 40% of inbound UDP from port 50000 for the first 15 seconds of a run (<code>dnctl pipe 1 config plr 0.4</code>, then <code>plr 0</code>); <strong>Start test</strong></td>
+<td>Either the test starts late and runs, or <em>UDP got through, but the connection over it could not be completed…</em> with <strong>Try again</strong>. 🛑 <strong>Must NOT</strong> say <em>UDP is blocked</em> while ICE got through</td>
+</tr>
+<tr>
+<td><code>UDP-031</code></td>
+<td>Engineer</td>
+<td>A filed UDP test is graded</td>
+<td>Drop 5% of inbound UDP for a 30 s run; <strong>Attach to a ticket</strong>; open it in <strong>History</strong>; then repeat on a clean line</td>
+<td>The lossy run: status <em>Breached</em>, <strong>SLA breaches</strong> <em>1</em>, <strong>Service level</strong> <em>Breached 1 100%</em>. The clean run: <em>OK</em>, <strong>SLA breaches</strong> <em>0</em>, <em>Within SLA</em>. 🛑 <strong>Must NOT</strong> read <em>UNKNOWN</em>, or draw a breach the tile does not count</td>
 </tr>
 <tr>
 <td><code>UDP-022</code></td>
@@ -2472,25 +2579,28 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <li>In the app: the engine is the self-test's own, copied to <code>packetpulseflutter/web/engine/</code> (<code>packetpulseflutter/test/udp_probe_run_test.dart</code> fails if either copy differs from <code>packetpulseweb/assets/</code>). <code>packetpulseflutter/lib/diagnosticmicroservice/service/udp/UdpProbeRun.dart</code> maps its result to samples and the split, checked against <code>packetpulsetest/contracts/udp_run_fixture.json</code>, which the engine's own test regenerates; <code>UdpProbeRunnerWeb.dart</code> is the browser bridge, <code>UdpProbeRunnerNative.dart</code> says no. The screen: <code>packetpulseflutter/lib/diagnosticmicroservice/presentation/screens/ClientProbeScreen.dart</code>; the split line, worded as the PDF's, <code>packetpulseflutter/lib/diagnosticmicroservice/presentation/widgets/UdpSplitLine.dart</code>.</li>
 <li>Filing: <code>udpProblem</code> and <code>namePacketPulseNetwork</code> in <code>packetpulsego/pkg/diagnosticmicroservice/diagnosticservice/DiagnosticUdpObservation.go</code> refuse a split on any other method, an unknown reflector, negative counts and a split larger than the loss, and name a PacketPulse-network result from the server's own <code>REFLECTOR_PUBLIC_IP</code>. The split's columns and their CHECK are in <code>packetpulsego/pkg/common/dbclient/migrations/0031_2026_10_09_udp_split_and_endpoint_reflector.sql</code>; the PDF line is <code>SplitLine</code> in <code>packetpulsego/pkg/pingmicroservice/pingdomain/shared/PingResult.go</code>. The CSV export's columns are unchanged. Signed in, the hosted reflector counts sessions per person (<code>user:&lt;id&gt;</code>), not per address.</li>
 <li>Coverage, in-app: <code>packetpulsego/pkg/diagnosticmicroservice/diagnosticservice/DiagnosticUdpObservation_test.go</code>, the <code>contract</code> suite's <code>udp_observation_test.go</code>, <code>packetpulseflutter/test/run_diagnostic_udp_test.dart</code>, <code>packetpulseflutter/test/udp_probe_run_test.dart</code>.</li>
-<li>The page's half: <code>packetpulseweb/assets/packetpulse-udp.js</code> (pacing that skips a missed slot rather than bursting, the per-sequence split, per-direction RFC 3550 jitter from the reflector's stamps), tested on a virtual clock in <code>packetpulseweb/assets/packetpulse-udp.test.mjs</code> (part of <code>unit</code>).</li>
+<li>Connecting: <code>connect</code> in <code>packetpulseweb/assets/packetpulse-udp.js</code> opens one connection; <code>runUdpTest</code> tries <code>CONNECT_ATTEMPTS</code> (2) when nothing came back, and <code>iceDiagnosis</code> reads the browser's own candidate-pair counts to tell <em>no UDP sent</em> (<code>no-udp</code>) and <em>answered</em> (<code>handshake</code>) from <em>nothing came back</em> (<code>udp-blocked</code>). The server's half is <code>logOutcome</code> and <code>iceChecks</code> in <code>packetpulsego/pkg/reflectormicroservice/reflectorcore/ReflectorEngine.go</code>, held by <code>TestASessionThatNeverConnectedSaysNoCheckArrived</code> and <code>TestASessionThatConnectedIsLoggedWithWhatItReceived</code>.</li>
+<li>The page's half: <code>packetpulseweb/assets/packetpulse-udp.js</code> (pacing that skips a missed slot rather than bursting, the per-sequence split, per-direction RFC 3550 jitter from the reflector's stamps, and the connect wait: <code>CONNECT_WAIT_MS</code> for ICE, <code>HANDSHAKE_WAIT_MS</code> once ICE has got through, kept under the hosted reflector's 15 s idle limit), tested on a virtual clock in <code>packetpulseweb/assets/packetpulse-udp.test.mjs</code> (part of <code>unit</code>).</li>
+<li>The rate: <code>_udpRates</code> in <code>packetpulseflutter/lib/diagnosticmicroservice/presentation/screens/ClientProbeScreen.dart</code>, passed to the engine as <code>ratePps</code> by <code>UdpProbeRunnerWeb.dart</code>. <code>HostedLimits</code> in <code>packetpulsego/pkg/reflectormicroservice/reflectorcore/ReflectorSession.go</code> allow the fastest for the longest test with a fifth of headroom (<code>TestThePagesLongestRunFitsTheHostedCaps</code>).</li>
 <li>Live: <code>REFLECTOR_UDP_PORT=50000</code> and <code>REFLECTOR_PUBLIC_IP</code> on the server; UDP 50000 open in the Oracle security list and the host firewall; <code>AF_NETLINK</code> in <code>scripts/deploy/packetpulse.service</code> (the reflector lists the host's interfaces through it). nginx needs nothing: the session route is under <code>/api/</code>, and the packets go straight to the UDP port.</li>
 </ul>
 </li>
 </ul>
 <hr>
-<h2 id="group-5-monitoring">Group 5 — Monitoring<a class="anchor" href="#group-5-monitoring" aria-label="Link to this section">#</a></h2>
-<p>Turning on-demand testing into a continuous watch, with alerts that mean something.</p>
+<h2 id="group-5-service-targets-and-grading">Group 5 — Service targets and grading<a class="anchor" href="#group-5-service-targets-and-grading" aria-label="Link to this section">#</a></h2>
+<p>How every result is judged: against the targets an organisation set, the same way for a sweep and for a call measured from the customer's own device.</p>
 <hr>
-<h3 id="51-the-sla-report-and-the-monitoring-behind-it">5.1 📈 The SLA report, and the monitoring behind it<a class="anchor" href="#51-the-sla-report-and-the-monitoring-behind-it" aria-label="Link to this section">#</a></h3>
-<p><strong>Screen:</strong> Configure → <strong>Monitoring</strong> (the SLA report) · <strong>Routes:</strong> <code>GET /monitor/slareport</code>, <code>GET /monitor/slareport.pdf</code>, <code>GET /monitor/trend</code>; through the API only: <code>/monitor/sla/*</code>, <code>/monitor/schedule/*</code>, <code>/monitor/channel/*</code>, <code>/monitor/maintenance/*</code>, <code>GET /monitor/alert/list</code> · <strong>Capabilities:</strong> <code>report_view</code>, <code>report_export</code>; through the API: <code>sla_view</code>, <code>sla_manage</code>, <code>schedule_manage</code></p>
+<h3 id="51-service-targets-and-the-grade-each-result-gets">5.1 🎯 Service targets, and the grade each result gets<a class="anchor" href="#51-service-targets-and-the-grade-each-result-gets" aria-label="Link to this section">#</a></h3>
+<p><strong>Screen:</strong> none — the History result view (§3.2) shows the grades · <strong>Routes:</strong> through the API only: <code>GET /monitor/sla/list</code> (<code>sla_view</code>), <code>POST /monitor/sla/add</code>, <code>PUT /monitor/sla/{slaPolicyId}</code>, <code>DELETE /monitor/sla/{slaPolicyId}</code> (<code>sla_manage</code>) · <strong>Capabilities:</strong> <code>sla_view</code>, <code>sla_manage</code></p>
 <ul>
-<li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: The monthly SLA report — availability, loss, jitter and MOS per site, IPv4 and IPv6 separately — exports as the document for the customer. Behind it, every result is graded against targets for latency, jitter, loss and MOS: <strong>OK / Degraded / Breached</strong>, with Degraded warning at 80% of a threshold, before the customer notices. Alerts do not cry wolf: a breach must persist for the sweeps chosen, then is announced once, its recovery once, and an outage that follows a warning is escalated even inside the quiet period. Planned work is excluded from the figure a customer is measured against.</li>
+<li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: Every result is graded against targets for latency, jitter, loss and MOS: <strong>OK / Degraded / Breached</strong>, with Degraded warning at 80% of a threshold, before the customer notices. A call measured from the customer's own browser is graded by the same targets as a sweep, so a ticket says <em>Breached</em> the moment the line drops a call's worth of packets.</li>
 <li>📖 <strong>User Guide &amp; Operational Flow</strong>:
 <ul>
-<li><strong>Monitoring</strong> is the SLA report, for anyone who may read reports (<code>report_view</code>): last month first, or any of the eleven before it under <strong>Month</strong>.</li>
-<li><strong>Availability</strong>, <strong>Sites on target</strong> and <strong>Excluded by maintenance</strong> head the month; each site has a line with round-trip time, loss, jitter and MOS, and <em>On target</em> or <em>Missed target</em>. A month with no measurements has no figure — never 100%.</li>
-<li><strong>Export PDF</strong>, for those who may export reports (<code>report_export</code>).</li>
-<li>Service targets, schedules, alert channels, alert history and planned work are no longer on the screen (removed October 2026). The server still grades, runs schedules, sends alerts and excludes planned work, for what was set up before and for what is set up through the API routes above.</li>
+<li>Targets are set through the API: a default for the organisation, and any number more, each site naming one (§3.1). A result with no site — a UDP test to the PacketPulse network — is held to the organisation's default; with no targets set, to the built-in defaults (100 ms, 30 ms jitter, 1% loss, MOS 3.6).</li>
+<li>What is graded: a sweep's results, and a device's <strong>UDP test</strong> or <strong>ICMP echo</strong>, which put real packets on the wire. An <strong>HTTPS</strong> round-trip from a device is not graded — the targets are set for packets, and TCP turns loss into delay — and reads <em>Not graded</em> (stored as <code>unknown</code>), with the reason under the results (§3.2). Until the review of 13 October 2026 every device result read <em>Unknown</em>, the UDP test included.</li>
+<li>A graded result keeps each figure against its target - the metric, what was measured, the target, where Degraded begins (80% of a ceiling, 105% of the MOS floor) and that figure's verdict - in <code>ping_result.sla_checks</code> (migration 0033; 0032 kept breaches alone, the same day). History, <strong>View ticket</strong>, the attach card on <strong>Run diagnostic</strong> and the PDF show them (§3.2, <code>DIAG-019</code>). Grading always knew and kept only the grade: a ticket read <em>Breached</em> beside 0% loss and 2.9 ms jitter, for a 117.6 ms round trip, and <em>Degraded</em> with nothing behind it; its PDF showed only <em>UP</em>.</li>
+<li>A ticket counts its breaches (<em>SLA breaches</em> in History); a dual-stack site's IPv6 result is reported but never counted. The <strong>Service level</strong> chart draws each grade as itself: <em>Within SLA</em>, <em>Degraded</em>, <em>Breached</em>, and <em>Not graded</em> for what was not graded — and <em>Excluded</em> for a result filed under planned work before October 2026. Until 13 October 2026 it drew anything ungraded as <em>Breached</em>, so every device test read <em>Breached 100%</em> beside a tile that said no breach.</li>
+<li><strong>Automatic monitoring was removed</strong> after the review of 13 October 2026: scheduled sweeps, alert channels and alerts, planned work (maintenance windows), the month-end SLA report and its PDF, and the dashboard's 30-day availability trend, with the <strong>Monitoring</strong> screen and the <code>schedule_manage</code> capability. Their routes answer 404. What they stored stays in its tables, unread; nothing runs on a timer but the result store's housekeeping. Policies no longer take <code>breach_threshold_runs</code> or <code>alert_cooldown_minutes</code>: a request naming either is refused (400) for naming a field the request does not accept.</li>
 </ul>
 </li>
 <li>🧪 <strong>Manual Testing Playbook</strong>:<div class="tw"><table><thead>
@@ -2518,85 +2628,50 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>The new site is graded against the default</td>
 </tr>
 <tr>
-<td><code>MON-003</code></td>
-<td>Administrator</td>
-<td>Schedules run, and run now</td>
-<td>Through the API, a schedule every 5 minutes; <code>POST /monitor/schedule/{scheduleId}/run</code></td>
-<td>A diagnostic <code>&lt;prefix&gt;-&lt;UTC date-time&gt;</code> appears in History at once, and again every 5 minutes. An interval under 5 is refused</td>
-</tr>
-<tr>
-<td><code>MON-004</code></td>
-<td>Administrator</td>
-<td>A breach is announced once, its recovery once</td>
-<td>Through the API, a webhook channel; a site that fails three sweeps then recovers, damping set to 2 consecutive breaches</td>
-<td>One alert after the 2nd failing sweep, none on the 3rd, one recovery alert. 🛑 <strong>Must NOT</strong> alert on every failing sweep</td>
-</tr>
-<tr>
-<td><code>MON-005</code></td>
-<td>Administrator</td>
-<td>An outage after a warning is escalated</td>
-<td>Quiet period 60 min; a site goes <em>Degraded</em> (alert), then <em>Breached</em> 5 minutes later</td>
-<td>A second, critical alert despite the quiet period</td>
-</tr>
-<tr>
-<td><code>MON-006</code></td>
-<td>Administrator</td>
-<td>A webhook cannot reach the host</td>
-<td><code>POST /monitor/channel/add</code> with <code>https://127.0.0.1/hook</code>, then <code>http://example.com/hook</code></td>
-<td>Both refused: loopback is not a destination, and a webhook must be HTTPS</td>
-</tr>
-<tr>
-<td><code>MON-007</code></td>
-<td>Administrator</td>
-<td>Maintenance excludes and silences</td>
-<td>Through the API, a window over a failing site, in <code>Asia/Kolkata</code></td>
-<td>Results inside are <em>excluded</em>: no alert, availability unaffected; the window's hours are Kolkata wall-clock hours</td>
-</tr>
-<tr>
-<td><code>MON-008</code></td>
-<td>Engineer</td>
-<td>The SLA report says what it measured</td>
-<td>Open a month with data and one without</td>
-<td>With data: availability, loss, jitter and MOS per site, IPv6 lines marked <code>IPv6 · not counted</code>; without: no figure. 🛑 <strong>Must NOT</strong> show 100% for an unmeasured month</td>
-</tr>
-<tr>
-<td><code>MON-009</code></td>
-<td>Engineer</td>
-<td>The report exports</td>
-<td><strong>Export PDF</strong> on Monitoring</td>
-<td>The month's document, with the Loss column and the <code>(v6*)</code> footnote where report-only lines appear</td>
-</tr>
-<tr>
 <td><code>MON-010</code></td>
 <td>Tester</td>
 <td>The guard suite</td>
-<td><code>./packetpulsetest.sh monitor</code></td>
-<td>Passes — grading, damping, recovery and maintenance against a live server</td>
+<td><code>./packetpulsetest.sh grading</code></td>
+<td>Passes — a device's UDP test graded and its breach counted, an HTTPS round-trip never graded, and automatic monitoring's routes gone, against a live server</td>
 </tr>
 <tr>
 <td><code>MON-011</code></td>
 <td>Administrator</td>
-<td>Monitoring is the report alone</td>
-<td>Open <strong>Monitoring</strong></td>
-<td>The month's report, and nothing else. 🛑 <strong>Must NOT</strong> offer <em>Service targets</em>, <em>Schedules</em>, <em>Alert channels</em>, <em>Alert history</em> or <em>Planned work</em></td>
+<td>Monitoring is gone</td>
+<td>Open the app as the owner; then <code>GET /monitor/schedule/list</code>, <code>GET /monitor/slareport</code>, <code>GET /monitor/trend</code></td>
+<td>No <strong>Monitoring</strong> in the navigation and no availability card on the <strong>Dashboard</strong>; each route answers 404. 🛑 <strong>Must NOT</strong> offer <em>Monitoring</em>, <em>Schedules</em>, <em>Alert channels</em>, <em>Alert history</em>, <em>Planned work</em> or <em>SLA report</em> anywhere</td>
 </tr>
 <tr>
-<td><code>MON-012</code></td>
+<td><code>MON-013</code></td>
+<td>Engineer</td>
+<td>A UDP test is graded against the organisation's own targets</td>
+<td>Through the API, a lenient default target (400 ms, 10% loss, MOS 2); file a UDP test to the PacketPulse network losing 5%; then remove the target and file the same</td>
+<td><em>OK</em> against the lenient default; then <em>Breached</em> against the built-in defaults, with <em>SLA breaches</em> 1</td>
+</tr>
+<tr>
+<td><code>MON-014</code></td>
+<td>Engineer</td>
+<td>An HTTPS round-trip is never graded</td>
+<td><code>POST /diagnostic/clientobservation</code> with an <code>https-dns</code> observation answering 2 of 10 at 950 ms</td>
+<td><code>sla_status</code> <em>unknown</em>, <code>breach_count</code> 0; History's chart <em>Not graded 1 100%</em>. 🛑 <strong>Must NOT</strong> draw it as a breach</td>
+</tr>
+<tr>
+<td><code>MON-015</code></td>
 <td>Administrator</td>
-<td>Monitoring follows the right to read reports</td>
-<td>A role with <code>sla_view</code> but not <code>report_view</code>; then one with <code>report_view</code> only</td>
-<td>The first has no <strong>Monitoring</strong> in the navigation; the second has it, and the report opens. Without <code>report_export</code>, no <strong>Export PDF</strong></td>
+<td>Damping is no longer taken</td>
+<td><code>POST /monitor/sla/add</code> with <code>breach_threshold_runs: 2</code></td>
+<td>400 naming <code>breach_threshold_runs</code>; the same body without it saves</td>
 </tr>
 </tbody>
 </table></div>
 </li>
 <li>⚙️ <strong>Developer Guide &amp; Release Confidence</strong>:
 <ul>
-<li>Damping: <code>DecideAlert</code> in <code>packetpulsego/pkg/monitormicroservice/monitordomain/shared/</code> (consecutive breaches, cooldown, escalation); runner: <code>packetpulsego/pkg/monitormicroservice/monitorservice/MonitorScheduleRunner.go</code> (claims due schedules with <code>FOR UPDATE SKIP LOCKED</code>).</li>
-<li>Results are partitioned by month and rolled up daily per site <strong>and family</strong> (<code>packetpulsego/pkg/common/dbclient/migrations/0012_2026_10_01_result_partitioning_and_retention.sql</code>, <code>0023</code>); the retention runner keeps partitions three months ahead.</li>
-<li>🔒 Report-only IPv6 never enters availability (<code>NOT report_only</code> in the rollup and the SLA queries).</li>
-<li>The screen: <code>packetpulseflutter/lib/monitormicroservice/presentation/screens/MonitorScreen.dart</code>; its navigation entry is gated on <code>report_view</code> in <code>packetpulseflutter/lib/common/presentation/PacketPulseShell.dart</code>.</li>
-<li>Coverage: <code>packetpulsetest/golang/monitorconformance/</code>, <code>packetpulsego/pkg/monitormicroservice/**</code>, <code>packetpulseflutter/test/monitor_screen_test.dart</code>, <code>packetpulseflutter/test/shell_test.dart</code>.</li>
+<li>Grading: <code>EvaluateSla</code> in <code>packetpulsego/pkg/pingmicroservice/pingservice/PingSlaEvaluator.go</code>; device results in <code>PingRunRecord</code> (<code>packetpulsego/pkg/pingmicroservice/pingservice/PingService.go</code>), graded when <code>ObservesPackets</code> says the method put packets on the wire; the ticket's count is <code>breachCount</code> in <code>packetpulsego/pkg/diagnosticmicroservice/diagnosticservice/DiagnosticService.go</code>. Targets: <code>SlaTargetsForSite</code> in <code>packetpulsego/pkg/monitormicroservice/monitorservice/MonitorService.go</code> (an empty site is the organisation's default).</li>
+<li>The chart: <code>DiagnosticOutcomeDonut</code> in <code>packetpulseflutter/lib/diagnosticmicroservice/presentation/widgets/DiagnosticCharts.dart</code>, held by <code>packetpulseflutter/test/diagnostic_charts_test.dart</code>.</li>
+<li>Results are partitioned by month (<code>packetpulsego/pkg/common/dbclient/migrations/0012_2026_10_01_result_partitioning_and_retention.sql</code>); the retention runner (<code>packetpulsego/pkg/monitormicroservice/monitorservice/MonitorRetentionRunner.go</code>) keeps partitions three months ahead and drops what no organisation's retention still wants. It no longer writes daily rollups: only the removed report and trend read them.</li>
+<li>Retired with automatic monitoring: Monitoring cases 003 to 009 and 012 (schedules, damping, escalation, webhooks, planned work, the SLA report and its PDF, and the screen's capability), and the fifth journey (an outage and its recovery).</li>
+<li>Coverage: <code>packetpulsetest/golang/gradingconformance/</code>, <code>packetpulsego/pkg/monitormicroservice/**</code>, <code>packetpulsego/pkg/pingmicroservice/pingservice/PingRunRecord_test.go</code>, <code>packetpulsego/pkg/diagnosticmicroservice/diagnosticservice/DiagnosticUdpObservation_test.go</code>, <code>packetpulseflutter/test/shell_test.dart</code>, <code>packetpulseflutter/test/dashboard_screen_test.dart</code>.</li>
 </ul>
 </li>
 </ul>
@@ -3216,7 +3291,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <li>⚙️ <strong>Developer Guide &amp; Release Confidence</strong>:
 <ul>
 <li><code>packetpulsego/pkg/common/orgbrand/</code>: <code>Normalise</code> checks the declared size before decoding (so a small file claiming a vast canvas costs nothing) and redraws every upload as a plain RGBA PNG; <code>DrawLogo</code> prints it, and a logo the PDF writer cannot read costs the report its logo, never the report. Stored in <code>organisation_brand</code> (migration 0029), one row per organisation.</li>
-<li>Reports get the logo through <code>SetReportBranding</code> on the diagnostic, ping and monitor services. The tab icon: <code>packetpulseflutter/lib/common/services/PacketPulseFavicon.dart</code>, applied by the shell after sign-in and removed when it closes.</li>
+<li>Reports get the logo through <code>SetReportBranding</code> on the diagnostic and ping services. The tab icon: <code>packetpulseflutter/lib/common/services/PacketPulseFavicon.dart</code>, applied by the shell after sign-in and removed when it closes.</li>
 <li>Coverage: <code>packetpulsego/pkg/common/orgbrand/</code>, <code>packetpulsego/pkg/staffmicroservice/staffapp/</code>, <code>packetpulsego/pkg/pingmicroservice/pingreport/</code>, <code>packetpulseflutter/test/brand_screen_test.dart</code>, <code>packetpulseflutter/test/shell_branding_test.dart</code>.</li>
 </ul>
 </li>
@@ -3312,11 +3387,11 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td><code>packetpulseflutter/test/run_diagnostic_udp_test.dart</code>, <code>packetpulseflutter/test/udp_probe_run_test.dart</code> (the page: <code>packetpulseweb/assets/packetpulse-udp.test.mjs</code>, in <code>unit</code>)</td>
 </tr>
 <tr>
-<td>Monitoring</td>
+<td>Service targets and grading</td>
 <td><code>MON-*</code></td>
 <td><code>packetpulsego/pkg/monitormicroservice/</code></td>
-<td><code>monitor</code></td>
-<td><code>packetpulseflutter/test/monitor_screen_test.dart</code></td>
+<td><code>grading</code></td>
+<td><code>packetpulseflutter/test/diagnostic_charts_test.dart</code></td>
 </tr>
 <tr>
 <td>Results API</td>
@@ -3383,7 +3458,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <p><strong>Covers:</strong> <code>DIAG-001</code>–<code>DIAG-005</code>, <code>HIST-001</code>, <code>V6-001</code></p>
 <ol>
 <li>Ticket <code>TT-JRN-002</code> arrives: Customer <code>CUST-88412</code>, slow calls.</li>
-<li>Run against the customer's sites. Read loss, jitter and MOS on each row.</li>
+<li>Run against the customer's sites. Read loss and jitter on each row.</li>
 <li>Re-run after the carrier's fix.</li>
 <li>In <strong>History</strong>, compare both attempts.</li>
 </ol>
@@ -3408,15 +3483,6 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <li>The SFTP password is changed on the server for one interval, then restored.</li>
 </ol>
 <p><strong>Expected:</strong> a file per interval with results; the interval with the wrong password shows <em>Not delivered</em>, and the next file holds that period's results too; every <code>result_id</code> appears exactly once across all the files — a failed delivery sent nothing, so nothing is sent twice.</p>
-<hr>
-<h3 id="jrn-005-monitoring-catches-an-outage-and-its-recovery">JRN-005 · Monitoring catches an outage and its recovery<a class="anchor" href="#jrn-005-monitoring-catches-an-outage-and-its-recovery" aria-label="Link to this section">#</a></h3>
-<p><strong>Covers:</strong> <code>MON-001</code>–<code>MON-005</code>, <code>MON-007</code></p>
-<ol>
-<li>Through the API: a default target; a schedule every 5 minutes over every enabled site; a webhook channel; damping 2.</li>
-<li>Black-hole one site for 15 minutes, then restore it.</li>
-<li>Through the API, declare a maintenance window over another site, and break that site inside the window.</li>
-</ol>
-<p><strong>Expected:</strong> one breach alert, one recovery; the maintenance site raises nothing and its availability is untouched.</p>
 <hr>
 <h3 id="jrn-006-an-attack-on-an-administrators-account">JRN-006 · An attack on an administrator's account<a class="anchor" href="#jrn-006-an-attack-on-an-administrators-account" aria-label="Link to this section">#</a></h3>
 <p><strong>Covers:</strong> <code>AUD-003</code>–<code>AUD-006</code>, <code>AUTH-006</code>, <code>AUTH-007</code></p>
@@ -3522,6 +3588,11 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td><code>NFR-009</code></td>
 <td>Each of the five themes in light and dark</td>
 <td>Text contrast passes; status colours unchanged in meaning</td>
+</tr>
+<tr>
+<td><code>NFR-020</code></td>
+<td>A chosen chip or segment in each theme, light and dark — <em>SFTP (recommended)</em> on <strong>Result export</strong>, an endpoint chip, <strong>Packets per second</strong></td>
+<td>The label is white (dark navy in dark mode) on the blue fill, as legible as its tick; an unchosen chip keeps the page's text colour. Held by <code>packetpulseflutter/test/packetpulse_theme_test.dart</code> at 4.5:1 (review of 14 October 2026). 🛑 <strong>Must NOT</strong> draw dark text on the dark fill</td>
 </tr>
 <tr>
 <td><code>NFR-010</code></td>
@@ -3642,7 +3713,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <pre class="code"><code>PACKETPULSE_TEST_URL=http://localhost:18080 PACKETPULSE_TEST_REQUIRE_SUPERUSER=1 ./packetpulsetest.sh
 ./packetpulsetest.sh load          # before a release that touches sweeps, sign-in or exports
 </code></pre>
-<p><code>./packetpulsetest.sh</code> runs <code>tenancy assignment acl audit translation contract monitor unit client backup docs</code>. Coverage floors are a ratchet (<code>scripts/PacketPulseCoverageFloor.py</code>, <code>scripts/PacketPulseFlutterCoverageFloor.py</code>): raised when real coverage rises, never lowered to make a build pass.</p>
+<p><code>./packetpulsetest.sh</code> runs <code>tenancy assignment acl audit translation contract grading unit client backup docs</code>. Coverage floors are a ratchet (<code>scripts/PacketPulseCoverageFloor.py</code>, <code>scripts/PacketPulseFlutterCoverageFloor.py</code>): raised when real coverage rises, never lowered to make a build pass.</p>
 <h2 id="52-what-blocks-a-release">5.2 What blocks a release<a class="anchor" href="#52-what-blocks-a-release" aria-label="Link to this section">#</a></h2>
 <div class="tw"><table><thead>
 <tr>
@@ -4051,118 +4122,6 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/packetpulse/releases/&lt;previous&gt;
 <td style="text-align:center">—</td>
 </tr>
 <tr>
-<td><code>GET</code></td>
-<td><code>/monitor/alert/list</code></td>
-<td>member</td>
-<td><code>sla_view</code></td>
-<td style="text-align:center">—</td>
-<td style="text-align:center">—</td>
-</tr>
-<tr>
-<td><code>POST</code></td>
-<td><code>/monitor/channel/add</code></td>
-<td>member</td>
-<td><code>sla_manage</code></td>
-<td style="text-align:center">required</td>
-<td style="text-align:center">✅</td>
-</tr>
-<tr>
-<td><code>GET</code></td>
-<td><code>/monitor/channel/list</code></td>
-<td>member</td>
-<td><code>sla_view</code></td>
-<td style="text-align:center">—</td>
-<td style="text-align:center">—</td>
-</tr>
-<tr>
-<td><code>DELETE</code></td>
-<td><code>/monitor/channel/{channelId}</code></td>
-<td>member</td>
-<td><code>sla_manage</code></td>
-<td style="text-align:center">—</td>
-<td style="text-align:center">✅</td>
-</tr>
-<tr>
-<td><code>POST</code></td>
-<td><code>/monitor/channel/{channelId}/test</code></td>
-<td>member</td>
-<td><code>sla_manage</code></td>
-<td style="text-align:center">required</td>
-<td style="text-align:center">✅</td>
-</tr>
-<tr>
-<td><code>POST</code></td>
-<td><code>/monitor/maintenance/add</code></td>
-<td>member</td>
-<td><code>schedule_manage</code></td>
-<td style="text-align:center">required</td>
-<td style="text-align:center">✅</td>
-</tr>
-<tr>
-<td><code>GET</code></td>
-<td><code>/monitor/maintenance/list</code></td>
-<td>member</td>
-<td><code>sla_view</code></td>
-<td style="text-align:center">—</td>
-<td style="text-align:center">—</td>
-</tr>
-<tr>
-<td><code>DELETE</code></td>
-<td><code>/monitor/maintenance/{windowId}</code></td>
-<td>member</td>
-<td><code>schedule_manage</code></td>
-<td style="text-align:center">required</td>
-<td style="text-align:center">✅</td>
-</tr>
-<tr>
-<td><code>PUT</code></td>
-<td><code>/monitor/maintenance/{windowId}</code></td>
-<td>member</td>
-<td><code>schedule_manage</code></td>
-<td style="text-align:center">required</td>
-<td style="text-align:center">✅</td>
-</tr>
-<tr>
-<td><code>POST</code></td>
-<td><code>/monitor/schedule/add</code></td>
-<td>member</td>
-<td><code>schedule_manage</code></td>
-<td style="text-align:center">required</td>
-<td style="text-align:center">✅</td>
-</tr>
-<tr>
-<td><code>GET</code></td>
-<td><code>/monitor/schedule/list</code></td>
-<td>member</td>
-<td><code>schedule_manage</code></td>
-<td style="text-align:center">—</td>
-<td style="text-align:center">—</td>
-</tr>
-<tr>
-<td><code>DELETE</code></td>
-<td><code>/monitor/schedule/{scheduleId}</code></td>
-<td>member</td>
-<td><code>schedule_manage</code></td>
-<td style="text-align:center">—</td>
-<td style="text-align:center">✅</td>
-</tr>
-<tr>
-<td><code>PUT</code></td>
-<td><code>/monitor/schedule/{scheduleId}</code></td>
-<td>member</td>
-<td><code>schedule_manage</code></td>
-<td style="text-align:center">required</td>
-<td style="text-align:center">✅</td>
-</tr>
-<tr>
-<td><code>POST</code></td>
-<td><code>/monitor/schedule/{scheduleId}/run</code></td>
-<td>member</td>
-<td><code>schedule_manage</code></td>
-<td style="text-align:center">required</td>
-<td style="text-align:center">✅</td>
-</tr>
-<tr>
 <td><code>POST</code></td>
 <td><code>/monitor/sla/add</code></td>
 <td>member</td>
@@ -4193,30 +4152,6 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/packetpulse/releases/&lt;previous&gt;
 <td><code>sla_manage</code></td>
 <td style="text-align:center">required</td>
 <td style="text-align:center">✅</td>
-</tr>
-<tr>
-<td><code>GET</code></td>
-<td><code>/monitor/slareport</code></td>
-<td>member</td>
-<td><code>report_view</code></td>
-<td style="text-align:center">—</td>
-<td style="text-align:center">—</td>
-</tr>
-<tr>
-<td><code>GET</code></td>
-<td><code>/monitor/slareport.pdf</code></td>
-<td>member</td>
-<td><code>report_export</code></td>
-<td style="text-align:center">—</td>
-<td style="text-align:center">—</td>
-</tr>
-<tr>
-<td><code>GET</code></td>
-<td><code>/monitor/trend</code></td>
-<td>member</td>
-<td><code>report_view</code></td>
-<td style="text-align:center">—</td>
-<td style="text-align:center">—</td>
 </tr>
 <tr>
 <td><code>GET</code></td>
@@ -4731,16 +4666,9 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/packetpulse/releases/&lt;previous&gt;
 </tr>
 <tr>
 <td><code>sla_manage</code></td>
-<td>Create and edit SLA policies and alert channels.</td>
+<td>Create and edit SLA policies.</td>
 <td style="text-align:center">✅</td>
 <td style="text-align:center">—</td>
-<td style="text-align:center">—</td>
-</tr>
-<tr>
-<td><code>schedule_manage</code></td>
-<td>Create and edit scheduled monitoring.</td>
-<td style="text-align:center">✅</td>
-<td style="text-align:center">✅</td>
 <td style="text-align:center">—</td>
 </tr>
 <tr>
@@ -4941,6 +4869,14 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/packetpulse/releases/&lt;previous&gt;
 <tr>
 <td><code>0031_2026_10_09_udp_split_and_endpoint_reflector.sql</code></td>
 <td>A UDP test filed on a ticket keeps where its loss happened - up, down or late - and its jitter each way; an endpoint can name the reflector beside it.</td>
+</tr>
+<tr>
+<td><code>0032_2026_10_14_sla_breach_reasons.sql</code></td>
+<td>A graded result keeps why it was graded so: each service target it missed, with what was measured and the target (<code>ping_result.sla_breaches</code>).</td>
+</tr>
+<tr>
+<td><code>0033_2026_10_14_sla_checks.sql</code></td>
+<td>Every figure of a graded result is kept against its target, with where Degraded begins and its own verdict: <code>sla_breaches</code> becomes <code>sla_checks</code>, its entries marked breached.</td>
 </tr>
 </tbody>
 </table></div>

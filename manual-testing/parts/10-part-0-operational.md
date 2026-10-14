@@ -72,7 +72,7 @@ To act as a person in a manual test, read their code from the **code outbox**: w
 | `audit` | The registry covers every mutation; the chain verifies; sign-ins (and failed ones) are recorded | server |
 | `translation` | The catalogue is complete and served | server |
 | `contract` | The Results API and CSV shapes, the export's destination guard | server |
-| `monitor` | SLA grading, schedules, alert damping, maintenance windows | server |
+| `grading` | A device's UDP test is graded and its breach counted; an HTTPS round-trip never is; automatic monitoring answers nothing | server |
 | `unit` | Every Go package with `-race -shuffle`, coverage floors, govulncheck, the string generator | database |
 | `client` | Every Flutter screen, `flutter analyze`, the client coverage floor | — |
 | `backup` | The backup, drill and restore scripts, for real | database |

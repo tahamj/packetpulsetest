@@ -28,11 +28,11 @@ A **diagnostic** tests sites and files the result against a **TT number** — a 
 
 ## L.4 IPv4, IPv6 and "not counted"
 
-A site whose name resolves to both an IPv4 and an IPv6 address is measured over **both**. The IPv6 result is shown, kept and exported, but marked **not counted**: the site's totals, alerts and SLA availability are carried by IPv4, because the customer's agreement is for the service and IPv4 still carries it. A site that is IPv6 *only* counts over IPv6 — otherwise it could never fail. When the server itself has no IPv6 route, an IPv6 address is reported as *could not be tested from here* rather than as an outage.
+A site whose name resolves to both an IPv4 and an IPv6 address is measured over **both**. The IPv6 result is shown, kept and exported, but marked **not counted**: the site's totals and breaches are carried by IPv4, because the customer's agreement is for the service and IPv4 still carries it. A site that is IPv6 *only* counts over IPv6 — otherwise it could never fail. When the server itself has no IPv6 route, an IPv6 address is reported as *could not be tested from here* rather than as an outage.
 
 ## L.5 Two vantage points
 
-PacketPulse measures from two places. Its server sweeps the organisation's endpoints from PacketPulse's data centre, on a schedule and for the Results API. **Run diagnostic** measures from wherever the person is, over their own connection, to the endpoint nearest them — the right tool for "is it slow for me?". The two will not match, and both are correct: they measure different layers from different places. A device test is **attached** to a ticket, under the endpoint it measured, labelled as measured on a device.
+PacketPulse measures from two places. Its server sweeps the organisation's endpoints from PacketPulse's data centre when the API asks it to. **Run diagnostic** measures from wherever the person is, over their own connection, to the endpoint nearest them — the right tool for "is it slow for me?". The two will not match, and both are correct: they measure different layers from different places. A device test is **attached** to a ticket, under the endpoint it measured, labelled as measured on a device.
 
 ## L.6 Two-step sign-in
 

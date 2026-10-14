@@ -59,7 +59,6 @@ var gatedRoutes = []routeCheck{
 	{"list SLA policies", http.MethodGet, "/monitor/sla/list", nil, "sla_view"},
 	{"add SLA policy", http.MethodPost, "/monitor/sla/add",
 		map[string]any{"policy_name": "acl probe", "max_latency_ms": 100}, "sla_manage"},
-	{"list schedules", http.MethodGet, "/monitor/schedule/list", nil, "schedule_manage"},
 	{"list users", http.MethodGet, "/user/list", nil, "user_manage"},
 	{"list staff", http.MethodGet, "/staff/list", nil, "staff_manage"},
 	{"list roles", http.MethodGet, "/staff/role/list", nil, "acl_manage"},

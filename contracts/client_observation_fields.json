@@ -28,6 +28,7 @@
     "mos_score",
     "error_message",
     "started_on",
+    "duration_ms",
     "packets_lost_up",
     "packets_lost_down",
     "packets_late",
