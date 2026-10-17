@@ -35,7 +35,7 @@ Who is in the organisation, what each may do, who is signed in, and the record o
 
 **Screen:** Administer → **Permission matrix** · **Routes:** `GET/POST /staff/role/*`, `PUT /staff/{staffId}/access`, `GET /user/capability/list` · **Capability:** `acl_manage`
 
-- 🌟 **Commercial Presentation & Sales Pitch**: Seventeen plain-language capabilities, three built-in roles (Administrator 17, NOC Engineer 7, Viewer 5) and as many of the operator's own as it likes — plus a per-person *allow* or *deny* for the exception that does not deserve a role. Changes take effect on the next request, not the next sign-in.
+- 🌟 **Commercial Presentation & Sales Pitch**: Sixteen plain-language capabilities, three built-in roles (Administrator 16, NOC Engineer 6, Viewer 5) and as many of the operator's own as it likes — plus a per-person *allow* or *deny* for the exception that does not deserve a role. Changes take effect on the next request, not the next sign-in.
 - 📖 **User Guide & Operational Flow**: The matrix lists roles across and capabilities down. **Add a role**, tick what it may do, save — the whole set is saved, so nothing is left to an invisible default. Built-in roles are read-only: an engineer reads the tests they ran (`diagnostic_view_own`), while Administrator and Viewer read everyone's (`diagnostic_view_all`). A role somebody holds cannot be deleted. Per person: *Inherit*, *Allow* or *Deny* each capability.
 - 🧪 **Manual Testing Playbook**:
   | ID | Persona | Scenario | Steps | Observable Expected Result |

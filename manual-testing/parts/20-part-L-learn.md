@@ -20,11 +20,11 @@ A **diagnostic** tests sites and files the result against a **TT number** — a 
 
 | Figure | Meaning | Good |
 |---|---|---|
-| **Loss** | Packets sent minus received, as a percentage. On a device test it is *query* loss, because a browser cannot send a packet. | 0% |
+| **Loss** | Packets sent minus received, as a percentage. A browser's UDP test counts real packets and says where each lost one went: upstream, downstream or too late to play. Only an HTTPS test from a device counts *query* loss, because HTTPS resends what the network drops. | 0% |
 | **Round trip** | Average, fastest and slowest response time, in ms. | Under the site's target |
 | **Jitter** | RFC 3550 interarrival jitter — how much *consecutive* round trips differ. Voice cares about this more than raw latency. | Low single digits of ms |
-| **MOS** | Mean Opinion Score (ITU-T G.107 E-model): how a phone call would sound over this path, 1–5. | Above 4.0; below 3.6 is noticed on a call |
-| **SLA** | **OK**, **Degraded** (within 80% of a threshold) or **Breached**, against the site's targets. | OK |
+| **MOS** | Mean Opinion Score (ITU-T G.107 E-model): how a phone call would sound over this path, 1–4.5. Computed, stored, graded against a MOS target and exported in the CSV, but shown on no screen or report since 14 October 2026 (§4.1). | Above 4.0; below 3.6 is noticed on a call |
+| **SLA** | **OK**, **Degraded** (within 80% of a threshold) or **Breached**, against the site's targets — each figure shown against its own target, with one line saying why. **Not graded** when the result was not held to targets (§5.1). | OK |
 
 ## L.4 IPv4, IPv6 and "not counted"
 

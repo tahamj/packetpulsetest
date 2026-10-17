@@ -14,7 +14,7 @@
 
 | 🧭 Screens | 🔌 API routes | 🔐 Capabilities | 🗄️ Migrations | 💬 Catalogue strings | ❓ Help topics | 🧪 Guard suites |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| **16** <br><sub>in the navigation rail</sub> | **94** <br><sub>under `/api/v1`</sub> | **16** <br><sub>3 built-in roles</sub> | **33** <br><sub>applied at boot</sub> | **1093** <br><sub>English, server-served</sub> | **19** <br><sub>one per screen</sub> | **11** <br><sub>+ `load`, opt-in</sub> |
+| **16** <br><sub>in the navigation rail</sub> | **94** <br><sub>under `/api/v1`</sub> | **16** <br><sub>3 built-in roles</sub> | **33** <br><sub>applied at boot</sub> | **1101** <br><sub>English, server-served</sub> | **19** <br><sub>one per screen</sub> | **11** <br><sub>+ `load`, opt-in</sub> |
 
 <br>
 
@@ -59,6 +59,35 @@ PacketPulse is a multi-tenant network-diagnostics service for telecom operators:
 
 > [!CAUTION]
 > **Never test against live customer data.** Use a local server with a disposable database (Part 0 §0.2), or the live demo organisation for read-only walkthroughs. Tenancy, ACL and audit cases need **two organisations** of your own — testing them from a single account proves nothing.
+
+---
+
+## 📋 What Changed on 16 October 2026
+
+> [!IMPORTANT]
+> **Deployed 2026-10-16, release 20261016-100901.** Two gaps found while preparing the customer briefing, closed. Where this table and an older one disagree, this one is the product.
+
+| Change | What changed | Where to test | Source of truth |
+|---|---|---|---|
+| **Change password on Settings** | **Settings → Change password** asks for the current password and the new one twice, and holds the server's rule (10 characters counted as characters, a letter and a number) before sending. A wrong current password is now a field error (422 with `details.current_password`), not a 401 the app would read as an ended session. Someone who signs in with their directory password is told to change it there and offered no form; the route refuses them with 409 `password_from_directory`. The owner keeps the form. | `SET-004`, `SET-006` | `packetpulseflutter/lib/common/presentation/PacketPulseSettingsScreen.dart`<br>`packetpulsego/pkg/usermicroservice/userservice/UserService.go` |
+| **The product site fits a phone** | Card grids drop to one column, the footer links wrap, and the phone layout starts at 560 px, so neither `/` nor `/selftest.html` scrolls sideways from 360 px up. | `WEB-005` | `packetpulseweb/assets/packetpulse-site.css` |
+
+---
+
+## 📋 What Changed in the 13–14 October 2026 Review
+
+> [!IMPORTANT]
+> **Deployed 2026-10-14, release 20261014-103600.** The review of 13 October 2026 removed automatic monitoring, graded the device's own tests, and asked that every grade say why. Where this table and an older one disagree, this one is the product.
+
+| Change | What changed | Where to test | Source of truth |
+|---|---|---|---|
+| **Automatic monitoring removed** | Schedules and their runner, alert channels and alerts, maintenance windows, the SLA report and its PDF, the dashboard's 30-day trend and the Monitoring screen are gone, with the `schedule_manage` capability; their routes answer 404. Nothing was dropped from the database. Policies no longer take damping fields. | `MON-011`, `MON-015`, `HIST-004` | `packetpulsego/pkg/pingmicroservice/pingservice/PingSlaEvaluator.go` |
+| **Device tests graded** | A browser's UDP test and an app's ICMP echo are graded against the organisation's targets, and a breach is counted on the ticket; an HTTPS round-trip stays *Not graded*, with the reason under the results. | `MON-013`, `MON-014`, `UDP-031`, `DIAG-017` | `packetpulsego/pkg/pingmicroservice/pingservice/PingSlaEvaluator.go` |
+| **Every grade against its targets** | Each graded figure is kept with its target, where Degraded begins and its verdict, and shown under the results, in the attach card and on the PDF. Loss to one decimal; charts and tiles coloured by their own figure. | `DIAG-018`, `DIAG-019` | `packetpulsego/pkg/common/dbclient/migrations/0033_2026_10_14_sla_checks.sql`<br>`packetpulsego/pkg/pingmicroservice/pingreport/PingReportPdfBuilder.go` |
+| **UDP the browser's only method, at a chosen rate** | No *HTTPS to the endpoint*; **Packets per second** 10, 25, 50 or 100. The hosted reflector allows 120 a second and 6000 packets a session. | `UDP-016`, `UDP-029` | `packetpulsego/pkg/reflectormicroservice/reflectorcore/ReflectorSession.go` |
+| **"UDP is blocked" only when it is** | A second, fresh connection before calling UDP blocked; *no UDP sent* and *could not be completed* told apart; the reflector logs how each session ended; a run records its real duration. | `UDP-030`, `UDP-032`, `UDP-033`, `UDP-034` | `packetpulseweb/assets/packetpulse-udp.js` |
+| **Hidden, still measured** | No MOS and no standard deviation on any screen, report or the self-test; MOS is still graded and in the CSV. | `DEV-025`, `DEV-026` | `packetpulseflutter/lib/common/config/PacketPulseConfig.dart` |
+| **The ticket, from where it was filed** | Notes in History and on the PDF; **View ticket** beside *Attached to ticket*; the results table fitted to its card; chosen chips readable; a read that got no answer is sent once more. | `DEV-024`, `DEV-027`, `DIAG-020`, `NFR-020` | `packetpulseflutter/lib/common/services/PacketPulseApiClient.dart` |
 
 ---
 

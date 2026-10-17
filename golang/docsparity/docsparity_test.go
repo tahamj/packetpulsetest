@@ -219,12 +219,16 @@ func TestAppendixBIsEveryCapabilityAndBuiltInGrant(t *testing.T) {
 		}
 	}
 	// The counts quoted in the roles chapter: what each role holds. A grant a
-	// later migration took away is in the map as false, and is not held.
+	// later migration took away is in the map as false, and is not held. Nor
+	// is a grant of a capability the code no longer has: schedule_manage was
+	// removed with automatic monitoring in October 2026 and its column kept,
+	// still granted, with no migration - so the migrations alone said 17 and 7
+	// while the product enforces 16 and 6.
 	text := guide(t, root)
 	for _, role := range roles {
 		held := 0
-		for _, granted := range grants[role] {
-			if granted {
+		for capability, granted := range grants[role] {
+			if _, exists := descriptions[capability]; granted && exists {
 				held++
 			}
 		}
