@@ -30,7 +30,7 @@ func TestOnlySuccessfulMutationsAreRecorded(t *testing.T) {
 
 	// One that succeeds.
 	ok := packetpulsetest.Call(t, http.MethodPost, "/dnssite/add", ownerToken, map[string]any{
-		"site_name": "audited site", "ip_address": "203.0.113.90",
+		"latitude": 12.9716, "longitude": 77.5946, "site_name": "audited site", "ip_address": "203.0.113.90",
 	})
 	if ok.Status != http.StatusCreated {
 		t.Fatalf("the successful mutation did not succeed: %d %s", ok.Status, ok.Raw)
@@ -38,13 +38,13 @@ func TestOnlySuccessfulMutationsAreRecorded(t *testing.T) {
 
 	// Three that do not: invalid, duplicate, and unauthorised.
 	packetpulsetest.Call(t, http.MethodPost, "/dnssite/add", ownerToken, map[string]any{
-		"site_name": "invalid", "ip_address": "not-an-address!!",
+		"latitude": 12.9716, "longitude": 77.5946, "site_name": "invalid", "ip_address": "not-an-address!!",
 	})
 	packetpulsetest.Call(t, http.MethodPost, "/dnssite/add", ownerToken, map[string]any{
-		"site_name": "duplicate", "ip_address": "203.0.113.90",
+		"latitude": 12.9716, "longitude": 77.5946, "site_name": "duplicate", "ip_address": "203.0.113.90",
 	})
 	packetpulsetest.Call(t, http.MethodPost, "/dnssite/add", "", map[string]any{
-		"site_name": "anonymous", "ip_address": "203.0.113.91",
+		"latitude": 12.9716, "longitude": 77.5946, "site_name": "anonymous", "ip_address": "203.0.113.91",
 	})
 
 	time.Sleep(2 * time.Second) // The trail is written off the response path.
@@ -63,6 +63,7 @@ func TestAuditChainVerifies(t *testing.T) {
 
 	for i := 0; i < 3; i++ {
 		packetpulsetest.Call(t, http.MethodPost, "/dnssite/add", ownerToken, map[string]any{
+			"latitude": 12.9716, "longitude": 77.5946,
 			"site_name":  fmt.Sprintf("chain %d", i),
 			"ip_address": fmt.Sprintf("203.0.113.%d", 120+i),
 		})
@@ -90,7 +91,7 @@ func TestAuditEntriesNameTheActorAndOrigin(t *testing.T) {
 	ownerToken, _ := packetpulsetest.SignUpOrganisation(t, "auditactor")
 
 	packetpulsetest.Call(t, http.MethodPost, "/dnssite/add", ownerToken, map[string]any{
-		"site_name": "actor probe", "ip_address": "203.0.113.150",
+		"latitude": 12.9716, "longitude": 77.5946, "site_name": "actor probe", "ip_address": "203.0.113.150",
 	})
 	time.Sleep(2 * time.Second)
 

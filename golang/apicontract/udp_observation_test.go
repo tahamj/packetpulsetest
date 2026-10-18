@@ -121,6 +121,7 @@ func TestAnEndpointsReflectorAddressSurvivesItsEdits(t *testing.T) {
 	token, _ := packetpulsetest.SignUpOrganisation(t, "udpreflector")
 	added := packetpulsetest.Call(t, http.MethodPost, "/dnssite/add", token, map[string]any{
 		"site_name": "Pune Edge", "ip_address": "192.0.2.73", "is_enabled": true,
+		"latitude": 18.5204, "longitude": 73.8567,
 		"reflector_address": "Reflector.Pune.Example:50001",
 	})
 	if added.Status != http.StatusCreated || added.Body["reflector_address"] != "reflector.pune.example:50001" {
@@ -130,6 +131,7 @@ func TestAnEndpointsReflectorAddressSurvivesItsEdits(t *testing.T) {
 
 	renamed := packetpulsetest.Call(t, http.MethodPut, "/dnssite/"+endpoint, token, map[string]any{
 		"site_name": "Pune Edge 2", "ip_address": "192.0.2.73", "is_enabled": true,
+		"latitude": 18.5204, "longitude": 73.8567,
 	})
 	if renamed.Status != http.StatusOK || renamed.Body["reflector_address"] != "reflector.pune.example:50001" {
 		t.Errorf("an edit without the field = %d %s, want the reflector kept", renamed.Status, renamed.Raw)
@@ -149,6 +151,7 @@ func TestAnEndpointsReflectorAddressSurvivesItsEdits(t *testing.T) {
 
 	cleared := packetpulsetest.Call(t, http.MethodPut, "/dnssite/"+endpoint, token, map[string]any{
 		"site_name": "Pune Edge 2", "ip_address": "192.0.2.73", "is_enabled": true, "reflector_address": "",
+		"latitude": 18.5204, "longitude": 73.8567,
 	})
 	if cleared.Status != http.StatusOK || cleared.Body["reflector_address"] != "" {
 		t.Errorf("clearing it = %d %s", cleared.Status, cleared.Raw)

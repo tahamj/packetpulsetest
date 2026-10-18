@@ -66,6 +66,7 @@ All routes are under `/api/v1`. **Access**: *public* (no session), *session* (si
 | `POST` | `/platform/organisation/add` | superuser | — | — | ✅ |
 | `GET` | `/platform/organisation/list` | superuser | — | — | — |
 | `GET` | `/platform/organisation/{organisationId}/licence` | superuser | — | — | — |
+| `POST` | `/platform/organisation/{organisationId}/support` | superuser | — | — | ✅ |
 | `GET` | `/platform/plan/list` | superuser | — | — | — |
 | `POST` | `/reflector/session` | public | — | — | — |
 | `GET` | `/result/bytt/{ttNumber}` | api key | — | — | — |
@@ -163,6 +164,7 @@ Embedded in the server binary and applied in order at boot (`packetpulsego/pkg/c
 | `0031_2026_10_09_udp_split_and_endpoint_reflector.sql` | A UDP test filed on a ticket keeps where its loss happened - up, down or late - and its jitter each way; an endpoint can name the reflector beside it. |
 | `0032_2026_10_14_sla_breach_reasons.sql` | A graded result keeps why it was graded so: each service target it missed, with what was measured and the target (`ping_result.sla_breaches`). |
 | `0033_2026_10_14_sla_checks.sql` | Every figure of a graded result is kept against its target, with where Degraded begins and its own verdict: `sla_breaches` becomes `sla_checks`, its entries marked breached. |
+| `0034_2026_10_17_support_sign_in.sql` | PacketPulse support can sign in to an organisation: one support account per organisation (`staff.is_support`, `auth_source = 'support'`), and who opened each support session and why. |
 
 ## Appendix D — Settings
 
@@ -204,6 +206,7 @@ Read from the environment, falling back to `.env` (see `.env.example`); defined 
 | `REFLECTOR_PUBLIC_IP` | — | The address browsers are told to send UDP to. A cloud instance sees only its private address, so the live host needs its public one here |
 | `REFLECTOR_SESSIONS_PER_MINUTE` | `6` | UDP tests one address may start in a minute on the public reflector |
 | `REFLECTOR_KEY_SECRET` | — (32+ characters) | Derives each endpoint's reflector key (§4.2). Without it the relay to customer reflectors and the key route answer 503. Changing it changes every key, so every installed reflector must be reinstalled |
+| `REFLECTOR_NETWORK_HOSTS` | — | PacketPulse's own standalone reflectors, as IP addresses separated by commas (live `140.245.28.232`). An endpoint whose **UDP reflector address** is one of them, or a name resolving to one, is signed for with the network key rather than its own endpoint key, so the one reflector answers every endpoint of every organisation. Install it with the key `packetpulseserver reflector-network-key` prints on the server. A name, not an IP, stops the server at boot |
 
 ## Appendix E — Response codes and actions
 

@@ -14,7 +14,7 @@
 
 | 🧭 Screens | 🔌 API routes | 🔐 Capabilities | 🗄️ Migrations | 💬 Catalogue strings | ❓ Help topics | 🧪 Guard suites |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| **16** <br><sub>in the navigation rail</sub> | **94** <br><sub>under `/api/v1`</sub> | **16** <br><sub>3 built-in roles</sub> | **33** <br><sub>applied at boot</sub> | **1101** <br><sub>English, server-served</sub> | **19** <br><sub>one per screen</sub> | **11** <br><sub>+ `load`, opt-in</sub> |
+| **16** <br><sub>in the navigation rail</sub> | **95** <br><sub>under `/api/v1`</sub> | **16** <br><sub>3 built-in roles</sub> | **34** <br><sub>applied at boot</sub> | **1115** <br><sub>English, server-served</sub> | **19** <br><sub>one per screen</sub> | **11** <br><sub>+ `load`, opt-in</sub> |
 
 <br>
 
@@ -59,6 +59,20 @@ PacketPulse is a multi-tenant network-diagnostics service for telecom operators:
 
 > [!CAUTION]
 > **Never test against live customer data.** Use a local server with a disposable database (Part 0 §0.2), or the live demo organisation for read-only walkthroughs. Tenancy, ACL and audit cases need **two organisations** of your own — testing them from a single account proves nothing.
+
+---
+
+## 📋 What Changed in the 17 October 2026 Review
+
+> [!IMPORTANT]
+> **Deployed 2026-10-17: release 20261017-105318, and the reflector row in 20261017-190629.** The review of 17 October 2026 asked for PacketPulse to be able to help inside a customer's organisation, for the endpoint to be picked by position, and for an ended session to land on sign-in; then for PacketPulse's own reflector to answer every location. Where this table and an older one disagree, this one is the product.
+
+| Change | What changed | Where to test | Source of truth |
+|---|---|---|---|
+| **PacketPulse support sign-in** | From **Platform**, the operator signs in to an organisation as **PacketPulse support** for one hour, giving a reason. Support is the organisation's own support account, its built-in Administrator: no one on its licence, not in its people list, never able to sign in by password. The organisation's activity trail names the operator and the reason; its administrators see the session under **Who is signed in** and can end it. A banner says so on every screen; **End support**, or the hour running out, returns to the console. | `PLAT-011`–`PLAT-018` | `packetpulsego/pkg/usermicroservice/userservice/UserSupport.go`<br>`packetpulsego/pkg/common/dbclient/migrations/0034_2026_10_17_support_sign_in.sql` |
+| **Every endpoint has a position** | **Latitude \*** and **Longitude \*** are required on the endpoint form, and for a file's new rows. Run diagnostic picks the endpoint nearest the device only when every enabled endpoint has a position; until then everyone chooses, and the page says why. **Bulk import** still adds plain addresses, which show *No position*. | `SITE-006`, `SITE-015`, `SITE-016`, `DEV-028` | `packetpulsego/pkg/dnssitemicroservice/dnssiteservice/DnsSiteService.go`<br>`packetpulseflutter/lib/diagnosticmicroservice/presentation/widgets/DiagnosticEndpointField.dart` |
+| **An ended session lands on sign-in** | When a session's twelve hours run out the app returns to sign-in then, not at the next click, and closes any dialog left open. A token the device thinks has expired is still sent, so the server's refusal is read as the session ending; sign-in says *Your session has ended. Sign in again to continue.* | `AUTH-014`, `AUTH-017`, `AUTH-018` | `packetpulseflutter/lib/main.dart`<br>`packetpulseflutter/lib/common/services/PacketPulseSessionStore.dart` |
+| **PacketPulse's reflector answers every endpoint** | PacketPulse's own standalone reflector is its test reflector for every location: any endpoint, of any organisation, may name it as its **UDP reflector address** and its UDP test runs to it. It was installed with one endpoint's key and refused every other endpoint (*installed with a different key*), so a Bengaluru engineer, given the nearest endpoint, could not test to it. The server now signs for it with one network key (`REFLECTOR_NETWORK_HOSTS`); customer reflectors keep their endpoint keys. | `UDP-044`, `UDP-013` | `packetpulsego/pkg/diagnosticmicroservice/diagnosticservice/DiagnosticReflectorRelay.go`<br>`packetpulsego/cmd/packetpulseserver/ReflectorNetworkKey.go` |
 
 ---
 

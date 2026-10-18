@@ -253,7 +253,7 @@ func TestALineSpeedIsFiledWithTheDevicesRun(t *testing.T) {
 func addEndpoint(t *testing.T, token, name, address string) string {
 	t.Helper()
 	site := packetpulsetest.Call(t, http.MethodPost, "/dnssite/add", token, map[string]any{
-		"site_name": name, "ip_address": address, "is_enabled": true,
+		"latitude": 12.9716, "longitude": 77.5946, "site_name": name, "ip_address": address, "is_enabled": true,
 	})
 	if site.Status != http.StatusCreated {
 		t.Fatalf("add endpoint: %d %s", site.Status, site.Raw)

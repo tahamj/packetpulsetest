@@ -49,9 +49,9 @@ const onePixelPng = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mN
 var gatedRoutes = []routeCheck{
 	{"list sites", http.MethodGet, "/dnssite/list", nil, "dns_site_view"},
 	{"add site", http.MethodPost, "/dnssite/add",
-		map[string]any{"site_name": "acl probe", "ip_address": "203.0.113.200"}, "dns_site_manage"},
+		map[string]any{"site_name": "acl probe", "ip_address": "203.0.113.200", "latitude": 12.9716, "longitude": 77.5946}, "dns_site_manage"},
 	{"import sites from a file", http.MethodPost, "/dnssite/importfile",
-		map[string]any{"text": "address\n203.0.113.201\n"}, "dns_site_manage"},
+		map[string]any{"text": "address,latitude,longitude\n203.0.113.201,12.9716,77.5946\n"}, "dns_site_manage"},
 	// An engineer reads the tests they ran, an administrator everyone's: the
 	// list opens to either, and what it holds is the server's to scope.
 	{"list diagnostics", http.MethodGet, "/diagnostic/list", nil, "diagnostic_view_own|diagnostic_view_all"},

@@ -33,7 +33,7 @@ func TestResultsApiShapeIsStable(t *testing.T) {
 	ownerToken, _ := packetpulsetest.SignUpOrganisation(t, "contract")
 
 	packetpulsetest.Call(t, http.MethodPost, "/dnssite/add", ownerToken, map[string]any{
-		"site_name": "loopback", "ip_address": "127.0.0.1",
+		"latitude": 12.9716, "longitude": 77.5946, "site_name": "loopback", "ip_address": "127.0.0.1",
 	})
 
 	ttNumber := fmt.Sprintf("TT-CONTRACT-%d", time.Now().UnixNano())

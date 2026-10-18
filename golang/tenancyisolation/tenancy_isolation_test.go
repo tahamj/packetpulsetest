@@ -30,7 +30,7 @@ func TestOneTenantCannotReachAnother(t *testing.T) {
 
 	// Alpha builds something worth stealing.
 	site := packetpulsetest.Call(t, http.MethodPost, "/dnssite/add", alphaToken, map[string]any{
-		"site_name": "Alpha core router", "ip_address": "203.0.113.11",
+		"latitude": 12.9716, "longitude": 77.5946, "site_name": "Alpha core router", "ip_address": "203.0.113.11",
 	})
 	if site.Status != http.StatusCreated {
 		t.Fatalf("alpha could not add a site: %d %s", site.Status, site.Raw)
@@ -48,7 +48,7 @@ func TestOneTenantCannotReachAnother(t *testing.T) {
 
 	t.Run("beta cannot edit alpha's site", func(t *testing.T) {
 		response := packetpulsetest.Call(t, http.MethodPut, "/dnssite/"+alphaSiteId, betaToken,
-			map[string]any{"site_name": "taken over", "ip_address": "203.0.113.11"})
+			map[string]any{"site_name": "taken over", "ip_address": "203.0.113.11", "latitude": 12.9716, "longitude": 77.5946})
 		if response.Status != http.StatusNotFound {
 			t.Errorf("expected 404, got %d: a cross-tenant id must not resolve", response.Status)
 		}
@@ -107,7 +107,7 @@ func TestSameAddressIsAllowedInTwoOrganisations(t *testing.T) {
 	// uniqueness constraint must be per organisation and not global.
 	for name, token := range map[string]string{"alpha": alphaToken, "beta": betaToken} {
 		response := packetpulsetest.Call(t, http.MethodPost, "/dnssite/add", token, map[string]any{
-			"site_name": name + " resolver", "ip_address": "9.9.9.9",
+			"latitude": 12.9716, "longitude": 77.5946, "site_name": name + " resolver", "ip_address": "9.9.9.9",
 		})
 		if response.Status != http.StatusCreated {
 			t.Fatalf("%s could not monitor a shared address: %d %s",
@@ -117,7 +117,7 @@ func TestSameAddressIsAllowedInTwoOrganisations(t *testing.T) {
 
 	// Within ONE organisation the same address twice is still a duplicate.
 	response := packetpulsetest.Call(t, http.MethodPost, "/dnssite/add", alphaToken, map[string]any{
-		"site_name": "duplicate", "ip_address": "9.9.9.9",
+		"latitude": 12.9716, "longitude": 77.5946, "site_name": "duplicate", "ip_address": "9.9.9.9",
 	})
 	if response.Status != http.StatusConflict {
 		t.Errorf("expected 409 for a duplicate inside one organisation, got %d", response.Status)
@@ -131,7 +131,7 @@ func TestDiagnosticsAreTenantScoped(t *testing.T) {
 	betaToken, _ := packetpulsetest.SignUpOrganisation(t, "diag-b")
 
 	packetpulsetest.Call(t, http.MethodPost, "/dnssite/add", alphaToken, map[string]any{
-		"site_name": "loopback", "ip_address": "127.0.0.1",
+		"latitude": 12.9716, "longitude": 77.5946, "site_name": "loopback", "ip_address": "127.0.0.1",
 	})
 
 	ttNumber := fmt.Sprintf("TT-ISOLATION-%d", testStamp())
@@ -174,6 +174,58 @@ func TestSuperUserIsRefusedTenantRoutes(t *testing.T) {
 		if response.Status != http.StatusBadRequest {
 			t.Errorf("%s: expected 400 for an unscoped superuser, got %d", path, response.Status)
 		}
+	}
+}
+
+// PacketPulse support signs in to ONE organisation from the console (review
+// of 17 October 2026), as that organisation's own support account. It reaches
+// that organisation's rows and never another's - it is scoped like any member
+// of the organisation, because it is one - and no tenant may open it.
+func TestSupportInOneOrganisationCannotReachAnother(t *testing.T) {
+	packetpulsetest.RequireServer(t)
+	superToken := packetpulsetest.SuperUserToken(t)
+	alphaToken, alphaOrg := packetpulsetest.SignUpOrganisation(t, "supalpha")
+	betaToken, betaOrg := packetpulsetest.SignUpOrganisation(t, "supbeta")
+
+	add := func(token, name, address string) string {
+		t.Helper()
+		site := packetpulsetest.Call(t, http.MethodPost, "/dnssite/add", token, map[string]any{
+			"site_name": name, "ip_address": address, "latitude": 12.9716, "longitude": 77.5946,
+		})
+		if site.Status != http.StatusCreated {
+			t.Fatalf("adding %s: %d %s", name, site.Status, site.Raw)
+		}
+		return site.String("dns_site_id")
+	}
+	alphaSite := add(alphaToken, "Alpha edge", "203.0.113.31")
+	betaSite := add(betaToken, "Beta edge", "203.0.113.32")
+
+	if refused := packetpulsetest.Call(t, http.MethodPost, "/platform/organisation/"+betaOrg+"/support", alphaToken,
+		map[string]any{"reason": "Reaching across"}); refused.Status != http.StatusForbidden {
+		t.Errorf("a tenant opening support in another organisation: %d, want 403", refused.Status)
+	}
+
+	opened := packetpulsetest.Call(t, http.MethodPost, "/platform/organisation/"+alphaOrg+"/support", superToken,
+		map[string]any{"reason": "Tenancy suite"})
+	if opened.Status != http.StatusOK || opened.Body["is_support"] != true || opened.String("organisation_id") != alphaOrg {
+		t.Fatalf("support sign-in: %d %s", opened.Status, opened.Raw)
+	}
+	support := opened.String("token")
+
+	seen := map[string]bool{}
+	for _, row := range packetpulsetest.ListOf(t, packetpulsetest.Call(t, http.MethodGet, "/dnssite/list", support, nil), "dns_sites") {
+		seen[row["dns_site_id"].(string)] = true
+	}
+	if !seen[alphaSite] || seen[betaSite] {
+		t.Errorf("support in alpha sees %v, want alpha's site and not beta's", seen)
+	}
+	if response := packetpulsetest.Call(t, http.MethodPut, "/dnssite/"+betaSite, support, map[string]any{
+		"site_name": "taken over", "ip_address": "203.0.113.32", "latitude": 12.9716, "longitude": 77.5946,
+	}); response.Status != http.StatusNotFound {
+		t.Errorf("support in alpha editing beta's site: %d, want 404", response.Status)
+	}
+	if response := packetpulsetest.Call(t, http.MethodDelete, "/dnssite/"+betaSite, support, nil); response.Status != http.StatusNotFound {
+		t.Errorf("support in alpha deleting beta's site: %d, want 404", response.Status)
 	}
 }
 
@@ -367,7 +419,7 @@ func TestExportsCarryOnlyTheOrganisationsOwnResults(t *testing.T) {
 	betaToken, _ := packetpulsetest.SignUpOrganisation(t, "export-b")
 
 	packetpulsetest.Call(t, http.MethodPost, "/dnssite/add", alphaToken, map[string]any{
-		"site_name": "loopback", "ip_address": "127.0.0.1",
+		"latitude": 12.9716, "longitude": 77.5946, "site_name": "loopback", "ip_address": "127.0.0.1",
 	})
 	ttNumber := fmt.Sprintf("TT-EXPORT-ISO-%d", testStamp())
 	submit := packetpulsetest.Call(t, http.MethodPost, "/diagnostic/submit", alphaToken, map[string]any{

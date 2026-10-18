@@ -4,7 +4,7 @@ What guards each area automatically, so a manual pass can spend its time where a
 
 | Area | Manual IDs | Go unit and repository | Integration suites | Flutter |
 |---|---|---|---|---|
-| Sign-in, second step | `AUTH-*` | `packetpulsego/pkg/usermicroservice/userservice/` | `assignment`, `audit` | `packetpulseflutter/test/sign_in_test.dart` |
+| Sign-in, second step | `AUTH-*` | `packetpulsego/pkg/usermicroservice/userservice/` | `assignment`, `audit` | `packetpulseflutter/test/sign_in_test.dart`, `packetpulseflutter/test/app_test.dart` |
 | SMS gateway, location rule | `SMS-*`, `LOC-*` | `packetpulsego/pkg/smsmicroservice/`, `packetpulsego/pkg/common/smsprovider/` | `acl` | `packetpulseflutter/test/sign_in_security_screen_test.dart` |
 | Staff, roles | `STF-*`, `ACL-*` | `packetpulsego/pkg/staffmicroservice/` | `acl`, `tenancy` | `packetpulseflutter/test/staff_screen_test.dart` |
 | Sessions and licence | `WHO-*` | `packetpulsego/pkg/staffmicroservice/` | `assignment`, `tenancy` | `packetpulseflutter/test/session_screen_test.dart` |
@@ -20,6 +20,7 @@ What guards each area automatically, so a manual pass can spend its time where a
 | Result export | `EXP-*` | `packetpulsego/pkg/common/filedrop/`, `packetpulsego/pkg/exportmicroservice/` | `contract`, `acl`, `tenancy`, `audit` | `packetpulseflutter/test/result_export_screen_test.dart` |
 | Directory | `LDAP-*` | `packetpulsego/pkg/common/ldapclient/`, `packetpulsego/pkg/ldapmicroservice/`, `packetpulsego/pkg/usermicroservice/userservice/UserDirectorySignIn_test.go` | — | `packetpulseflutter/test/ldap_settings_screen_test.dart` |
 | Platform | `PLAT-*` | `packetpulsego/pkg/platformmicroservice/` | `assignment` | `packetpulseflutter/test/platform_console_screen_test.dart` |
+| Support sign-in | `PLAT-011`–`PLAT-018` | `packetpulsego/pkg/usermicroservice/userservice/`, `packetpulsego/pkg/staffmicroservice/staffdomain/repository/`, `packetpulsego/cmd/packetpulseserver/` | `tenancy` | `packetpulseflutter/test/platform_console_screen_test.dart`, `packetpulseflutter/test/app_test.dart` |
 | Settings, catalogue | `SET-*` | `packetpulsego/pkg/initmicroservice/` | `translation` | `packetpulseflutter/test/settings_screen_test.dart` |
 | Branding | `BRAND-*` | `packetpulsego/pkg/common/orgbrand/` | `acl`, `tenancy` | `packetpulseflutter/test/brand_screen_test.dart` |
 

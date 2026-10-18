@@ -54,7 +54,7 @@ func TestTheExportsCarryTheContractedHeader(t *testing.T) {
 	packetpulsetest.RequireServer(t)
 	ownerToken, _ := packetpulsetest.SignUpOrganisation(t, "csvcontract")
 	packetpulsetest.Call(t, http.MethodPost, "/dnssite/add", ownerToken, map[string]any{
-		"site_name": "loopback", "ip_address": "127.0.0.1",
+		"latitude": 12.9716, "longitude": 77.5946, "site_name": "loopback", "ip_address": "127.0.0.1",
 	})
 	ttNumber := fmt.Sprintf("TT-CSV-%d", time.Now().UnixNano())
 	submit := packetpulsetest.Call(t, http.MethodPost, "/diagnostic/submit", ownerToken, map[string]any{

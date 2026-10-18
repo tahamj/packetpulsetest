@@ -63,11 +63,19 @@ func TestAnEngineersTestSweepsTheCityNearestTheirDevice(t *testing.T) {
 	imported := packetpulsetest.Call(t, http.MethodPost, "/dnssite/importfile", ownerToken, map[string]any{
 		"text": "Name,Address,City,Latitude,Longitude\n" +
 			"Bengaluru DNS 1,127.0.0.1,Bengaluru,12.9716,77.5946\n" +
-			"Bengaluru DNS 2,127.0.0.2,bengaluru,,\n" +
 			"Mumbai DNS 1,169.254.169.254,Mumbai,19.0760,72.8777\n",
 	})
-	if imported.Status != http.StatusOK || imported.Float("added") != 3 {
+	if imported.Status != http.StatusOK || imported.Float("added") != 2 {
 		t.Fatalf("import: %d %s", imported.Status, imported.Raw)
+	}
+	// A file adds no endpoint without a position (review of 17 October
+	// 2026); a pasted list of addresses still can, and the city's sweep
+	// takes it with the one that has a position.
+	pasted := packetpulsetest.Call(t, http.MethodPost, "/dnssite/bulkimport", ownerToken, map[string]any{
+		"entries": "Bengaluru DNS 2=127.0.0.2", "region": "bengaluru",
+	})
+	if pasted.Status != http.StatusOK || pasted.Float("added") != 1 {
+		t.Fatalf("paste: %d %s", pasted.Status, pasted.Raw)
 	}
 	mumbaiId := ""
 	for _, site := range packetpulsetest.ListOf(t,
