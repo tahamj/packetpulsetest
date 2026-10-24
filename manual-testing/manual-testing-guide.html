@@ -221,7 +221,7 @@ nav.side .nohit.on{display:block}
 <h3 id="master-knowledge-manual"><em>&amp; Master Knowledge Manual</em><a class="anchor" href="#master-knowledge-manual" aria-label="Link to this section">#</a></h3>
 <p><strong>The single source of truth for testing, understanding, selling, operating, and releasing PacketPulse.</strong></p>
 <br>
-<p><code>v2026.10-PROD-v2</code>  ·  <code>Verified against source 2026-10-23</code></p>
+<p><code>v2026.10-PROD-v2</code>  ·  <code>Verified against source 2026-10-24</code></p>
 <br>
 <div class="tw"><table><thead>
 <tr>
@@ -240,7 +240,7 @@ nav.side .nohit.on{display:block}
 <td style="text-align:center"><strong>100</strong> <br><sub>under <code>/api/v1</code></sub></td>
 <td style="text-align:center"><strong>16</strong> <br><sub>3 built-in roles</sub></td>
 <td style="text-align:center"><strong>35</strong> <br><sub>applied at boot</sub></td>
-<td style="text-align:center"><strong>1176</strong> <br><sub>English, server-served</sub></td>
+<td style="text-align:center"><strong>1186</strong> <br><sub>English, server-served</sub></td>
 <td style="text-align:center"><strong>20</strong> <br><sub>one per screen</sub></td>
 <td style="text-align:center"><strong>11</strong> <br><sub>+ <code>load</code>, opt-in</sub></td>
 </tr>
@@ -2067,9 +2067,9 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <tr>
 <td><code>V6-005</code></td>
 <td>Engineer</td>
-<td>A device's UDP test is filed under its family</td>
-<td>On a network with IPv6, run a UDP test of an endpoint whose reflector answers over IPv6; open the ticket; then <strong>Network reports</strong> for the day</td>
-<td>The row is tagged IPv6 and reads <em>Reflector … at 2001:…</em>; the report has a <em>UDP (reflector) IPv6</em> row of its own beside the IPv4 one. 🛑 <strong>Must NOT</strong> leave a device test with no family, or add IPv4 and IPv6 together</td>
+<td>A device's UDP test is run and filed over each family</td>
+<td>On a network with IPv6, run a UDP test of an endpoint whose reflector has an IPv6 address (<code>UDP-045</code>); attach; open the ticket; then <strong>Network reports</strong> for the day</td>
+<td>Two runs, IPv4 then IPv6; <strong>By IP version</strong> shows both; the ticket has two rows, one tagged IPv6 reading <em>Reflector … at 2001:…</em>; the report has <em>UDP (reflector) IPv4</em> and <em>UDP (reflector) IPv6</em> rows. 🛑 <strong>Must NOT</strong> leave a device test with no family, or add IPv4 and IPv6 together</td>
 </tr>
 </tbody>
 </table></div>
@@ -2248,7 +2248,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: Packet loss, latency and jitter for every reflector site — each city's endpoints — and for every site combined — <em>Pan India</em> for an operator in India — as the average, minimum and maximum, for any day, week, month or year, on screen and as CSV and PDF, and dropped on the operator's own server as each period closes (§6.2). Every figure says how it was calculated and what it covers, so a monthly review argues about the network, not the arithmetic.</li>
 <li>📖 <strong>User Guide &amp; Operational Flow</strong>:
 <ul>
-<li><strong>By reflector site / All sites combined</strong>, <strong>Daily / Weekly / Monthly / Yearly</strong>, and the period button (a calendar). It opens on the last full day. Days, weeks (Monday to Sunday), months and years begin at midnight in the organisation's time zone: its own choice with the scheduled reports on <strong>Result export</strong>, else its country's (India Standard Time for India). The zone is said under the controls.</li>
+<li><strong>By reflector site / All sites combined</strong>, <strong>Daily / Weekly / Monthly / Yearly</strong>, and the period button (a calendar). It opens on today so far, so a test just run is in it: the period button reads <em>…, so far (to 09:12)</em>, the PDF says <em>So far, to 09:12 IST</em>, the files are named <code>…-so-far</code>, and each CSV row's <code>period_end</code> is when it was made. Any earlier period is picked from the calendar. Days, weeks (Monday to Sunday), months and years begin at midnight in the organisation's time zone: its own choice with the scheduled reports on <strong>Result export</strong>, else its country's (India Standard Time for India). The zone is said under the controls.</li>
 <li><strong>By reflector site</strong>: one card per site — the <strong>Region</strong> given in <strong>DNS sites</strong>. Its first rows, in bold, are the site over all its endpoints (<em>All endpoints</em>); each endpoint's rows follow. Endpoints with none set are <em>City not set on the endpoint</em>. UDP tests to the PacketPulse network, with no endpoint, have a card of their own.</li>
 <li><strong>All sites combined</strong>: every site as one, then the period before, a trend hour by hour (a day), day by day (a week or a month) or month by month (a year), quiet steps included, and the five sites that lost the most packets.</li>
 <li>Each figure as its <strong>average, minimum and maximum</strong>: loss (packets lost over packets sent across the row, so a long test counts for more; minimum and maximum of single tests), latency (the round trip: the average weighted by replies; minimum and maximum of single replies) and jitter. HTTPS rows show no loss.</li>
@@ -2343,6 +2343,13 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>A file says whose it is</td>
 <td>Merge two organisations' CSVs in a spreadsheet; filter on <strong>organisation</strong>; then name an organisation <code>=SUM(1,1)</code> and download again</td>
 <td>Each row names its own organisation; the formula-like name shows as text (<code>'=SUM(1,1)</code>). 🛑 <strong>Must NOT</strong> run a name as a formula</td>
+</tr>
+<tr>
+<td><code>RPT-014</code></td>
+<td>Administrator</td>
+<td>A test just run is in the report</td>
+<td>Run a UDP test; open <strong>Network reports</strong></td>
+<td>Today, <em>so far (to <now>)</em>, with the test in its site; <strong>Export CSV</strong> saves <code>packetpulse-city-daily-&lt;today&gt;-so-far.csv</code>. Pick yesterday: the whole day, no <em>so far</em>. 🛑 <strong>Must NOT</strong> open on yesterday, or name a period still under way as if it were whole</td>
 </tr>
 <tr>
 <td><code>RPT-011</code></td>
@@ -2854,6 +2861,20 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>PacketPulse's test reflector answers every endpoint</td>
 <td>With PacketPulse's standalone reflector installed with the key from <code>packetpulseserver reflector-network-key</code> and its address in <code>REFLECTOR_NETWORK_HOSTS</code> (live <code>140.245.28.232</code>): set it as the <strong>UDP reflector address</strong> of two endpoints, one in each of two organisations (on live, <em>Chennai Core</em> and <em>Lab host (TEST-NET-1) Bengaluru</em>); run the UDP test for each</td>
 <td>Both run: <em>UDP over WebRTC → The reflector beside …</em> for each endpoint, filed under it. Then an endpoint naming a customer's reflector still runs only with that endpoint's own key (<code>UDP-013</code>). 🛑 <strong>Must NOT</strong> answer 409 <em>…installed with a different key…</em> for any endpoint naming PacketPulse's reflector, nor let a customer's reflector answer a request signed with the network key</td>
+</tr>
+<tr>
+<td><code>UDP-045</code></td>
+<td>Engineer</td>
+<td>Each IP family is tested on its own</td>
+<td>Run a UDP test of an endpoint whose reflector has both an IPv4 and an IPv6 address, from a network with both; attach</td>
+<td><em>The same test over IPv6.</em> after the first run; <strong>By IP version</strong> shows IPv4 and IPv6 figures; two observations filed, each with its <code>reflector_ip</code> (one <code>x.x.x.x</code>, one <code>…:…</code>). 🛑 <strong>Must NOT</strong> let the browser pick one family and report it as both</td>
+</tr>
+<tr>
+<td><code>UDP-046</code></td>
+<td>Engineer</td>
+<td>A family that could not be tested says why</td>
+<td>Run the same test from a network without IPv6; then to a reflector with no IPv6 address; then with IPv6 UDP blocked at a firewall</td>
+<td><strong>By IP version</strong>: <em>Not tested: this device has no IPv6 connection.</em>, then <em>Not tested: the reflector has no IPv6 address.</em>, then <em>Not tested: UDP over IPv6 did not get through.</em>; the IPv4 run is filed alone each time. 🛑 <strong>Must NOT</strong> call a missing IPv6 path <em>UDP blocked</em>, or fail the IPv4 run because of it</td>
 </tr>
 <tr>
 <td><code>UDP-027</code></td>

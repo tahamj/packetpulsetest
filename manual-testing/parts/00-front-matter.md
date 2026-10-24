@@ -8,13 +8,13 @@
 
 <br>
 
-`v2026.10-PROD-v2`  ·  `Verified against source 2026-10-23`
+`v2026.10-PROD-v2`  ·  `Verified against source 2026-10-24`
 
 <br>
 
 | 🧭 Screens | 🔌 API routes | 🔐 Capabilities | 🗄️ Migrations | 💬 Catalogue strings | ❓ Help topics | 🧪 Guard suites |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| **17** <br><sub>in the navigation rail</sub> | **100** <br><sub>under `/api/v1`</sub> | **16** <br><sub>3 built-in roles</sub> | **35** <br><sub>applied at boot</sub> | **1176** <br><sub>English, server-served</sub> | **20** <br><sub>one per screen</sub> | **11** <br><sub>+ `load`, opt-in</sub> |
+| **17** <br><sub>in the navigation rail</sub> | **100** <br><sub>under `/api/v1`</sub> | **16** <br><sub>3 built-in roles</sub> | **35** <br><sub>applied at boot</sub> | **1186** <br><sub>English, server-served</sub> | **20** <br><sub>one per screen</sub> | **11** <br><sub>+ `load`, opt-in</sub> |
 
 <br>
 

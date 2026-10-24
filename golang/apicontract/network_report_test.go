@@ -134,12 +134,23 @@ func TestTheNetworkReportsKeepTheirContract(t *testing.T) {
 
 	pdf := packetpulsetest.Call(t, http.MethodGet, "/report/network.pdf?view=country&period=month&date="+today, ownerToken, nil)
 	if pdf.Status != http.StatusOK || pdf.Header.Get("Content-Type") != "application/pdf" || !strings.HasPrefix(string(pdf.Raw), "%PDF-") ||
-		pdf.Header.Get("Content-Disposition") != `attachment; filename="packetpulse-pan-india-monthly-`+today[:7]+`.pdf"` {
+		pdf.Header.Get("Content-Disposition") != `attachment; filename="packetpulse-pan-india-monthly-`+today[:7]+`-so-far.pdf"` {
 		t.Errorf("PDF = %d %q %q", pdf.Status, pdf.Header.Get("Content-Type"), pdf.Header.Get("Content-Disposition"))
+	}
+	// Asked for no day, the report is today so far - the test just filed is
+	// in it - and says so; its files are named so too.
+	open := packetpulsetest.Call(t, http.MethodGet, "/report/network", ownerToken, nil)
+	if openPeriod, _ := open.Body["period"].(map[string]any); open.Status != http.StatusOK || openPeriod["slug"] != today ||
+		openPeriod["in_progress"] != true || openPeriod["as_of"] == nil || len(packetpulsetest.ListOf(t, open, "sites")) != 1 {
+		t.Errorf("an open report = %d %s", open.Status, open.Raw)
+	}
+	if soFar := packetpulsetest.Call(t, http.MethodGet, "/report/network.csv", ownerToken, nil); soFar.Header.Get("Content-Disposition") !=
+		`attachment; filename="packetpulse-city-daily-`+today+`-so-far.csv"` {
+		t.Errorf("today's CSV = %q", soFar.Header.Get("Content-Disposition"))
 	}
 	yearly := packetpulsetest.Call(t, http.MethodGet, "/report/network.csv?period=year&date="+today, ownerToken, nil)
 	if yearly.Status != http.StatusOK ||
-		yearly.Header.Get("Content-Disposition") != `attachment; filename="packetpulse-city-yearly-`+today[:4]+`.csv"` {
+		yearly.Header.Get("Content-Disposition") != `attachment; filename="packetpulse-city-yearly-`+today[:4]+`-so-far.csv"` {
 		t.Errorf("yearly CSV = %d %q", yearly.Status, yearly.Header.Get("Content-Disposition"))
 	}
 }
