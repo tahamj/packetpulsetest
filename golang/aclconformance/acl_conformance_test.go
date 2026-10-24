@@ -86,6 +86,17 @@ var gatedRoutes = []routeCheck{
 	// Exporting a ticket is reading it as a file, so it needs both.
 	{"download a ticket's CSV", http.MethodGet, "/diagnostic/00000000-0000-4000-8000-000000000000/report.csv", nil,
 		"report_export+diagnostic_view_own|diagnostic_view_all"},
+	// A network report adds up everyone's tests, so it needs the capability
+	// to read everyone's as well as the one to read - or download - reports.
+	// An engineer who reads only their own tests is refused.
+	{"read the report by reflector site", http.MethodGet, "/report/network", nil, "report_view+diagnostic_view_all"},
+	{"download the report by reflector site", http.MethodGet, "/report/network.csv", nil, "report_export+diagnostic_view_all"},
+	{"download the Pan India report", http.MethodGet, "/report/network.pdf?view=country", nil, "report_export+diagnostic_view_all"},
+	// The schedules drop files on the result export's server, so they are
+	// set with it.
+	{"read report settings", http.MethodGet, "/report/settings", nil, "apikey_manage"},
+	{"save report settings", http.MethodPut, "/report/settings",
+		map[string]any{"time_zone": "UTC", "deliveries": map[string]any{"daily": false, "weekly": false, "monthly": false, "yearly": false}}, "apikey_manage"},
 	{"view licence", http.MethodGet, "/licence/my", nil, "licence_view"},
 	// A UDP test against a customer's reflector is a test run; the key that
 	// installs a reflector is the endpoint manager's to hand out. Both name an

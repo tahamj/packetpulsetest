@@ -221,7 +221,7 @@ nav.side .nohit.on{display:block}
 <h3 id="master-knowledge-manual"><em>&amp; Master Knowledge Manual</em><a class="anchor" href="#master-knowledge-manual" aria-label="Link to this section">#</a></h3>
 <p><strong>The single source of truth for testing, understanding, selling, operating, and releasing PacketPulse.</strong></p>
 <br>
-<p><code>v2026.10-PROD-v2</code>  ·  <code>Verified against source 2026-10-06</code></p>
+<p><code>v2026.10-PROD-v2</code>  ·  <code>Verified against source 2026-10-23</code></p>
 <br>
 <div class="tw"><table><thead>
 <tr>
@@ -236,12 +236,12 @@ nav.side .nohit.on{display:block}
 </thead>
 <tbody>
 <tr>
-<td style="text-align:center"><strong>16</strong> <br><sub>in the navigation rail</sub></td>
-<td style="text-align:center"><strong>95</strong> <br><sub>under <code>/api/v1</code></sub></td>
+<td style="text-align:center"><strong>17</strong> <br><sub>in the navigation rail</sub></td>
+<td style="text-align:center"><strong>100</strong> <br><sub>under <code>/api/v1</code></sub></td>
 <td style="text-align:center"><strong>16</strong> <br><sub>3 built-in roles</sub></td>
-<td style="text-align:center"><strong>34</strong> <br><sub>applied at boot</sub></td>
-<td style="text-align:center"><strong>1115</strong> <br><sub>English, server-served</sub></td>
-<td style="text-align:center"><strong>19</strong> <br><sub>one per screen</sub></td>
+<td style="text-align:center"><strong>35</strong> <br><sub>applied at boot</sub></td>
+<td style="text-align:center"><strong>1176</strong> <br><sub>English, server-served</sub></td>
+<td style="text-align:center"><strong>20</strong> <br><sub>one per screen</sub></td>
 <td style="text-align:center"><strong>11</strong> <br><sub>+ <code>load</code>, opt-in</sub></td>
 </tr>
 </tbody>
@@ -951,8 +951,8 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 </tr>
 <tr>
 <td>3 · Diagnostics</td>
-<td>Sites · Diagnostics and results · IPv6 · CSV · History and dashboard</td>
-<td><code>SITE-*</code>, <code>DIAG-*</code>, <code>V6-*</code>, <code>CSV-*</code>, <code>HIST-*</code></td>
+<td>Sites · Diagnostics and results · IPv6 · CSV · History and dashboard · Network reports</td>
+<td><code>SITE-*</code>, <code>DIAG-*</code>, <code>V6-*</code>, <code>CSV-*</code>, <code>HIST-*</code>, <code>RPT-*</code></td>
 </tr>
 <tr>
 <td>4 · The customer's side</td>
@@ -1831,6 +1831,13 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>Sign in as an engineer; look for <strong>DNS sites</strong> in the rail, then open <strong>Run diagnostic</strong>; repeat as a Viewer; then as an administrator</td>
 <td>No <strong>DNS sites</strong> for the engineer or the Viewer, while <strong>Run diagnostic</strong> still lists the endpoints for the engineer; the administrator has <strong>DNS sites</strong> under Configure. 🛑 <strong>Must NOT</strong> offer an engineer the endpoint inventory, or take the endpoints off their <strong>Run diagnostic</strong></td>
 </tr>
+<tr>
+<td><code>SITE-017</code></td>
+<td>Administrator, then Engineer</td>
+<td>An endpoint can show its reflector only</td>
+<td>Edit an endpoint with a <strong>UDP reflector address</strong>: <strong>Reports show</strong> <em>The reflector only</em>; save. As a NOC Engineer, run a UDP test of it; open the ticket, its PDF and <strong>Export CSV</strong>; then as the Administrator</td>
+<td>The engineer sees the reflector and the IP the browser reached it at (<em>Reflector … at …</em>), and an empty address and resolved IP in the screen, the PDF and the CSV; the Administrator sees both. An edit that does not name the choice keeps it. 🛑 <strong>Must NOT</strong> show the endpoint's address to anyone without <code>dns_site_manage</code>, or clear the choice on an edit from an older app</td>
+</tr>
 </tbody>
 </table></div>
 </li>
@@ -1888,7 +1895,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>Engineer</td>
 <td>The PDF is evidence</td>
 <td><strong>Export PDF</strong></td>
-<td>Named <code>packetpulse-&lt;TT&gt;-&lt;UTC time&gt;.pdf</code>; Customer ID, TT, UTC timestamps, a Jitter column and no MOS column, average loss and jitter cards; a long IPv6 address wraps onto two lines; the foot names who ran it and where — <em>Triggered by Asha Rao  -  at MG Road, Pune</em>. 🛑 <strong>Must NOT</strong> truncate an address</td>
+<td>Named <code>packetpulse-&lt;TT&gt;-&lt;time&gt;.pdf</code> in the organisation's time zone; Customer ID, TT, every time in that zone and named (<em>Checked (IST)</em>, <em>Started … IST</em> for India), a UDP test's reflector and where it was reached, a Jitter column and no MOS column, average loss and jitter cards; a long IPv6 address wraps onto two lines; the foot names who ran it and where — <em>Triggered by Asha Rao  -  at MG Road, Pune</em>. 🛑 <strong>Must NOT</strong> truncate an address</td>
 </tr>
 <tr>
 <td><code>DIAG-005</code></td>
@@ -2057,11 +2064,19 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>On a server without IPv6, a dual-stack site</td>
 <td>The IPv6 row reads <em>There is no IPv6 route from this vantage point, so this IPv6 address could not be tested from here.</em> 🛑 <strong>Must NOT</strong> report it as the site being down</td>
 </tr>
+<tr>
+<td><code>V6-005</code></td>
+<td>Engineer</td>
+<td>A device's UDP test is filed under its family</td>
+<td>On a network with IPv6, run a UDP test of an endpoint whose reflector answers over IPv6; open the ticket; then <strong>Network reports</strong> for the day</td>
+<td>The row is tagged IPv6 and reads <em>Reflector … at 2001:…</em>; the report has a <em>UDP (reflector) IPv6</em> row of its own beside the IPv4 one. 🛑 <strong>Must NOT</strong> leave a device test with no family, or add IPv4 and IPv6 together</td>
+</tr>
 </tbody>
 </table></div>
 </li>
 <li>⚙️ <strong>Developer Guide &amp; Release Confidence</strong>:
 <ul>
+<li>A device's UDP test takes its family from the address the browser reached its reflector at (<code>ping_result.reflector_ip</code>, from the engine's <code>remoteAddress</code>), else from what its target resolved to: <code>PingResult.MeasuredIp</code> (<code>packetpulsego/pkg/pingmicroservice/pingdomain/shared/PingResult.go</code>).</li>
 <li><code>ping_result.ip_version</code> (4, 6 or NULL when nothing was probed) and <code>report_only</code>; the daily rollup is keyed by family (<code>packetpulsego/pkg/common/dbclient/migrations/0023_2026_10_04_dual_stack_results.sql</code>).</li>
 <li><code>probeguard.ResolveAllAndCheck</code> returns one checked address per family; the runner probes them in parallel and marks IPv6 report-only only when there is more than one family.</li>
 </ul>
@@ -2072,7 +2087,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <p><strong>Where:</strong> <strong>Export CSV</strong> on every result · <strong>Route:</strong> <code>GET /diagnostic/{requestId}/report.csv</code> · <strong>Capability:</strong> <code>report_export</code></p>
 <ul>
 <li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: The same results, in the columns an IT system imports, in one click — and safe to open: a site name typed as a spreadsheet formula is written as text, so an export can never run code on someone else's desk.</li>
-<li>📖 <strong>User Guide &amp; Operational Flow</strong>: <strong>Export CSV</strong> saves <code>packetpulse-&lt;TT&gt;-&lt;UTC time&gt;.csv</code> beside the PDF of the same ticket. One row per site and family; empty cells (not zeros) where a probe had no reply. The last two columns, <code>test_latitude</code> and <code>test_longitude</code>, say where the device was when the test ran; empty when it was not known.</li>
+<li>📖 <strong>User Guide &amp; Operational Flow</strong>: <strong>Export CSV</strong> saves <code>packetpulse-&lt;TT&gt;-&lt;time&gt;.csv</code> beside the PDF of the same ticket, both named and dated in the organisation's time zone. One row per site and family; empty cells (not zeros) where a probe had no reply. <code>checked_on</code> is in the organisation's time zone with its offset (<code>2026-10-21T11:30:00+05:30</code> in India): its own choice under <em>Scheduled reports</em>, else its country's. <code>test_latitude</code> and <code>test_longitude</code> say where the device was when the test ran; empty when it was not known. <code>resolved_ip</code> is what the endpoint's name resolved to, and <code>reflector_address</code> and <code>reflector_ip</code> the reflector a UDP test measured to and where the browser reached it. For an endpoint set to show its reflector only, someone who does not manage endpoints gets empty <code>ip_address</code> and <code>resolved_ip</code>.</li>
 <li>🧪 <strong>Manual Testing Playbook</strong>:<div class="tw"><table><thead>
 <tr>
 <th>ID</th>
@@ -2088,7 +2103,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>Engineer</td>
 <td>The file has the contracted header</td>
 <td><strong>Export CSV</strong>; open it</td>
-<td>Header exactly as in <code>packetpulsetest/contracts/result_export_columns.json</code>, <code>result_id</code> first; times in UTC (<code>…Z</code>); an unreachable row has empty round-trip cells</td>
+<td>Header exactly as in <code>packetpulsetest/contracts/result_export_columns.json</code>, <code>result_id</code> first; <code>checked_on</code> in the organisation's zone with its offset (<code>…+05:30</code> in India), never <code>…Z</code>; an unreachable row has empty round-trip cells</td>
 </tr>
 <tr>
 <td><code>CSV-002</code></td>
@@ -2124,6 +2139,13 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>Where the test ran, as numbers</td>
 <td>Export <code>DIAG-012</code>'s CSV; export one of a sweep submitted with no <code>location</code></td>
 <td>Six-place <code>test_latitude</code>/<code>test_longitude</code> on every row of the first; empty on the second. A longitude west of Greenwich is a plain negative number. 🛑 <strong>Must NOT</strong> be written as text starting <code>'-</code>, or as 0</td>
+</tr>
+<tr>
+<td><code>CSV-007</code></td>
+<td>Engineer</td>
+<td>A UDP test names where it was measured</td>
+<td>Run a UDP test of an endpoint named by a hostname, with a reflector; <strong>Export CSV</strong></td>
+<td><code>resolved_ip</code> holds the address the name resolved to; <code>reflector_address</code> and <code>reflector_ip</code> the reflector and the IP the browser reached it at. 🛑 <strong>Must NOT</strong> leave <code>resolved_ip</code> blank for a test the server could resolve</td>
 </tr>
 </tbody>
 </table></div>
@@ -2216,6 +2238,135 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <li>🔒 Whose tests come back is the server's decision, made in SQL: <code>readerOf</code> (<code>packetpulsego/pkg/diagnosticmicroservice/diagnosticapp/DiagnosticHandlers.go</code>) gives an engineer <code>OwnOnly</code> and anyone with <code>diagnostic_view_all</code> <code>WholeOrganisation</code>, and every read — list, detail, ticket, PDF, CSV — passes it to the repository's <code>submitted_by_user_id</code> predicate. The Results API reads the whole organisation, as its key does.</li>
 <li>Place is the check-in address of the session the test was run from (<code>diagnostic_request.session_id</code>, <code>packetpulsego/pkg/common/dbclient/migrations/0026_2026_10_05_own_results_places_and_indexes.sql</code>) or, matched by the filter, a probed site's region or name. The same migration indexes a person's own tests and the administrator's filters.</li>
 <li>Coverage: <code>packetpulseflutter/test/diagnostic_history_screen_test.dart</code>, <code>packetpulseflutter/test/dashboard_screen_test.dart</code>, <code>packetpulsego/pkg/diagnosticmicroservice/diagnosticdomain/repository/DiagnosticRepositoryPostgres_test.go</code> (scope, who and where, every filter), <code>packetpulsego/pkg/diagnosticmicroservice/diagnosticapp/DiagnosticRouteHandler_test.go</code>.</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h3 id="36-network-reports">3.6 📊 Network reports<a class="anchor" href="#36-network-reports" aria-label="Link to this section">#</a></h3>
+<p><strong>Screen:</strong> Operate → <strong>Network reports</strong> · <strong>Routes:</strong> <code>GET /report/network</code>, <code>GET /report/network.csv</code>, <code>GET /report/network.pdf</code> · <strong>Capability:</strong> <code>report_view</code> (to read) or <code>report_export</code> (to download), and <code>diagnostic_view_all</code></p>
+<ul>
+<li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: Packet loss, latency and jitter for every reflector site — each city's endpoints — and for every site combined — <em>Pan India</em> for an operator in India — as the average, minimum and maximum, for any day, week, month or year, on screen and as CSV and PDF, and dropped on the operator's own server as each period closes (§6.2). Every figure says how it was calculated and what it covers, so a monthly review argues about the network, not the arithmetic.</li>
+<li>📖 <strong>User Guide &amp; Operational Flow</strong>:
+<ul>
+<li><strong>By reflector site / All sites combined</strong>, <strong>Daily / Weekly / Monthly / Yearly</strong>, and the period button (a calendar). It opens on the last full day. Days, weeks (Monday to Sunday), months and years begin at midnight in the organisation's time zone: its own choice with the scheduled reports on <strong>Result export</strong>, else its country's (India Standard Time for India). The zone is said under the controls.</li>
+<li><strong>By reflector site</strong>: one card per site — the <strong>Region</strong> given in <strong>DNS sites</strong>. Its first rows, in bold, are the site over all its endpoints (<em>All endpoints</em>); each endpoint's rows follow. Endpoints with none set are <em>City not set on the endpoint</em>. UDP tests to the PacketPulse network, with no endpoint, have a card of their own.</li>
+<li><strong>All sites combined</strong>: every site as one, then the period before, a trend hour by hour (a day), day by day (a week or a month) or month by month (a year), quiet steps included, and the five sites that lost the most packets.</li>
+<li>Each figure as its <strong>average, minimum and maximum</strong>: loss (packets lost over packets sent across the row, so a long test counts for more; minimum and maximum of single tests), latency (the round trip: the average weighted by replies; minimum and maximum of single replies) and jitter. HTTPS rows show no loss.</li>
+<li>One method and family a row (UDP to an endpoint's reflector, UDP to the PacketPulse network, ICMP or TCP from the device or the server, HTTPS; IPv4 or IPv6): no row adds one to another. A row on fewer than 5 tests is marked <code>*</code>.</li>
+<li>Under each report, what it covers: results from devices and from the server, over IPv4 and over IPv6.</li>
+<li><strong>Export CSV</strong> and <strong>Export PDF</strong> save the report on screen. Every CSV row starts with the organisation's name, so a file forwarded or merged with another still says whose it is.</li>
+</ul>
+</li>
+<li>🧪 <strong>Manual Testing Playbook</strong>:<div class="tw"><table><thead>
+<tr>
+<th>ID</th>
+<th>Persona</th>
+<th>Scenario</th>
+<th>Steps</th>
+<th>Observable Expected Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>RPT-001</code></td>
+<td>Administrator</td>
+<td>A site's figures add up</td>
+<td>Two device UDP tests of Mumbai endpoints — one losing 10 of 1000 packets, one 5 of 10 — and one of a Pune endpoint; open <strong>Network reports</strong> on that day</td>
+<td>Mumbai's <em>All endpoints</em> row shows <strong>2</strong> tests, loss average <strong>1.5%</strong> (15 of 1010), minimum <strong>1%</strong>, maximum <strong>50%</strong>; each endpoint has its own row beneath. 🛑 <strong>Must NOT</strong> average the two percentages</td>
+</tr>
+<tr>
+<td><code>RPT-002</code></td>
+<td>Administrator</td>
+<td>A test is filed under its endpoint's site, never its tester's city</td>
+<td>Run a server sweep (§3.2) of an endpoint whose <strong>Region</strong> is <code>Agra</code>, from a sign-in in Pune</td>
+<td>An <strong>Agra</strong> card with <em>ICMP (server)</em>; no Pune card. 🛑 <strong>Must NOT</strong> file a measurement under where its tester stood</td>
+</tr>
+<tr>
+<td><code>RPT-003</code></td>
+<td>Administrator</td>
+<td>Methods and families are never added together</td>
+<td>At one site, a device UDP test over IPv4, one over IPv6 (<code>V6-005</code>) and a device HTTPS test</td>
+<td>Three rows: <em>UDP (reflector) IPv4</em>, <em>UDP (reflector) IPv6</em>, and the HTTPS row with loss <code>—</code>. 🛑 <strong>Must NOT</strong> pool a UDP and an HTTPS figure, or IPv4 and IPv6</td>
+</tr>
+<tr>
+<td><code>RPT-004</code></td>
+<td>Administrator</td>
+<td>A day is the organisation's day</td>
+<td>An organisation in India with no zone chosen; a test at 00:30 IST on the 21st and one at 23:30 IST on the 20th; open the 21st</td>
+<td>Only the first; <em>Days begin at midnight, Asia/Kolkata.</em> 🛑 <strong>Must NOT</strong> cut the day in UTC or the device's zone</td>
+</tr>
+<tr>
+<td><code>RPT-005</code></td>
+<td>Administrator</td>
+<td>Every site combined</td>
+<td><strong>All sites combined</strong></td>
+<td>Title <em>Pan India network performance</em>; one row a method and family over every site; <em>The period before: …</em> beneath</td>
+</tr>
+<tr>
+<td><code>RPT-006</code></td>
+<td>Administrator</td>
+<td>A week beside the week before</td>
+<td><strong>All sites combined</strong>, <strong>Weekly</strong></td>
+<td>The period before's rows; seven day rows per method, a quiet day as <code>0</code> tests; the five worst sites by loss</td>
+</tr>
+<tr>
+<td><code>RPT-007</code></td>
+<td>Administrator</td>
+<td>A year, month by month</td>
+<td><strong>Yearly</strong> on each view</td>
+<td>The year's sites and their endpoints; <em>Month by month</em> with twelve rows a method; files <code>packetpulse-city-yearly-&lt;year&gt;.csv</code> and <code>packetpulse-pan-india-yearly-&lt;year&gt;.pdf</code></td>
+</tr>
+<tr>
+<td><code>RPT-008</code></td>
+<td>Engineer</td>
+<td>An engineer is not shown everyone's figures</td>
+<td>As a NOC Engineer (<code>diagnostic_view_own</code>); look for <strong>Network reports</strong>; then <code>GET /api/v1/report/network</code></td>
+<td>Not in the menu; 403. 🛑 <strong>Must NOT</strong> show a colleague's tests added up</td>
+</tr>
+<tr>
+<td><code>RPT-009</code></td>
+<td>Viewer</td>
+<td>Reading without downloading</td>
+<td>As a Viewer (no <code>report_export</code>)</td>
+<td>The report, and no <strong>Export CSV</strong> or <strong>Export PDF</strong></td>
+</tr>
+<tr>
+<td><code>RPT-010</code></td>
+<td>Administrator</td>
+<td>The files are the report on screen</td>
+<td><strong>Export CSV</strong>, then <strong>Export PDF</strong></td>
+<td><code>packetpulse-city-daily-&lt;day&gt;.csv</code> under the contracted header (<code>packetpulsetest/contracts/network_report_columns.json</code>), the organisation's name in the first column of every row, each figure's <code>_avg</code>, <code>_min</code> and <code>_max</code>, and the PDF with the same figures, the organisation, the zone and the definitions; <em>Pan India</em> files are <code>packetpulse-pan-india-…</code></td>
+</tr>
+<tr>
+<td><code>RPT-013</code></td>
+<td>Administrator</td>
+<td>A file says whose it is</td>
+<td>Merge two organisations' CSVs in a spreadsheet; filter on <strong>organisation</strong>; then name an organisation <code>=SUM(1,1)</code> and download again</td>
+<td>Each row names its own organisation; the formula-like name shows as text (<code>'=SUM(1,1)</code>). 🛑 <strong>Must NOT</strong> run a name as a formula</td>
+</tr>
+<tr>
+<td><code>RPT-011</code></td>
+<td>Administrator</td>
+<td>A failed load is not a quiet day</td>
+<td>Stop the API; open <strong>Network reports</strong></td>
+<td>The failure, with <em>Try again</em>; no <em>No tests in this period</em>, and the export buttons disabled</td>
+</tr>
+<tr>
+<td><code>RPT-012</code></td>
+<td>Tester</td>
+<td>A query that cannot be read is refused</td>
+<td><code>GET /report/network?period=fortnight</code>, <code>?view=town</code>, <code>?date=21-10-2026</code>, a date in the future</td>
+<td>422 naming the field; the CSV route answers the same, never with a file</td>
+</tr>
+</tbody>
+</table></div>
+</li>
+<li>⚙️ <strong>Developer Guide &amp; Release Confidence</strong>:
+<ul>
+<li><code>packetpulsego/pkg/reportmicroservice/</code>: <code>reportstats</code> holds every rule — periods in the zone (<code>ReportPeriod.go</code>), weighting, minimum and maximum, and grouping by site, endpoint, method and family (<code>ReportStats.go</code>); <code>reportfile</code> writes the CSV and PDF; <code>reportservice</code> resolves a query and runs the scheduled drops; <code>reportdomain/repository</code> reads a period's results with their endpoint's region and their family.</li>
+<li>🔒 One organisation predicate on <code>ping_run</code>, and the test (<code>diagnostic_request</code>) and the endpoint (<code>dns_site</code>) are joined <em>within</em> that organisation, so a row naming another tenant's run or endpoint describes nothing.</li>
+<li>The organisation's zone: <code>report_settings.time_zone</code>, else its country's (<code>packetpulsego/pkg/common/orgzone/OrgZone.go</code>); the same zone writes a ticket's PDF and CSV and the result export.</li>
+<li>Coverage: <code>packetpulsego/pkg/reportmicroservice/**</code>, <code>packetpulseflutter/test/network_report_screen_test.dart</code>, <code>packetpulsetest/golang/apicontract/network_report_test.go</code>, <code>packetpulsetest/golang/tenancyisolation/tenancy_isolation_test.go</code>.</li>
 </ul>
 </li>
 </ul>
@@ -2985,7 +3136,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 </ul>
 <hr>
 <h3 id="62-result-export">6.2 📤 Result export<a class="anchor" href="#62-result-export" aria-label="Link to this section">#</a></h3>
-<p><strong>Screen:</strong> Configure → <strong>Result export</strong> · <strong>Routes:</strong> <code>GET/PUT /export/target</code>, <code>POST /export/target/test</code> · <strong>Capability:</strong> <code>apikey_manage</code></p>
+<p><strong>Screen:</strong> Configure → <strong>Result export</strong> · <strong>Routes:</strong> <code>GET/PUT /export/target</code>, <code>POST /export/target/test</code>, <code>GET/PUT /report/settings</code> · <strong>Capability:</strong> <code>apikey_manage</code></p>
 <ul>
 <li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: Results delivered to the operator's own SFTP or FTPS server as CSV, every interval it chooses — no integration project. Nothing is lost: a failed delivery is retried with the same period, and each row carries a <code>result_id</code> so a file that arrives twice is recognised. The server's key is confirmed before anything is sent, and a saved password is only ever sent to the server it was entered for.</li>
 <li>📖 <strong>User Guide &amp; Operational Flow</strong>:
@@ -2995,6 +3146,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <li><strong>Test connection</strong> signs in, writes and removes a small file. For SFTP it shows the server's key: check it with whoever runs the server, then <strong>Trust this key</strong> and <strong>Save</strong>.</li>
 <li><strong>Folder</strong> and <strong>Deliver every (minutes)</strong> — 15 to 1440.</li>
 <li>The status card says how the last delivery went: <em>Sent <file> with N results</em>, <em>Nothing new to send</em>, or <em>Not delivered: <why></em>.</li>
+<li><strong>Scheduled reports</strong>, below, sends the network reports (§3.6) to the same server: the <strong>Time zone</strong> every report is cut in and every time in a result file is written in — the organisation's country's until one is chosen — and <em>Send each day's / week's / month's / year's reports</em>, each with how it last went and the period it sends next. It saves on its own <strong>Save</strong>; the result export need not be switched on.</li>
 </ul>
 </li>
 <li>🧪 <strong>Manual Testing Playbook</strong>:<div class="tw"><table><thead>
@@ -3047,7 +3199,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>Administrator</td>
 <td>A delivery lands whole</td>
 <td>Switched on, every 15 minutes, a diagnostic run after saving; wait for the interval</td>
-<td><code>packetpulse-results-&lt;from&gt;-&lt;to&gt;.csv</code> in the folder (written as <code>.part</code>, renamed when whole); the card says <em>Sent … with N results</em></td>
+<td><code>packetpulse-results-&lt;from&gt;-&lt;to&gt;.csv</code> in the folder (written as <code>.part</code>, renamed when whole), named in UTC, its <code>checked_on</code> in the organisation's zone (<code>…+05:30</code> in India); the card says <em>Sent … with N results</em></td>
 </tr>
 <tr>
 <td><code>EXP-007</code></td>
@@ -3091,6 +3243,41 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td><code>GET /api/v1/export/target</code></td>
 <td><code>has_password</code>, <code>has_private_key</code> — never the password, key or sealed text</td>
 </tr>
+<tr>
+<td><code>EXP-013</code></td>
+<td>Administrator</td>
+<td>Scheduled reports need a server</td>
+<td>With no server saved, switch on <em>Send each day's reports</em>; <strong>Save</strong> in <em>Scheduled reports</em></td>
+<td>Refused: <em>Set up the file server on this page, test it and trust its key before switching scheduled reports on.</em></td>
+</tr>
+<tr>
+<td><code>EXP-014</code></td>
+<td>Administrator</td>
+<td>Each closed day is four files</td>
+<td>A trusted SFTP server; time zone <code>Asia/Kolkata</code>; daily on; wait past 00:30 IST</td>
+<td><code>packetpulse-city-daily-&lt;day&gt;.csv/.pdf</code> and <code>packetpulse-pan-india-daily-&lt;day&gt;.csv/.pdf</code> in the folder (a year: <code>packetpulse-city-yearly-&lt;year&gt;.csv</code>, sent after midnight on 1 January); the schedule reads <em>Last sent: …</em> and <em>Next to send: the period from <the next day>.</em> Switched on, the last closed day is sent at once</td>
+</tr>
+<tr>
+<td><code>EXP-015</code></td>
+<td>Administrator</td>
+<td>A quiet day is still sent</td>
+<td>A day with no tests</td>
+<td>All four files, the PDF saying <em>No test…</em>. 🛑 <strong>Must NOT</strong> skip a day: a missing file means a failure</td>
+</tr>
+<tr>
+<td><code>EXP-016</code></td>
+<td>Administrator</td>
+<td>A failed sending is retried, nothing skipped</td>
+<td>Change the server's password; let a period close; restore it</td>
+<td><em>Not sent: The server refused the sign-in…</em>; within fifteen minutes the same period is sent. 🛑 <strong>Must NOT</strong> move on past the failed period</td>
+</tr>
+<tr>
+<td><code>EXP-017</code></td>
+<td>Administrator</td>
+<td>The zone is kept as chosen</td>
+<td>Choose <code>Asia/Dubai</code>; <strong>Save</strong>; reload</td>
+<td><code>Asia/Dubai</code>; every report now cut in it (§3.6)</td>
+</tr>
 </tbody>
 </table></div>
 </li>
@@ -3100,6 +3287,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <li>🔒 Every connection — the FTP <strong>data</strong> connection included — is made by <code>probeguard.Dialer</code>, whose <code>Control</code> hook checks the resolved address before connecting. A dial <em>function</em> would have made the FTP library send FTPS data unencrypted.</li>
 <li>The watermark (<code>exported_through</code>) moves only on a delivery, and only from where the run found it; a run catches up a day per file; the last two minutes are left to settle.</li>
 <li><code>EXPORT_ALLOW_LOOPBACK</code> permits a server on PacketPulse's own host for development; production refuses to boot with it.</li>
+<li>Scheduled reports: <code>report_settings</code> and <code>report_delivery</code> (migration 0035), run each minute by <code>packetpulsego/pkg/reportmicroservice/reportservice/ReportService.go</code>, which calls the export's <code>Drop</code> — the same account, key pin and dialer. A period is sent 30 minutes after it closes; <code>next_period</code> moves only when all four files land, and only from where the run found it.</li>
 <li>Coverage: <code>packetpulsego/pkg/common/filedrop/</code> (in-process SFTP and FTP/FTPS servers), <code>packetpulsego/pkg/exportmicroservice/**</code>, <code>packetpulseflutter/test/result_export_screen_test.dart</code>, <code>packetpulsetest/golang/apicontract/result_export_test.go</code>.</li>
 </ul>
 </li>
@@ -3706,6 +3894,13 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td><code>packetpulsego/pkg/diagnosticmicroservice/diagnosticexport/</code></td>
 <td><code>contract</code>, <code>tenancy</code>, <code>load</code></td>
 <td><code>packetpulseflutter/test/diagnostic_history_screen_test.dart</code></td>
+</tr>
+<tr>
+<td>Network reports</td>
+<td><code>RPT-*</code>, <code>EXP-013</code>–<code>EXP-017</code></td>
+<td><code>packetpulsego/pkg/reportmicroservice/</code>, <code>packetpulsego/pkg/common/orgzone/</code>, <code>packetpulsego/pkg/diagnosticmicroservice/diagnosticservice/</code></td>
+<td><code>contract</code>, <code>tenancy</code>, <code>acl</code>, <code>audit</code></td>
+<td><code>packetpulseflutter/test/network_report_screen_test.dart</code>, <code>packetpulseflutter/test/scheduled_reports_card_test.dart</code></td>
 </tr>
 <tr>
 <td>Run diagnostic, device test</td>
@@ -4713,6 +4908,46 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/packetpulse/releases/&lt;previous&gt;
 </tr>
 <tr>
 <td><code>GET</code></td>
+<td><code>/report/network</code></td>
+<td>member</td>
+<td><code>report_view</code> and <code>diagnostic_view_all</code></td>
+<td style="text-align:center">—</td>
+<td style="text-align:center">—</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/report/network.csv</code></td>
+<td>member</td>
+<td><code>report_export</code> and <code>diagnostic_view_all</code></td>
+<td style="text-align:center">—</td>
+<td style="text-align:center">✅</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/report/network.pdf</code></td>
+<td>member</td>
+<td><code>report_export</code> and <code>diagnostic_view_all</code></td>
+<td style="text-align:center">—</td>
+<td style="text-align:center">✅</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/report/settings</code></td>
+<td>member</td>
+<td><code>apikey_manage</code></td>
+<td style="text-align:center">—</td>
+<td style="text-align:center">—</td>
+</tr>
+<tr>
+<td><code>PUT</code></td>
+<td><code>/report/settings</code></td>
+<td>member</td>
+<td><code>apikey_manage</code></td>
+<td style="text-align:center">—</td>
+<td style="text-align:center">✅</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
 <td><code>/result/export.csv</code></td>
 <td>api key</td>
 <td>—</td>
@@ -5231,6 +5466,10 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/packetpulse/releases/&lt;previous&gt;
 <tr>
 <td><code>0034_2026_10_17_support_sign_in.sql</code></td>
 <td>PacketPulse support can sign in to an organisation: one support account per organisation (<code>staff.is_support</code>, <code>auth_source = 'support'</code>), and who opened each support session and why.</td>
+</tr>
+<tr>
+<td><code>0035_2026_10_22_network_reports.sql</code></td>
+<td>Network reports: an index from a result's run to its test, the time zone reports and exports are written in (<code>report_settings</code>), the daily, weekly, monthly and yearly drops (<code>report_delivery</code>), the reflector a UDP test measured to and the IP it was reached at (<code>ping_result.reflector_address</code>, <code>reflector_ip</code>), and what an endpoint shows of itself to those who do not manage endpoints (<code>dns_site.report_visibility</code>).</td>
 </tr>
 </tbody>
 </table></div>

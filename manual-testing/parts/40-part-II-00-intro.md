@@ -8,7 +8,7 @@ Run every case on a disposable stack (Part 0 §0.3) with **two organisations of 
 |---|---|---|
 | 1 · Access | Sign-in and the second step · Sign-in security | `AUTH-*`, `SMS-*`, `LOC-*` |
 | 2 · People | Staff · Roles and permissions · Sessions and licence · Check-ins · Activity | `STF-*`, `ACL-*`, `WHO-*`, `CHK-*`, `AUD-*` |
-| 3 · Diagnostics | Sites · Diagnostics and results · IPv6 · CSV · History and dashboard | `SITE-*`, `DIAG-*`, `V6-*`, `CSV-*`, `HIST-*` |
+| 3 · Diagnostics | Sites · Diagnostics and results · IPv6 · CSV · History and dashboard · Network reports | `SITE-*`, `DIAG-*`, `V6-*`, `CSV-*`, `HIST-*`, `RPT-*` |
 | 4 · The customer's side | Run diagnostic, from this device | `DEV-*` |
 | 5 · Service targets and grading | Targets through the API; how every result, a device's UDP test included, is graded | `MON-*` |
 | 6 · Integrations | Results API keys · Result export · Directory | `API-*`, `EXP-*`, `LDAP-*` |

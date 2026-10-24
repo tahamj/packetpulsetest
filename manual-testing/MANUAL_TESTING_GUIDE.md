@@ -8,13 +8,13 @@
 
 <br>
 
-`v2026.10-PROD-v2`  ·  `Verified against source 2026-10-06`
+`v2026.10-PROD-v2`  ·  `Verified against source 2026-10-23`
 
 <br>
 
 | 🧭 Screens | 🔌 API routes | 🔐 Capabilities | 🗄️ Migrations | 💬 Catalogue strings | ❓ Help topics | 🧪 Guard suites |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| **16** <br><sub>in the navigation rail</sub> | **95** <br><sub>under `/api/v1`</sub> | **16** <br><sub>3 built-in roles</sub> | **34** <br><sub>applied at boot</sub> | **1115** <br><sub>English, server-served</sub> | **19** <br><sub>one per screen</sub> | **11** <br><sub>+ `load`, opt-in</sub> |
+| **17** <br><sub>in the navigation rail</sub> | **100** <br><sub>under `/api/v1`</sub> | **16** <br><sub>3 built-in roles</sub> | **35** <br><sub>applied at boot</sub> | **1176** <br><sub>English, server-served</sub> | **20** <br><sub>one per screen</sub> | **11** <br><sub>+ `load`, opt-in</sub> |
 
 <br>
 
@@ -304,7 +304,7 @@ Run every case on a disposable stack (Part 0 §0.3) with **two organisations of 
 |---|---|---|
 | 1 · Access | Sign-in and the second step · Sign-in security | `AUTH-*`, `SMS-*`, `LOC-*` |
 | 2 · People | Staff · Roles and permissions · Sessions and licence · Check-ins · Activity | `STF-*`, `ACL-*`, `WHO-*`, `CHK-*`, `AUD-*` |
-| 3 · Diagnostics | Sites · Diagnostics and results · IPv6 · CSV · History and dashboard | `SITE-*`, `DIAG-*`, `V6-*`, `CSV-*`, `HIST-*` |
+| 3 · Diagnostics | Sites · Diagnostics and results · IPv6 · CSV · History and dashboard · Network reports | `SITE-*`, `DIAG-*`, `V6-*`, `CSV-*`, `HIST-*`, `RPT-*` |
 | 4 · The customer's side | Run diagnostic, from this device | `DEV-*` |
 | 5 · Service targets and grading | Targets through the API; how every result, a device's UDP test included, is graded | `MON-*` |
 | 6 · Integrations | Results API keys · Result export · Directory | `API-*`, `EXP-*`, `LDAP-*` |
@@ -552,6 +552,7 @@ The core of the product: what to test, testing it against a ticket, and reading 
   | `SITE-015` | Administrator | A file adds no endpoint without its position | **Import file** with `Name,Address,City,Latitude,Longitude`: one new row with both, one new row with neither, and an existing endpoint's row with neither | The first added; the second refused by its line with *This endpoint is new, so give its latitude and longitude.*; the third *Already monitored; nothing to change.* 🛑 **Must NOT** add an endpoint with no position from a file, or refuse the whole file for one row |
   | `SITE-016` | Administrator | An endpoint without a position is placed when edited | **Bulk import** `Branch 9=203.0.113.99`; the list says *No position*; edit only its notes and **Save**; then give it a latitude and longitude and **Save** | The first save is held with *Enter the latitude.* and *Enter the longitude.*, nothing sent; the second saves and the list shows the position. 🛑 **Must NOT** save the edit of an endpoint while it still has no position |
   | `SITE-014` | Engineer, then Viewer, then Administrator | The inventory is the endpoint managers' | Sign in as an engineer; look for **DNS sites** in the rail, then open **Run diagnostic**; repeat as a Viewer; then as an administrator | No **DNS sites** for the engineer or the Viewer, while **Run diagnostic** still lists the endpoints for the engineer; the administrator has **DNS sites** under Configure. 🛑 **Must NOT** offer an engineer the endpoint inventory, or take the endpoints off their **Run diagnostic** |
+  | `SITE-017` | Administrator, then Engineer | An endpoint can show its reflector only | Edit an endpoint with a **UDP reflector address**: **Reports show** *The reflector only*; save. As a NOC Engineer, run a UDP test of it; open the ticket, its PDF and **Export CSV**; then as the Administrator | The engineer sees the reflector and the IP the browser reached it at (*Reflector … at …*), and an empty address and resolved IP in the screen, the PDF and the CSV; the Administrator sees both. An edit that does not name the choice keeps it. 🛑 **Must NOT** show the endpoint's address to anyone without `dns_site_manage`, or clear the choice on an edit from an older app |
 - ⚙️ **Developer Guide & Release Confidence**:
   - Policy: `packetpulsego/pkg/common/probeguard/ProbeGuardPolicy.go` — every address a name resolves to is checked, and one refused address refuses them all; IPv4-mapped IPv6 is judged as IPv4.
   - Positions: `latitude`/`longitude` on `dns_site`, both or neither, in `packetpulsego/pkg/common/dbclient/migrations/0029_2026_10_07_endpoint_location_and_report_branding.sql`. The form and a file's new rows require them since 2026-10-17 (`positionProblems` with `required` in `packetpulsego/pkg/dnssitemicroservice/dnssiteservice/DnsSiteService.go`, and `importRow` in `DnsSiteImport.go`); the column stays nullable because **Bulk import** and endpoints added before then have none. The nearest city is a pure function, `ChooseNearestCity` in `packetpulsego/pkg/dnssitemicroservice/dnssitedomain/shared/DnsSite.go`: the nearest **enabled** endpoint with a position names the city (its region, ignoring case), and every enabled endpoint in that city is swept; with no city, the endpoints at the nearest one's position.
@@ -575,7 +576,7 @@ The core of the product: what to test, testing it against a ticket, and reading 
   | `DIAG-001` | Tester | A sweep files against the ticket | `POST /diagnostic/submit` against every enabled site with TT `TT-MAN-001` | Status *Completed*; one row per site (and family); the packet line exactly as specified |
   | `DIAG-002` | Tester | A ticket keeps every attempt | Submit `TT-MAN-001` again | **History** for the ticket shows both attempts, newest first |
   | `DIAG-003` | Engineer | A failure is reported, not traced | Include a black-holed address (`203.0.113.99`); submit; open the result, its PDF and the **Dashboard** | The row shows the failure and its packet line. No path, hops or fault verdict anywhere, and no *Where the faults lay* card. 🛑 **Must NOT** offer a *Trace failures* switch |
-  | `DIAG-004` | Engineer | The PDF is evidence | **Export PDF** | Named `packetpulse-<TT>-<UTC time>.pdf`; Customer ID, TT, UTC timestamps, a Jitter column and no MOS column, average loss and jitter cards; a long IPv6 address wraps onto two lines; the foot names who ran it and where — *Triggered by Asha Rao  -  at MG Road, Pune*. 🛑 **Must NOT** truncate an address |
+  | `DIAG-004` | Engineer | The PDF is evidence | **Export PDF** | Named `packetpulse-<TT>-<time>.pdf` in the organisation's time zone; Customer ID, TT, every time in that zone and named (*Checked (IST)*, *Started … IST* for India), a UDP test's reflector and where it was reached, a Jitter column and no MOS column, average loss and jitter cards; a long IPv6 address wraps onto two lines; the foot names who ran it and where — *Triggered by Asha Rao  -  at MG Road, Pune*. 🛑 **Must NOT** truncate an address |
   | `DIAG-005` | Engineer | Loss and jitter on the ticket | Open the result; open **History** | Headline cards show average loss and average jitter; the history row shows the same figures |
   | `DIAG-006` | Engineer | A lapsed licence stops new runs only | Platform suspends the licence; submit a sweep, and attach a device run (§4.1); open an old one and export it | Both refused (`licence_suspended`, who can renew named); the old result opens and exports. 🛑 **Must NOT** hide recorded evidence |
   | `DIAG-007` | RIVAL engineer | Another organisation's ticket is not found | Open `/diagnostic/<ACME request id>` as RIVAL | 404. 🛑 **Must NOT** reveal that the ticket exists |
@@ -618,7 +619,9 @@ The core of the product: what to test, testing it against a ticket, and reading 
   | `V6-002` | Engineer | An IPv6 failure does not breach the site | A dual-stack site whose IPv6 fails while IPv4 answers | The IPv6 row is graded but not counted: the site counts as reachable, and the ticket's breach count is the IPv4's. 🛑 **Must NOT** count a breach for report-only IPv6 |
   | `V6-003` | Engineer | IPv6-only counts | A site with only an IPv6 address that fails | Counted as a failure, and graded as usual |
   | `V6-004` | Engineer | No IPv6 route is said plainly | On a server without IPv6, a dual-stack site | The IPv6 row reads *There is no IPv6 route from this vantage point, so this IPv6 address could not be tested from here.* 🛑 **Must NOT** report it as the site being down |
+  | `V6-005` | Engineer | A device's UDP test is filed under its family | On a network with IPv6, run a UDP test of an endpoint whose reflector answers over IPv6; open the ticket; then **Network reports** for the day | The row is tagged IPv6 and reads *Reflector … at 2001:…*; the report has a *UDP (reflector) IPv6* row of its own beside the IPv4 one. 🛑 **Must NOT** leave a device test with no family, or add IPv4 and IPv6 together |
 - ⚙️ **Developer Guide & Release Confidence**:
+  - A device's UDP test takes its family from the address the browser reached its reflector at (`ping_result.reflector_ip`, from the engine's `remoteAddress`), else from what its target resolved to: `PingResult.MeasuredIp` (`packetpulsego/pkg/pingmicroservice/pingdomain/shared/PingResult.go`).
   - `ping_result.ip_version` (4, 6 or NULL when nothing was probed) and `report_only`; the daily rollup is keyed by family (`packetpulsego/pkg/common/dbclient/migrations/0023_2026_10_04_dual_stack_results.sql`).
   - `probeguard.ResolveAllAndCheck` returns one checked address per family; the runner probes them in parallel and marks IPv6 report-only only when there is more than one family.
 
@@ -629,16 +632,17 @@ The core of the product: what to test, testing it against a ticket, and reading 
 **Where:** **Export CSV** on every result · **Route:** `GET /diagnostic/{requestId}/report.csv` · **Capability:** `report_export`
 
 - 🌟 **Commercial Presentation & Sales Pitch**: The same results, in the columns an IT system imports, in one click — and safe to open: a site name typed as a spreadsheet formula is written as text, so an export can never run code on someone else's desk.
-- 📖 **User Guide & Operational Flow**: **Export CSV** saves `packetpulse-<TT>-<UTC time>.csv` beside the PDF of the same ticket. One row per site and family; empty cells (not zeros) where a probe had no reply. The last two columns, `test_latitude` and `test_longitude`, say where the device was when the test ran; empty when it was not known.
+- 📖 **User Guide & Operational Flow**: **Export CSV** saves `packetpulse-<TT>-<time>.csv` beside the PDF of the same ticket, both named and dated in the organisation's time zone. One row per site and family; empty cells (not zeros) where a probe had no reply. `checked_on` is in the organisation's time zone with its offset (`2026-10-21T11:30:00+05:30` in India): its own choice under *Scheduled reports*, else its country's. `test_latitude` and `test_longitude` say where the device was when the test ran; empty when it was not known. `resolved_ip` is what the endpoint's name resolved to, and `reflector_address` and `reflector_ip` the reflector a UDP test measured to and where the browser reached it. For an endpoint set to show its reflector only, someone who does not manage endpoints gets empty `ip_address` and `resolved_ip`.
 - 🧪 **Manual Testing Playbook**:
   | ID | Persona | Scenario | Steps | Observable Expected Result |
   |---|---|---|---|---|
-  | `CSV-001` | Engineer | The file has the contracted header | **Export CSV**; open it | Header exactly as in `packetpulsetest/contracts/result_export_columns.json`, `result_id` first; times in UTC (`…Z`); an unreachable row has empty round-trip cells |
+  | `CSV-001` | Engineer | The file has the contracted header | **Export CSV**; open it | Header exactly as in `packetpulsetest/contracts/result_export_columns.json`, `result_id` first; `checked_on` in the organisation's zone with its offset (`…+05:30` in India), never `…Z`; an unreachable row has empty round-trip cells |
   | `CSV-002` | Engineer | A formula is written as text | Name a site `=HYPERLINK("http://x","y")`; run; export; open in Excel or Sheets | The cell shows the text starting `'=`. 🛑 **Must NOT** become a live formula or link |
   | `CSV-003` | Engineer | Names in any script survive | Name a site `पुणे केंद्र`; export | The name intact (UTF-8). 🛑 **Must NOT** show mojibake |
   | `CSV-004` | Viewer | No export without `report_export` | Open a result as a Viewer | No **Export CSV** or **Export PDF**; the route answers 403 |
   | `CSV-005` | Tester | The download is on the record | Export a CSV; open **Activity** | An *Exported* entry naming the diagnostic |
   | `CSV-006` | Engineer | Where the test ran, as numbers | Export `DIAG-012`'s CSV; export one of a sweep submitted with no `location` | Six-place `test_latitude`/`test_longitude` on every row of the first; empty on the second. A longitude west of Greenwich is a plain negative number. 🛑 **Must NOT** be written as text starting `'-`, or as 0 |
+  | `CSV-007` | Engineer | A UDP test names where it was measured | Run a UDP test of an endpoint named by a hostname, with a reflector; **Export CSV** | `resolved_ip` holds the address the name resolved to; `reflector_address` and `reflector_ip` the reflector and the IP the browser reached it at. 🛑 **Must NOT** leave `resolved_ip` blank for a test the server could resolve |
 - ⚙️ **Developer Guide & Release Confidence**:
   - One writer for every CSV: `packetpulsego/pkg/diagnosticmicroservice/diagnosticexport/DiagnosticExport.go`; one projection and scanner: `packetpulsego/pkg/diagnosticmicroservice/diagnosticdomain/repository/DiagnosticExportPostgres.go` (the run's organisation must match the ticket's).
   - The browser download is `text/csv` (`packetpulseflutter/lib/common/services/PacketPulseFileSaverWeb.dart`); desktop and phone use the share sheet.
@@ -667,6 +671,43 @@ The core of the product: what to test, testing it against a ticket, and reading 
   - 🔒 Whose tests come back is the server's decision, made in SQL: `readerOf` (`packetpulsego/pkg/diagnosticmicroservice/diagnosticapp/DiagnosticHandlers.go`) gives an engineer `OwnOnly` and anyone with `diagnostic_view_all` `WholeOrganisation`, and every read — list, detail, ticket, PDF, CSV — passes it to the repository's `submitted_by_user_id` predicate. The Results API reads the whole organisation, as its key does.
   - Place is the check-in address of the session the test was run from (`diagnostic_request.session_id`, `packetpulsego/pkg/common/dbclient/migrations/0026_2026_10_05_own_results_places_and_indexes.sql`) or, matched by the filter, a probed site's region or name. The same migration indexes a person's own tests and the administrator's filters.
   - Coverage: `packetpulseflutter/test/diagnostic_history_screen_test.dart`, `packetpulseflutter/test/dashboard_screen_test.dart`, `packetpulsego/pkg/diagnosticmicroservice/diagnosticdomain/repository/DiagnosticRepositoryPostgres_test.go` (scope, who and where, every filter), `packetpulsego/pkg/diagnosticmicroservice/diagnosticapp/DiagnosticRouteHandler_test.go`.
+
+---
+
+### 3.6 📊 Network reports
+
+**Screen:** Operate → **Network reports** · **Routes:** `GET /report/network`, `GET /report/network.csv`, `GET /report/network.pdf` · **Capability:** `report_view` (to read) or `report_export` (to download), and `diagnostic_view_all`
+
+- 🌟 **Commercial Presentation & Sales Pitch**: Packet loss, latency and jitter for every reflector site — each city's endpoints — and for every site combined — *Pan India* for an operator in India — as the average, minimum and maximum, for any day, week, month or year, on screen and as CSV and PDF, and dropped on the operator's own server as each period closes (§6.2). Every figure says how it was calculated and what it covers, so a monthly review argues about the network, not the arithmetic.
+- 📖 **User Guide & Operational Flow**:
+  - **By reflector site / All sites combined**, **Daily / Weekly / Monthly / Yearly**, and the period button (a calendar). It opens on the last full day. Days, weeks (Monday to Sunday), months and years begin at midnight in the organisation's time zone: its own choice with the scheduled reports on **Result export**, else its country's (India Standard Time for India). The zone is said under the controls.
+  - **By reflector site**: one card per site — the **Region** given in **DNS sites**. Its first rows, in bold, are the site over all its endpoints (*All endpoints*); each endpoint's rows follow. Endpoints with none set are *City not set on the endpoint*. UDP tests to the PacketPulse network, with no endpoint, have a card of their own.
+  - **All sites combined**: every site as one, then the period before, a trend hour by hour (a day), day by day (a week or a month) or month by month (a year), quiet steps included, and the five sites that lost the most packets.
+  - Each figure as its **average, minimum and maximum**: loss (packets lost over packets sent across the row, so a long test counts for more; minimum and maximum of single tests), latency (the round trip: the average weighted by replies; minimum and maximum of single replies) and jitter. HTTPS rows show no loss.
+  - One method and family a row (UDP to an endpoint's reflector, UDP to the PacketPulse network, ICMP or TCP from the device or the server, HTTPS; IPv4 or IPv6): no row adds one to another. A row on fewer than 5 tests is marked `*`.
+  - Under each report, what it covers: results from devices and from the server, over IPv4 and over IPv6.
+  - **Export CSV** and **Export PDF** save the report on screen. Every CSV row starts with the organisation's name, so a file forwarded or merged with another still says whose it is.
+- 🧪 **Manual Testing Playbook**:
+  | ID | Persona | Scenario | Steps | Observable Expected Result |
+  |---|---|---|---|---|
+  | `RPT-001` | Administrator | A site's figures add up | Two device UDP tests of Mumbai endpoints — one losing 10 of 1000 packets, one 5 of 10 — and one of a Pune endpoint; open **Network reports** on that day | Mumbai's *All endpoints* row shows **2** tests, loss average **1.5%** (15 of 1010), minimum **1%**, maximum **50%**; each endpoint has its own row beneath. 🛑 **Must NOT** average the two percentages |
+  | `RPT-002` | Administrator | A test is filed under its endpoint's site, never its tester's city | Run a server sweep (§3.2) of an endpoint whose **Region** is `Agra`, from a sign-in in Pune | An **Agra** card with *ICMP (server)*; no Pune card. 🛑 **Must NOT** file a measurement under where its tester stood |
+  | `RPT-003` | Administrator | Methods and families are never added together | At one site, a device UDP test over IPv4, one over IPv6 (`V6-005`) and a device HTTPS test | Three rows: *UDP (reflector) IPv4*, *UDP (reflector) IPv6*, and the HTTPS row with loss `—`. 🛑 **Must NOT** pool a UDP and an HTTPS figure, or IPv4 and IPv6 |
+  | `RPT-004` | Administrator | A day is the organisation's day | An organisation in India with no zone chosen; a test at 00:30 IST on the 21st and one at 23:30 IST on the 20th; open the 21st | Only the first; *Days begin at midnight, Asia/Kolkata.* 🛑 **Must NOT** cut the day in UTC or the device's zone |
+  | `RPT-005` | Administrator | Every site combined | **All sites combined** | Title *Pan India network performance*; one row a method and family over every site; *The period before: …* beneath |
+  | `RPT-006` | Administrator | A week beside the week before | **All sites combined**, **Weekly** | The period before's rows; seven day rows per method, a quiet day as `0` tests; the five worst sites by loss |
+  | `RPT-007` | Administrator | A year, month by month | **Yearly** on each view | The year's sites and their endpoints; *Month by month* with twelve rows a method; files `packetpulse-city-yearly-<year>.csv` and `packetpulse-pan-india-yearly-<year>.pdf` |
+  | `RPT-008` | Engineer | An engineer is not shown everyone's figures | As a NOC Engineer (`diagnostic_view_own`); look for **Network reports**; then `GET /api/v1/report/network` | Not in the menu; 403. 🛑 **Must NOT** show a colleague's tests added up |
+  | `RPT-009` | Viewer | Reading without downloading | As a Viewer (no `report_export`) | The report, and no **Export CSV** or **Export PDF** |
+  | `RPT-010` | Administrator | The files are the report on screen | **Export CSV**, then **Export PDF** | `packetpulse-city-daily-<day>.csv` under the contracted header (`packetpulsetest/contracts/network_report_columns.json`), the organisation's name in the first column of every row, each figure's `_avg`, `_min` and `_max`, and the PDF with the same figures, the organisation, the zone and the definitions; *Pan India* files are `packetpulse-pan-india-…` |
+  | `RPT-013` | Administrator | A file says whose it is | Merge two organisations' CSVs in a spreadsheet; filter on **organisation**; then name an organisation `=SUM(1,1)` and download again | Each row names its own organisation; the formula-like name shows as text (`'=SUM(1,1)`). 🛑 **Must NOT** run a name as a formula |
+  | `RPT-011` | Administrator | A failed load is not a quiet day | Stop the API; open **Network reports** | The failure, with *Try again*; no *No tests in this period*, and the export buttons disabled |
+  | `RPT-012` | Tester | A query that cannot be read is refused | `GET /report/network?period=fortnight`, `?view=town`, `?date=21-10-2026`, a date in the future | 422 naming the field; the CSV route answers the same, never with a file |
+- ⚙️ **Developer Guide & Release Confidence**:
+  - `packetpulsego/pkg/reportmicroservice/`: `reportstats` holds every rule — periods in the zone (`ReportPeriod.go`), weighting, minimum and maximum, and grouping by site, endpoint, method and family (`ReportStats.go`); `reportfile` writes the CSV and PDF; `reportservice` resolves a query and runs the scheduled drops; `reportdomain/repository` reads a period's results with their endpoint's region and their family.
+  - 🔒 One organisation predicate on `ping_run`, and the test (`diagnostic_request`) and the endpoint (`dns_site`) are joined *within* that organisation, so a row naming another tenant's run or endpoint describes nothing.
+  - The organisation's zone: `report_settings.time_zone`, else its country's (`packetpulsego/pkg/common/orgzone/OrgZone.go`); the same zone writes a ticket's PDF and CSV and the result export.
+  - Coverage: `packetpulsego/pkg/reportmicroservice/**`, `packetpulseflutter/test/network_report_screen_test.dart`, `packetpulsetest/golang/apicontract/network_report_test.go`, `packetpulsetest/golang/tenancyisolation/tenancy_isolation_test.go`.
 
 ---
 ## Group 4 — The Customer's Side
@@ -879,7 +920,7 @@ How results reach the operator's own systems, and how its directory signs people
 
 ### 6.2 📤 Result export
 
-**Screen:** Configure → **Result export** · **Routes:** `GET/PUT /export/target`, `POST /export/target/test` · **Capability:** `apikey_manage`
+**Screen:** Configure → **Result export** · **Routes:** `GET/PUT /export/target`, `POST /export/target/test`, `GET/PUT /report/settings` · **Capability:** `apikey_manage`
 
 - 🌟 **Commercial Presentation & Sales Pitch**: Results delivered to the operator's own SFTP or FTPS server as CSV, every interval it chooses — no integration project. Nothing is lost: a failed delivery is retried with the same period, and each row carries a `result_id` so a file that arrives twice is recognised. The server's key is confirmed before anything is sent, and a saved password is only ever sent to the server it was entered for.
 - 📖 **User Guide & Operational Flow**:
@@ -888,6 +929,7 @@ How results reach the operator's own systems, and how its directory signs people
   - **Test connection** signs in, writes and removes a small file. For SFTP it shows the server's key: check it with whoever runs the server, then **Trust this key** and **Save**.
   - **Folder** and **Deliver every (minutes)** — 15 to 1440.
   - The status card says how the last delivery went: *Sent <file> with N results*, *Nothing new to send*, or *Not delivered: <why>*.
+  - **Scheduled reports**, below, sends the network reports (§3.6) to the same server: the **Time zone** every report is cut in and every time in a result file is written in — the organisation's country's until one is chosen — and *Send each day's / week's / month's / year's reports*, each with how it last went and the period it sends next. It saves on its own **Save**; the result export need not be switched on.
 - 🧪 **Manual Testing Playbook**:
   | ID | Persona | Scenario | Steps | Observable Expected Result |
   |---|---|---|---|---|
@@ -896,18 +938,24 @@ How results reach the operator's own systems, and how its directory signs people
   | `EXP-003` | Administrator | Switching on needs everything a delivery needs | Switch on with no server, no username, no password and no trusted key | Refused against each field |
   | `EXP-004` | Administrator | A changed key is a warning, not a detail | Re-key the SFTP server (or point the name at another); **Test connection** | *The server's key has changed* with the new key to check; the trusted key stays until you trust the new one. 🛑 **Must NOT** deliver to a server showing a different key |
   | `EXP-005` | Administrator | A saved password goes nowhere new | With a saved password, change the server (or port, username or protocol) and test or save | The password field becomes required again (*Enter the password again…*). 🛑 **Must NOT** sign in to the new server with the saved password |
-  | `EXP-006` | Administrator | A delivery lands whole | Switched on, every 15 minutes, a diagnostic run after saving; wait for the interval | `packetpulse-results-<from>-<to>.csv` in the folder (written as `.part`, renamed when whole); the card says *Sent … with N results* |
+  | `EXP-006` | Administrator | A delivery lands whole | Switched on, every 15 minutes, a diagnostic run after saving; wait for the interval | `packetpulse-results-<from>-<to>.csv` in the folder (written as `.part`, renamed when whole), named in UTC, its `checked_on` in the organisation's zone (`…+05:30` in India); the card says *Sent … with N results* |
   | `EXP-007` | Administrator | A quiet period sends nothing | No diagnostics in an interval | No file; *Nothing new to send* |
   | `EXP-008` | Administrator | A failure is retried, nothing lost | Change the server's password; wait for a delivery; restore it; wait again | First: *Not delivered: The server refused the sign-in…*; the next delivery covers the same results. 🛑 **Must NOT** skip the failed period |
   | `EXP-009` | Administrator | PacketPulse's own host is not a destination | Server `127.0.0.1`, `localhost`, `169.254.169.254` or `::1`; **Test connection** | Refused against **Server**: *PacketPulse may not connect to that address.* |
   | `EXP-010` | Administrator | Plain FTP is warned about | Choose FTP | The unencrypted warning; port moves to 21; the private key and server key disappear |
   | `EXP-011` | Administrator | FTPS with a private authority | FTPS to a server whose certificate your own CA signed, without and then with that CA | Without: *certificate is not trusted*; with it pasted: test passes |
   | `EXP-012` | Tester | Credentials never come back | `GET /api/v1/export/target` | `has_password`, `has_private_key` — never the password, key or sealed text |
+  | `EXP-013` | Administrator | Scheduled reports need a server | With no server saved, switch on *Send each day's reports*; **Save** in *Scheduled reports* | Refused: *Set up the file server on this page, test it and trust its key before switching scheduled reports on.* |
+  | `EXP-014` | Administrator | Each closed day is four files | A trusted SFTP server; time zone `Asia/Kolkata`; daily on; wait past 00:30 IST | `packetpulse-city-daily-<day>.csv/.pdf` and `packetpulse-pan-india-daily-<day>.csv/.pdf` in the folder (a year: `packetpulse-city-yearly-<year>.csv`, sent after midnight on 1 January); the schedule reads *Last sent: …* and *Next to send: the period from <the next day>.* Switched on, the last closed day is sent at once |
+  | `EXP-015` | Administrator | A quiet day is still sent | A day with no tests | All four files, the PDF saying *No test…*. 🛑 **Must NOT** skip a day: a missing file means a failure |
+  | `EXP-016` | Administrator | A failed sending is retried, nothing skipped | Change the server's password; let a period close; restore it | *Not sent: The server refused the sign-in…*; within fifteen minutes the same period is sent. 🛑 **Must NOT** move on past the failed period |
+  | `EXP-017` | Administrator | The zone is kept as chosen | Choose `Asia/Dubai`; **Save**; reload | `Asia/Dubai`; every report now cut in it (§3.6) |
 - ⚙️ **Developer Guide & Release Confidence**:
   - `packetpulsego/pkg/exportmicroservice/` (target, test, runner each minute); transport: `packetpulsego/pkg/common/filedrop/FileDrop.go` (SFTP via `pkg/sftp`, FTP/FTPS via `jlaffaye/ftp`).
   - 🔒 Every connection — the FTP **data** connection included — is made by `probeguard.Dialer`, whose `Control` hook checks the resolved address before connecting. A dial *function* would have made the FTP library send FTPS data unencrypted.
   - The watermark (`exported_through`) moves only on a delivery, and only from where the run found it; a run catches up a day per file; the last two minutes are left to settle.
   - `EXPORT_ALLOW_LOOPBACK` permits a server on PacketPulse's own host for development; production refuses to boot with it.
+  - Scheduled reports: `report_settings` and `report_delivery` (migration 0035), run each minute by `packetpulsego/pkg/reportmicroservice/reportservice/ReportService.go`, which calls the export's `Drop` — the same account, key pin and dialer. A period is sent 30 minutes after it closes; `next_period` moves only when all four files land, and only from where the run found it.
   - Coverage: `packetpulsego/pkg/common/filedrop/` (in-process SFTP and FTP/FTPS servers), `packetpulsego/pkg/exportmicroservice/**`, `packetpulseflutter/test/result_export_screen_test.dart`, `packetpulsetest/golang/apicontract/result_export_test.go`.
 
 ---
@@ -1085,6 +1133,7 @@ What guards each area automatically, so a manual pass can spend its time where a
 | Sites, policy | `SITE-*` | `packetpulsego/pkg/dnssitemicroservice/`, `packetpulsego/pkg/common/probeguard/` | `tenancy` | `packetpulseflutter/test/dns_site_screen_test.dart`, `packetpulseflutter/test/shell_test.dart` |
 | Diagnostics, IPv6 | `DIAG-*`, `V6-*` | `packetpulsego/pkg/pingmicroservice/`, `packetpulsego/pkg/diagnosticmicroservice/` | `contract`, `tenancy`, `load` | `packetpulseflutter/test/diagnostic_result_selection_test.dart` |
 | CSV | `CSV-*`, `API-003` | `packetpulsego/pkg/diagnosticmicroservice/diagnosticexport/` | `contract`, `tenancy`, `load` | `packetpulseflutter/test/diagnostic_history_screen_test.dart` |
+| Network reports | `RPT-*`, `EXP-013`–`EXP-017` | `packetpulsego/pkg/reportmicroservice/`, `packetpulsego/pkg/common/orgzone/`, `packetpulsego/pkg/diagnosticmicroservice/diagnosticservice/` | `contract`, `tenancy`, `acl`, `audit` | `packetpulseflutter/test/network_report_screen_test.dart`, `packetpulseflutter/test/scheduled_reports_card_test.dart` |
 | Run diagnostic, device test | `DEV-*` | `packetpulsego/pkg/diagnosticmicroservice/diagnosticservice/` | `contract` | `packetpulseflutter/test/run_diagnostic_screen_test.dart`, `packetpulseflutter/test/client_probe_run_test.dart`, `packetpulseflutter/test/client_probe_live_panels_test.dart`, `packetpulseflutter/test/dns_site_nearest_test.dart` |
 | UDP test, reflectors | `UDP-*`, `WEB-006` | `packetpulsego/pkg/reflectormicroservice/`, `packetpulsego/pkg/diagnosticmicroservice/diagnosticservice/` | `contract`, `tenancy`, `acl`, `audit` | `packetpulseflutter/test/run_diagnostic_udp_test.dart`, `packetpulseflutter/test/udp_probe_run_test.dart` (the page: `packetpulseweb/assets/packetpulse-udp.test.mjs`, in `unit`) |
 | Service targets and grading | `MON-*` | `packetpulsego/pkg/monitormicroservice/` | `grading` | `packetpulseflutter/test/diagnostic_charts_test.dart` |
@@ -1394,6 +1443,11 @@ All routes are under `/api/v1`. **Access**: *public* (no session), *session* (si
 | `GET` | `/platform/plan/list` | superuser | — | — | — |
 | `POST` | `/reflector/session` | public | — | — | — |
 | `GET` | `/result/bytt/{ttNumber}` | api key | — | — | — |
+| `GET` | `/report/network` | member | `report_view` and `diagnostic_view_all` | — | — |
+| `GET` | `/report/network.csv` | member | `report_export` and `diagnostic_view_all` | — | ✅ |
+| `GET` | `/report/network.pdf` | member | `report_export` and `diagnostic_view_all` | — | ✅ |
+| `GET` | `/report/settings` | member | `apikey_manage` | — | — |
+| `PUT` | `/report/settings` | member | `apikey_manage` | — | ✅ |
 | `GET` | `/result/export.csv` | api key | — | — | — |
 | `GET` | `/sms/gateway` | member | `staff_manage` | — | — |
 | `PUT` | `/sms/gateway` | member | `staff_manage` | — | ✅ |
@@ -1489,6 +1543,7 @@ Embedded in the server binary and applied in order at boot (`packetpulsego/pkg/c
 | `0032_2026_10_14_sla_breach_reasons.sql` | A graded result keeps why it was graded so: each service target it missed, with what was measured and the target (`ping_result.sla_breaches`). |
 | `0033_2026_10_14_sla_checks.sql` | Every figure of a graded result is kept against its target, with where Degraded begins and its own verdict: `sla_breaches` becomes `sla_checks`, its entries marked breached. |
 | `0034_2026_10_17_support_sign_in.sql` | PacketPulse support can sign in to an organisation: one support account per organisation (`staff.is_support`, `auth_source = 'support'`), and who opened each support session and why. |
+| `0035_2026_10_22_network_reports.sql` | Network reports: an index from a result's run to its test, the time zone reports and exports are written in (`report_settings`), the daily, weekly, monthly and yearly drops (`report_delivery`), the reflector a UDP test measured to and the IP it was reached at (`ping_result.reflector_address`, `reflector_ip`), and what an endpoint shows of itself to those who do not manage endpoints (`dns_site.report_visibility`). |
 
 ## Appendix D — Settings
 

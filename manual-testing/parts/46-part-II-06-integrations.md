@@ -28,7 +28,7 @@ How results reach the operator's own systems, and how its directory signs people
 
 ### 6.2 📤 Result export
 
-**Screen:** Configure → **Result export** · **Routes:** `GET/PUT /export/target`, `POST /export/target/test` · **Capability:** `apikey_manage`
+**Screen:** Configure → **Result export** · **Routes:** `GET/PUT /export/target`, `POST /export/target/test`, `GET/PUT /report/settings` · **Capability:** `apikey_manage`
 
 - 🌟 **Commercial Presentation & Sales Pitch**: Results delivered to the operator's own SFTP or FTPS server as CSV, every interval it chooses — no integration project. Nothing is lost: a failed delivery is retried with the same period, and each row carries a `result_id` so a file that arrives twice is recognised. The server's key is confirmed before anything is sent, and a saved password is only ever sent to the server it was entered for.
 - 📖 **User Guide & Operational Flow**:
@@ -37,6 +37,7 @@ How results reach the operator's own systems, and how its directory signs people
   - **Test connection** signs in, writes and removes a small file. For SFTP it shows the server's key: check it with whoever runs the server, then **Trust this key** and **Save**.
   - **Folder** and **Deliver every (minutes)** — 15 to 1440.
   - The status card says how the last delivery went: *Sent <file> with N results*, *Nothing new to send*, or *Not delivered: <why>*.
+  - **Scheduled reports**, below, sends the network reports (§3.6) to the same server: the **Time zone** every report is cut in and every time in a result file is written in — the organisation's country's until one is chosen — and *Send each day's / week's / month's / year's reports*, each with how it last went and the period it sends next. It saves on its own **Save**; the result export need not be switched on.
 - 🧪 **Manual Testing Playbook**:
   | ID | Persona | Scenario | Steps | Observable Expected Result |
   |---|---|---|---|---|
@@ -45,18 +46,24 @@ How results reach the operator's own systems, and how its directory signs people
   | `EXP-003` | Administrator | Switching on needs everything a delivery needs | Switch on with no server, no username, no password and no trusted key | Refused against each field |
   | `EXP-004` | Administrator | A changed key is a warning, not a detail | Re-key the SFTP server (or point the name at another); **Test connection** | *The server's key has changed* with the new key to check; the trusted key stays until you trust the new one. 🛑 **Must NOT** deliver to a server showing a different key |
   | `EXP-005` | Administrator | A saved password goes nowhere new | With a saved password, change the server (or port, username or protocol) and test or save | The password field becomes required again (*Enter the password again…*). 🛑 **Must NOT** sign in to the new server with the saved password |
-  | `EXP-006` | Administrator | A delivery lands whole | Switched on, every 15 minutes, a diagnostic run after saving; wait for the interval | `packetpulse-results-<from>-<to>.csv` in the folder (written as `.part`, renamed when whole); the card says *Sent … with N results* |
+  | `EXP-006` | Administrator | A delivery lands whole | Switched on, every 15 minutes, a diagnostic run after saving; wait for the interval | `packetpulse-results-<from>-<to>.csv` in the folder (written as `.part`, renamed when whole), named in UTC, its `checked_on` in the organisation's zone (`…+05:30` in India); the card says *Sent … with N results* |
   | `EXP-007` | Administrator | A quiet period sends nothing | No diagnostics in an interval | No file; *Nothing new to send* |
   | `EXP-008` | Administrator | A failure is retried, nothing lost | Change the server's password; wait for a delivery; restore it; wait again | First: *Not delivered: The server refused the sign-in…*; the next delivery covers the same results. 🛑 **Must NOT** skip the failed period |
   | `EXP-009` | Administrator | PacketPulse's own host is not a destination | Server `127.0.0.1`, `localhost`, `169.254.169.254` or `::1`; **Test connection** | Refused against **Server**: *PacketPulse may not connect to that address.* |
   | `EXP-010` | Administrator | Plain FTP is warned about | Choose FTP | The unencrypted warning; port moves to 21; the private key and server key disappear |
   | `EXP-011` | Administrator | FTPS with a private authority | FTPS to a server whose certificate your own CA signed, without and then with that CA | Without: *certificate is not trusted*; with it pasted: test passes |
   | `EXP-012` | Tester | Credentials never come back | `GET /api/v1/export/target` | `has_password`, `has_private_key` — never the password, key or sealed text |
+  | `EXP-013` | Administrator | Scheduled reports need a server | With no server saved, switch on *Send each day's reports*; **Save** in *Scheduled reports* | Refused: *Set up the file server on this page, test it and trust its key before switching scheduled reports on.* |
+  | `EXP-014` | Administrator | Each closed day is four files | A trusted SFTP server; time zone `Asia/Kolkata`; daily on; wait past 00:30 IST | `packetpulse-city-daily-<day>.csv/.pdf` and `packetpulse-pan-india-daily-<day>.csv/.pdf` in the folder (a year: `packetpulse-city-yearly-<year>.csv`, sent after midnight on 1 January); the schedule reads *Last sent: …* and *Next to send: the period from <the next day>.* Switched on, the last closed day is sent at once |
+  | `EXP-015` | Administrator | A quiet day is still sent | A day with no tests | All four files, the PDF saying *No test…*. 🛑 **Must NOT** skip a day: a missing file means a failure |
+  | `EXP-016` | Administrator | A failed sending is retried, nothing skipped | Change the server's password; let a period close; restore it | *Not sent: The server refused the sign-in…*; within fifteen minutes the same period is sent. 🛑 **Must NOT** move on past the failed period |
+  | `EXP-017` | Administrator | The zone is kept as chosen | Choose `Asia/Dubai`; **Save**; reload | `Asia/Dubai`; every report now cut in it (§3.6) |
 - ⚙️ **Developer Guide & Release Confidence**:
   - `packetpulsego/pkg/exportmicroservice/` (target, test, runner each minute); transport: `packetpulsego/pkg/common/filedrop/FileDrop.go` (SFTP via `pkg/sftp`, FTP/FTPS via `jlaffaye/ftp`).
   - 🔒 Every connection — the FTP **data** connection included — is made by `probeguard.Dialer`, whose `Control` hook checks the resolved address before connecting. A dial *function* would have made the FTP library send FTPS data unencrypted.
   - The watermark (`exported_through`) moves only on a delivery, and only from where the run found it; a run catches up a day per file; the last two minutes are left to settle.
   - `EXPORT_ALLOW_LOOPBACK` permits a server on PacketPulse's own host for development; production refuses to boot with it.
+  - Scheduled reports: `report_settings` and `report_delivery` (migration 0035), run each minute by `packetpulsego/pkg/reportmicroservice/reportservice/ReportService.go`, which calls the export's `Drop` — the same account, key pin and dialer. A period is sent 30 minutes after it closes; `next_period` moves only when all four files land, and only from where the run found it.
   - Coverage: `packetpulsego/pkg/common/filedrop/` (in-process SFTP and FTP/FTPS servers), `packetpulsego/pkg/exportmicroservice/**`, `packetpulseflutter/test/result_export_screen_test.dart`, `packetpulsetest/golang/apicontract/result_export_test.go`.
 
 ---

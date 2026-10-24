@@ -36,6 +36,7 @@
     "jitter_up_ms",
     "jitter_down_ms",
     "longest_burst",
-    "reflector"
+    "reflector",
+    "reflector_ip"
   ]
 }

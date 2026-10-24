@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"net/http"
+	"slices"
 	"sort"
 	"strings"
 	"testing"
@@ -109,10 +110,12 @@ func TestAnEngineersTestSweepsTheCityNearestTheirDevice(t *testing.T) {
 	}
 	requestId, _ := request["request_id"].(string)
 
-	csv := packetpulsetest.Call(t, http.MethodGet, "/diagnostic/"+requestId+"/report.csv", engineer, nil)
-	lines := strings.Split(strings.TrimSpace(string(csv.Raw)), "\n")
-	if csv.Status != http.StatusOK || len(lines) < 2 || !strings.HasSuffix(strings.TrimSpace(lines[1]), ",12.969800,77.750000") {
-		t.Errorf("the ticket's CSV: %d %q", csv.Status, lines)
+	// Where the device was, in the columns the contract names: columns are
+	// only ever added at the end, so they are found by their header.
+	rows := readCsv(t, packetpulsetest.Call(t, http.MethodGet, "/diagnostic/"+requestId+"/report.csv", engineer, nil))
+	latitude, longitude := slices.Index(rows[0], "test_latitude"), slices.Index(rows[0], "test_longitude")
+	if len(rows) < 2 || latitude < 0 || longitude < 0 || rows[1][latitude] != "12.969800" || rows[1][longitude] != "77.750000" {
+		t.Errorf("the ticket's CSV: %q", rows)
 	}
 
 	// The owner's own logo is on the engineer's report.

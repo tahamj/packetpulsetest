@@ -173,3 +173,68 @@ func TestTheUdpRoutesRefuseAnAnonymousCaller(t *testing.T) {
 		}
 	}
 }
+
+// A UDP test reached its reflector over IPv6, by the address the browser
+// connected to: it is filed under IPv6 with its reflector and the endpoint's
+// resolved IP, and a report counts it as an IPv6 row (customer report, 22
+// October 2026: device tests had no family, so IPv6 was missing, and the
+// resolved IP was blank). An endpoint set to show its reflector only keeps
+// its address from an engineer, and not from whoever manages endpoints.
+func TestAUdpTestOverIpv6IsFiledAndReportedAsIpv6(t *testing.T) {
+	packetpulsetest.RequireServer(t)
+
+	ownerToken, _ := packetpulsetest.SignUpOrganisation(t, "udpipv6")
+	added := packetpulsetest.Call(t, http.MethodPost, "/dnssite/add", ownerToken, map[string]any{
+		"site_name": "Andheri Core", "ip_address": "192.0.2.74", "is_enabled": true, "region": "Mumbai",
+		"latitude": 19.1136, "longitude": 72.8697,
+		"reflector_address": "reflector.mumbai.example:50001", "report_visibility": "reflector_only",
+	})
+	if added.Status != http.StatusCreated || added.Body["report_visibility"] != "reflector_only" {
+		t.Fatalf("add = %d %s", added.Status, added.Raw)
+	}
+	endpoint, _ := added.Body["dns_site_id"].(string)
+	engineerToken := engineerIn(t, ownerToken)
+
+	run := udpRun(fmt.Sprintf("TT-UDP6-%d", time.Now().UnixNano()), endpoint, "endpoint")
+	run["observations"].([]map[string]any)[0]["reflector_ip"] = "2001:db8::50"
+	attached := packetpulsetest.Call(t, http.MethodPost, "/diagnostic/clientobservation", engineerToken, run)
+	if attached.Status != http.StatusCreated {
+		t.Fatalf("attach returned %d: %s", attached.Status, attached.Raw)
+	}
+	requestId, _ := attached.Body["request"].(map[string]any)["request_id"].(string)
+
+	asOwner := packetpulsetest.ListOf(t, packetpulsetest.Call(t, http.MethodGet, "/diagnostic/"+requestId, ownerToken, nil), "results")[0]
+	if asOwner["ip_address"] != "192.0.2.74" || asOwner["resolved_ip"] != "192.0.2.74" ||
+		asOwner["reflector_address"] != "reflector.mumbai.example:50001" || asOwner["reflector_ip"] != "2001:db8::50" ||
+		asOwner["ip_version"] != 6.0 {
+		t.Errorf("read by the owner = %v", asOwner)
+	}
+	asEngineer := packetpulsetest.ListOf(t, packetpulsetest.Call(t, http.MethodGet, "/diagnostic/"+requestId, engineerToken, nil), "results")[0]
+	if asEngineer["ip_address"] != "" || asEngineer["resolved_ip"] != "" ||
+		asEngineer["reflector_address"] != "reflector.mumbai.example:50001" || asEngineer["reflector_ip"] != "2001:db8::50" {
+		t.Errorf("read by an engineer = %v, want the reflector alone", asEngineer)
+	}
+
+	// Today, in the organisation's zone: India's, as no other was chosen.
+	kolkata, err := time.LoadLocation("Asia/Kolkata")
+	if err != nil {
+		t.Fatal(err)
+	}
+	report := packetpulsetest.Call(t, http.MethodGet,
+		"/report/network?period=day&date="+time.Now().In(kolkata).Format("2006-01-02"), ownerToken, nil)
+	sites := packetpulsetest.ListOf(t, report, "sites")
+	if len(sites) != 1 || sites[0]["city"] != "Mumbai" {
+		t.Fatalf("sites = %v", sites)
+	}
+	endpoints, _ := sites[0]["endpoints"].([]any)
+	if len(endpoints) != 1 {
+		t.Fatalf("endpoint rows = %v", endpoints)
+	}
+	row, _ := endpoints[0].(map[string]any)
+	if row["endpoint_name"] != "Andheri Core" || row["ip_version"] != 6.0 || row["method_label"] != "UDP (reflector) IPv6" {
+		t.Errorf("endpoint row = %v", row)
+	}
+	if coverage, _ := report.Body["coverage"].(map[string]any); coverage["over_ipv6"] != 1.0 {
+		t.Errorf("coverage = %v", coverage)
+	}
+}

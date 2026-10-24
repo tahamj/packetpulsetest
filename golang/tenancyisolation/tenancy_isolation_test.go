@@ -473,3 +473,76 @@ func TestExportsCarryOnlyTheOrganisationsOwnResults(t *testing.T) {
 		}
 	})
 }
+
+// A network report adds up the organisation's own tests and no other's - on
+// the screen and in its CSV - and its time zone and schedules are its own.
+func TestNetworkReportsAreTheOrganisationsOwn(t *testing.T) {
+	packetpulsetest.RequireServer(t)
+	alphaToken, _ := packetpulsetest.SignUpOrganisation(t, "report-a")
+	betaToken, _ := packetpulsetest.SignUpOrganisation(t, "report-b")
+
+	city := fmt.Sprintf("Isoville%d", testStamp())
+	site := packetpulsetest.Call(t, http.MethodPost, "/dnssite/add", alphaToken, map[string]any{
+		"latitude": 12.9716, "longitude": 77.5946, "site_name": "Iso POP", "ip_address": "192.0.2.91",
+		"is_enabled": true, "region": city,
+	})
+	endpoint, _ := site.Body["dns_site_id"].(string)
+	attached := packetpulsetest.Call(t, http.MethodPost, "/diagnostic/clientobservation", alphaToken, map[string]any{
+		"customer_id": "CUST-ISO", "tt_number": fmt.Sprintf("TT-REPORT-ISO-%d", testStamp()),
+		"sample_count": 100, "timeout_ms": 1000, "dns_site_id": endpoint,
+		"observations": []map[string]any{{
+			"target_label": "Iso POP", "target_address": "192.0.2.91", "method": "https-dns",
+			"packets_sent": 12, "packets_recv": 12, "packet_loss": 0, "avg_rtt_ms": 20.0, "jitter_ms": 2.0,
+			"started_on": time.Now().UTC().Format(time.RFC3339),
+		}},
+	})
+	if attached.Status != http.StatusCreated {
+		t.Fatalf("alpha could not file a test: %d %s", attached.Status, attached.Raw)
+	}
+	// Today in Asia/Kolkata: both organisations are in India, and chose no
+	// other zone.
+	kolkata, err := time.LoadLocation("Asia/Kolkata")
+	if err != nil {
+		t.Fatal(err)
+	}
+	date := time.Now().In(kolkata).Format("2006-01-02")
+	today := "/report/network?date=" + date
+
+	alpha := packetpulsetest.Call(t, http.MethodGet, today, alphaToken, nil)
+	if sites := packetpulsetest.ListOf(t, alpha, "sites"); alpha.Status != http.StatusOK || len(sites) != 1 || sites[0]["city"] != city {
+		t.Fatalf("alpha's report = %d %s, want its own endpoint's city", alpha.Status, alpha.Raw)
+	}
+	beta := packetpulsetest.Call(t, http.MethodGet, today, betaToken, nil)
+	coverage, _ := beta.Body["coverage"].(map[string]any)
+	if beta.Status != http.StatusOK || len(packetpulsetest.ListOf(t, beta, "sites")) != 0 || coverage["results"] != 0.0 ||
+		strings.Contains(string(beta.Raw), city) {
+		t.Errorf("beta's report = %d %s, want none of alpha's tests", beta.Status, beta.Raw)
+	}
+	download := packetpulsetest.Call(t, http.MethodGet, "/report/network.csv?date="+date, betaToken, nil)
+	if download.Status != http.StatusOK || strings.Contains(string(download.Raw), city) {
+		t.Errorf("beta's CSV = %d, naming alpha's city: %v", download.Status, strings.Contains(string(download.Raw), city))
+	}
+	// Each row of beta's file names beta, and none names alpha.
+	alphaName, betaName := alpha.String("organisation_name"), beta.String("organisation_name")
+	if alphaName == "" || betaName == "" || alphaName == betaName {
+		t.Fatalf("organisations named %q and %q", alphaName, betaName)
+	}
+	for _, line := range strings.Split(strings.TrimSpace(string(download.Raw)), "\n")[1:] {
+		if !strings.HasPrefix(line, betaName+",") {
+			t.Errorf("a row of beta's CSV does not name beta: %q", line)
+		}
+	}
+	if strings.Contains(string(download.Raw), alphaName) {
+		t.Error("beta's CSV names alpha")
+	}
+
+	saved := packetpulsetest.Call(t, http.MethodPut, "/report/settings", alphaToken, map[string]any{
+		"time_zone": "Asia/Dubai", "deliveries": map[string]any{"daily": false, "weekly": false, "monthly": false, "yearly": false},
+	})
+	if saved.Status != http.StatusOK || saved.String("time_zone") != "Asia/Dubai" {
+		t.Fatalf("alpha's save = %d %s", saved.Status, saved.Raw)
+	}
+	if betaSettings := packetpulsetest.Call(t, http.MethodGet, "/report/settings", betaToken, nil); betaSettings.String("time_zone") != "Asia/Kolkata" {
+		t.Errorf("beta's settings = %s, want its own country's zone", betaSettings.Raw)
+	}
+}

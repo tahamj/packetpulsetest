@@ -1,5 +1,5 @@
 {
-  "_comment": "The header row of every PacketPulse results CSV - the download beside a ticket (GET /diagnostic/{id}/report.csv), the Results API pull (GET /result/export.csv) and the scheduled push to an organisation's own server. An IT system's importer is written against this list, so columns are only ever ADDED, at the end. The Go writer's test asserts it writes exactly these; the integration suite asserts the server sends exactly these.",
+  "_comment": "The header row of every PacketPulse results CSV - the download beside a ticket (GET /diagnostic/{id}/report.csv), the Results API pull (GET /result/export.csv) and the scheduled push to an organisation's own server. An IT system's importer is written against this list, so columns are only ever ADDED, at the end. The Go writer's test asserts it writes exactly these; the integration suite asserts the server sends exactly these. checked_on is written in the organisation's own time zone with its offset (2026-10-21T11:30:00+05:30 in Mumbai); it was checked_on_utc until 22 October 2026, when the customer asked for IST.",
   "columns": [
     "result_id",
     "request_id",
@@ -25,8 +25,10 @@
     "sla_status",
     "fault_class",
     "error_message",
-    "checked_on_utc",
+    "checked_on",
     "test_latitude",
-    "test_longitude"
+    "test_longitude",
+    "reflector_address",
+    "reflector_ip"
   ]
 }
