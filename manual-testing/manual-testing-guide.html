@@ -239,8 +239,8 @@ nav.side .nohit.on{display:block}
 <td style="text-align:center"><strong>17</strong> <br><sub>in the navigation rail</sub></td>
 <td style="text-align:center"><strong>100</strong> <br><sub>under <code>/api/v1</code></sub></td>
 <td style="text-align:center"><strong>16</strong> <br><sub>3 built-in roles</sub></td>
-<td style="text-align:center"><strong>35</strong> <br><sub>applied at boot</sub></td>
-<td style="text-align:center"><strong>1186</strong> <br><sub>English, server-served</sub></td>
+<td style="text-align:center"><strong>37</strong> <br><sub>applied at boot</sub></td>
+<td style="text-align:center"><strong>1202</strong> <br><sub>English, server-served</sub></td>
 <td style="text-align:center"><strong>20</strong> <br><sub>one per screen</sub></td>
 <td style="text-align:center"><strong>11</strong> <br><sub>+ <code>load</code>, opt-in</sub></td>
 </tr>
@@ -811,12 +811,12 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 </tr>
 <tr>
 <td><code>unit</code></td>
-<td>Every Go package with <code>-race -shuffle</code>, coverage floors, govulncheck, the string generator</td>
+<td>Every Go package with <code>-race -shuffle</code>, coverage floors and the 100% check (every statement run, or listed with its reason in <code>scripts/PacketPulseCoverageExemptLines.json</code>), govulncheck, the string generator</td>
 <td>database</td>
 </tr>
 <tr>
 <td><code>client</code></td>
-<td>Every Flutter screen, <code>flutter analyze</code>, the client coverage floor</td>
+<td>Every Flutter screen, <code>flutter analyze</code>, the client coverage floor and the same 100% check</td>
 <td>—</td>
 </tr>
 <tr>
@@ -1895,7 +1895,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>Engineer</td>
 <td>The PDF is evidence</td>
 <td><strong>Export PDF</strong></td>
-<td>Named <code>packetpulse-&lt;TT&gt;-&lt;time&gt;.pdf</code> in the organisation's time zone; Customer ID, TT, every time in that zone and named (<em>Checked (IST)</em>, <em>Started … IST</em> for India), a UDP test's reflector and where it was reached, a Jitter column and no MOS column, average loss and jitter cards; a long IPv6 address wraps onto two lines; the foot names who ran it and where — <em>Triggered by Asha Rao  -  at MG Road, Pune</em>. 🛑 <strong>Must NOT</strong> truncate an address</td>
+<td>Named <code>packetpulse-&lt;TT&gt;-&lt;time&gt;.pdf</code> in the organisation's time zone; Customer ID, TT, every time in that zone and named (<em>Checked (IST)</em>, <em>Started … IST</em> for India), a UDP test's reflector and where it was reached, a Jitter column and no MOS column, average loss and jitter cards; a long IPv6 address wraps onto two lines; the details under the headline figures name who ran it and where — <strong>Run by</strong> <em>Asha Rao</em>, <strong>Signed in at</strong> <em>MG Road, Pune</em>, wrapped whole. 🛑 <strong>Must NOT</strong> truncate an address or a place</td>
 </tr>
 <tr>
 <td><code>DIAG-005</code></td>
@@ -1930,7 +1930,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>Customer</td>
 <td>A device UDP ticket reads as the test</td>
 <td>File a 30 s UDP test that loses 16 of 1494 packets against the built-in 1% target; open it in <strong>History</strong>; <strong>Export PDF</strong></td>
-<td>Heading <em>TT-…</em> (not <em>TT TT-…</em>) and <em>… 1 endpoint(s) in 3x.x s</em>; <strong>Average loss</strong> (not <em>query loss</em>) <em>1.1%</em>; the packet line <em>Lost = 16 (1.1% loss)</em> and the PDF's Loss column <em>1.1%</em> beside <em>Breached</em>; the <strong>Round-trip time</strong> bar blue, not red; the <strong>Packet loss</strong> chart scaled to 4%, its bar named <em>PacketPulse network</em>. An HTTPS device ticket still reads <em>Average query loss</em>. 🛑 <strong>Must NOT</strong> print <em>1%</em> beside a breach of a 1% target</td>
+<td>Heading <em>TT-…</em> (not <em>TT TT-…</em>) and <em>… 1 endpoint in 3x.x s</em> (<em>… 3 endpoints in …</em> for three); <strong>Average loss</strong> (not <em>query loss</em>) <em>1.1%</em>; the packet line <em>Lost = 16 (1.1% loss)</em> and the PDF's Loss column <em>1.1%</em> beside <em>Breached</em>; the <strong>Round-trip time</strong> bar blue, not red; the <strong>Packet loss</strong> chart scaled to 4%, its bar named <em>PacketPulse network</em>. An HTTPS device ticket still reads <em>Average query loss</em>. 🛑 <strong>Must NOT</strong> print <em>1%</em> beside a breach of a 1% target</td>
 </tr>
 <tr>
 <td><code>DIAG-019</code></td>
@@ -2000,7 +2000,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>Engineer</td>
 <td>The PDF says where</td>
 <td><strong>Export PDF</strong> of <code>DIAG-012</code></td>
-<td>Under the run details: <em>Tested from 12.97…, 77.75…, within N m    |    Endpoints: the city nearest the device, Bengaluru, N km away</em></td>
+<td>In the details under the headline figures: <strong>Tested from</strong> <em>12.97…, 77.75…</em> with <em>within N m</em> beside it, a link that opens the position on a map, and <strong>Endpoints</strong> <em>the city nearest the device, Bengaluru, N km away</em> on a row of its own</td>
 </tr>
 </tbody>
 </table></div>
@@ -2087,7 +2087,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <p><strong>Where:</strong> <strong>Export CSV</strong> on every result · <strong>Route:</strong> <code>GET /diagnostic/{requestId}/report.csv</code> · <strong>Capability:</strong> <code>report_export</code></p>
 <ul>
 <li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: The same results, in the columns an IT system imports, in one click — and safe to open: a site name typed as a spreadsheet formula is written as text, so an export can never run code on someone else's desk.</li>
-<li>📖 <strong>User Guide &amp; Operational Flow</strong>: <strong>Export CSV</strong> saves <code>packetpulse-&lt;TT&gt;-&lt;time&gt;.csv</code> beside the PDF of the same ticket, both named and dated in the organisation's time zone. One row per site and family; empty cells (not zeros) where a probe had no reply. <code>checked_on</code> is in the organisation's time zone with its offset (<code>2026-10-21T11:30:00+05:30</code> in India): its own choice under <em>Scheduled reports</em>, else its country's. <code>test_latitude</code> and <code>test_longitude</code> say where the device was when the test ran; empty when it was not known. <code>resolved_ip</code> is what the endpoint's name resolved to, and <code>reflector_address</code> and <code>reflector_ip</code> the reflector a UDP test measured to and where the browser reached it. For an endpoint set to show its reflector only, someone who does not manage endpoints gets empty <code>ip_address</code> and <code>resolved_ip</code>.</li>
+<li>📖 <strong>User Guide &amp; Operational Flow</strong>: <strong>Export CSV</strong> saves <code>packetpulse-&lt;TT&gt;-&lt;time&gt;.csv</code> beside the PDF of the same ticket, both named and dated in the organisation's time zone. One row per site and family; empty cells (not zeros) where a probe had no reply. <code>checked_on</code> is in the organisation's time zone with its offset (<code>2026-10-21T11:30:00+05:30</code> in India): its own choice under <em>Scheduled reports</em>, else its country's. <code>test_latitude</code> and <code>test_longitude</code> say where the device was when the test ran; empty when it was not known. <code>resolved_ip</code> is what the endpoint's name resolved to, and <code>reflector_address</code> and <code>reflector_ip</code> the reflector a UDP test measured to and where the browser reached it. <code>user_ip</code> and <code>user_ipv6</code> (since 26 October 2026) are where a device test came from, on every row of that test: the IP the device filed it from, as PacketPulse saw it, and the public IPv6 its IPv6 traffic leaves from, as the device's own lookup found it (PacketPulse is reached over IPv4 and never sees it). Empty for a server sweep and for a test filed before; <code>user_ipv6</code> is empty for a device with no IPv6. For an endpoint set to show its reflector only, someone who does not manage endpoints gets empty <code>ip_address</code> and <code>resolved_ip</code>; the <code>user_ip</code> is the tester's line, not the endpoint's, and stays.</li>
 <li>🧪 <strong>Manual Testing Playbook</strong>:<div class="tw"><table><thead>
 <tr>
 <th>ID</th>
@@ -2146,6 +2146,13 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>A UDP test names where it was measured</td>
 <td>Run a UDP test of an endpoint named by a hostname, with a reflector; <strong>Export CSV</strong></td>
 <td><code>resolved_ip</code> holds the address the name resolved to; <code>reflector_address</code> and <code>reflector_ip</code> the reflector and the IP the browser reached it at. 🛑 <strong>Must NOT</strong> leave <code>resolved_ip</code> blank for a test the server could resolve</td>
+</tr>
+<tr>
+<td><code>CSV-008</code></td>
+<td>Engineer</td>
+<td>A device test says where it came from</td>
+<td>Note this device's public IPv4 (the <strong>IPv4</strong> card on <strong>Run diagnostic</strong>); run a UDP test of an endpoint whose address is its own reflector (live: TATA-MUMBAI); <strong>Attach to a ticket</strong>; <strong>Export CSV</strong>; then export a server sweep's CSV</td>
+<td><code>user_ip</code> is that IPv4 and, from a network with IPv6, <code>user_ipv6</code> the address on the <strong>IPv6</strong> card, on every row of the device test; <code>resolved_ip</code> and <code>reflector_ip</code> are still the endpoint's own address; the sweep's are empty. 🛑 <strong>Must NOT</strong> put the reflector's IP, or any address the device sent itself, in <code>user_ip</code></td>
 </tr>
 </tbody>
 </table></div>
@@ -2393,7 +2400,8 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <li><strong>IP version</strong> — <em>Auto</em>, <em>IPv4 only</em>, <em>IPv6 only</em> — holds a run against the default target to one address family, to compare the two paths. It is offered only on the test with no ticket, when the organisation tests the default over HTTPS: an endpoint is reached at its own address, a browser cannot choose the family a hostname resolves to, and the native ping is IPv4.</li>
 <li>While a run goes, six figures fill in — average, fastest, slowest, jitter, loss and progress, and for the UDP test <strong>Lost up · down</strong> — with <strong>Round-trip, sample by sample</strong> (jitter as a band, the average dashed, a red mark per unanswered sample; point at it to read one), <strong>Round-trips by band</strong> (under 20, 20–50, 50–100, 100–200, 200 ms and over) and a <strong>Probe log</strong> of every reply. <strong>Clear results</strong> empties the figures and charts and keeps the log; <strong>Clear log</strong> empties the log. No standard deviation is shown, here or on the public self-test (review of 13 October 2026): beside jitter it read as a second figure for the same thing. It is still measured and filed. Nor is the voice-quality estimate (MOS), on any screen or report or on the self-test (review of 13 October 2026): it is still computed, filed, graded against a MOS target and exported in the CSV, and one switch shows it again — <code>PacketPulseConfig.voiceQualityShown</code> in the app, <code>ReportOptions.ShowVoiceQuality</code> for the PDF.</li>
 <li><strong>Attach to a ticket</strong> files the finished run against the ticket at the top of the page and says <em>Attached to ticket TT-…</em> beside the button, with <strong>View ticket</strong> (since 14 October 2026). It opens the ticket as <strong>History</strong> shows it — its results and grades, the notes, <strong>Export PDF</strong> and <strong>Export CSV</strong> — over the test, from what the server returned on filing, so nothing more is fetched; on a phone it takes the whole screen. Closing it leaves the run on screen as it was. Running again clears the confirmation and the button with it.</li>
-<li><strong>Notes</strong>, typed at the top of the page, are filed with the run and shown with the ticket in History (<em>Notes</em> beside <em>Tested from</em>) and on its PDF (<em>Notes: …</em> under the run's details). Until the review of 13 October 2026 they were stored and shown nowhere.</li>
+<li><strong>Notes</strong>, typed at the top of the page, are filed with the run and shown with the ticket in History (<strong>Notes</strong>, a row of its own in the ticket's details) and on its PDF (<strong>Notes</strong>, the last row of the details under the headline figures). Until the review of 13 October 2026 they were stored and shown nowhere.</li>
+<li><strong>User IPv4</strong> and <strong>User IPv6</strong> (26 October 2026) are where the run came from. The IPv4 is the address the device attached it from, as PacketPulse's server saw the connection (through its own nginx; never a value the device sends - a body naming <code>user_ip</code> is refused). The IPv6 is the device's own report, <code>egress_ipv6</code>: the address its <strong>IPv6</strong> card shows, from the same lookup (Cloudflare's 1.1.1.1 over IPv6), because PacketPulse is reached over IPv4 and never sees it; the server keeps it only when it is a public IPv6. The ticket shows both first in its details, each with a copy button; the PDF leads the details under its headline figures with them; and the CSV and the Results API carry <code>user_ip</code> and <code>user_ipv6</code>. Every other address on a ticket - the endpoint, its <em>Resolved IP</em>, the reflector - is where the test went; for an endpoint whose address is its own reflector they are all the reflector's, which is why the customer asked for this (<em>&quot;Resolved IP is taking the reflector IP instead of User IP&quot;</em>). On a fixed line the IPv6 is often the better identifier: a public IPv4 may be shared behind carrier-grade NAT, while the IPv6 prefix is the line's own (its second half changes as devices rotate privacy addresses). Tickets filed before 26 October 2026 have neither.</li>
 </ul>
 </li>
 <li>🧪 <strong>Manual Testing Playbook</strong>:<div class="tw"><table><thead>
@@ -2572,7 +2580,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>Engineer</td>
 <td>The notes reach the report</td>
 <td>Type <em>Calls drop every evening</em> in <strong>Notes</strong>; run; <strong>Attach to a ticket</strong>; open the ticket in <strong>History</strong>; <strong>Export PDF</strong></td>
-<td><em>Notes  Calls drop every evening</em> beside <em>Tested from</em>; the PDF prints <em>Notes: Calls drop every evening</em> under the run's details. A ticket filed with no notes shows no Notes line on either. 🛑 <strong>Must NOT</strong> drop the notes the engineer typed</td>
+<td><strong>Notes</strong> <em>Calls drop every evening</em> as a row of its own in the ticket's details; the PDF prints it as the last row of its details. A ticket filed with no notes shows no Notes on either. 🛑 <strong>Must NOT</strong> drop the notes the engineer typed</td>
 </tr>
 <tr>
 <td><code>DEV-025</code></td>
@@ -2594,6 +2602,20 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>The ticket from where it was filed</td>
 <td>Fill the ticket with notes; run; <strong>Attach to a ticket</strong>; <strong>View ticket</strong>; <strong>Export PDF</strong>; close it; then on a phone</td>
 <td><em>Attached to ticket TT-…</em> and <strong>View ticket</strong> beside <strong>Attach to a ticket</strong>; the ticket opens over the test with its results, grade, notes and export buttons, and opens at once with no request in the network panel; the PDF downloads from there; closing it leaves the run's figures and log as they were. On a phone it fills the screen, its export buttons under its heading. Before a run is filed there is no <strong>View ticket</strong>. 🛑 <strong>Must NOT</strong> leave the page, or lose the run, to show the ticket</td>
+</tr>
+<tr>
+<td><code>DEV-029</code></td>
+<td>Engineer</td>
+<td>The ticket says where the test came from</td>
+<td>Note this device's public IPv4 and IPv6 (the <strong>IPv4</strong> and <strong>IPv6</strong> cards); run a UDP test of an endpoint whose address is its own reflector (live: TATA-MUMBAI); <strong>Attach to a ticket</strong>; <strong>View ticket</strong>; <strong>Export PDF</strong>; then open a ticket filed before 26 October 2026</td>
+<td><strong>User IPv4</strong> <em>a.b.c.d</em> first in the ticket's details, that IPv4, then from a network with IPv6 <strong>User IPv6</strong> with the <strong>IPv6</strong> card's address, each copied whole by its copy button; the PDF's details start with the same two; <em>Resolved IP</em> in the PDF table is still the endpoint's address. From a network without IPv6 there is no <em>User IPv6</em> line; the older ticket shows neither. 🛑 <strong>Must NOT</strong> show the reflector's IP, or an address from an <code>X-Forwarded-For</code> the device sent, as the user IPv4</td>
+</tr>
+<tr>
+<td><code>DEV-030</code></td>
+<td>Engineer</td>
+<td>A ticket's details read at a glance</td>
+<td>Attach a run; <strong>View ticket</strong>; read the details; copy the <strong>Run ID</strong>; <strong>Export PDF</strong>; then open the same ticket on a phone</td>
+<td>Labelled facts, in order: <strong>User IPv4</strong>, <strong>User IPv6</strong>, <strong>Tested from</strong> (with <em>within N m</em>), <strong>Run by</strong>, <strong>Signed in at</strong>, <strong>Run ID</strong>, then <strong>Endpoints</strong> and <strong>Notes</strong> on rows of their own; addresses and the run ID in a fixed-width face, each on one line, with copy buttons; the PDF's details are the same facts four across, its position a map link, its place whole, <em>Duration</em> and <em>Packets per site 1,486</em>. On a phone, one fact per row. 🛑 <strong>Must NOT</strong> cut a place short, break an address or the run ID across lines, or read <em>endpoint(s)</em>, <em>packet(s)</em> or <em>Sweep took</em> on a device test</td>
 </tr>
 <tr>
 <td><code>DEV-022</code></td>
@@ -2916,7 +2938,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>Engineer</td>
 <td>The ticket says how long the test took</td>
 <td>Run a 30 s UDP test; <strong>Attach to a ticket</strong>; open it in <strong>History</strong></td>
-<td>The heading's subtitle reads <em>… 1 endpoint(s) in 3x.x s</em>, the run's own duration. A run filed by an older client reads as before. 🛑 <strong>Must NOT</strong> read <em>in 0 ms</em></td>
+<td>The heading's subtitle reads <em>… 1 endpoint in 3x.x s</em>, the run's own duration. A run filed by an older client reads as before. 🛑 <strong>Must NOT</strong> read <em>in 0 ms</em></td>
 </tr>
 <tr>
 <td><code>UDP-029</code></td>
@@ -3114,7 +3136,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>Integrator</td>
 <td>One ticket as JSON</td>
 <td><code>curl -H &quot;Authorization: Bearer &lt;key&gt;&quot; https://…/api/v1/result/bytt/TT-MAN-001</code></td>
-<td>The ticket with every result, including <code>ip_version</code> and <code>report_only</code></td>
+<td>The ticket with every result, including <code>ip_version</code>, <code>report_only</code>, and each UDP result's <code>reflector_address</code> and <code>reflector_ip</code>; at the top, <code>user_ip</code> and <code>user_ipv6</code>, the public IPv4 and IPv6 a device test came from (empty for a server sweep)</td>
 </tr>
 <tr>
 <td><code>API-003</code></td>
@@ -5491,6 +5513,14 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/packetpulse/releases/&lt;previous&gt;
 <tr>
 <td><code>0035_2026_10_22_network_reports.sql</code></td>
 <td>Network reports: an index from a result's run to its test, the time zone reports and exports are written in (<code>report_settings</code>), the daily, weekly, monthly and yearly drops (<code>report_delivery</code>), the reflector a UDP test measured to and the IP it was reached at (<code>ping_result.reflector_address</code>, <code>reflector_ip</code>), and what an endpoint shows of itself to those who do not manage endpoints (<code>dns_site.report_visibility</code>).</td>
+</tr>
+<tr>
+<td><code>0036_2026_10_26_user_ip.sql</code></td>
+<td>The user IP of a device test: the public address its device filed it from, as the server saw the caller (<code>diagnostic_request.user_ip</code>), shown on the ticket, its PDF and CSV and the Results API beside where the test went. Empty for a server sweep and for a test filed before.</td>
+</tr>
+<tr>
+<td><code>0037_2026_10_26_user_ipv6.sql</code></td>
+<td>The user IPv6 of a device test, beside its user IP (<code>diagnostic_request.user_ipv6</code>): the public IPv6 the device's IPv6 traffic leaves from, as its own lookup found it, kept only when it is a public IPv6 - PacketPulse is reached over IPv4 and never sees it.</td>
 </tr>
 </tbody>
 </table></div>

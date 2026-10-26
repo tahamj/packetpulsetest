@@ -6,8 +6,13 @@
 package apicontract
 
 import (
+	"bytes"
+	"encoding/csv"
+	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
+	"strings"
 	"testing"
 	"time"
 
@@ -236,5 +241,104 @@ func TestAUdpTestOverIpv6IsFiledAndReportedAsIpv6(t *testing.T) {
 	}
 	if coverage, _ := report.Body["coverage"].(map[string]any); coverage["over_ipv6"] != 1.0 {
 		t.Errorf("coverage = %v", coverage)
+	}
+}
+
+// attachThroughProxy attaches a test as it arrives through PacketPulse's own
+// nginx: the suite connects from loopback, a trusted proxy, carrying the
+// X-Forwarded-For nginx writes - whatever the device sent, then the address
+// nginx saw.
+func attachThroughProxy(t *testing.T, token, forwardedFor string, run map[string]any) (int, map[string]any) {
+	t.Helper()
+	encoded, err := json.Marshal(run)
+	if err != nil {
+		t.Fatal(err)
+	}
+	request, err := http.NewRequest(http.MethodPost, packetpulsetest.BaseURL()+"/api/v1/diagnostic/clientobservation", bytes.NewReader(encoded))
+	if err != nil {
+		t.Fatal(err)
+	}
+	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("Authorization", "Bearer "+token)
+	request.Header.Set("X-Forwarded-For", forwardedFor)
+	response, err := http.DefaultClient.Do(request)
+	if err != nil {
+		t.Fatalf("attach: %v", err)
+	}
+	defer func() { _ = response.Body.Close() }()
+	raw, _ := io.ReadAll(response.Body)
+	body := map[string]any{}
+	_ = json.Unmarshal(raw, &body)
+	return response.StatusCode, body
+}
+
+// The customer's report of 26 October 2026: "Resolved IP is taking the
+// reflector IP instead of User IP". An endpoint whose address is its own
+// reflector had nothing else on its ticket. A device test is now filed with
+// the user IP it came from - the address nginx saw, not one the device put
+// first - and the ticket and its CSV carry it. A device that names its own
+// user IP is refused.
+func TestADeviceTestIsFiledWithTheUserIpItCameFrom(t *testing.T) {
+	packetpulsetest.RequireServer(t)
+
+	token, _ := packetpulsetest.SignUpOrganisation(t, "userip")
+	added := packetpulsetest.Call(t, http.MethodPost, "/dnssite/add", token, map[string]any{
+		"site_name": "TATA-MUMBAI", "ip_address": "192.0.2.80", "is_enabled": true, "region": "Mumbai",
+		"latitude": 19.076, "longitude": 72.8777, "reflector_address": "192.0.2.80",
+	})
+	if added.Status != http.StatusCreated {
+		t.Fatalf("add = %d %s", added.Status, added.Raw)
+	}
+	endpoint, _ := added.Body["dns_site_id"].(string)
+	run := udpRun(fmt.Sprintf("TT-USERIP-%d", time.Now().UnixNano()), endpoint, "endpoint")
+	run["observations"].([]map[string]any)[0]["reflector_ip"] = "192.0.2.80"
+	// The device's IPv6, as its own lookup found it: the server is reached
+	// over IPv4 and never sees it.
+	run["egress_ipv6"] = "2401:4900:1c5a:8f2e::1"
+
+	status, attached := attachThroughProxy(t, token, "198.51.100.66, 203.0.113.9", run)
+	if status != http.StatusCreated {
+		t.Fatalf("attach returned %d: %v", status, attached)
+	}
+	requestId, _ := attached["request"].(map[string]any)["request_id"].(string)
+
+	detail := packetpulsetest.Call(t, http.MethodGet, "/diagnostic/"+requestId, token, nil)
+	request, _ := detail.Body["request"].(map[string]any)
+	if request["user_ip"] != "203.0.113.9" || request["user_ipv6"] != "2401:4900:1c5a:8f2e::1" {
+		t.Errorf("user_ip = %v, user_ipv6 = %v; want the address nginx saw and the device's IPv6",
+			request["user_ip"], request["user_ipv6"])
+	}
+	row := packetpulsetest.ListOf(t, detail, "results")[0]
+	if row["resolved_ip"] != "192.0.2.80" || row["reflector_ip"] != "192.0.2.80" {
+		t.Errorf("resolved %v, reflector %v: the endpoint's addresses should be as before", row["resolved_ip"], row["reflector_ip"])
+	}
+
+	ticketCsv := packetpulsetest.Call(t, http.MethodGet, "/diagnostic/"+requestId+"/report.csv", token, nil)
+	records, err := csv.NewReader(strings.NewReader(string(ticketCsv.Raw))).ReadAll()
+	if err != nil || len(records) != 2 {
+		t.Fatalf("ticket csv = %d %s", ticketCsv.Status, ticketCsv.Raw)
+	}
+	column := map[string]int{}
+	for index, name := range records[0] {
+		column[name] = index
+	}
+	if at, ok := column["user_ip"]; !ok || records[1][at] != "203.0.113.9" {
+		t.Errorf("ticket csv = %v, want user_ip 203.0.113.9", records)
+	}
+	if at, ok := column["user_ipv6"]; !ok || records[1][at] != "2401:4900:1c5a:8f2e::1" {
+		t.Errorf("ticket csv = %v, want user_ipv6 2401:4900:1c5a:8f2e::1", records)
+	}
+
+	// An IPv6 that is not a public one is refused on its field.
+	private := udpRun(fmt.Sprintf("TT-USERIP-ULA-%d", time.Now().UnixNano()), endpoint, "endpoint")
+	private["observations"].([]map[string]any)[0]["reflector_ip"] = "192.0.2.80"
+	private["egress_ipv6"] = "fd12:3456::1"
+	if refused := packetpulsetest.Call(t, http.MethodPost, "/diagnostic/clientobservation", token, private); refused.Status != http.StatusUnprocessableEntity {
+		t.Errorf("a private IPv6 answered %d, want 422: %s", refused.Status, refused.Raw)
+	}
+
+	run["tt_number"], run["user_ip"] = fmt.Sprintf("TT-USERIP-SAID-%d", time.Now().UnixNano()), "198.51.100.66"
+	if said := packetpulsetest.Call(t, http.MethodPost, "/diagnostic/clientobservation", token, run); said.Status != http.StatusBadRequest {
+		t.Errorf("a body naming its own user IP answered %d, want 400", said.Status)
 	}
 }

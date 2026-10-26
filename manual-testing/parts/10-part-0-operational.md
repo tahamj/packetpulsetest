@@ -73,8 +73,8 @@ To act as a person in a manual test, read their code from the **code outbox**: w
 | `translation` | The catalogue is complete and served | server |
 | `contract` | The Results API and CSV shapes, the export's destination guard | server |
 | `grading` | A device's UDP test is graded and its breach counted; an HTTPS round-trip never is; automatic monitoring answers nothing | server |
-| `unit` | Every Go package with `-race -shuffle`, coverage floors, govulncheck, the string generator | database |
-| `client` | Every Flutter screen, `flutter analyze`, the client coverage floor | — |
+| `unit` | Every Go package with `-race -shuffle`, coverage floors and the 100% check (every statement run, or listed with its reason in `scripts/PacketPulseCoverageExemptLines.json`), govulncheck, the string generator | database |
+| `client` | Every Flutter screen, `flutter analyze`, the client coverage floor and the same 100% check | — |
 | `backup` | The backup, drill and restore scripts, for real | database |
 | `docs` | This guide is current and every number, path, route and capability in it matches source | — |
 | `load` *(opt-in)* | 20 people, a 200-site sweep, API and CSV pulls against p95 budgets | server |

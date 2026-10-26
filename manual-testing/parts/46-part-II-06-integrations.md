@@ -14,7 +14,7 @@ How results reach the operator's own systems, and how its directory signs people
   | ID | Persona | Scenario | Steps | Observable Expected Result |
   |---|---|---|---|---|
   | `API-001` | Administrator | A key is shown once | Issue a key; reload the screen | The full key appeared once; afterwards only its prefix, label, expiry and last use |
-  | `API-002` | Integrator | One ticket as JSON | `curl -H "Authorization: Bearer <key>" https://…/api/v1/result/bytt/TT-MAN-001` | The ticket with every result, including `ip_version` and `report_only` |
+  | `API-002` | Integrator | One ticket as JSON | `curl -H "Authorization: Bearer <key>" https://…/api/v1/result/bytt/TT-MAN-001` | The ticket with every result, including `ip_version`, `report_only`, and each UDP result's `reflector_address` and `reflector_ip`; at the top, `user_ip` and `user_ipv6`, the public IPv4 and IPv6 a device test came from (empty for a server sweep) |
   | `API-003` | Integrator | A period as CSV | `…/result/export.csv?from=2026-10-01T00:00:00Z&to=2026-10-02T00:00:00Z` | `text/csv`, the contracted header, one row per result of the diagnostics that finished in that window |
   | `API-004` | Integrator | Bad periods are refused, not guessed | `from` 40 days before `to`; `to=tomorrow`; `from` after `to` | 422 (*at most 31 days*), 400 (unreadable time), 422. 🛑 **Must NOT** answer with a partial file |
   | `API-005` | Integrator | The wrong credential is refused | No header; a person's session token; a revoked key | 401 each |

@@ -10,7 +10,8 @@
     "download_mbps",
     "upload_mbps",
     "location",
-    "dns_site_id"
+    "dns_site_id",
+    "egress_ipv6"
   ],
   "fields": [
     "target_label",

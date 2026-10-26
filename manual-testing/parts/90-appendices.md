@@ -171,6 +171,8 @@ Embedded in the server binary and applied in order at boot (`packetpulsego/pkg/c
 | `0033_2026_10_14_sla_checks.sql` | Every figure of a graded result is kept against its target, with where Degraded begins and its own verdict: `sla_breaches` becomes `sla_checks`, its entries marked breached. |
 | `0034_2026_10_17_support_sign_in.sql` | PacketPulse support can sign in to an organisation: one support account per organisation (`staff.is_support`, `auth_source = 'support'`), and who opened each support session and why. |
 | `0035_2026_10_22_network_reports.sql` | Network reports: an index from a result's run to its test, the time zone reports and exports are written in (`report_settings`), the daily, weekly, monthly and yearly drops (`report_delivery`), the reflector a UDP test measured to and the IP it was reached at (`ping_result.reflector_address`, `reflector_ip`), and what an endpoint shows of itself to those who do not manage endpoints (`dns_site.report_visibility`). |
+| `0036_2026_10_26_user_ip.sql` | The user IP of a device test: the public address its device filed it from, as the server saw the caller (`diagnostic_request.user_ip`), shown on the ticket, its PDF and CSV and the Results API beside where the test went. Empty for a server sweep and for a test filed before. |
+| `0037_2026_10_26_user_ipv6.sql` | The user IPv6 of a device test, beside its user IP (`diagnostic_request.user_ipv6`): the public IPv6 the device's IPv6 traffic leaves from, as its own lookup found it, kept only when it is a public IPv6 - PacketPulse is reached over IPv4 and never sees it. |
 
 ## Appendix D — Settings
 
