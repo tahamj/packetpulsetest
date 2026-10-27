@@ -122,13 +122,13 @@ func TestEveryMutationRouteIsRegistered(t *testing.T) {
 
 	registry, err := os.ReadFile(registryPath)
 	if err != nil {
-		t.Skipf("audit registry not found: %v", err)
+		t.Fatalf("audit registry not found: %v", err)
 	}
 	registryText := string(registry)
 
 	routeFiles, err := filepath.Glob(filepath.Join(repoRoot, "packetpulsego/pkg/*/*/*RouteHandler.go"))
 	if err != nil || len(routeFiles) == 0 {
-		t.Skip("no route handlers found")
+		t.Fatal("no route handlers found")
 	}
 
 	// Routes that mutate but are deliberately not audited, each with a reason.
@@ -262,7 +262,7 @@ func findRepoRoot(t *testing.T) string {
 
 	directory, err := os.Getwd()
 	if err != nil {
-		t.Skip("cannot determine the working directory")
+		t.Fatal("cannot determine the working directory")
 	}
 	for i := 0; i < 6; i++ {
 		if _, err := os.Stat(filepath.Join(directory, "packetpulsego", "go.mod")); err == nil {
@@ -270,7 +270,7 @@ func findRepoRoot(t *testing.T) string {
 		}
 		directory = filepath.Dir(directory)
 	}
-	t.Skip("cannot locate the repository root")
+	t.Fatal("cannot locate the repository root")
 	return ""
 }
 

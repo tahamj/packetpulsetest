@@ -240,7 +240,7 @@ nav.side .nohit.on{display:block}
 <td style="text-align:center"><strong>100</strong> <br><sub>under <code>/api/v1</code></sub></td>
 <td style="text-align:center"><strong>16</strong> <br><sub>3 built-in roles</sub></td>
 <td style="text-align:center"><strong>37</strong> <br><sub>applied at boot</sub></td>
-<td style="text-align:center"><strong>1202</strong> <br><sub>English, server-served</sub></td>
+<td style="text-align:center"><strong>1213</strong> <br><sub>English, server-served</sub></td>
 <td style="text-align:center"><strong>20</strong> <br><sub>one per screen</sub></td>
 <td style="text-align:center"><strong>11</strong> <br><sub>+ <code>load</code>, opt-in</sub></td>
 </tr>
@@ -836,7 +836,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 </tr>
 </tbody>
 </table></div>
-<p>Integration suites read <code>PACKETPULSE_TEST_URL</code> (default <code>http://localhost:8080</code>). <code>PACKETPULSE_TEST_REQUIRE_SUPERUSER=1</code> turns a missing superuser into a failure rather than a skip — a skipped suite looks exactly like a passing one.</p>
+<p>Integration suites read <code>PACKETPULSE_TEST_URL</code> (default <code>http://localhost:8080</code>). <code>PACKETPULSE_TEST_REQUIRE_SUPERUSER=1</code> turns a missing superuser into a failure rather than a skip — a skipped suite looks exactly like a passing one. For the same reason <code>packetpulsetest.sh</code> sets <code>PACKETPULSE_TEST_REQUIRE_SERVER=1</code> once the server has answered, so a server that stops part-way fails the tests after it, and a test whose setup the server refuses (a diagnostic that will not run, a key that will not issue) fails rather than skips.</p>
 <h2 id="06-deploying">0.6 Deploying<a class="anchor" href="#06-deploying" aria-label="Link to this section">#</a></h2>
 <p><code>scripts/deploy/PacketPulseDeploy.sh --host mshop.rummaan53.com</code> builds from the working tree, runs <code>unit client backup</code> and the integration suites against <code>PACKETPULSE_TEST_URL</code>, cross-compiles for linux/arm64, builds the web app with base href <code>/app/</code>, backs up the live database, then switches the release and restarts. <code>--api-only</code>, <code>--web-only</code> and <code>--site-only</code> ship one part; <code>--skip-guards</code> and <code>--skip-backup</code> are for a logged emergency only. Part V §5.4 is what to check afterwards.</p>
 <hr>
@@ -880,13 +880,13 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 </tr>
 <tr>
 <td><strong>SLA</strong></td>
-<td><strong>OK</strong>, <strong>Degraded</strong> (within 80% of a threshold) or <strong>Breached</strong>, against the site's targets — each figure shown against its own target, with one line saying why. <strong>Not graded</strong> when the result was not held to targets (§5.1).</td>
+<td><strong>OK</strong>, <strong>Degraded</strong> (past 80% of a threshold but not past the threshold itself) or <strong>Breached</strong>, against the site's targets — each figure shown against its own target, with one line saying why. <strong>Not graded</strong> when the result was not held to targets (§5.1).</td>
 <td>OK</td>
 </tr>
 </tbody>
 </table></div>
 <h2 id="l4-ipv4-ipv6-and-not-counted">L.4 IPv4, IPv6 and &quot;not counted&quot;<a class="anchor" href="#l4-ipv4-ipv6-and-not-counted" aria-label="Link to this section">#</a></h2>
-<p>A site whose name resolves to both an IPv4 and an IPv6 address is measured over <strong>both</strong>. The IPv6 result is shown, kept and exported, but marked <strong>not counted</strong>: the site's totals and breaches are carried by IPv4, because the customer's agreement is for the service and IPv4 still carries it. A site that is IPv6 <em>only</em> counts over IPv6 — otherwise it could never fail. When the server itself has no IPv6 route, an IPv6 address is reported as <em>could not be tested from here</em> rather than as an outage.</p>
+<p>A site whose name resolves to both an IPv4 and an IPv6 address is measured over <strong>both</strong>. The IPv6 result is shown, kept and exported, but marked <strong>not counted</strong>: the site's totals and breaches are carried by IPv4, because the customer's agreement is for the service and IPv4 still carries it. A site that is IPv6 <em>only</em> counts over IPv6 — otherwise it could never fail. That is a server sweep, which tests both at once; a device's browser UDP test runs over IPv4 and then over IPv6 when the reflector offers it, and both of its results count. When the server itself has no IPv6 route (the hosted server has had one since 24 October 2026), an IPv6 address is reported as <em>could not be tested from here</em> rather than as an outage.</p>
 <h2 id="l5-two-vantage-points">L.5 Two vantage points<a class="anchor" href="#l5-two-vantage-points" aria-label="Link to this section">#</a></h2>
 <p>PacketPulse measures from two places. Its server sweeps the organisation's endpoints from PacketPulse's data centre when the API asks it to. <strong>Run diagnostic</strong> measures from wherever the person is, over their own connection, to the endpoint nearest them — the right tool for &quot;is it slow for me?&quot;. The two will not match, and both are correct: they measure different layers from different places. A device test is <strong>attached</strong> to a ticket, under the endpoint it measured, labelled as measured on a device.</p>
 <h2 id="l6-two-step-sign-in">L.6 Two-step sign-in<a class="anchor" href="#l6-two-step-sign-in" aria-label="Link to this section">#</a></h2>
@@ -2257,10 +2257,10 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <ul>
 <li><strong>By reflector site / All sites combined</strong>, <strong>Daily / Weekly / Monthly / Yearly</strong>, and the period button (a calendar). It opens on today so far, so a test just run is in it: the period button reads <em>…, so far (to 09:12)</em>, the PDF says <em>So far, to 09:12 IST</em>, the files are named <code>…-so-far</code>, and each CSV row's <code>period_end</code> is when it was made. Any earlier period is picked from the calendar. Days, weeks (Monday to Sunday), months and years begin at midnight in the organisation's time zone: its own choice with the scheduled reports on <strong>Result export</strong>, else its country's (India Standard Time for India). The zone is said under the controls.</li>
 <li><strong>By reflector site</strong>: one card per site — the <strong>Region</strong> given in <strong>DNS sites</strong>. Its first rows, in bold, are the site over all its endpoints (<em>All endpoints</em>); each endpoint's rows follow. Endpoints with none set are <em>City not set on the endpoint</em>. UDP tests to the PacketPulse network, with no endpoint, have a card of their own.</li>
-<li><strong>All sites combined</strong>: every site as one, then the period before, a trend hour by hour (a day), day by day (a week or a month) or month by month (a year), quiet steps included, and the five sites that lost the most packets.</li>
+<li><strong>All sites combined</strong>: every site as one, then the period before, a trend hour by hour (a day), day by day (a week or a month) or month by month (a year), quiet steps included — a period so far stops at the step under way — and, for each method and family, the five sites that lost the most packets. Methods are never ranked against one another.</li>
 <li>Each figure as its <strong>average, minimum and maximum</strong>: loss (packets lost over packets sent across the row, so a long test counts for more; minimum and maximum of single tests), latency (the round trip: the average weighted by replies; minimum and maximum of single replies) and jitter. HTTPS rows show no loss.</li>
 <li>One method and family a row (UDP to an endpoint's reflector, UDP to the PacketPulse network, ICMP or TCP from the device or the server, HTTPS; IPv4 or IPv6): no row adds one to another. A row on fewer than 5 tests is marked <code>*</code>.</li>
-<li>Under each report, what it covers: results from devices and from the server, over IPv4 and over IPv6.</li>
+<li>Under each report, what it covers: results from devices and from the server, over IPv4 and over IPv6, each count in words that agree with it (<em>1 result</em>, <em>2 results</em>).</li>
 <li><strong>Export CSV</strong> and <strong>Export PDF</strong> save the report on screen. Every CSV row starts with the organisation's name, so a file forwarded or merged with another still says whose it is.</li>
 </ul>
 </li>
@@ -2314,7 +2314,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>Administrator</td>
 <td>A week beside the week before</td>
 <td><strong>All sites combined</strong>, <strong>Weekly</strong></td>
-<td>The period before's rows; seven day rows per method, a quiet day as <code>0</code> tests; the five worst sites by loss</td>
+<td>The period before's rows; seven day rows per method, a quiet day as <code>0</code> tests; for each method and family, the five worst sites by loss</td>
 </tr>
 <tr>
 <td><code>RPT-007</code></td>
@@ -2357,6 +2357,20 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>A test just run is in the report</td>
 <td>Run a UDP test; open <strong>Network reports</strong></td>
 <td>Today, <em>so far (to <now>)</em>, with the test in its site; <strong>Export CSV</strong> saves <code>packetpulse-city-daily-&lt;today&gt;-so-far.csv</code>. Pick yesterday: the whole day, no <em>so far</em>. 🛑 <strong>Must NOT</strong> open on yesterday, or name a period still under way as if it were whole</td>
+</tr>
+<tr>
+<td><code>RPT-015</code></td>
+<td>Administrator</td>
+<td>The worst sites are ranked within each method</td>
+<td>In one week: a Bengaluru endpoint losing 150 of 6,000 UDP packets, a Mumbai endpoint losing 1 of 1,000, and an app ICMP test of the Mumbai endpoint losing 1 echo of 8; <strong>All sites combined</strong>, <strong>Weekly</strong></td>
+<td>Under <em>The reflector sites that lost the most packets</em>: the <em>UDP (reflector) IPv4</em> rows first (Bengaluru, then Mumbai), then the <em>ICMP (device) IPv4</em> row; the PDF says <em>For each method and IP version</em>. 🛑 <strong>Must NOT</strong> rank Mumbai's one lost echo above Bengaluru's UDP loss, or list a city twice for one method</td>
+</tr>
+<tr>
+<td><code>RPT-016</code></td>
+<td>Administrator</td>
+<td>A trend so far ends at the step under way</td>
+<td>At 09:12, <strong>All sites combined</strong>, <strong>Daily</strong> (today)</td>
+<td><em>Hour by hour</em> lists 00:00 to 09:00 and stops; pick yesterday: all 24 hours. 🛑 <strong>Must NOT</strong> list the hours still to come as quiet ones</td>
 </tr>
 <tr>
 <td><code>RPT-011</code></td>
@@ -3188,7 +3202,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <li><strong>Server, Port, Username, Password</strong> (or for SFTP a private key). Saved credentials are never shown again; leave the field empty to keep them, or tick <em>Remove the saved password</em>.</li>
 <li><strong>Test connection</strong> signs in, writes and removes a small file. For SFTP it shows the server's key: check it with whoever runs the server, then <strong>Trust this key</strong> and <strong>Save</strong>.</li>
 <li><strong>Folder</strong> and <strong>Deliver every (minutes)</strong> — 15 to 1440.</li>
-<li>The status card says how the last delivery went: <em>Sent <file> with N results</em>, <em>Nothing new to send</em>, or <em>Not delivered: <why></em>.</li>
+<li>The status card says how the last delivery went: <em>Sent <file> with N results</em> (<em>with 1 result</em> for one), <em>Nothing new to send</em>, or <em>Not delivered: <why></em>.</li>
 <li><strong>Scheduled reports</strong>, below, sends the network reports (§3.6) to the same server: the <strong>Time zone</strong> every report is cut in and every time in a result file is written in — the organisation's country's until one is chosen — and <em>Send each day's / week's / month's / year's reports</em>, each with how it last went and the period it sends next. It saves on its own <strong>Save</strong>; the result export need not be switched on.</li>
 </ul>
 </li>
@@ -3320,6 +3334,13 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>The zone is kept as chosen</td>
 <td>Choose <code>Asia/Dubai</code>; <strong>Save</strong>; reload</td>
 <td><code>Asia/Dubai</code>; every report now cut in it (§3.6)</td>
+</tr>
+<tr>
+<td><code>EXP-018</code></td>
+<td>Administrator</td>
+<td>A file the server refuses is not left behind</td>
+<td>Fill the server's disk, or set the account's quota below one file; <strong>Test connection</strong>, then wait for a delivery</td>
+<td><em>Not delivered: …</em> (the test fails too); the folder holds no <code>.part</code> file and no <code>packetpulse-connection-test-…</code> file; free the space and the next delivery covers the same results. 🛑 <strong>Must NOT</strong> leave part of a file for a watcher to take</td>
 </tr>
 </tbody>
 </table></div>

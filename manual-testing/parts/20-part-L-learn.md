@@ -24,11 +24,11 @@ A **diagnostic** tests sites and files the result against a **TT number** — a 
 | **Round trip** | Average, fastest and slowest response time, in ms. | Under the site's target |
 | **Jitter** | RFC 3550 interarrival jitter — how much *consecutive* round trips differ. Voice cares about this more than raw latency. | Low single digits of ms |
 | **MOS** | Mean Opinion Score (ITU-T G.107 E-model): how a phone call would sound over this path, 1–4.5. Computed, stored, graded against a MOS target and exported in the CSV, but shown on no screen or report since 14 October 2026 (§4.1). | Above 4.0; below 3.6 is noticed on a call |
-| **SLA** | **OK**, **Degraded** (within 80% of a threshold) or **Breached**, against the site's targets — each figure shown against its own target, with one line saying why. **Not graded** when the result was not held to targets (§5.1). | OK |
+| **SLA** | **OK**, **Degraded** (past 80% of a threshold but not past the threshold itself) or **Breached**, against the site's targets — each figure shown against its own target, with one line saying why. **Not graded** when the result was not held to targets (§5.1). | OK |
 
 ## L.4 IPv4, IPv6 and "not counted"
 
-A site whose name resolves to both an IPv4 and an IPv6 address is measured over **both**. The IPv6 result is shown, kept and exported, but marked **not counted**: the site's totals and breaches are carried by IPv4, because the customer's agreement is for the service and IPv4 still carries it. A site that is IPv6 *only* counts over IPv6 — otherwise it could never fail. When the server itself has no IPv6 route, an IPv6 address is reported as *could not be tested from here* rather than as an outage.
+A site whose name resolves to both an IPv4 and an IPv6 address is measured over **both**. The IPv6 result is shown, kept and exported, but marked **not counted**: the site's totals and breaches are carried by IPv4, because the customer's agreement is for the service and IPv4 still carries it. A site that is IPv6 *only* counts over IPv6 — otherwise it could never fail. That is a server sweep, which tests both at once; a device's browser UDP test runs over IPv4 and then over IPv6 when the reflector offers it, and both of its results count. When the server itself has no IPv6 route (the hosted server has had one since 24 October 2026), an IPv6 address is reported as *could not be tested from here* rather than as an outage.
 
 ## L.5 Two vantage points
 

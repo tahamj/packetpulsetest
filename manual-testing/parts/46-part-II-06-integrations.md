@@ -36,7 +36,7 @@ How results reach the operator's own systems, and how its directory signs people
   - **Server, Port, Username, Password** (or for SFTP a private key). Saved credentials are never shown again; leave the field empty to keep them, or tick *Remove the saved password*.
   - **Test connection** signs in, writes and removes a small file. For SFTP it shows the server's key: check it with whoever runs the server, then **Trust this key** and **Save**.
   - **Folder** and **Deliver every (minutes)** — 15 to 1440.
-  - The status card says how the last delivery went: *Sent <file> with N results*, *Nothing new to send*, or *Not delivered: <why>*.
+  - The status card says how the last delivery went: *Sent <file> with N results* (*with 1 result* for one), *Nothing new to send*, or *Not delivered: <why>*.
   - **Scheduled reports**, below, sends the network reports (§3.6) to the same server: the **Time zone** every report is cut in and every time in a result file is written in — the organisation's country's until one is chosen — and *Send each day's / week's / month's / year's reports*, each with how it last went and the period it sends next. It saves on its own **Save**; the result export need not be switched on.
 - 🧪 **Manual Testing Playbook**:
   | ID | Persona | Scenario | Steps | Observable Expected Result |
@@ -58,6 +58,7 @@ How results reach the operator's own systems, and how its directory signs people
   | `EXP-015` | Administrator | A quiet day is still sent | A day with no tests | All four files, the PDF saying *No test…*. 🛑 **Must NOT** skip a day: a missing file means a failure |
   | `EXP-016` | Administrator | A failed sending is retried, nothing skipped | Change the server's password; let a period close; restore it | *Not sent: The server refused the sign-in…*; within fifteen minutes the same period is sent. 🛑 **Must NOT** move on past the failed period |
   | `EXP-017` | Administrator | The zone is kept as chosen | Choose `Asia/Dubai`; **Save**; reload | `Asia/Dubai`; every report now cut in it (§3.6) |
+  | `EXP-018` | Administrator | A file the server refuses is not left behind | Fill the server's disk, or set the account's quota below one file; **Test connection**, then wait for a delivery | *Not delivered: …* (the test fails too); the folder holds no `.part` file and no `packetpulse-connection-test-…` file; free the space and the next delivery covers the same results. 🛑 **Must NOT** leave part of a file for a watcher to take |
 - ⚙️ **Developer Guide & Release Confidence**:
   - `packetpulsego/pkg/exportmicroservice/` (target, test, runner each minute); transport: `packetpulsego/pkg/common/filedrop/FileDrop.go` (SFTP via `pkg/sftp`, FTP/FTPS via `jlaffaye/ftp`).
   - 🔒 Every connection — the FTP **data** connection included — is made by `probeguard.Dialer`, whose `Control` hook checks the resolved address before connecting. A dial *function* would have made the FTP library send FTPS data unencrypted.

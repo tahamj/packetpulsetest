@@ -61,7 +61,7 @@ func TestTheExportsCarryTheContractedHeader(t *testing.T) {
 		"customer_id": "CUST-CSV", "tt_number": ttNumber, "packet_count": 1, "timeout_ms": 900,
 	})
 	if submit.Status != http.StatusCreated {
-		t.Skipf("could not run a diagnostic: %d %s", submit.Status, submit.Raw)
+		t.Fatalf("could not run a diagnostic: %d %s", submit.Status, submit.Raw)
 	}
 	request, _ := submit.Body["request"].(map[string]any)
 	requestId, _ := request["request_id"].(string)
@@ -81,7 +81,7 @@ func TestTheExportsCarryTheContractedHeader(t *testing.T) {
 
 	issued := packetpulsetest.Call(t, http.MethodPost, "/apikey/add", ownerToken, map[string]any{"label": "csv contract"})
 	if issued.Status != http.StatusCreated {
-		t.Skipf("could not issue an API key: %d %s", issued.Status, issued.Raw)
+		t.Fatalf("could not issue an API key: %d %s", issued.Status, issued.Raw)
 	}
 	from := url.QueryEscape(time.Now().UTC().Add(-time.Hour).Format(time.RFC3339))
 	pulled := readCsv(t, packetpulsetest.Call(t, http.MethodGet, "/result/export.csv?from="+from, issued.String("api_key"), nil))

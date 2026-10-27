@@ -14,7 +14,7 @@
 
 | 🧭 Screens | 🔌 API routes | 🔐 Capabilities | 🗄️ Migrations | 💬 Catalogue strings | ❓ Help topics | 🧪 Guard suites |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| **17** <br><sub>in the navigation rail</sub> | **100** <br><sub>under `/api/v1`</sub> | **16** <br><sub>3 built-in roles</sub> | **37** <br><sub>applied at boot</sub> | **1202** <br><sub>English, server-served</sub> | **20** <br><sub>one per screen</sub> | **11** <br><sub>+ `load`, opt-in</sub> |
+| **17** <br><sub>in the navigation rail</sub> | **100** <br><sub>under `/api/v1`</sub> | **16** <br><sub>3 built-in roles</sub> | **37** <br><sub>applied at boot</sub> | **1213** <br><sub>English, server-served</sub> | **20** <br><sub>one per screen</sub> | **11** <br><sub>+ `load`, opt-in</sub> |
 
 <br>
 
@@ -227,7 +227,7 @@ To act as a person in a manual test, read their code from the **code outbox**: w
 | `docs` | This guide is current and every number, path, route and capability in it matches source | — |
 | `load` *(opt-in)* | 20 people, a 200-site sweep, API and CSV pulls against p95 budgets | server |
 
-Integration suites read `PACKETPULSE_TEST_URL` (default `http://localhost:8080`). `PACKETPULSE_TEST_REQUIRE_SUPERUSER=1` turns a missing superuser into a failure rather than a skip — a skipped suite looks exactly like a passing one.
+Integration suites read `PACKETPULSE_TEST_URL` (default `http://localhost:8080`). `PACKETPULSE_TEST_REQUIRE_SUPERUSER=1` turns a missing superuser into a failure rather than a skip — a skipped suite looks exactly like a passing one. For the same reason `packetpulsetest.sh` sets `PACKETPULSE_TEST_REQUIRE_SERVER=1` once the server has answered, so a server that stops part-way fails the tests after it, and a test whose setup the server refuses (a diagnostic that will not run, a key that will not issue) fails rather than skips.
 
 ## 0.6 Deploying
 
@@ -260,11 +260,11 @@ A **diagnostic** tests sites and files the result against a **TT number** — a 
 | **Round trip** | Average, fastest and slowest response time, in ms. | Under the site's target |
 | **Jitter** | RFC 3550 interarrival jitter — how much *consecutive* round trips differ. Voice cares about this more than raw latency. | Low single digits of ms |
 | **MOS** | Mean Opinion Score (ITU-T G.107 E-model): how a phone call would sound over this path, 1–4.5. Computed, stored, graded against a MOS target and exported in the CSV, but shown on no screen or report since 14 October 2026 (§4.1). | Above 4.0; below 3.6 is noticed on a call |
-| **SLA** | **OK**, **Degraded** (within 80% of a threshold) or **Breached**, against the site's targets — each figure shown against its own target, with one line saying why. **Not graded** when the result was not held to targets (§5.1). | OK |
+| **SLA** | **OK**, **Degraded** (past 80% of a threshold but not past the threshold itself) or **Breached**, against the site's targets — each figure shown against its own target, with one line saying why. **Not graded** when the result was not held to targets (§5.1). | OK |
 
 ## L.4 IPv4, IPv6 and "not counted"
 
-A site whose name resolves to both an IPv4 and an IPv6 address is measured over **both**. The IPv6 result is shown, kept and exported, but marked **not counted**: the site's totals and breaches are carried by IPv4, because the customer's agreement is for the service and IPv4 still carries it. A site that is IPv6 *only* counts over IPv6 — otherwise it could never fail. When the server itself has no IPv6 route, an IPv6 address is reported as *could not be tested from here* rather than as an outage.
+A site whose name resolves to both an IPv4 and an IPv6 address is measured over **both**. The IPv6 result is shown, kept and exported, but marked **not counted**: the site's totals and breaches are carried by IPv4, because the customer's agreement is for the service and IPv4 still carries it. A site that is IPv6 *only* counts over IPv6 — otherwise it could never fail. That is a server sweep, which tests both at once; a device's browser UDP test runs over IPv4 and then over IPv6 when the reflector offers it, and both of its results count. When the server itself has no IPv6 route (the hosted server has had one since 24 October 2026), an IPv6 address is reported as *could not be tested from here* rather than as an outage.
 
 ## L.5 Two vantage points
 
@@ -683,10 +683,10 @@ The core of the product: what to test, testing it against a ticket, and reading 
 - 📖 **User Guide & Operational Flow**:
   - **By reflector site / All sites combined**, **Daily / Weekly / Monthly / Yearly**, and the period button (a calendar). It opens on today so far, so a test just run is in it: the period button reads *…, so far (to 09:12)*, the PDF says *So far, to 09:12 IST*, the files are named `…-so-far`, and each CSV row's `period_end` is when it was made. Any earlier period is picked from the calendar. Days, weeks (Monday to Sunday), months and years begin at midnight in the organisation's time zone: its own choice with the scheduled reports on **Result export**, else its country's (India Standard Time for India). The zone is said under the controls.
   - **By reflector site**: one card per site — the **Region** given in **DNS sites**. Its first rows, in bold, are the site over all its endpoints (*All endpoints*); each endpoint's rows follow. Endpoints with none set are *City not set on the endpoint*. UDP tests to the PacketPulse network, with no endpoint, have a card of their own.
-  - **All sites combined**: every site as one, then the period before, a trend hour by hour (a day), day by day (a week or a month) or month by month (a year), quiet steps included, and the five sites that lost the most packets.
+  - **All sites combined**: every site as one, then the period before, a trend hour by hour (a day), day by day (a week or a month) or month by month (a year), quiet steps included — a period so far stops at the step under way — and, for each method and family, the five sites that lost the most packets. Methods are never ranked against one another.
   - Each figure as its **average, minimum and maximum**: loss (packets lost over packets sent across the row, so a long test counts for more; minimum and maximum of single tests), latency (the round trip: the average weighted by replies; minimum and maximum of single replies) and jitter. HTTPS rows show no loss.
   - One method and family a row (UDP to an endpoint's reflector, UDP to the PacketPulse network, ICMP or TCP from the device or the server, HTTPS; IPv4 or IPv6): no row adds one to another. A row on fewer than 5 tests is marked `*`.
-  - Under each report, what it covers: results from devices and from the server, over IPv4 and over IPv6.
+  - Under each report, what it covers: results from devices and from the server, over IPv4 and over IPv6, each count in words that agree with it (*1 result*, *2 results*).
   - **Export CSV** and **Export PDF** save the report on screen. Every CSV row starts with the organisation's name, so a file forwarded or merged with another still says whose it is.
 - 🧪 **Manual Testing Playbook**:
   | ID | Persona | Scenario | Steps | Observable Expected Result |
@@ -696,13 +696,15 @@ The core of the product: what to test, testing it against a ticket, and reading 
   | `RPT-003` | Administrator | Methods and families are never added together | At one site, a device UDP test over IPv4, one over IPv6 (`V6-005`) and a device HTTPS test | Three rows: *UDP (reflector) IPv4*, *UDP (reflector) IPv6*, and the HTTPS row with loss `—`. 🛑 **Must NOT** pool a UDP and an HTTPS figure, or IPv4 and IPv6 |
   | `RPT-004` | Administrator | A day is the organisation's day | An organisation in India with no zone chosen; a test at 00:30 IST on the 21st and one at 23:30 IST on the 20th; open the 21st | Only the first; *Days begin at midnight, Asia/Kolkata.* 🛑 **Must NOT** cut the day in UTC or the device's zone |
   | `RPT-005` | Administrator | Every site combined | **All sites combined** | Title *Pan India network performance*; one row a method and family over every site; *The period before: …* beneath |
-  | `RPT-006` | Administrator | A week beside the week before | **All sites combined**, **Weekly** | The period before's rows; seven day rows per method, a quiet day as `0` tests; the five worst sites by loss |
+  | `RPT-006` | Administrator | A week beside the week before | **All sites combined**, **Weekly** | The period before's rows; seven day rows per method, a quiet day as `0` tests; for each method and family, the five worst sites by loss |
   | `RPT-007` | Administrator | A year, month by month | **Yearly** on each view | The year's sites and their endpoints; *Month by month* with twelve rows a method; files `packetpulse-city-yearly-<year>.csv` and `packetpulse-pan-india-yearly-<year>.pdf` |
   | `RPT-008` | Engineer | An engineer is not shown everyone's figures | As a NOC Engineer (`diagnostic_view_own`); look for **Network reports**; then `GET /api/v1/report/network` | Not in the menu; 403. 🛑 **Must NOT** show a colleague's tests added up |
   | `RPT-009` | Viewer | Reading without downloading | As a Viewer (no `report_export`) | The report, and no **Export CSV** or **Export PDF** |
   | `RPT-010` | Administrator | The files are the report on screen | **Export CSV**, then **Export PDF** | `packetpulse-city-daily-<day>.csv` under the contracted header (`packetpulsetest/contracts/network_report_columns.json`), the organisation's name in the first column of every row, each figure's `_avg`, `_min` and `_max`, and the PDF with the same figures, the organisation, the zone and the definitions; *Pan India* files are `packetpulse-pan-india-…` |
   | `RPT-013` | Administrator | A file says whose it is | Merge two organisations' CSVs in a spreadsheet; filter on **organisation**; then name an organisation `=SUM(1,1)` and download again | Each row names its own organisation; the formula-like name shows as text (`'=SUM(1,1)`). 🛑 **Must NOT** run a name as a formula |
   | `RPT-014` | Administrator | A test just run is in the report | Run a UDP test; open **Network reports** | Today, *so far (to <now>)*, with the test in its site; **Export CSV** saves `packetpulse-city-daily-<today>-so-far.csv`. Pick yesterday: the whole day, no *so far*. 🛑 **Must NOT** open on yesterday, or name a period still under way as if it were whole |
+  | `RPT-015` | Administrator | The worst sites are ranked within each method | In one week: a Bengaluru endpoint losing 150 of 6,000 UDP packets, a Mumbai endpoint losing 1 of 1,000, and an app ICMP test of the Mumbai endpoint losing 1 echo of 8; **All sites combined**, **Weekly** | Under *The reflector sites that lost the most packets*: the *UDP (reflector) IPv4* rows first (Bengaluru, then Mumbai), then the *ICMP (device) IPv4* row; the PDF says *For each method and IP version*. 🛑 **Must NOT** rank Mumbai's one lost echo above Bengaluru's UDP loss, or list a city twice for one method |
+  | `RPT-016` | Administrator | A trend so far ends at the step under way | At 09:12, **All sites combined**, **Daily** (today) | *Hour by hour* lists 00:00 to 09:00 and stops; pick yesterday: all 24 hours. 🛑 **Must NOT** list the hours still to come as quiet ones |
   | `RPT-011` | Administrator | A failed load is not a quiet day | Stop the API; open **Network reports** | The failure, with *Try again*; no *No tests in this period*, and the export buttons disabled |
   | `RPT-012` | Tester | A query that cannot be read is refused | `GET /report/network?period=fortnight`, `?view=town`, `?date=21-10-2026`, a date in the future | 422 naming the field; the CSV route answers the same, never with a file |
 - ⚙️ **Developer Guide & Release Confidence**:
@@ -935,7 +937,7 @@ How results reach the operator's own systems, and how its directory signs people
   - **Server, Port, Username, Password** (or for SFTP a private key). Saved credentials are never shown again; leave the field empty to keep them, or tick *Remove the saved password*.
   - **Test connection** signs in, writes and removes a small file. For SFTP it shows the server's key: check it with whoever runs the server, then **Trust this key** and **Save**.
   - **Folder** and **Deliver every (minutes)** — 15 to 1440.
-  - The status card says how the last delivery went: *Sent <file> with N results*, *Nothing new to send*, or *Not delivered: <why>*.
+  - The status card says how the last delivery went: *Sent <file> with N results* (*with 1 result* for one), *Nothing new to send*, or *Not delivered: <why>*.
   - **Scheduled reports**, below, sends the network reports (§3.6) to the same server: the **Time zone** every report is cut in and every time in a result file is written in — the organisation's country's until one is chosen — and *Send each day's / week's / month's / year's reports*, each with how it last went and the period it sends next. It saves on its own **Save**; the result export need not be switched on.
 - 🧪 **Manual Testing Playbook**:
   | ID | Persona | Scenario | Steps | Observable Expected Result |
@@ -957,6 +959,7 @@ How results reach the operator's own systems, and how its directory signs people
   | `EXP-015` | Administrator | A quiet day is still sent | A day with no tests | All four files, the PDF saying *No test…*. 🛑 **Must NOT** skip a day: a missing file means a failure |
   | `EXP-016` | Administrator | A failed sending is retried, nothing skipped | Change the server's password; let a period close; restore it | *Not sent: The server refused the sign-in…*; within fifteen minutes the same period is sent. 🛑 **Must NOT** move on past the failed period |
   | `EXP-017` | Administrator | The zone is kept as chosen | Choose `Asia/Dubai`; **Save**; reload | `Asia/Dubai`; every report now cut in it (§3.6) |
+  | `EXP-018` | Administrator | A file the server refuses is not left behind | Fill the server's disk, or set the account's quota below one file; **Test connection**, then wait for a delivery | *Not delivered: …* (the test fails too); the folder holds no `.part` file and no `packetpulse-connection-test-…` file; free the space and the next delivery covers the same results. 🛑 **Must NOT** leave part of a file for a watcher to take |
 - ⚙️ **Developer Guide & Release Confidence**:
   - `packetpulsego/pkg/exportmicroservice/` (target, test, runner each minute); transport: `packetpulsego/pkg/common/filedrop/FileDrop.go` (SFTP via `pkg/sftp`, FTP/FTPS via `jlaffaye/ftp`).
   - 🔒 Every connection — the FTP **data** connection included — is made by `probeguard.Dialer`, whose `Control` hook checks the resolved address before connecting. A dial *function* would have made the FTP library send FTPS data unencrypted.

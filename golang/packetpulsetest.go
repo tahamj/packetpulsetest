@@ -39,17 +39,28 @@ func BaseURL() string {
 
 var httpClient = &http.Client{Timeout: 180 * time.Second}
 
-// RequireServer skips the test when the API is not reachable.
+// RequireServer skips the test when the API is not reachable - unless
+// PACKETPULSE_TEST_REQUIRE_SERVER is set, as packetpulsetest.sh sets it once it
+// has seen the server answer. Then it fails: a server that stopped part-way
+// through a run would otherwise turn every test after it into a skip, and the
+// run would still read "passed".
 func RequireServer(t *testing.T) {
 	t.Helper()
+	required := os.Getenv("PACKETPULSE_TEST_REQUIRE_SERVER") != ""
 
 	response, err := httpClient.Get(BaseURL() + "/healthz")
 	if err != nil {
+		if required {
+			t.Fatalf("PacketPulse stopped answering at %s and PACKETPULSE_TEST_REQUIRE_SERVER is set: %v", BaseURL(), err)
+		}
 		t.Skipf("PacketPulse is not running at %s: %v", BaseURL(), err)
 	}
 	defer func() { _ = response.Body.Close() }()
 
 	if response.StatusCode != http.StatusOK {
+		if required {
+			t.Fatalf("PacketPulse at %s answered /healthz with %d and PACKETPULSE_TEST_REQUIRE_SERVER is set", BaseURL(), response.StatusCode)
+		}
 		t.Skipf("PacketPulse at %s answered /healthz with %d", BaseURL(), response.StatusCode)
 	}
 }

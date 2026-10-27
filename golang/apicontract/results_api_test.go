@@ -42,14 +42,14 @@ func TestResultsApiShapeIsStable(t *testing.T) {
 		"packet_count": 1, "timeout_ms": 900,
 	})
 	if submit.Status != http.StatusCreated {
-		t.Skipf("could not run a diagnostic: %d %s", submit.Status, submit.Raw)
+		t.Fatalf("could not run a diagnostic: %d %s", submit.Status, submit.Raw)
 	}
 
 	issued := packetpulsetest.Call(t, http.MethodPost, "/apikey/add", ownerToken, map[string]any{
 		"label": "contract test",
 	})
 	if issued.Status != http.StatusCreated {
-		t.Skipf("could not issue an API key: %d %s", issued.Status, issued.Raw)
+		t.Fatalf("could not issue an API key: %d %s", issued.Status, issued.Raw)
 	}
 	apiKey := issued.String("api_key")
 	if apiKey == "" {

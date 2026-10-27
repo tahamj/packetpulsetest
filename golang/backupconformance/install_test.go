@@ -55,6 +55,11 @@ func TestNoPrivateKeyMaterialIsInTheRepository(t *testing.T) {
 // the person holding the private half can check it is theirs.
 func TestTheShippedBackupKeyIsPublicAndCanEncrypt(t *testing.T) {
 	if _, err := exec.LookPath("gpg"); err != nil {
+		// The same rule as requireDatabase: where the suite is required, a
+		// missing tool fails rather than passing a check that never ran.
+		if os.Getenv("PACKETPULSE_TEST_REQUIRE_DATABASE") == "1" {
+			t.Fatal("gpg is not installed, and the backup suite needs it")
+		}
 		t.Skip("gpg is not installed")
 	}
 	out, err := exec.Command("gpg", "--show-keys", "--with-colons", scriptPath(t, "packetpulse-backup-pub.asc")).Output()

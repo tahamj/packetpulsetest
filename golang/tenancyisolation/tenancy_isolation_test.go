@@ -140,7 +140,7 @@ func TestDiagnosticsAreTenantScoped(t *testing.T) {
 		"packet_count": 1, "timeout_ms": 900,
 	})
 	if submit.Status != http.StatusCreated {
-		t.Skipf("alpha could not run a diagnostic (licence or sites): %d %s",
+		t.Fatalf("alpha could not run a diagnostic (licence or sites): %d %s",
 			submit.Status, submit.Raw)
 	}
 
@@ -426,7 +426,7 @@ func TestExportsCarryOnlyTheOrganisationsOwnResults(t *testing.T) {
 		"customer_id": "CUST-ISO", "tt_number": ttNumber, "packet_count": 1, "timeout_ms": 900,
 	})
 	if submit.Status != http.StatusCreated {
-		t.Skipf("alpha could not run a diagnostic: %d %s", submit.Status, submit.Raw)
+		t.Fatalf("alpha could not run a diagnostic: %d %s", submit.Status, submit.Raw)
 	}
 	request, _ := submit.Body["request"].(map[string]any)
 	requestId, _ := request["request_id"].(string)
@@ -441,7 +441,7 @@ func TestExportsCarryOnlyTheOrganisationsOwnResults(t *testing.T) {
 	t.Run("beta's key pulls none of alpha's results", func(t *testing.T) {
 		issued := packetpulsetest.Call(t, http.MethodPost, "/apikey/add", betaToken, map[string]any{"label": "iso"})
 		if issued.Status != http.StatusCreated {
-			t.Skipf("could not issue beta a key: %d", issued.Status)
+			t.Fatalf("could not issue beta a key: %d", issued.Status)
 		}
 		pulled := packetpulsetest.Call(t, http.MethodGet, "/result/export.csv", issued.String("api_key"), nil)
 		if pulled.Status != http.StatusOK || strings.Contains(string(pulled.Raw), ttNumber) {

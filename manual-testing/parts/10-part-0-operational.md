@@ -79,7 +79,7 @@ To act as a person in a manual test, read their code from the **code outbox**: w
 | `docs` | This guide is current and every number, path, route and capability in it matches source | — |
 | `load` *(opt-in)* | 20 people, a 200-site sweep, API and CSV pulls against p95 budgets | server |
 
-Integration suites read `PACKETPULSE_TEST_URL` (default `http://localhost:8080`). `PACKETPULSE_TEST_REQUIRE_SUPERUSER=1` turns a missing superuser into a failure rather than a skip — a skipped suite looks exactly like a passing one.
+Integration suites read `PACKETPULSE_TEST_URL` (default `http://localhost:8080`). `PACKETPULSE_TEST_REQUIRE_SUPERUSER=1` turns a missing superuser into a failure rather than a skip — a skipped suite looks exactly like a passing one. For the same reason `packetpulsetest.sh` sets `PACKETPULSE_TEST_REQUIRE_SERVER=1` once the server has answered, so a server that stops part-way fails the tests after it, and a test whose setup the server refuses (a diagnostic that will not run, a key that will not issue) fails rather than skips.
 
 ## 0.6 Deploying
 

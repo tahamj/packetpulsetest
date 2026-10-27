@@ -129,7 +129,7 @@ func TestEveryRoleGetsExactlyItsCapabilities(t *testing.T) {
 		t.Run(roleName, func(t *testing.T) {
 			token := colleagueWithRole(t, ownerToken, roleId, roleName)
 			if token == "" {
-				t.Skip("could not provision a colleague with this role")
+				t.Fatal("could not provision a colleague with this role")
 			}
 
 			for _, route := range gatedRoutes {
@@ -169,12 +169,12 @@ func TestPermissionChangeTakesEffectImmediately(t *testing.T) {
 		}
 	}
 	if viewerRoleId == "" {
-		t.Skip("no Viewer role available")
+		t.Fatal("no Viewer role available")
 	}
 
 	token := colleagueWithRole(t, ownerToken, viewerRoleId, "Viewer")
 	if token == "" {
-		t.Skip("could not provision a colleague")
+		t.Fatal("could not provision a colleague")
 	}
 
 	before := packetpulsetest.Call(t, http.MethodGet, "/dnssite/list", token, nil)
@@ -184,7 +184,7 @@ func TestPermissionChangeTakesEffectImmediately(t *testing.T) {
 
 	staffId := findStaffId(t, ownerToken, "Viewer")
 	if staffId == "" {
-		t.Skip("could not find the colleague's staff record")
+		t.Fatal("could not find the colleague's staff record")
 	}
 
 	// Deny a capability the role grants.
