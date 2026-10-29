@@ -94,7 +94,7 @@ func TestAnHttpsObservationIsNeverABreach(t *testing.T) {
 	token, _ := packetpulsetest.SignUpOrganisation(t, "grdhttps")
 
 	request, results := file(t, token, map[string]any{
-		"customer_id": "CUST-OBS", "tt_number": "TT-OBS-1", "sample_count": 10, "timeout_ms": 2000,
+		"customer_id": "CUST-OBS", "tt_number": "TT-OBS-1", "sample_count": 25, "timeout_ms": 2000,
 		"observations": []map[string]any{{
 			"method": "https-dns", "target_label": "Cloudflare", "target_address": "1.1.1.1",
 			"packets_sent": 10, "packets_recv": 2, "packets_lost": 8, "packet_loss": 80, "avg_rtt_ms": 950,

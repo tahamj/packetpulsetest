@@ -179,13 +179,14 @@ func TestTheUdpRoutesRefuseAnAnonymousCaller(t *testing.T) {
 	}
 }
 
-// A UDP test reached its reflector over IPv6, by the address the browser
-// connected to: it is filed under IPv6 with its reflector and the endpoint's
-// resolved IP, and a report counts it as an IPv6 row (customer report, 22
-// October 2026: device tests had no family, so IPv6 was missing, and the
-// resolved IP was blank). An endpoint set to show its reflector only keeps
-// its address from an engineer, and not from whoever manages endpoints.
-func TestAUdpTestOverIpv6IsFiledAndReportedAsIpv6(t *testing.T) {
+// A UDP test is filed under the family of the address the browser reached
+// its reflector at, with its reflector and the endpoint's resolved IP, and a
+// report counts it as a row of that family (customer report, 22 October
+// 2026: device tests had no family, and the resolved IP was blank). Tests run
+// over IPv4 alone unless the server tests IPv6 too (28 October 2026), so this
+// one is over IPv4. An endpoint set to show its reflector only keeps its
+// address from an engineer, and not from whoever manages endpoints.
+func TestAUdpTestIsFiledAndReportedUnderItsFamily(t *testing.T) {
 	packetpulsetest.RequireServer(t)
 
 	ownerToken, _ := packetpulsetest.SignUpOrganisation(t, "udpipv6")
@@ -200,23 +201,25 @@ func TestAUdpTestOverIpv6IsFiledAndReportedAsIpv6(t *testing.T) {
 	endpoint, _ := added.Body["dns_site_id"].(string)
 	engineerToken := engineerIn(t, ownerToken)
 
-	run := udpRun(fmt.Sprintf("TT-UDP6-%d", time.Now().UnixNano()), endpoint, "endpoint")
-	run["observations"].([]map[string]any)[0]["reflector_ip"] = "2001:db8::50"
-	attached := packetpulsetest.Call(t, http.MethodPost, "/diagnostic/clientobservation", engineerToken, run)
-	if attached.Status != http.StatusCreated {
-		t.Fatalf("attach returned %d: %s", attached.Status, attached.Raw)
+	run := udpRun(fmt.Sprintf("TT-UDP4-%d", time.Now().UnixNano()), endpoint, "endpoint")
+	run["observations"].([]map[string]any)[0]["reflector_ip"] = "203.0.113.50"
+	run["egress_ipv6"] = "2401:4900:1c5a:8f2e::1"
+	// Filed as it arrives through PacketPulse's own nginx, from the user's line.
+	status, attached := attachThroughProxy(t, engineerToken, "203.0.113.9", run)
+	if status != http.StatusCreated {
+		t.Fatalf("attach returned %d: %v", status, attached)
 	}
-	requestId, _ := attached.Body["request"].(map[string]any)["request_id"].(string)
+	requestId, _ := attached["request"].(map[string]any)["request_id"].(string)
 
 	asOwner := packetpulsetest.ListOf(t, packetpulsetest.Call(t, http.MethodGet, "/diagnostic/"+requestId, ownerToken, nil), "results")[0]
 	if asOwner["ip_address"] != "192.0.2.74" || asOwner["resolved_ip"] != "192.0.2.74" ||
-		asOwner["reflector_address"] != "reflector.mumbai.example:50001" || asOwner["reflector_ip"] != "2001:db8::50" ||
-		asOwner["ip_version"] != 6.0 {
+		asOwner["reflector_address"] != "reflector.mumbai.example:50001" || asOwner["reflector_ip"] != "203.0.113.50" ||
+		asOwner["ip_version"] != 4.0 {
 		t.Errorf("read by the owner = %v", asOwner)
 	}
 	asEngineer := packetpulsetest.ListOf(t, packetpulsetest.Call(t, http.MethodGet, "/diagnostic/"+requestId, engineerToken, nil), "results")[0]
 	if asEngineer["ip_address"] != "" || asEngineer["resolved_ip"] != "" ||
-		asEngineer["reflector_address"] != "reflector.mumbai.example:50001" || asEngineer["reflector_ip"] != "2001:db8::50" {
+		asEngineer["reflector_address"] != "reflector.mumbai.example:50001" || asEngineer["reflector_ip"] != "203.0.113.50" {
 		t.Errorf("read by an engineer = %v, want the reflector alone", asEngineer)
 	}
 
@@ -236,11 +239,56 @@ func TestAUdpTestOverIpv6IsFiledAndReportedAsIpv6(t *testing.T) {
 		t.Fatalf("endpoint rows = %v", endpoints)
 	}
 	row, _ := endpoints[0].(map[string]any)
-	if row["endpoint_name"] != "Andheri Core" || row["ip_version"] != 6.0 || row["method_label"] != "UDP (reflector) IPv6" {
+	if row["endpoint_name"] != "Andheri Core" || row["ip_version"] != 4.0 || row["method_label"] != "UDP (reflector) IPv4" {
 		t.Errorf("endpoint row = %v", row)
 	}
-	if coverage, _ := report.Body["coverage"].(map[string]any); coverage["over_ipv6"] != 1.0 {
+	if coverage, _ := report.Body["coverage"].(map[string]any); coverage["over_ipv4"] != 1.0 {
 		t.Errorf("coverage = %v", coverage)
+	}
+	// The test is listed one by one under its city, with where it came from.
+	entries, _ := sites[0]["entries"].([]any)
+	if len(entries) != 1 || sites[0]["entry_count"] != 1.0 {
+		t.Fatalf("entries = %v", entries)
+	}
+	entry, _ := entries[0].(map[string]any)
+	if entry["endpoint_name"] != "Andheri Core" || entry["from_device"] != true || entry["user_ipv4"] != "203.0.113.9" ||
+		entry["user_ipv6"] != "2401:4900:1c5a:8f2e::1" || entry["method_label"] != "UDP (reflector) IPv4" {
+		t.Errorf("entry = %v", entry)
+	}
+}
+
+// Tests run over IPv4 alone unless the server tests IPv6 too (customer
+// requirement, 28 October 2026): a UDP test over IPv6 - from an app loaded
+// before that - is refused, with what to do, and nothing of it is filed. The
+// session and every offer answer say so, at the server's pace.
+func TestATestOverIpv6IsRefusedWhileTestsRunOverIpv4(t *testing.T) {
+	packetpulsetest.RequireServer(t)
+
+	token, _ := packetpulsetest.SignUpOrganisation(t, "udpipv4only")
+	endpoint := addEndpoint(t, token, "Pune Core", "192.0.2.75")
+	me := packetpulsetest.Call(t, http.MethodGet, "/user/me", token, nil)
+	settings, _ := me.Body["device_test"].(map[string]any)
+	if settings["over_ipv6"] != false || settings["udp_rate_pps"] != 10.0 || settings["max_seconds"] != 300.0 {
+		t.Errorf("device_test = %v, want ten a second over IPv4 alone", settings)
+	}
+	if settings["samples"] != 25.0 || settings["interval_ms"] != 200.0 || settings["timeout_ms"] != 2000.0 {
+		t.Errorf("device_test = %v, want 25 samples 200 ms apart with a 2000 ms time-out", settings)
+	}
+
+	ttNumber := fmt.Sprintf("TT-UDP6-%d", time.Now().UnixNano())
+	run := udpRun(ttNumber, endpoint, "packetpulse")
+	run["observations"].([]map[string]any)[0]["reflector_ip"] = "2001:db8::50"
+	refused := packetpulsetest.Call(t, http.MethodPost, "/diagnostic/clientobservation", token, run)
+	if refused.Status != http.StatusUnprocessableEntity || refused.ErrorCode() != "validation_failed" {
+		t.Fatalf("a test over IPv6 = %d: %s", refused.Status, refused.Raw)
+	}
+	details, _ := refused.Body["error"].(map[string]any)["details"].(map[string]any)
+	if message, _ := details["observations"].(string); !strings.Contains(message, "IPv4 only") {
+		t.Errorf("refusal = %s", refused.Raw)
+	}
+	listed := packetpulsetest.Call(t, http.MethodGet, "/diagnostic/list?tt_number="+ttNumber, token, nil)
+	if diagnostics := packetpulsetest.ListOf(t, listed, "diagnostics"); len(diagnostics) != 0 {
+		t.Errorf("a refused test was filed: %v", diagnostics)
 	}
 }
 

@@ -2,7 +2,7 @@
 
 ## Appendix A — Every API route
 
-All routes are under `/api/v1`. **Access**: *public* (no session), *session* (signed in), *member* (signed in **and** in an organisation), *superuser* (the platform operator), *api key* (a Results API key with `read:results`). **Licence**: refused while the organisation's licence is suspended, revoked or expired. **Audited**: recorded by the audit middleware from `packetpulsego/pkg/auditlogmicroservice/auditlogconstants/AuditLogRegistry.go`; sign-in, sign-out and failed sign-ins are recorded by the user service itself (§2.5). `./packetpulsetest.sh docs` derives this table from the route handlers and fails if it drifts.
+All routes are under `/api/v1`. **Access**: *public* (no session), *session* (signed in), *member* (signed in **and** in an organisation), *superuser* (the platform operator), *api key* (a Results API key with `read:results`); *when switched on* means the route exists only while `SERVER_SWEEPS_ENABLED=true` - off by default, so a test is started only by a person, from their device (decision of 30 October 2026). **Licence**: refused while the organisation's licence is suspended, revoked or expired. **Audited**: recorded by the audit middleware from `packetpulsego/pkg/auditlogmicroservice/auditlogconstants/AuditLogRegistry.go`; sign-in, sign-out and failed sign-ins are recorded by the user service itself (§2.5). `./packetpulsetest.sh docs` derives this table from the route handlers and fails if it drifts.
 
 | Method | Path | Access | Capability | Licence | Audited |
 |---|---|---|---|:---:|:---:|
@@ -15,7 +15,7 @@ All routes are under `/api/v1`. **Access**: *public* (no session), *session* (si
 | `POST` | `/diagnostic/endpoint/{dnsSiteId}/reflector-key` | member | `dns_site_manage` | required | ✅ |
 | `POST` | `/diagnostic/endpoint/{dnsSiteId}/webrtc-offer` | member | `diagnostic_run` | required | — |
 | `GET` | `/diagnostic/list` | member | `diagnostic_view_own` or `diagnostic_view_all` | — | — |
-| `POST` | `/diagnostic/submit` | member | `diagnostic_run` | required | ✅ |
+| `POST` | `/diagnostic/submit` | member when switched on | `diagnostic_run` | required | ✅ |
 | `GET` | `/diagnostic/tt/{ttNumber}` | member | `diagnostic_view_own` or `diagnostic_view_all` | — | — |
 | `GET` | `/diagnostic/{requestId}` | member | `diagnostic_view_own` or `diagnostic_view_all` | — | — |
 | `GET` | `/diagnostic/{requestId}/report.csv` | member | `diagnostic_view_own` or `diagnostic_view_all` and `report_export` | — | ✅ |
@@ -49,7 +49,7 @@ All routes are under `/api/v1`. **Access**: *public* (no session), *session* (si
 | `GET` | `/organisation/settings` | member | — | — | — |
 | `PUT` | `/organisation/settings` | member | `staff_manage` | — | ✅ |
 | `GET` | `/ping/dashboard` | member | `report_view` | — | — |
-| `POST` | `/ping/run` | member | `diagnostic_run` | required | — |
+| `POST` | `/ping/run` | member when switched on | `diagnostic_run` | required | — |
 | `GET` | `/ping/run/{runId}` | member | `diagnostic_view_all` | — | — |
 | `GET` | `/ping/run/{runId}/report.pdf` | member | `report_export` | — | — |
 | `GET` | `/ping/runlist` | member | `diagnostic_view_all` | — | — |
@@ -70,6 +70,7 @@ All routes are under `/api/v1`. **Access**: *public* (no session), *session* (si
 | `GET` | `/platform/plan/list` | superuser | — | — | — |
 | `POST` | `/reflector/session` | public | — | — | — |
 | `GET` | `/result/bytt/{ttNumber}` | api key | — | — | — |
+| `GET` | `/result/bycustomer/{customerId}` | api key | — | — | — |
 | `GET` | `/report/network` | member | `report_view` and `diagnostic_view_all` | — | — |
 | `GET` | `/report/network.csv` | member | `report_export` and `diagnostic_view_all` | — | ✅ |
 | `GET` | `/report/network.pdf` | member | `report_export` and `diagnostic_view_all` | — | ✅ |
@@ -173,10 +174,11 @@ Embedded in the server binary and applied in order at boot (`packetpulsego/pkg/c
 | `0035_2026_10_22_network_reports.sql` | Network reports: an index from a result's run to its test, the time zone reports and exports are written in (`report_settings`), the daily, weekly, monthly and yearly drops (`report_delivery`), the reflector a UDP test measured to and the IP it was reached at (`ping_result.reflector_address`, `reflector_ip`), and what an endpoint shows of itself to those who do not manage endpoints (`dns_site.report_visibility`). |
 | `0036_2026_10_26_user_ip.sql` | The user IP of a device test: the public address its device filed it from, as the server saw the caller (`diagnostic_request.user_ip`), shown on the ticket, its PDF and CSV and the Results API beside where the test went. Empty for a server sweep and for a test filed before. |
 | `0037_2026_10_26_user_ipv6.sql` | The user IPv6 of a device test, beside its user IP (`diagnostic_request.user_ipv6`): the public IPv6 the device's IPv6 traffic leaves from, as its own lookup found it, kept only when it is a public IPv6 - PacketPulse is reached over IPv4 and never sees it. |
+| `0038_2026_10_28_result_organisation.sql` | The organisation of every result on the result itself (`ping_result.organisation_id`), set from its run by a trigger on every insert and filled for the results already filed, with `ping_result_org_checked_idx` (organisation, `checked_on`) in every monthly partition: a report of a day reads that day of that month's partition, however long the organisation has been testing (customer request, 28 October 2026). NULL where the run has none. |
 
 ## Appendix D — Settings
 
-Read from the environment, falling back to `.env` (see `.env.example`); defined in `packetpulsego/pkg/common/config/Config.go`.
+Read from the environment, falling back to `.env` (see `.env.example`); defined in `packetpulsego/pkg/common/config/Config.go`. A number, a switch or a duration given a value that cannot be read - `PING_TIMEOUT=900` with no unit, `IPV6_TESTS_ENABLED=yes` - stops the server at boot, naming every such setting, what it was given and what it wants (since 29 October 2026: it used to mean the default, quietly). An empty value is no value: the default.
 
 | Setting | Default | What it decides |
 |---|---|---|
@@ -202,7 +204,7 @@ Read from the environment, falling back to `.env` (see `.env.example`); defined 
 | `DEMO_SMS_CODE`, `DEMO_SEATS` | `111111`, `5` | The demo's on-screen code, and how many demo walkthroughs may run at once — at least 5; a session unused for 30 minutes gives up its place |
 | `DEMO_ORGANISATION_CODE` | — | Gives an organisation that already exists, by its licence's code, the demo sign-in: the on-screen code instead of an emailed or texted one, no password changes, the `DEMO_SEATS` cap, and public-only sweeps. Seeds nothing. **Console only**, and not with `SEED_DEMO` |
 | `TRIAL_DAYS`, `TRIAL_SEATS`, `TRIAL_SITES` | `14`, `5`, `25` | A trial licence's terms |
-| `PING_COUNT`, `PING_TIMEOUT`, `PING_INTERVAL`, `PING_CONCURRENCY` | `4`, `5s`, `200ms`, `16` | The probe engine's defaults |
+| `PING_COUNT`, `PING_TIMEOUT`, `PING_INTERVAL`, `PING_CONCURRENCY` | `4`, `5s`, `200ms`, `16` | How every server sweep runs: packets to each site, the wait for each reply, the gap between packets, sites at once. The server's alone: a sweep request naming `packet_count` or `timeout_ms` is refused (customer decision, 28 October 2026). The test servers run `PING_COUNT=1`, `PING_TIMEOUT=900ms` so the suites' sweeps are quick |
 | `PING_TCP_FALLBACK` | `true` | TCP connect where ICMP cannot be sent |
 | `PING_ALLOW_PRIVATE` | `true` | Whether RFC 1918 and unique-local addresses may be probed |
 | `LDAP_ALLOW_LOOPBACK` | `false` | A directory on PacketPulse's own host (development only) |
@@ -215,6 +217,11 @@ Read from the environment, falling back to `.env` (see `.env.example`); defined 
 | `REFLECTOR_SESSIONS_PER_MINUTE` | `6` | UDP tests one address may start in a minute on the public reflector |
 | `REFLECTOR_KEY_SECRET` | — (32+ characters) | Derives each endpoint's reflector key (§4.2). Without it the relay to customer reflectors and the key route answer 503. Changing it changes every key, so every installed reflector must be reinstalled |
 | `REFLECTOR_NETWORK_HOSTS` | — | PacketPulse's own standalone reflectors, as IP addresses separated by commas (live `140.245.28.232`). An endpoint whose **UDP reflector address** is one of them, or a name resolving to one, is signed for with the network key rather than its own endpoint key, so the one reflector answers every endpoint of every organisation. Install it with the key `packetpulseserver reflector-network-key` prints on the server. A name, not an IP, stops the server at boot |
+| `UDP_TEST_RATE_PPS` | `10` | The pace of every UDP test a person runs from a device, in packets a second: set here, never by the person (customer request, 28 October 2026). 1 to 20 - every reflector holds the longest test, 300 s, at 20 - or the server stops at boot. Sent to the app on every session and with every offer answer. |
+| `IPV6_TESTS_ENABLED` | `false` | Whether tests also run over IPv6: a device's UDP test over each family its reflector offers, and the server's sweep of a dual-stack endpoint over both. Off, every test runs over IPv4 alone and a test over IPv6 is refused when filed (customer requirement, 28 October 2026); set aside for a later release, not removed. |
+| `DEVICE_TEST_SAMPLES` | `25` | How many samples every ICMP or HTTPS test a person runs from a device takes: set here, never by the person (customer decision, 28 October 2026). 3 to 200, or the server stops at boot. Sent to the app on every session; a test filed with another count is refused. |
+| `DEVICE_TEST_INTERVAL_MS` | `200` | The gap between those samples, in milliseconds. 0 to 2000, or the server stops at boot. Sent to the app on every session. |
+| `DEVICE_TEST_TIMEOUT_MS` | `2000` | How long each of those samples may take to answer, in milliseconds, before it counts as unanswered. 200 to 10000, or the server stops at boot. Sent to the app on every session; a test filed with another time-out is refused. |
 
 ## Appendix E — Response codes and actions
 

@@ -1,0 +1,9 @@
+{
+  "_comment": "The device UDP test a person runs (customer request, 28 October 2026): its length is chosen between min_seconds and max_seconds (default_seconds unless chosen), at a pace the server sets - default_rate_pps unless UDP_TEST_RATE_PPS says otherwise, never above max_rate_pps - and the person cannot change. setup_allowance_ms is the time a session may spend before its first probe and after its last (gathering, connecting, the handshake, the warm-up echo, the drain and the summary). The Go reflector constants (reflectorconstants) are these; every reflector's limits are tested to hold max_seconds at max_rate_pps plus setup_allowance_ms; and the app's engine is tested to spend no more than setup_allowance_ms outside sending.",
+  "min_seconds": 30,
+  "max_seconds": 300,
+  "default_seconds": 60,
+  "default_rate_pps": 10,
+  "max_rate_pps": 20,
+  "setup_allowance_ms": 40000
+}

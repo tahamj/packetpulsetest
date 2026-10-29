@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"net/http"
 	"slices"
-	"sort"
-	"strings"
 	"testing"
 	"time"
 
@@ -40,70 +38,25 @@ func engineerIn(t *testing.T, ownerToken string) string {
 	return packetpulsetest.SignIn(t, email, "EngineerPass2026")
 }
 
-func sweptSites(t *testing.T, response packetpulsetest.Response) []string {
-	t.Helper()
-	names := []string{}
-	for _, result := range packetpulsetest.ListOf(t, response, "results") {
-		name, _ := result["site_name"].(string)
-		names = append(names, name)
-	}
-	sort.Strings(names)
-	return names
-}
-
 // The whole chain over HTTP, through the server as it is wired at boot: an
-// administrator imports a spreadsheet of placed endpoints, an engineer's test
-// sweeps the city nearest their device - whatever endpoints their request
-// names - and the ticket, its CSV and its PDF say so.
-func TestAnEngineersTestSweepsTheCityNearestTheirDevice(t *testing.T) {
+// engineer files the test their device ran, and the ticket, its CSV and its
+// PDF say where the device was and carry the organisation's logo. The
+// endpoint nearest the device is chosen on the device (DEV-017); the
+// server's own sweep, which chose by city, is switched off (decision of 30
+// October 2026).
+func TestAnEngineersTicketSaysWhereTheirDeviceWas(t *testing.T) {
 	packetpulsetest.RequireServer(t)
 	ownerToken, _ := packetpulsetest.SignUpOrganisation(t, "nearest")
 
-	// Addresses the probe policy refuses at once: the test is about which
-	// endpoints a sweep takes, and refused ones are still reported.
-	imported := packetpulsetest.Call(t, http.MethodPost, "/dnssite/importfile", ownerToken, map[string]any{
-		"text": "Name,Address,City,Latitude,Longitude\n" +
-			"Bengaluru DNS 1,127.0.0.1,Bengaluru,12.9716,77.5946\n" +
-			"Mumbai DNS 1,169.254.169.254,Mumbai,19.0760,72.8777\n",
-	})
-	if imported.Status != http.StatusOK || imported.Float("added") != 2 {
-		t.Fatalf("import: %d %s", imported.Status, imported.Raw)
-	}
-	// A file adds no endpoint without a position (review of 17 October
-	// 2026); a pasted list of addresses still can, and the city's sweep
-	// takes it with the one that has a position.
-	pasted := packetpulsetest.Call(t, http.MethodPost, "/dnssite/bulkimport", ownerToken, map[string]any{
-		"entries": "Bengaluru DNS 2=127.0.0.2", "region": "bengaluru",
-	})
-	if pasted.Status != http.StatusOK || pasted.Float("added") != 1 {
-		t.Fatalf("paste: %d %s", pasted.Status, pasted.Raw)
-	}
-	mumbaiId := ""
-	for _, site := range packetpulsetest.ListOf(t,
-		packetpulsetest.Call(t, http.MethodGet, "/dnssite/list", ownerToken, nil), "dns_sites") {
-		if site["site_name"] == "Mumbai DNS 1" {
-			mumbaiId, _ = site["dns_site_id"].(string)
-		}
-	}
-
 	engineer := engineerIn(t, ownerToken)
 	ttNumber := fmt.Sprintf("TT-NEAREST-%d", time.Now().UnixNano())
-	submitted := packetpulsetest.Call(t, http.MethodPost, "/diagnostic/submit", engineer, map[string]any{
-		"customer_id": "CUST-NEAR", "tt_number": ttNumber, "packet_count": 1, "timeout_ms": 900,
-		// An engineer's own choice is never read.
-		"dns_site_ids": []string{mumbaiId},
-		"location":     map[string]any{"status": "captured", "latitude": 12.9698, "longitude": 77.75, "accuracy_m": 20},
+	filed := packetpulsetest.FileDeviceTest(t, engineer, "CUST-NEAR", ttNumber, map[string]any{
+		"location": map[string]any{"status": "captured", "latitude": 12.9698, "longitude": 77.75, "accuracy_m": 20},
 	})
-	if submitted.Status != http.StatusCreated {
-		t.Fatalf("submit: %d %s", submitted.Status, submitted.Raw)
+	if filed.Status != http.StatusCreated {
+		t.Fatalf("filing: %d %s", filed.Status, filed.Raw)
 	}
-	if got := sweptSites(t, submitted); strings.Join(got, ",") != "Bengaluru DNS 1,Bengaluru DNS 2" {
-		t.Errorf("swept %v, want Bengaluru's two and not the Mumbai endpoint the request named", got)
-	}
-	request, _ := submitted.Body["request"].(map[string]any)
-	if request["endpoint_selection"] != "nearest" || request["selection_city"] != "Bengaluru" {
-		t.Errorf("recorded %v / %v", request["endpoint_selection"], request["selection_city"])
-	}
+	request, _ := filed.Body["request"].(map[string]any)
 	location, _ := request["test_location"].(map[string]any)
 	if location["status"] != "captured" || location["latitude"] != 12.9698 {
 		t.Errorf("test location = %v", location)
@@ -126,17 +79,6 @@ func TestAnEngineersTestSweepsTheCityNearestTheirDevice(t *testing.T) {
 	pdf := packetpulsetest.Call(t, http.MethodGet, "/diagnostic/"+requestId+"/report.pdf", engineer, nil)
 	if pdf.Status != http.StatusOK || !bytes.Contains(pdf.Raw, []byte("/Subtype /Image")) {
 		t.Errorf("the report: %d, logo embedded: %v", pdf.Status, bytes.Contains(pdf.Raw, []byte("/Subtype /Image")))
-	}
-
-	// With no position, the administrator's sweep takes every endpoint.
-	everything := packetpulsetest.Call(t, http.MethodPost, "/diagnostic/submit", ownerToken, map[string]any{
-		"customer_id": "CUST-NEAR", "tt_number": ttNumber + "-ALL", "packet_count": 1, "timeout_ms": 900,
-	})
-	if got := sweptSites(t, everything); len(got) != 3 {
-		t.Errorf("with no position swept %v, want all three", got)
-	}
-	if all, _ := everything.Body["request"].(map[string]any); all["endpoint_selection"] != "all" {
-		t.Errorf("recorded %v, want all", all["endpoint_selection"])
 	}
 }
 

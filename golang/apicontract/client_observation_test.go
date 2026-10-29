@@ -24,7 +24,7 @@ func oneRun(ttNumber string) map[string]any {
 		"customer_id":  "CUST-CLIENT",
 		"tt_number":    ttNumber,
 		"notes":        "Measured in the customer's browser.",
-		"sample_count": 12,
+		"sample_count": 25,
 		"timeout_ms":   2000,
 		"observations": []map[string]any{
 			{
@@ -133,6 +133,24 @@ func TestAttachedClientRunBehavesLikeAnyOtherDiagnostic(t *testing.T) {
 	// packet, and this document is the one in which that gets challenged.
 	if bytes := report.Raw; len(bytes) < 1000 {
 		t.Errorf("the PDF is %d bytes, which is too small to be a report", len(bytes))
+	}
+
+	// A4 landscape unless portrait is asked for (customer SOW, 28 October
+	// 2026), and an orientation it cannot print refused.
+	for orientation, box := range map[string]string{
+		"":          "/MediaBox [0 0 841.89 595.28]",
+		"landscape": "/MediaBox [0 0 841.89 595.28]",
+		"portrait":  "/MediaBox [0 0 595.28 841.89]",
+	} {
+		turned := packetpulsetest.Call(t, http.MethodGet,
+			"/diagnostic/"+requestId+"/report.pdf?orientation="+orientation, ownerToken, nil)
+		if turned.Status != http.StatusOK || !strings.Contains(string(turned.Raw), box) {
+			t.Errorf("orientation %q = %d, want a page of %s", orientation, turned.Status, box)
+		}
+	}
+	if sideways := packetpulsetest.Call(t, http.MethodGet,
+		"/diagnostic/"+requestId+"/report.pdf?orientation=sideways", ownerToken, nil); sideways.Status != http.StatusBadRequest {
+		t.Errorf("orientation sideways = %d, want 400", sideways.Status)
 	}
 }
 
@@ -337,5 +355,32 @@ func TestADeviceRunCannotBeFiledAgainstAnotherOrganisationsEndpoint(t *testing.T
 				t.Errorf("the refused run was filed: %d %s", byTt.Status, byTt.Raw)
 			}
 		})
+	}
+}
+
+// How an ICMP or HTTPS test samples is the server's (customer decision, 28
+// October 2026): a test from an app loaded before that, run with other
+// samples or another time-out, is refused with what to do, and nothing of it
+// is filed.
+func TestATestSampledOtherThanTheServerSetsIsRefused(t *testing.T) {
+	packetpulsetest.RequireServer(t)
+
+	token, _ := packetpulsetest.SignUpOrganisation(t, "clientsampled")
+	for name, change := range map[string]map[string]any{
+		"more samples":       {"sample_count": 50},
+		"a shorter time-out": {"timeout_ms": 500},
+	} {
+		ttNumber := fmt.Sprintf("TT-SAMPLED-%d", time.Now().UnixNano())
+		run := oneRun(ttNumber)
+		for field, value := range change {
+			run[field] = value
+		}
+		refused := packetpulsetest.Call(t, http.MethodPost, "/diagnostic/clientobservation", token, run)
+		if refused.Status != http.StatusUnprocessableEntity || !strings.Contains(string(refused.Raw), "Reload the page") {
+			t.Errorf("%s = %d %s, want 422 saying to reload", name, refused.Status, refused.Raw)
+		}
+		if found := packetpulsetest.Call(t, http.MethodGet, "/diagnostic/list?tt_number="+ttNumber, token, nil); len(packetpulsetest.ListOf(t, found, "diagnostics")) != 0 {
+			t.Errorf("%s was filed: %s", name, found.Raw)
+		}
 	}
 }

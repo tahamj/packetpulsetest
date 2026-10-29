@@ -148,6 +148,17 @@ func collectRoutes(t *testing.T, statements []ast.Stmt, inherited []string, inhe
 		return render(argument)
 	}
 	for _, statement := range statements {
+		// A route inside an if is mounted only when a server setting
+		// switches it on (SERVER_SWEEPS_ENABLED); the guide says so.
+		if conditional, ok := statement.(*ast.IfStmt); ok {
+			var switched []route
+			collectRoutes(t, conditional.Body.List, local, vars, consts, pkg, &switched)
+			for _, each := range switched {
+				each.Access += " when switched on"
+				*routes = append(*routes, each)
+			}
+			continue
+		}
 		if assign, ok := statement.(*ast.AssignStmt); ok && assign.Tok == token.DEFINE {
 			for index, name := range assign.Lhs {
 				if identifier, ok := name.(*ast.Ident); ok && index < len(assign.Rhs) {

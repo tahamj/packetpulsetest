@@ -135,13 +135,9 @@ func TestDiagnosticsAreTenantScoped(t *testing.T) {
 	})
 
 	ttNumber := fmt.Sprintf("TT-ISOLATION-%d", testStamp())
-	submit := packetpulsetest.Call(t, http.MethodPost, "/diagnostic/submit", alphaToken, map[string]any{
-		"customer_id": "CUST-ISO", "tt_number": ttNumber,
-		"packet_count": 1, "timeout_ms": 900,
-	})
+	submit := packetpulsetest.FileDeviceTest(t, alphaToken, "CUST-ISO", ttNumber, nil)
 	if submit.Status != http.StatusCreated {
-		t.Fatalf("alpha could not run a diagnostic (licence or sites): %d %s",
-			submit.Status, submit.Raw)
+		t.Fatalf("alpha could not file a test (licence): %d %s", submit.Status, submit.Raw)
 	}
 
 	t.Run("beta cannot read alpha's ticket", func(t *testing.T) {
@@ -422,11 +418,9 @@ func TestExportsCarryOnlyTheOrganisationsOwnResults(t *testing.T) {
 		"latitude": 12.9716, "longitude": 77.5946, "site_name": "loopback", "ip_address": "127.0.0.1",
 	})
 	ttNumber := fmt.Sprintf("TT-EXPORT-ISO-%d", testStamp())
-	submit := packetpulsetest.Call(t, http.MethodPost, "/diagnostic/submit", alphaToken, map[string]any{
-		"customer_id": "CUST-ISO", "tt_number": ttNumber, "packet_count": 1, "timeout_ms": 900,
-	})
+	submit := packetpulsetest.FileDeviceTest(t, alphaToken, "CUST-ISO", ttNumber, nil)
 	if submit.Status != http.StatusCreated {
-		t.Fatalf("alpha could not run a diagnostic: %d %s", submit.Status, submit.Raw)
+		t.Fatalf("alpha could not file a test: %d %s", submit.Status, submit.Raw)
 	}
 	request, _ := submit.Body["request"].(map[string]any)
 	requestId, _ := request["request_id"].(string)
@@ -489,7 +483,7 @@ func TestNetworkReportsAreTheOrganisationsOwn(t *testing.T) {
 	endpoint, _ := site.Body["dns_site_id"].(string)
 	attached := packetpulsetest.Call(t, http.MethodPost, "/diagnostic/clientobservation", alphaToken, map[string]any{
 		"customer_id": "CUST-ISO", "tt_number": fmt.Sprintf("TT-REPORT-ISO-%d", testStamp()),
-		"sample_count": 100, "timeout_ms": 1000, "dns_site_id": endpoint,
+		"sample_count": 25, "timeout_ms": 2000, "dns_site_id": endpoint,
 		"observations": []map[string]any{{
 			"target_label": "Iso POP", "target_address": "192.0.2.91", "method": "https-dns",
 			"packets_sent": 12, "packets_recv": 12, "packet_loss": 0, "avg_rtt_ms": 20.0, "jitter_ms": 2.0,

@@ -14,7 +14,7 @@
 
 | 🧭 Screens | 🔌 API routes | 🔐 Capabilities | 🗄️ Migrations | 💬 Catalogue strings | ❓ Help topics | 🧪 Guard suites |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| **17** <br><sub>in the navigation rail</sub> | **100** <br><sub>under `/api/v1`</sub> | **16** <br><sub>3 built-in roles</sub> | **37** <br><sub>applied at boot</sub> | **1213** <br><sub>English, server-served</sub> | **20** <br><sub>one per screen</sub> | **11** <br><sub>+ `load`, opt-in</sub> |
+| **17** <br><sub>in the navigation rail</sub> | **101** <br><sub>under `/api/v1`</sub> | **16** <br><sub>3 built-in roles</sub> | **38** <br><sub>applied at boot</sub> | **1288** <br><sub>English, server-served</sub> | **20** <br><sub>one per screen</sub> | **11** <br><sub>+ `load`, opt-in</sub> |
 
 <br>
 
@@ -59,6 +59,32 @@ PacketPulse is a multi-tenant network-diagnostics service for telecom operators:
 
 > [!CAUTION]
 > **Never test against live customer data.** Use a local server with a disposable database (Part 0 §0.2), or the live demo organisation for read-only walkthroughs. Tenancy, ACL and audit cases need **two organisations** of your own — testing them from a single account proves nothing.
+
+---
+
+## 📋 What Changed for the 28 October 2026 Feedback
+
+> [!IMPORTANT]
+> **Built 2026-10-28; not yet deployed.** Tata Play Fiber's minutes of 28 October 2026 asked for each test in the daily, weekly and monthly reports, Pan India as a summary, a city filter, a test length from 30 to 300 seconds, a fixed 10 packets a second, tests over IPv4 alone, the user's IPv6 shown where it is known, no Resolved IP, and samples of the API by Customer ID and TT number. Where this table and an older one disagree, this one is the product.
+
+| Change | What changed | Where to test | Source of truth |
+|---|---|---|---|
+| **Each test in the report** | Under each city, its tests, newest first, with User IPv4 and User IPv6, from the device or the server, and its own figures; then each endpoint, the city's summary in bold, and *How these figures were calculated*. The screen and the PDF list the latest 100; the CSV has every test. | `RPT-017`, `RPT-020` | `packetpulsego/pkg/reportmicroservice/reportstats/ReportStats.go` |
+| **Pan India is the summary** | The view by country lists no tests: its summary and how it was calculated. | `RPT-019` | `packetpulsego/pkg/reportmicroservice/reportstats/ReportStats.go` |
+| **A city filter** | **City** narrows the report by reflector site, its CSV and its PDF to one city. | `RPT-018` | `packetpulsego/pkg/reportmicroservice/reportservice/ReportService.go` |
+| **No Resolved IP** | Out of the ticket screen, the ticket PDF, the result CSV (retired in its contract) and the Results API's JSON. | `CSV-007`, `API-002` | `packetpulsetest/contracts/result_export_columns.json` |
+| **30 to 300 seconds, at 10 a second** | The test length is a slider from 30 seconds to 5 minutes; the pace is the server's `UDP_TEST_RATE_PPS` (10), shown and not chosen. The screen stays on through a test. | `UDP-029`, `UDP-049`, `UDP-050` | `packetpulsetest/contracts/udp_test_limits.json` |
+| **IPv4 alone** | Device tests and server checks run over IPv4 alone while `IPV6_TESTS_ENABLED` is off, its default; the user's IPv6 is still shown where the device found one. IPv6 testing is deferred, not removed. | `UDP-047`, `UDP-051`, `V6-006`, `DEV-031` | `packetpulsego/pkg/common/config/Config.go` |
+| **A customer's tickets by Customer ID** | `GET /result/bycustomer/{customerId}` gives a customer's tickets of a period, newest first, each as `/result/bytt` gives one. A list asked for more than it serves now gets as many as it serves, not its default page. | `API-007` | `packetpulsego/pkg/diagnosticmicroservice/diagnosticapp/DiagnosticHandlers.go` |
+| **How each test runs is the server's** | An ICMP or HTTPS test's samples, interval and time-out are the server's `DEVICE_TEST_SAMPLES`, `DEVICE_TEST_INTERVAL_MS` and `DEVICE_TEST_TIMEOUT_MS` (25, 200 ms, 2000 ms), shown as *How each test runs* and not offered; a test filed otherwise is refused. | `DEV-032`, `DEV-033` | `packetpulsego/pkg/common/devicetest/DeviceTest.go` |
+| **Each summary worked out, line by line** | *How these figures were calculated* is a line per figure - the figure, its value, and the sum behind it (*Average loss · 0.5% · 20 lost ÷ 4,200 sent…*) - on screen and in the PDF, where it stays on its summary's page; the PDF's column titles no longer run together. | `RPT-022` | `packetpulsego/pkg/reportmicroservice/reportfile/ReportPdf.go` |
+| **The server's sweep is switched off** | `POST /diagnostic/submit` and `POST /ping/run` exist only with `SERVER_SWEEPS_ENABLED=true`, off by default: a test is started only by a person, from their device, and its TCP fallback reaches no ticket (gap G1). The in-app help, the documents and Appendix A say so. | `DIAG-023`, `API-008` | `packetpulsego/pkg/common/config/Config.go` |
+| **A sweep runs as the server sets** | When switched on, neither `POST /diagnostic/submit` nor `POST /ping/run` takes `packet_count` or `timeout_ms` any more: naming either is refused with 422, and every sweep runs at `PING_COUNT` and `PING_TIMEOUT`. A setting the server cannot read stops it at boot rather than meaning the default. | `DIAG-022` | `packetpulsego/pkg/pingmicroservice/pingservice/PingService.go` |
+| **A4 portrait as well as landscape** | **Export PDF** asks *A4 landscape* or *A4 portrait*; the portrait page carries the same report, details two across and the table a point smaller (SOW item 8, gap G4). `?orientation=` on both report routes. | `DIAG-021` | `packetpulsego/pkg/pingmicroservice/pingreport/PingReportPdfBuilder.go` |
+| **A ticket starts when its test did** | A test filed from a device starts its ticket and its run when its first result was measured, not when it was filed: a five-minute test read as starting the moment it finished. | `UDP-052` | `packetpulsego/pkg/diagnosticmicroservice/diagnosticdomain/repository/DiagnosticRepositoryPostgres.go` |
+| **Lists of a period** | History opens on the last 30 days; the dashboard counts the last 30 days' runs; every report reads its period alone. | `HIST-009`, `HIST-010`, `RPT-021` | `packetpulsego/pkg/diagnosticmicroservice/diagnosticservice/DiagnosticService.go` |
+| **Ticket limits in characters** | A Customer ID and a TT number take 64 characters, and a target name 128, in any script: a Devanagari value was refused at about a third of that, because the limit counted bytes. | `DEV-034` | `packetpulsego/pkg/diagnosticmicroservice/diagnosticservice/DiagnosticService.go` |
+| **Only a person starts a test** | An API key reads results and never starts a test. The in-app help and the documents now say so: only a signed-in person starts one. | `API-008` | `packetpulsetest/golang/apicontract/results_api_test.go` |
 
 ---
 

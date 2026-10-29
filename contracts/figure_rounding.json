@@ -1,0 +1,19 @@
+{
+  "_comment": "How a figure is written to its decimal places on every screen and in every file: from its exact value, a half going away from zero (Dart's toStringAsFixed, which the app uses). Go's %.1f takes a half to the even digit, so a jitter of exactly 3.25 ms read 3.2 ms on a PDF and 3.3 ms on the screen beside it (found 28 October 2026). The Go writer (pingdomain/shared Decimal) and the app's loss line are both tested against these.",
+  "cases": [
+    {"value": 3.25, "places": 1, "text": "3.3"},
+    {"value": 3.35, "places": 1, "text": "3.4"},
+    {"value": 0.35, "places": 1, "text": "0.3"},
+    {"value": 2.75, "places": 1, "text": "2.8"},
+    {"value": 0.25, "places": 1, "text": "0.3"},
+    {"value": 1.005, "places": 2, "text": "1.00"},
+    {"value": 4.125, "places": 2, "text": "4.13"},
+    {"value": 0.04, "places": 1, "text": "0.0"},
+    {"value": 22.04, "places": 1, "text": "22.0"},
+    {"value": 100, "places": 1, "text": "100.0"},
+    {"value": 7.5, "places": 0, "text": "8"},
+    {"value": 0, "places": 2, "text": "0.00"},
+    {"value": -1.25, "places": 1, "text": "-1.3"},
+    {"value": -0.04, "places": 1, "text": "-0.0"}
+  ]
+}

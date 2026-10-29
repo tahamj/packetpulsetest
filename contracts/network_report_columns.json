@@ -1,5 +1,5 @@
 {
-  "_comment": "The header row of every network report CSV - by reflector site (each city, with each endpoint under it) and for every reflector site combined (Pan India for India), downloaded (GET /report/network.csv) or dropped on an organisation's own file server each day, week, month and year. One shape for every row: 'organisation' names whose tests it adds up, on every row, so a forwarded or merged file still says whose it is; 'section' says which part of the report a row is and 'level' what it adds up (a reflector site, one endpoint, the PacketPulse network, every site); packet loss, latency (the round trip) and jitter each come as average, minimum and maximum; a coverage row's count is in 'results' with its meaning in 'note'. A spreadsheet or importer is written against this list, so columns are only ever ADDED, at the end. The Go writer's test asserts it writes exactly these; the integration suite asserts the server sends exactly these.",
+  "_comment": "The header row of every network report CSV - by reflector site (each city, with each endpoint under it) and for every reflector site combined (Pan India for India), downloaded (GET /report/network.csv) or dropped on an organisation's own file server each day, week, month and year. One shape for every row: 'organisation' names whose tests it adds up, on every row, so a forwarded or merged file still says whose it is; 'section' says which part of the report a row is and 'level' what it adds up (a reflector site, one endpoint, the PacketPulse network, every site); packet loss, latency (the round trip) and jitter each come as average, minimum and maximum; a coverage row's count is in 'results' with its meaning in 'note'; a test row (level 'test', 28 October 2026) is one result a site's figures add up, its own loss, latency and jitter in the average columns, with when it was checked ('checked_on'), whether a device or the server measured it ('measured_from') and the user's addresses a device's test came from ('user_ipv4', 'user_ipv6'). A spreadsheet or importer is written against this list, so columns are only ever ADDED, at the end. The Go writer's test asserts it writes exactly these; the integration suite asserts the server sends exactly these.",
   "columns": [
     "organisation",
     "report",
@@ -30,6 +30,10 @@
     "breached",
     "degraded",
     "few_tests",
-    "note"
+    "note",
+    "checked_on",
+    "measured_from",
+    "user_ipv4",
+    "user_ipv6"
   ]
 }

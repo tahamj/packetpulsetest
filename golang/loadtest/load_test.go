@@ -1,7 +1,7 @@
 // Package loadtest measures the platform under the load one licensed
 // organisation puts on it: twenty people signing in at once, reading and
-// running diagnostics side by side, a sweep of two hundred sites, and the
-// machines that pull results out of it.
+// filing the tests their devices ran side by side, and the machines that pull
+// results out of it.
 //
 // It is opt-in - `./packetpulsetest.sh load` - and not part of the default run.
 // It takes minutes, and its budgets describe the machine it runs on as much
@@ -12,7 +12,7 @@
 // partition per row, a sweep that drops what it measured.
 //
 // Three properties are absolute, whatever the machine: no request answers
-// 5xx, every result a sweep measures is stored, and everything stored can be
+// 5xx, every result a test files is stored, and everything stored can be
 // pulled back out.
 package loadtest
 
@@ -40,6 +40,27 @@ const (
 	sites  = 200
 )
 
+// largestFiling is the most results one filed test may hold: the server's
+// diagnosticconstants.MaxClientObservations.
+const largestFiling = 16
+
+// deviceFiling is a test a device ran against one endpoint, with as many
+// results as asked, as Run diagnostic files it.
+func deviceFiling(customerId, ttNumber, dnsSiteId string, results int) map[string]any {
+	observations := make([]map[string]any, 0, results)
+	for index := range results {
+		observations = append(observations, map[string]any{
+			"target_label": fmt.Sprintf("Load target %d", index+1), "target_address": "203.0.113.1", "method": "icmp",
+			"packets_sent": 25, "packets_recv": 25, "packet_loss": 0,
+			"min_rtt_ms": 12.0, "avg_rtt_ms": 20.0, "max_rtt_ms": 45.0, "jitter_ms": 2.5,
+		})
+	}
+	return map[string]any{
+		"customer_id": customerId, "tt_number": ttNumber, "dns_site_id": dnsSiteId,
+		"sample_count": 25, "timeout_ms": 2000, "observations": observations,
+	}
+}
+
 // Budgets, as the 95th percentile of each kind of request. Measured on a
 // developer laptop against a local server and database; see the strategy
 // document for the figures they were set from.
@@ -47,10 +68,13 @@ const (
 	budgetPasswordStep = 3 * time.Second // bcrypt, twenty at once
 	budgetSecondStep   = 1 * time.Second
 	budgetReads        = 750 * time.Millisecond
-	budgetSubmit       = 20 * time.Second // five sites, ten people at once
-	budgetSweep        = 120 * time.Second
-	budgetResultsApi   = 1 * time.Second // a ticket of two hundred results
+	budgetSubmit       = 20 * time.Second // a filing, ten people at once
+	budgetResultsApi   = 1 * time.Second  // a ticket of sixteen results
 	budgetCsv          = 10 * time.Second
+	// A network report of a busy day and of its year, every test listed
+	// (customer request, 28 October 2026: as tests grow, a report reads its
+	// period, not everything an organisation has run).
+	budgetReport = 5 * time.Second
 )
 
 var client = &http.Client{
@@ -321,42 +345,34 @@ func TestTheLicensedLoad(t *testing.T) {
 		reads.judge(t)
 	})
 
+	// A test is filed from a person's device; the server's own sweep is
+	// switched off (decision of 30 October 2026). The largest filing holds as
+	// many results as one test can (the server's MaxClientObservations).
 	var sweepTicket, sweepId string
-	t.Run("a sweep of two hundred sites keeps every result", func(t *testing.T) {
-		sweep := &meter{name: "sweep: 200 sites", budget: budgetSweep}
+	t.Run("the largest filing keeps every result", func(t *testing.T) {
+		largest := &meter{name: "filing: 16 results", budget: budgetSubmit}
 		sweepTicket = fmt.Sprintf("TT-LOAD-%d", time.Now().UnixNano())
-		submitted := sweep.do(http.MethodPost, "/diagnostic/submit", owner.token, map[string]any{
-			"customer_id": "CUST-LOAD", "tt_number": sweepTicket,
-			"packet_count": 1, "timeout_ms": 1000,
-		})
-		sweep.judge(t)
+		submitted := largest.do(http.MethodPost, "/diagnostic/clientobservation", owner.token,
+			deviceFiling("CUST-LOAD", sweepTicket, siteIds[0], largestFiling))
+		largest.judge(t)
 		if submitted.status != http.StatusCreated {
-			t.Fatalf("the sweep: %d %s", submitted.status, submitted.raw)
+			t.Fatalf("the filing: %d %s", submitted.status, submitted.raw)
 		}
 		sweepId = requestIdOf(submitted)
-		answered, _ := submitted.body["results"].([]any)
-		if len(answered) != sites {
-			t.Errorf("the sweep answered %d results, want %d", len(answered), sites)
-		}
-		// Stored, not just answered: tracing two hundred dead addresses runs
-		// past its budget, and a sweep must not lose what it measured to that.
-		if stored := storedResults(t, owner.token, sweepId); stored != sites {
-			t.Errorf("%d results are stored, want all %d", stored, sites)
+		if stored := storedResults(t, owner.token, sweepId); stored != largestFiling {
+			t.Errorf("%d results are stored, want all %d", stored, largestFiling)
 		}
 	})
 
 	var submitIds []string
-	t.Run("ten people run diagnostics at once", func(t *testing.T) {
-		submits := &meter{name: "submit: 5 sites", budget: budgetSubmit}
+	t.Run("ten people file tests at once", func(t *testing.T) {
+		submits := &meter{name: "filing: 5 results", budget: budgetSubmit}
 		const submitters, each = 10, 5
 		ids := make([]string, submitters)
 		together(submitters, submitters, func(index int) {
-			who := team[1+index]
-			chosen := siteIds[index*each : (index+1)*each]
-			ids[index] = requestIdOf(submits.do(http.MethodPost, "/diagnostic/submit", who.token, map[string]any{
-				"customer_id": "CUST-LOAD", "tt_number": fmt.Sprintf("TT-LOAD-%d-%d", index, time.Now().UnixNano()),
-				"dns_site_ids": chosen, "packet_count": 1, "timeout_ms": 1000,
-			}))
+			who := team[index%len(team)]
+			ids[index] = requestIdOf(submits.do(http.MethodPost, "/diagnostic/clientobservation", who.token,
+				deviceFiling("CUST-LOAD", fmt.Sprintf("TT-LOAD-%d-%d", index, time.Now().UnixNano()), siteIds[index], each)))
 		})
 		submits.judge(t)
 		for index, id := range ids {
@@ -364,7 +380,7 @@ func TestTheLicensedLoad(t *testing.T) {
 				continue // already counted as refused
 			}
 			if stored := storedResults(t, owner.token, id); stored != each {
-				t.Errorf("diagnostic %d stored %d results, want %d", index, stored, each)
+				t.Errorf("filing %d stored %d results, want %d", index, stored, each)
 			}
 		}
 		submitIds = ids
@@ -372,21 +388,21 @@ func TestTheLicensedLoad(t *testing.T) {
 
 	t.Run("a ticketing system pulls results steadily", func(t *testing.T) {
 		if sweepTicket == "" {
-			t.Skip("the sweep did not run")
+			t.Skip("the filing did not run")
 		}
 		issued := packetpulsetest.Call(t, http.MethodPost, "/apikey/add", owner.token, map[string]any{"label": "load"})
 		if issued.Status != http.StatusCreated {
 			t.Fatalf("issuing a key: %d %s", issued.Status, issued.Raw)
 		}
 		key := issued.String("api_key")
-		pulls := &meter{name: "results API: 200 results", budget: budgetResultsApi}
+		pulls := &meter{name: "results API: 16 results", budget: budgetResultsApi}
 		together(200, 10, func(int) {
 			pulls.do(http.MethodGet, "/result/bytt/"+sweepTicket, key, nil)
 		})
 		pulls.judge(t)
 
-		// Everything stored comes back out as CSV: the sweep's results and
-		// each of the ten diagnostics', one row each.
+		// Everything stored comes back out as CSV: the largest filing's
+		// results and each of the ten filings', one row each.
 		export := &meter{name: "CSV export of the run", budget: budgetCsv}
 		pulled := export.do(http.MethodGet,
 			"/result/export.csv?from="+url.QueryEscape(started.Format(time.RFC3339)), key, nil)
@@ -395,7 +411,7 @@ func TestTheLicensedLoad(t *testing.T) {
 		if err != nil {
 			t.Fatalf("the export is not CSV: %v", err)
 		}
-		want := sites
+		want := largestFiling
 		for _, id := range submitIds {
 			if id != "" {
 				want += 5
@@ -404,5 +420,60 @@ func TestTheLicensedLoad(t *testing.T) {
 		if rows := len(records) - 1; rows != want {
 			t.Errorf("the export holds %d rows, want %d - every stored result once", rows, want)
 		}
+	})
+
+	// The team files a busy day of device tests - a thousand tickets of four
+	// results each - and the network report of the day and of the year reads
+	// them within its budget, every test accounted for: listed under its
+	// city, counted once, and every one in the CSV.
+	t.Run("a busy day's network report lists every test", func(t *testing.T) {
+		const tickets, each = 1000, 4
+		files := &meter{name: "device tests filed", budget: budgetSubmit}
+		stamp := time.Now().UnixNano()
+		together(tickets, len(team), func(index int) {
+			observations := make([]map[string]any, 0, each)
+			for range each {
+				observations = append(observations, map[string]any{
+					"target_label": "Load site", "target_address": "203.0.113.1", "method": "icmp",
+					"packets_sent": 10, "packets_recv": 10 - index%2, "packet_loss": float64(index%2) * 10,
+					"min_rtt_ms": 12.0, "avg_rtt_ms": 20.0 + float64(index%7), "max_rtt_ms": 45.0, "jitter_ms": 2.5,
+				})
+			}
+			files.do(http.MethodPost, "/diagnostic/clientobservation", team[index%len(team)].token, map[string]any{
+				"customer_id": "CUST-LOAD-DAY", "tt_number": fmt.Sprintf("TT-DAY-%d-%04d", stamp, index),
+				"sample_count": 25, "timeout_ms": 2000, "dns_site_id": siteIds[index%len(siteIds)],
+				"observations": observations,
+			})
+		})
+		files.judge(t)
+
+		reports := &meter{name: "network report: day and year", budget: budgetReport}
+		for _, period := range []string{"day", "year"} {
+			read := reports.do(http.MethodGet, "/report/network?period="+period, owner.token, nil)
+			sites, _ := read.body["sites"].([]any)
+			listed := 0
+			for _, site := range sites {
+				count, _ := site.(map[string]any)["entry_count"].(float64)
+				listed += int(count)
+			}
+			if listed < tickets*each {
+				t.Errorf("the %s's report lists %d tests, want at least the %d filed", period, listed, tickets*each)
+			}
+			csvFile := reports.do(http.MethodGet, "/report/network.csv?period="+period, owner.token, nil)
+			records, err := csv.NewReader(bytes.NewReader(csvFile.raw)).ReadAll()
+			if err != nil {
+				t.Fatalf("the %s's CSV is not CSV: %v", period, err)
+			}
+			tests := 0
+			for _, record := range records[1:] {
+				if len(record) > 3 && record[3] == "test" {
+					tests++
+				}
+			}
+			if tests != listed {
+				t.Errorf("the %s's CSV holds %d tests, the report %d", period, tests, listed)
+			}
+		}
+		reports.judge(t)
 	})
 }

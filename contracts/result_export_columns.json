@@ -1,5 +1,5 @@
 {
-  "_comment": "The header row of every PacketPulse results CSV - the download beside a ticket (GET /diagnostic/{id}/report.csv), the Results API pull (GET /result/export.csv) and the scheduled push to an organisation's own server. An IT system's importer is written against this list, so columns are only ever ADDED, at the end. The Go writer's test asserts it writes exactly these; the integration suite asserts the server sends exactly these. checked_on is written in the organisation's own time zone with its offset (2026-10-21T11:30:00+05:30 in Mumbai); it was checked_on_utc until 22 October 2026, when the customer asked for IST. user_ip, added 26 October 2026, is the public IP a device test was filed from, as the server saw the caller; it is empty for a server sweep. user_ipv6, added the same day, is the device's public IPv6 as its own lookup found it (PacketPulse is reached over IPv4 and never sees it); empty when the device had no IPv6.",
+  "_comment": "The header row of every PacketPulse results CSV - the download beside a ticket (GET /diagnostic/{id}/report.csv), the Results API pull (GET /result/export.csv) and the scheduled push to an organisation's own server. An IT system's importer is written against this list, so columns are only ever ADDED, at the end - with one recorded exception, in 'retired': resolved_ip was taken out on 28 October 2026 at the customer's request (it read as the reflector's IP, not the user's; the user's addresses are user_ip and user_ipv6). A retired column never comes back under its old name. The Go writer's test asserts it writes exactly these; the integration suite asserts the server sends exactly these. checked_on is written in the organisation's own time zone with its offset (2026-10-21T11:30:00+05:30 in Mumbai); it was checked_on_utc until 22 October 2026, when the customer asked for IST. user_ip, added 26 October 2026, is the public IP a device test was filed from, as the server saw the caller; it is empty for a server sweep. user_ipv6, added the same day, is the device's public IPv6 as its own lookup found it (PacketPulse is reached over IPv4 and never sees it); empty when the device had no IPv6.",
   "columns": [
     "result_id",
     "request_id",
@@ -8,7 +8,6 @@
     "customer_id",
     "site_name",
     "address",
-    "resolved_ip",
     "ip_version",
     "counted",
     "method",
@@ -32,5 +31,12 @@
     "reflector_ip",
     "user_ip",
     "user_ipv6"
+  ],
+  "retired": [
+    {
+      "column": "resolved_ip",
+      "on": "2026-10-28",
+      "why": "customer request: remove the Resolved IP column from reports; the user's addresses are user_ip and user_ipv6"
+    }
   ]
 }

@@ -57,11 +57,9 @@ func TestTheExportsCarryTheContractedHeader(t *testing.T) {
 		"latitude": 12.9716, "longitude": 77.5946, "site_name": "loopback", "ip_address": "127.0.0.1",
 	})
 	ttNumber := fmt.Sprintf("TT-CSV-%d", time.Now().UnixNano())
-	submit := packetpulsetest.Call(t, http.MethodPost, "/diagnostic/submit", ownerToken, map[string]any{
-		"customer_id": "CUST-CSV", "tt_number": ttNumber, "packet_count": 1, "timeout_ms": 900,
-	})
+	submit := packetpulsetest.FileDeviceTest(t, ownerToken, "CUST-CSV", ttNumber, nil)
 	if submit.Status != http.StatusCreated {
-		t.Fatalf("could not run a diagnostic: %d %s", submit.Status, submit.Raw)
+		t.Fatalf("could not file a test: %d %s", submit.Status, submit.Raw)
 	}
 	request, _ := submit.Body["request"].(map[string]any)
 	requestId, _ := request["request_id"].(string)

@@ -38,7 +38,7 @@ PACKETPULSE_TEST_URL=http://localhost:18080 PACKETPULSE_TEST_REQUIRE_SUPERUSER=1
 scripts/deploy/PacketPulseDeploy.sh --host mshop.rummaan53.com
 ```
 
-The script backs the live database up before the new release boots and migrates it. It does not install the nginx vhost: when `scripts/deploy/packetpulse-nginx.conf` changes, copy it to `/etc/nginx/conf.d/packetpulse.conf` on the host, run `sudo certbot --nginx -d packetpulse.rummaan53.com --reinstall` to put the TLS lines back, then `sudo nginx -t` and reload. Afterwards:
+Before anything is switched, the script runs the new release's `packetpulseserver check-config` on the host, as the unit runs it (its user, `/opt/packetpulse/.env`): a setting the new release would refuse - a value it cannot read, a range it narrowed - stops the deploy with *refuses the live settings … nothing was activated*, rather than the server at boot (since 29 October 2026). The script then backs the live database up before the new release boots and migrates it. It does not install the nginx vhost: when `scripts/deploy/packetpulse-nginx.conf` changes, copy it to `/etc/nginx/conf.d/packetpulse.conf` on the host, run `sudo certbot --nginx -d packetpulse.rummaan53.com --reinstall` to put the TLS lines back, then `sudo nginx -t` and reload. Afterwards:
 
 | ID | Check | Expected |
 |---|---|---|
@@ -50,6 +50,7 @@ The script backs the live database up before the new release boots and migrates 
 | `REL-012` | `/proc/sys/net/ipv4/ping_group_range` on the host | `0 2147483647` — unprivileged ICMP, so sweeps report `icmp` rather than falling back to TCP |
 | `REL-013` | `curl -sI https://packetpulse.rummaan53.com/app/flutter_bootstrap.js`, then the `main.<hash>.dart.js` it names | The bootstrap: `Cache-Control: no-cache` and no `max-age`. The bundle: `immutable`. 🛑 **Must NOT** cache anything else under `/app/` - a returning browser then keeps the old client. In October 2026 a seven-day cache kept browsers on a client from before two-step sign-in, which dropped everyone back at sign-in with no message |
 | `REL-014` | `curl -sI` on `/`, `/app/` and `/assets/packetpulse-site.css` | `X-Frame-Options: SAMEORIGIN` and `X-Content-Type-Options: nosniff` on each. 🛑 **Must NOT** be missing: an `add_header` inside a location drops every header set on the server block |
+| `REL-015` | The deploy's output before *activating* | *the live settings boot <version>*; with a setting the release cannot read put in a copy of the host's `.env` (on a scratch host), *refuses the live settings in /opt/packetpulse/.env … nothing was activated*, and `current` unchanged |
 
 ## 5.5 Rollback
 

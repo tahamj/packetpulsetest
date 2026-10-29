@@ -499,6 +499,30 @@ func ListOf(t *testing.T, response Response, key string) []map[string]any {
 	return rows
 }
 
+// FileDeviceTest files an ICMP test a device ran against a ticket, as Run
+// diagnostic does, and returns the answer: 201 with the request. A test is
+// started by a person, from their device; the server's own sweep is switched
+// off unless SERVER_SWEEPS_ENABLED turns it on (decision of 30 October 2026),
+// so this is how a suite opens a ticket. extra adds to or replaces the
+// filing's fields, such as location or dns_site_id.
+func FileDeviceTest(t *testing.T, token, customerId, ttNumber string, extra map[string]any) Response {
+	t.Helper()
+	filing := map[string]any{
+		"customer_id": customerId, "tt_number": ttNumber,
+		"sample_count": 25, "timeout_ms": 2000,
+		"observations": []map[string]any{{
+			"target_label": "Cloudflare DNS", "target_address": "1.1.1.1", "method": "icmp",
+			"packets_sent": 25, "packets_recv": 24, "packet_loss": 4,
+			"min_rtt_ms": 18.2, "avg_rtt_ms": 21.5, "max_rtt_ms": 30.1, "jitter_ms": 1.8,
+			"started_on": time.Now().UTC().Format(time.RFC3339Nano),
+		}},
+	}
+	for key, value := range extra {
+		filing[key] = value
+	}
+	return Call(t, http.MethodPost, "/diagnostic/clientobservation", token, filing)
+}
+
 // setting reads a value the suite shares with the server it tests: from the
 // environment under the suite's own name or the server's, or - on a
 // development machine, as DATABASE_URL is - from the repository's .env under

@@ -165,6 +165,10 @@ func TestANetworkReportQueryIsChecked(t *testing.T) {
 		"period=fortnight": "period",
 		"date=21-10-2026":  "date",
 		"date=" + time.Now().UTC().AddDate(0, 0, 3).Format("2006-01-02"): "date",
+		// A city is one of the organisation's own, and only narrows a report
+		// by site (customer request, 28 October 2026).
+		"city=Atlantis":            "city",
+		"view=country&city=Mumbai": "city",
 	} {
 		for _, path := range []string{"/report/network", "/report/network.csv"} {
 			response := packetpulsetest.Call(t, http.MethodGet, path+"?"+query, ownerToken, nil)

@@ -156,6 +156,7 @@ nav.side .nohit.on{display:block}
     </div>
     <a class="n1" href="#packetpulse-manual-testing-guide">📡 PacketPulse Manual Testing Guide</a>
     <a class="n2" href="#how-to-read-this-manual">🧭 How To Read This Manual</a>
+    <a class="n2" href="#what-changed-for-the-28-october-2026-feedback">📋 What Changed for the 28 October 2026 Feedback</a>
     <a class="n2" href="#what-changed-in-the-17-october-2026-review">📋 What Changed in the 17 October 2026 Review</a>
     <a class="n2" href="#what-changed-on-16-october-2026">📋 What Changed on 16 October 2026</a>
     <a class="n2" href="#what-changed-in-the-1314-october-2026-review">📋 What Changed in the 13–14 October 2026 Review</a>
@@ -237,10 +238,10 @@ nav.side .nohit.on{display:block}
 <tbody>
 <tr>
 <td style="text-align:center"><strong>17</strong> <br><sub>in the navigation rail</sub></td>
-<td style="text-align:center"><strong>100</strong> <br><sub>under <code>/api/v1</code></sub></td>
+<td style="text-align:center"><strong>101</strong> <br><sub>under <code>/api/v1</code></sub></td>
 <td style="text-align:center"><strong>16</strong> <br><sub>3 built-in roles</sub></td>
-<td style="text-align:center"><strong>37</strong> <br><sub>applied at boot</sub></td>
-<td style="text-align:center"><strong>1213</strong> <br><sub>English, server-served</sub></td>
+<td style="text-align:center"><strong>38</strong> <br><sub>applied at boot</sub></td>
+<td style="text-align:center"><strong>1288</strong> <br><sub>English, server-served</sub></td>
 <td style="text-align:center"><strong>20</strong> <br><sub>one per screen</sub></td>
 <td style="text-align:center"><strong>11</strong> <br><sub>+ <code>load</code>, opt-in</sub></td>
 </tr>
@@ -340,6 +341,117 @@ nav.side .nohit.on{display:block}
 </div>
 <div class="alert a-caution"><div class="alert-h">🛑 CAUTION</div><p><strong>Never test against live customer data.</strong> Use a local server with a disposable database (Part 0 §0.2), or the live demo organisation for read-only walkthroughs. Tenancy, ACL and audit cases need <strong>two organisations</strong> of your own — testing them from a single account proves nothing.</p>
 </div>
+<hr>
+<h2 id="what-changed-for-the-28-october-2026-feedback">📋 What Changed for the 28 October 2026 Feedback<a class="anchor" href="#what-changed-for-the-28-october-2026-feedback" aria-label="Link to this section">#</a></h2>
+<div class="alert a-important"><div class="alert-h">📌 IMPORTANT</div><p><strong>Built 2026-10-28; not yet deployed.</strong> Tata Play Fiber's minutes of 28 October 2026 asked for each test in the daily, weekly and monthly reports, Pan India as a summary, a city filter, a test length from 30 to 300 seconds, a fixed 10 packets a second, tests over IPv4 alone, the user's IPv6 shown where it is known, no Resolved IP, and samples of the API by Customer ID and TT number. Where this table and an older one disagree, this one is the product.</p>
+</div>
+<div class="tw"><table><thead>
+<tr>
+<th>Change</th>
+<th>What changed</th>
+<th>Where to test</th>
+<th>Source of truth</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Each test in the report</strong></td>
+<td>Under each city, its tests, newest first, with User IPv4 and User IPv6, from the device or the server, and its own figures; then each endpoint, the city's summary in bold, and <em>How these figures were calculated</em>. The screen and the PDF list the latest 100; the CSV has every test.</td>
+<td><code>RPT-017</code>, <code>RPT-020</code></td>
+<td><code>packetpulsego/pkg/reportmicroservice/reportstats/ReportStats.go</code></td>
+</tr>
+<tr>
+<td><strong>Pan India is the summary</strong></td>
+<td>The view by country lists no tests: its summary and how it was calculated.</td>
+<td><code>RPT-019</code></td>
+<td><code>packetpulsego/pkg/reportmicroservice/reportstats/ReportStats.go</code></td>
+</tr>
+<tr>
+<td><strong>A city filter</strong></td>
+<td><strong>City</strong> narrows the report by reflector site, its CSV and its PDF to one city.</td>
+<td><code>RPT-018</code></td>
+<td><code>packetpulsego/pkg/reportmicroservice/reportservice/ReportService.go</code></td>
+</tr>
+<tr>
+<td><strong>No Resolved IP</strong></td>
+<td>Out of the ticket screen, the ticket PDF, the result CSV (retired in its contract) and the Results API's JSON.</td>
+<td><code>CSV-007</code>, <code>API-002</code></td>
+<td><code>packetpulsetest/contracts/result_export_columns.json</code></td>
+</tr>
+<tr>
+<td><strong>30 to 300 seconds, at 10 a second</strong></td>
+<td>The test length is a slider from 30 seconds to 5 minutes; the pace is the server's <code>UDP_TEST_RATE_PPS</code> (10), shown and not chosen. The screen stays on through a test.</td>
+<td><code>UDP-029</code>, <code>UDP-049</code>, <code>UDP-050</code></td>
+<td><code>packetpulsetest/contracts/udp_test_limits.json</code></td>
+</tr>
+<tr>
+<td><strong>IPv4 alone</strong></td>
+<td>Device tests and server checks run over IPv4 alone while <code>IPV6_TESTS_ENABLED</code> is off, its default; the user's IPv6 is still shown where the device found one. IPv6 testing is deferred, not removed.</td>
+<td><code>UDP-047</code>, <code>UDP-051</code>, <code>V6-006</code>, <code>DEV-031</code></td>
+<td><code>packetpulsego/pkg/common/config/Config.go</code></td>
+</tr>
+<tr>
+<td><strong>A customer's tickets by Customer ID</strong></td>
+<td><code>GET /result/bycustomer/{customerId}</code> gives a customer's tickets of a period, newest first, each as <code>/result/bytt</code> gives one. A list asked for more than it serves now gets as many as it serves, not its default page.</td>
+<td><code>API-007</code></td>
+<td><code>packetpulsego/pkg/diagnosticmicroservice/diagnosticapp/DiagnosticHandlers.go</code></td>
+</tr>
+<tr>
+<td><strong>How each test runs is the server's</strong></td>
+<td>An ICMP or HTTPS test's samples, interval and time-out are the server's <code>DEVICE_TEST_SAMPLES</code>, <code>DEVICE_TEST_INTERVAL_MS</code> and <code>DEVICE_TEST_TIMEOUT_MS</code> (25, 200 ms, 2000 ms), shown as <em>How each test runs</em> and not offered; a test filed otherwise is refused.</td>
+<td><code>DEV-032</code>, <code>DEV-033</code></td>
+<td><code>packetpulsego/pkg/common/devicetest/DeviceTest.go</code></td>
+</tr>
+<tr>
+<td><strong>Each summary worked out, line by line</strong></td>
+<td><em>How these figures were calculated</em> is a line per figure - the figure, its value, and the sum behind it (<em>Average loss · 0.5% · 20 lost ÷ 4,200 sent…</em>) - on screen and in the PDF, where it stays on its summary's page; the PDF's column titles no longer run together.</td>
+<td><code>RPT-022</code></td>
+<td><code>packetpulsego/pkg/reportmicroservice/reportfile/ReportPdf.go</code></td>
+</tr>
+<tr>
+<td><strong>The server's sweep is switched off</strong></td>
+<td><code>POST /diagnostic/submit</code> and <code>POST /ping/run</code> exist only with <code>SERVER_SWEEPS_ENABLED=true</code>, off by default: a test is started only by a person, from their device, and its TCP fallback reaches no ticket (gap G1). The in-app help, the documents and Appendix A say so.</td>
+<td><code>DIAG-023</code>, <code>API-008</code></td>
+<td><code>packetpulsego/pkg/common/config/Config.go</code></td>
+</tr>
+<tr>
+<td><strong>A sweep runs as the server sets</strong></td>
+<td>When switched on, neither <code>POST /diagnostic/submit</code> nor <code>POST /ping/run</code> takes <code>packet_count</code> or <code>timeout_ms</code> any more: naming either is refused with 422, and every sweep runs at <code>PING_COUNT</code> and <code>PING_TIMEOUT</code>. A setting the server cannot read stops it at boot rather than meaning the default.</td>
+<td><code>DIAG-022</code></td>
+<td><code>packetpulsego/pkg/pingmicroservice/pingservice/PingService.go</code></td>
+</tr>
+<tr>
+<td><strong>A4 portrait as well as landscape</strong></td>
+<td><strong>Export PDF</strong> asks <em>A4 landscape</em> or <em>A4 portrait</em>; the portrait page carries the same report, details two across and the table a point smaller (SOW item 8, gap G4). <code>?orientation=</code> on both report routes.</td>
+<td><code>DIAG-021</code></td>
+<td><code>packetpulsego/pkg/pingmicroservice/pingreport/PingReportPdfBuilder.go</code></td>
+</tr>
+<tr>
+<td><strong>A ticket starts when its test did</strong></td>
+<td>A test filed from a device starts its ticket and its run when its first result was measured, not when it was filed: a five-minute test read as starting the moment it finished.</td>
+<td><code>UDP-052</code></td>
+<td><code>packetpulsego/pkg/diagnosticmicroservice/diagnosticdomain/repository/DiagnosticRepositoryPostgres.go</code></td>
+</tr>
+<tr>
+<td><strong>Lists of a period</strong></td>
+<td>History opens on the last 30 days; the dashboard counts the last 30 days' runs; every report reads its period alone.</td>
+<td><code>HIST-009</code>, <code>HIST-010</code>, <code>RPT-021</code></td>
+<td><code>packetpulsego/pkg/diagnosticmicroservice/diagnosticservice/DiagnosticService.go</code></td>
+</tr>
+<tr>
+<td><strong>Ticket limits in characters</strong></td>
+<td>A Customer ID and a TT number take 64 characters, and a target name 128, in any script: a Devanagari value was refused at about a third of that, because the limit counted bytes.</td>
+<td><code>DEV-034</code></td>
+<td><code>packetpulsego/pkg/diagnosticmicroservice/diagnosticservice/DiagnosticService.go</code></td>
+</tr>
+<tr>
+<td><strong>Only a person starts a test</strong></td>
+<td>An API key reads results and never starts a test. The in-app help and the documents now say so: only a signed-in person starts one.</td>
+<td><code>API-008</code></td>
+<td><code>packetpulsetest/golang/apicontract/results_api_test.go</code></td>
+</tr>
+</tbody>
+</table></div>
 <hr>
 <h2 id="what-changed-in-the-17-october-2026-review">📋 What Changed in the 17 October 2026 Review<a class="anchor" href="#what-changed-in-the-17-october-2026-review" aria-label="Link to this section">#</a></h2>
 <div class="alert a-important"><div class="alert-h">📌 IMPORTANT</div><p><strong>Deployed 2026-10-17: release 20261017-105318, and the reflector row in 20261017-190629.</strong> The review of 17 October 2026 asked for PacketPulse to be able to help inside a customer's organisation, for the endpoint to be picked by position, and for an ended session to land on sign-in; then for PacketPulse's own reflector to answer every location. Where this table and an older one disagree, this one is the product.</p>
@@ -886,9 +998,9 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 </tbody>
 </table></div>
 <h2 id="l4-ipv4-ipv6-and-not-counted">L.4 IPv4, IPv6 and &quot;not counted&quot;<a class="anchor" href="#l4-ipv4-ipv6-and-not-counted" aria-label="Link to this section">#</a></h2>
-<p>A site whose name resolves to both an IPv4 and an IPv6 address is measured over <strong>both</strong>. The IPv6 result is shown, kept and exported, but marked <strong>not counted</strong>: the site's totals and breaches are carried by IPv4, because the customer's agreement is for the service and IPv4 still carries it. A site that is IPv6 <em>only</em> counts over IPv6 — otherwise it could never fail. That is a server sweep, which tests both at once; a device's browser UDP test runs over IPv4 and then over IPv6 when the reflector offers it, and both of its results count. When the server itself has no IPv6 route (the hosted server has had one since 24 October 2026), an IPv6 address is reported as <em>could not be tested from here</em> rather than as an outage.</p>
+<p>Tests run over IPv4 alone unless <code>IPV6_TESTS_ENABLED</code> is set (customer requirement, 28 October 2026: the goal is packet loss over IPv4); the device's public IPv6 is still shown. With it set, a site whose name resolves to both an IPv4 and an IPv6 address is measured over <strong>both</strong>. The IPv6 result is shown, kept and exported, but marked <strong>not counted</strong>: the site's totals and breaches are carried by IPv4, because the customer's agreement is for the service and IPv4 still carries it. A site that is IPv6 <em>only</em> counts over IPv6 — otherwise it could never fail. That is a server sweep (itself switched off unless <code>SERVER_SWEEPS_ENABLED</code> is set, 30 October 2026), which tests both at once; a device's browser UDP test runs over IPv4 and then over IPv6 when the reflector offers it, and both of its results count. When the server itself has no IPv6 route (the hosted server has had one since 24 October 2026), an IPv6 address is reported as <em>could not be tested from here</em> rather than as an outage.</p>
 <h2 id="l5-two-vantage-points">L.5 Two vantage points<a class="anchor" href="#l5-two-vantage-points" aria-label="Link to this section">#</a></h2>
-<p>PacketPulse measures from two places. Its server sweeps the organisation's endpoints from PacketPulse's data centre when the API asks it to. <strong>Run diagnostic</strong> measures from wherever the person is, over their own connection, to the endpoint nearest them — the right tool for &quot;is it slow for me?&quot;. The two will not match, and both are correct: they measure different layers from different places. A device test is <strong>attached</strong> to a ticket, under the endpoint it measured, labelled as measured on a device.</p>
+<p>Every test is started by a person, from their device: <strong>Run diagnostic</strong> measures from wherever the person is, over their own connection, to the endpoint nearest them — the right tool for &quot;is it slow for me?&quot;. PacketPulse's own sweep of endpoints from its data centre measured a different layer from a different place; it is set aside for a later release (switched off on 2026-10-30, <code>SERVER_SWEEPS_ENABLED</code>). A device test is <strong>attached</strong> to a ticket, under the endpoint it measured, labelled as measured on a device.</p>
 <h2 id="l6-two-step-sign-in">L.6 Two-step sign-in<a class="anchor" href="#l6-two-step-sign-in" aria-label="Link to this section">#</a></h2>
 <p>After the password, everyone enters a one-time <strong>6-digit code</strong>. It is <strong>emailed</strong> to their sign-in address, or <strong>texted</strong> to their mobile when an administrator chose text for them and the organisation's own SMS gateway is on. An owner's code is always emailed, so the account that runs the organisation never depends on a gateway. A code is good for ten minutes and five tries; ten wrong codes in all lock the account for fifteen minutes, and nobody is sent more than ten codes an hour. A wrong <em>password</em> never locks anything, so a stranger cannot lock someone out by typing their address. A lost phone is handled by an administrator, who signs that device out and switches the person to email.</p>
 <h2 id="l7-location-at-sign-in">L.7 Location at sign-in<a class="anchor" href="#l7-location-at-sign-in" aria-label="Link to this section">#</a></h2>
@@ -1836,7 +1948,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>Administrator, then Engineer</td>
 <td>An endpoint can show its reflector only</td>
 <td>Edit an endpoint with a <strong>UDP reflector address</strong>: <strong>Reports show</strong> <em>The reflector only</em>; save. As a NOC Engineer, run a UDP test of it; open the ticket, its PDF and <strong>Export CSV</strong>; then as the Administrator</td>
-<td>The engineer sees the reflector and the IP the browser reached it at (<em>Reflector … at …</em>), and an empty address and resolved IP in the screen, the PDF and the CSV; the Administrator sees both. An edit that does not name the choice keeps it. 🛑 <strong>Must NOT</strong> show the endpoint's address to anyone without <code>dns_site_manage</code>, or clear the choice on an edit from an older app</td>
+<td>The engineer sees the reflector and the IP the browser reached it at (<em>Reflector … at …</em>), and an empty address in the screen, the PDF and the CSV (none of them shows a resolved IP since 28 October 2026); the Administrator sees both. An edit that does not name the choice keeps it. 🛑 <strong>Must NOT</strong> show the endpoint's address to anyone without <code>dns_site_manage</code>, or clear the choice on an edit from an older app</td>
 </tr>
 </tbody>
 </table></div>
@@ -1855,10 +1967,10 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 </ul>
 <hr>
 <h3 id="32-diagnostics-and-results">3.2 🩺 Diagnostics and results<a class="anchor" href="#32-diagnostics-and-results" aria-label="Link to this section">#</a></h3>
-<p><strong>Screen:</strong> a ticket's result, from <strong>History</strong>; no screen starts a sweep (since 2026-10-07: <strong>Run diagnostic</strong> is the test from this device, §4.1) · <strong>Routes:</strong> <code>POST /diagnostic/submit</code>, <code>GET /diagnostic/{requestId}</code>, <code>GET /diagnostic/{requestId}/report.pdf</code> · <strong>Capabilities:</strong> <code>diagnostic_run</code>, <code>diagnostic_view_own</code> or <code>diagnostic_view_all</code>, <code>report_export</code> · <strong>Licence:</strong> required to run</p>
+<p><strong>Screen:</strong> a ticket's result, from <strong>History</strong>; no screen starts a sweep (since 2026-10-07: <strong>Run diagnostic</strong> is the test from this device, §4.1), and since 2026-10-30 the sweep's routes exist only with <code>SERVER_SWEEPS_ENABLED=true</code> (off by default) · <strong>Routes:</strong> <code>POST /diagnostic/submit</code> (switched), <code>GET /diagnostic/{requestId}</code>, <code>GET /diagnostic/{requestId}/report.pdf?orientation=landscape|portrait</code> · <strong>Capabilities:</strong> <code>diagnostic_run</code>, <code>diagnostic_view_own</code> or <code>diagnostic_view_all</code>, <code>report_export</code> · <strong>Licence:</strong> required to run</p>
 <ul>
-<li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: One ticket, one report. Every figure a NOC argues about — loss, latency, RFC 3550 jitter — from PacketPulse's server, and from the engineer's own device on <strong>Run diagnostic</strong>. A lapsed licence stops new tests but never takes away the evidence already gathered.</li>
-<li>📖 <strong>User Guide &amp; Operational Flow</strong>: A sweep runs on PacketPulse's server when <code>POST /diagnostic/submit</code> asks for one; nothing sweeps on a schedule since automatic monitoring was removed (§5.1). <strong>Run diagnostic</strong> no longer starts one (since 2026-10-07); it is the test from this device against one endpoint (§4.1). A sweep given a position tests the endpoints of the city nearest it (§3.1); with no position — location refused, no fix, or no endpoint placed yet — every enabled endpoint is swept. Only whoever manages the endpoints (<code>dns_site_manage</code>) may name endpoints instead; an engineer's list is ignored. The result says <strong>Tested from</strong> — the device's position as the test ran, beside the sign-in place — and <strong>Endpoints</strong>: the nearest city and how far away it was, every endpoint, or chosen by hand. The result shows headline cards (sites reachable, average loss, average jitter), then a row per site and family: reachable, the packet line verbatim (<em>Sent = 4, Received = 4, Lost = 0</em>), round trips, jitter and SLA grade. A result that was not graded reads <em>Not graded</em>, and a note under the table says what that means and why for each reason present: an HTTPS test from a device (HTTPS resends what the network drops), a device test filed before 14 October 2026 (before device tests were graded), or an address PacketPulse could not test. A result filed under planned work before October 2026 reads <em>Excluded</em>, with its own line. The voice-quality estimate (MOS) is not shown (§4.1). <strong>Export PDF</strong> and <strong>Export CSV</strong> sit at the top.</li>
+<li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: One ticket, one report. Every figure a NOC argues about — loss, latency, RFC 3550 jitter — from the engineer's own device on <strong>Run diagnostic</strong>. A lapsed licence stops new tests but never takes away the evidence already gathered.</li>
+<li>📖 <strong>User Guide &amp; Operational Flow</strong>: <strong>Export PDF</strong> asks which way up: <em>A4 landscape</em> or <em>A4 portrait</em> (customer SOW, 28 October 2026). Both carry the same report; portrait puts the details two across and the table a point smaller, shrinking a long value to fit its column rather than cutting it. The route takes <code>orientation=landscape</code> (the default) or <code>orientation=portrait</code>, and refuses anything else with 400. A sweep runs on PacketPulse's server when <code>POST /diagnostic/submit</code> asks for one; nothing sweeps on a schedule since automatic monitoring was removed (§5.1). <strong>Run diagnostic</strong> no longer starts one (since 2026-10-07); it is the test from this device against one endpoint (§4.1). A sweep given a position tests the endpoints of the city nearest it (§3.1); with no position — location refused, no fix, or no endpoint placed yet — every enabled endpoint is swept. Only whoever manages the endpoints (<code>dns_site_manage</code>) may name endpoints instead; an engineer's list is ignored. The result says <strong>Tested from</strong> — the device's position as the test ran, beside the sign-in place — and <strong>Endpoints</strong>: the nearest city and how far away it was, every endpoint, or chosen by hand. The result shows headline cards (sites reachable, average loss, average jitter), then a row per site and family: reachable, the packet line verbatim (<em>Sent = 4, Received = 4, Lost = 0</em>), round trips, jitter and SLA grade. A result that was not graded reads <em>Not graded</em>, and a note under the table says what that means and why for each reason present: an HTTPS test from a device (HTTPS resends what the network drops), a device test filed before 14 October 2026 (before device tests were graded), or an address PacketPulse could not test. A result filed under planned work before October 2026 reads <em>Excluded</em>, with its own line. The voice-quality estimate (MOS) is not shown (§4.1). <strong>Export PDF</strong> and <strong>Export CSV</strong> sit at the top.</li>
 <li>🧪 <strong>Manual Testing Playbook</strong>:<div class="tw"><table><thead>
 <tr>
 <th>ID</th>
@@ -1870,10 +1982,17 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 </thead>
 <tbody>
 <tr>
+<td><code>DIAG-023</code></td>
+<td>Tester</td>
+<td>The server's sweep is switched off</td>
+<td>On a server with <code>SERVER_SWEEPS_ENABLED</code> unset, as a member with <code>diagnostic_run</code>: <code>POST /diagnostic/submit</code> with TT <code>TT-MAN-023</code>; then <code>POST /ping/run</code>; then open TT <code>TT-MAN-023</code> in <strong>History</strong></td>
+<td>405 and 404: neither route exists; no ticket <code>TT-MAN-023</code> and no new run. Only a person starts a test, from their device. 🛑 <strong>Must NOT</strong> sweep anything</td>
+</tr>
+<tr>
 <td><code>DIAG-001</code></td>
 <td>Tester</td>
 <td>A sweep files against the ticket</td>
-<td><code>POST /diagnostic/submit</code> against every enabled site with TT <code>TT-MAN-001</code></td>
+<td>On a server with <code>SERVER_SWEEPS_ENABLED=true</code>, <code>POST /diagnostic/submit</code> against every enabled site with TT <code>TT-MAN-001</code></td>
 <td>Status <em>Completed</em>; one row per site (and family); the packet line exactly as specified</td>
 </tr>
 <tr>
@@ -1894,8 +2013,22 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td><code>DIAG-004</code></td>
 <td>Engineer</td>
 <td>The PDF is evidence</td>
-<td><strong>Export PDF</strong></td>
+<td><strong>Export PDF → A4 landscape</strong></td>
 <td>Named <code>packetpulse-&lt;TT&gt;-&lt;time&gt;.pdf</code> in the organisation's time zone; Customer ID, TT, every time in that zone and named (<em>Checked (IST)</em>, <em>Started … IST</em> for India), a UDP test's reflector and where it was reached, a Jitter column and no MOS column, average loss and jitter cards; a long IPv6 address wraps onto two lines; the details under the headline figures name who ran it and where — <strong>Run by</strong> <em>Asha Rao</em>, <strong>Signed in at</strong> <em>MG Road, Pune</em>, wrapped whole. 🛑 <strong>Must NOT</strong> truncate an address or a place</td>
+</tr>
+<tr>
+<td><code>DIAG-021</code></td>
+<td>Engineer</td>
+<td>The PDF the way up asked for</td>
+<td><strong>Export PDF</strong> on a ticket with a UDP test and a full IPv6 endpoint; choose <strong>A4 portrait</strong>; then <code>GET /diagnostic/{id}/report.pdf?orientation=sideways</code></td>
+<td>The menu offers <em>A4 landscape</em> and <em>A4 portrait</em>; the portrait file is an upright A4 page with everything <code>DIAG-004</code> lists - every column, the full IPv6 address on two lines, the details two across, <em>Page 1 of 1</em> inside the margin; then 400 <em>Ask for orientation=landscape or orientation=portrait.</em> 🛑 <strong>Must NOT</strong> cut a column off the page's right edge</td>
+</tr>
+<tr>
+<td><code>DIAG-022</code></td>
+<td>Tester</td>
+<td>A sweep cannot choose how it runs</td>
+<td>On a server with <code>SERVER_SWEEPS_ENABLED=true</code>, <code>POST /diagnostic/submit</code> with <code>packet_count</code> 1; then with <code>timeout_ms</code> 900; then <code>POST /ping/run</code> with each; then <code>POST /diagnostic/submit</code> with neither</td>
+<td>422 naming each: <em>PacketPulse sets how many packets a sweep sends. Leave packet_count out.</em>, <em>… how long a sweep waits for each reply. Leave timeout_ms out.</em>; nothing filed for the refused ones. The last runs at the server's <code>PING_COUNT</code> and <code>PING_TIMEOUT</code>, which the run records as its packets per site and timeout. 🛑 <strong>Must NOT</strong> run a sweep a request chose</td>
 </tr>
 <tr>
 <td><code>DIAG-005</code></td>
@@ -1971,7 +2104,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td><code>DIAG-012</code></td>
 <td>Tester</td>
 <td>The nearest city is tested</td>
-<td>With endpoints placed in Bengaluru and Mumbai (<code>SITE-007</code>), <code>POST /diagnostic/submit</code> with a <code>location</code> in Bengaluru</td>
+<td>With endpoints placed in Bengaluru and Mumbai (<code>SITE-007</code>), on a server with <code>SERVER_SWEEPS_ENABLED=true</code>, <code>POST /diagnostic/submit</code> with a <code>location</code> in Bengaluru</td>
 <td>Only Bengaluru's endpoints in the result; <em>Endpoints: The city nearest the device, Bengaluru, N km away</em>; <em>Tested from</em> the phone's coordinates. 🛑 <strong>Must NOT</strong> sweep Mumbai</td>
 </tr>
 <tr>
@@ -1985,7 +2118,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td><code>DIAG-014</code></td>
 <td>Engineer</td>
 <td>An engineer cannot choose</td>
-<td>As an engineer, <code>POST /diagnostic/submit</code> with <code>dns_site_ids</code> naming a Mumbai endpoint and a Bengaluru position</td>
+<td>On a server with <code>SERVER_SWEEPS_ENABLED=true</code>, as an engineer, <code>POST /diagnostic/submit</code> with <code>dns_site_ids</code> naming a Mumbai endpoint and a Bengaluru position</td>
 <td>The request sweeps Bengaluru's. 🛑 <strong>Must NOT</strong> honour an engineer's endpoint list</td>
 </tr>
 <tr>
@@ -2009,7 +2142,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <ul>
 <li>Engine: <code>packetpulsego/pkg/pingmicroservice/pingprobe/PingProbeRunner.go</code> (pro-bing, unprivileged ICMP, TCP fallback); jitter: <code>packetpulsego/pkg/pingmicroservice/pingprobe/PingVoiceQuality.go</code> (<code>InterarrivalJitter</code>, RFC 3550).</li>
 <li>🔒 Results are saved under their <strong>own</strong> deadline, never the sweep's: a sweep that runs long still stores everything it measured (<code>load</code> suite §4.5 proves it, and goes red with the old bug restored).</li>
-<li>No screen starts a sweep: the app's sweep form was removed when <strong>Run diagnostic</strong> became the test from this device (2026-10-07, §4.1), and the client no longer calls <code>POST /diagnostic/submit</code>. The route stays, for the API and scripts. The case for one page holding the sweep and the device test is retired, its number left vacant.</li>
+<li>No screen starts a sweep: the app's sweep form was set aside when <strong>Run diagnostic</strong> became the test from this device (2026-10-07, §4.1), and the client no longer calls <code>POST /diagnostic/submit</code>. Since 2026-10-30 the sweep's two routes are mounted only with <code>SERVER_SWEEPS_ENABLED=true</code> (<code>WithServerSweeps</code> on both route handlers); off, the default, a test is started only by a person, from their device. Its TCP fallback grades one connection as 0% loss, so that must be measured over a timed series before the switch is turned on (gap G1, FF-49). The case for one page holding the sweep and the device test is retired, its number left vacant.</li>
 <li>Path analysis was removed in <code>packetpulsego/pkg/common/dbclient/migrations/0027_2026_10_05_path_analysis_removed.sql</code>: <code>ping_hop</code> and the fault verdict columns are no longer written, and the rows already stored stay. A client built before then still sends <code>trace_failures</code>; the server accepts and ignores it, because decoding is strict and refusing it would fail every run that client made.</li>
 <li>Endpoint choice: <code>chooseEndpoints</code> in <code>packetpulsego/pkg/diagnosticmicroservice/diagnosticservice/DiagnosticService.go</code>; the handler empties <code>dns_site_ids</code> for anyone without <code>dns_site_manage</code>. The request records <code>test_location_*</code>, <code>endpoint_selection</code> (<code>chosen</code>, <code>nearest</code>, <code>all</code>), <code>selection_city</code> and <code>selection_distance_km</code> (migration 0029).</li>
 <li>Ticket figures (<code>avg_loss_pct</code>, <code>max_loss_pct</code>, <code>avg_jitter_ms</code>) are computed in <code>RequestFinish</code> from the run's counted results (<code>packetpulsego/pkg/common/dbclient/migrations/0022_2026_10_03_loss_and_jitter.sql</code>).</li>
@@ -2039,28 +2172,35 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <tr>
 <td><code>V6-001</code></td>
 <td>Engineer</td>
-<td>Both families, one counted</td>
+<td>With <code>IPV6_TESTS_ENABLED=true</code> on the server: both families, one counted</td>
 <td>Add a dual-stack site (e.g. <code>one.one.one.one</code>) on a host with IPv6; run</td>
 <td>Two rows: IPv4 counted, IPv6 tagged <em>not counted</em> with its tooltip</td>
 </tr>
 <tr>
 <td><code>V6-002</code></td>
 <td>Engineer</td>
-<td>An IPv6 failure does not breach the site</td>
+<td>With <code>IPV6_TESTS_ENABLED=true</code> on the server: an IPv6 failure does not breach the site</td>
 <td>A dual-stack site whose IPv6 fails while IPv4 answers</td>
 <td>The IPv6 row is graded but not counted: the site counts as reachable, and the ticket's breach count is the IPv4's. 🛑 <strong>Must NOT</strong> count a breach for report-only IPv6</td>
 </tr>
 <tr>
 <td><code>V6-003</code></td>
 <td>Engineer</td>
-<td>IPv6-only counts</td>
-<td>A site with only an IPv6 address that fails</td>
-<td>Counted as a failure, and graded as usual</td>
+<td>IPv6-only is tested where IPv6 is, and said otherwise</td>
+<td>A site with only an IPv6 address that fails, with <code>IPV6_TESTS_ENABLED=true</code>; then with it unset</td>
+<td>Counted as a failure, and graded as usual; then one row, nothing sent, <em>This endpoint has only an IPv6 address, and PacketPulse tests over IPv4 only, so it was not tested.</em>, graded <em>unknown</em>. 🛑 <strong>Must NOT</strong> grade a site a breach for the setting</td>
+</tr>
+<tr>
+<td><code>V6-006</code></td>
+<td>Engineer</td>
+<td>The server tests over IPv4 alone by default</td>
+<td>On a server with IPv6 and <code>IPV6_TESTS_ENABLED</code> unset, sweep a dual-stack site (e.g. <code>one.one.one.one</code>)</td>
+<td>One row, over IPv4, counted; no IPv6 row (customer requirement, 28 October 2026). 🛑 <strong>Must NOT</strong> probe over IPv6</td>
 </tr>
 <tr>
 <td><code>V6-004</code></td>
 <td>Engineer</td>
-<td>No IPv6 route is said plainly</td>
+<td>With <code>IPV6_TESTS_ENABLED=true</code> on the server: no IPv6 route is said plainly</td>
 <td>On a server without IPv6, a dual-stack site</td>
 <td>The IPv6 row reads <em>There is no IPv6 route from this vantage point, so this IPv6 address could not be tested from here.</em> 🛑 <strong>Must NOT</strong> report it as the site being down</td>
 </tr>
@@ -2068,7 +2208,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td><code>V6-005</code></td>
 <td>Engineer</td>
 <td>A device's UDP test is run and filed over each family</td>
-<td>On a network with IPv6, run a UDP test of an endpoint whose reflector has an IPv6 address (<code>UDP-045</code>); attach; open the ticket; then <strong>Network reports</strong> for the day</td>
+<td>With <code>IPV6_TESTS_ENABLED=true</code> on the server, on a network with IPv6, run a UDP test of an endpoint whose reflector has an IPv6 address (<code>UDP-045</code>); attach; open the ticket; then <strong>Network reports</strong> for the day</td>
 <td>Two runs, IPv4 then IPv6; <strong>By IP version</strong> shows both; the ticket has two rows, one tagged IPv6 reading <em>Reflector … at 2001:…</em>; the report has <em>UDP (reflector) IPv4</em> and <em>UDP (reflector) IPv6</em> rows. 🛑 <strong>Must NOT</strong> leave a device test with no family, or add IPv4 and IPv6 together</td>
 </tr>
 </tbody>
@@ -2087,7 +2227,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <p><strong>Where:</strong> <strong>Export CSV</strong> on every result · <strong>Route:</strong> <code>GET /diagnostic/{requestId}/report.csv</code> · <strong>Capability:</strong> <code>report_export</code></p>
 <ul>
 <li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: The same results, in the columns an IT system imports, in one click — and safe to open: a site name typed as a spreadsheet formula is written as text, so an export can never run code on someone else's desk.</li>
-<li>📖 <strong>User Guide &amp; Operational Flow</strong>: <strong>Export CSV</strong> saves <code>packetpulse-&lt;TT&gt;-&lt;time&gt;.csv</code> beside the PDF of the same ticket, both named and dated in the organisation's time zone. One row per site and family; empty cells (not zeros) where a probe had no reply. <code>checked_on</code> is in the organisation's time zone with its offset (<code>2026-10-21T11:30:00+05:30</code> in India): its own choice under <em>Scheduled reports</em>, else its country's. <code>test_latitude</code> and <code>test_longitude</code> say where the device was when the test ran; empty when it was not known. <code>resolved_ip</code> is what the endpoint's name resolved to, and <code>reflector_address</code> and <code>reflector_ip</code> the reflector a UDP test measured to and where the browser reached it. <code>user_ip</code> and <code>user_ipv6</code> (since 26 October 2026) are where a device test came from, on every row of that test: the IP the device filed it from, as PacketPulse saw it, and the public IPv6 its IPv6 traffic leaves from, as the device's own lookup found it (PacketPulse is reached over IPv4 and never sees it). Empty for a server sweep and for a test filed before; <code>user_ipv6</code> is empty for a device with no IPv6. For an endpoint set to show its reflector only, someone who does not manage endpoints gets empty <code>ip_address</code> and <code>resolved_ip</code>; the <code>user_ip</code> is the tester's line, not the endpoint's, and stays.</li>
+<li>📖 <strong>User Guide &amp; Operational Flow</strong>: <strong>Export CSV</strong> saves <code>packetpulse-&lt;TT&gt;-&lt;time&gt;.csv</code> beside the PDF of the same ticket, both named and dated in the organisation's time zone. One row per site and family; empty cells (not zeros) where a probe had no reply. <code>checked_on</code> is in the organisation's time zone with its offset (<code>2026-10-21T11:30:00+05:30</code> in India): its own choice under <em>Scheduled reports</em>, else its country's. <code>test_latitude</code> and <code>test_longitude</code> say where the device was when the test ran; empty when it was not known. There is no <code>resolved_ip</code> column since 28 October 2026 (customer request: it read as the reflector's IP, not the user's; the contract records it as retired, and the Results API's JSON has none either). <code>reflector_address</code> and <code>reflector_ip</code> the reflector a UDP test measured to and where the browser reached it. <code>user_ip</code> and <code>user_ipv6</code> (since 26 October 2026) are where a device test came from, on every row of that test: the IP the device filed it from, as PacketPulse saw it, and the public IPv6 its IPv6 traffic leaves from, as the device's own lookup found it (PacketPulse is reached over IPv4 and never sees it). Empty for a server sweep and for a test filed before; <code>user_ipv6</code> is empty for a device with no IPv6. For an endpoint set to show its reflector only, someone who does not manage endpoints gets an empty <code>address</code>; the <code>user_ip</code> is the tester's line, not the endpoint's, and stays.</li>
 <li>🧪 <strong>Manual Testing Playbook</strong>:<div class="tw"><table><thead>
 <tr>
 <th>ID</th>
@@ -2143,16 +2283,16 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <tr>
 <td><code>CSV-007</code></td>
 <td>Engineer</td>
-<td>A UDP test names where it was measured</td>
+<td>A UDP test names where it was measured, and no resolved IP</td>
 <td>Run a UDP test of an endpoint named by a hostname, with a reflector; <strong>Export CSV</strong></td>
-<td><code>resolved_ip</code> holds the address the name resolved to; <code>reflector_address</code> and <code>reflector_ip</code> the reflector and the IP the browser reached it at. 🛑 <strong>Must NOT</strong> leave <code>resolved_ip</code> blank for a test the server could resolve</td>
+<td><code>reflector_address</code> and <code>reflector_ip</code> the reflector and the IP the browser reached it at; no <code>resolved_ip</code> column, and the address the name resolved to in no cell. 🛑 <strong>Must NOT</strong> carry a Resolved IP column (customer request, 28 October 2026)</td>
 </tr>
 <tr>
 <td><code>CSV-008</code></td>
 <td>Engineer</td>
 <td>A device test says where it came from</td>
 <td>Note this device's public IPv4 (the <strong>IPv4</strong> card on <strong>Run diagnostic</strong>); run a UDP test of an endpoint whose address is its own reflector (live: TATA-MUMBAI); <strong>Attach to a ticket</strong>; <strong>Export CSV</strong>; then export a server sweep's CSV</td>
-<td><code>user_ip</code> is that IPv4 and, from a network with IPv6, <code>user_ipv6</code> the address on the <strong>IPv6</strong> card, on every row of the device test; <code>resolved_ip</code> and <code>reflector_ip</code> are still the endpoint's own address; the sweep's are empty. 🛑 <strong>Must NOT</strong> put the reflector's IP, or any address the device sent itself, in <code>user_ip</code></td>
+<td><code>user_ip</code> is that IPv4 and, from a network with IPv6, <code>user_ipv6</code> the address on the <strong>IPv6</strong> card, on every row of the device test; <code>reflector_ip</code> is still the endpoint's own address; the sweep's are empty. 🛑 <strong>Must NOT</strong> put the reflector's IP, or any address the device sent itself, in <code>user_ip</code></td>
 </tr>
 </tbody>
 </table></div>
@@ -2169,7 +2309,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <p><strong>Screens:</strong> Operate → <strong>History</strong>, <strong>Dashboard</strong> · <strong>Routes:</strong> <code>GET /diagnostic/list</code>, <code>GET /diagnostic/tt/{ttNumber}</code>, <code>GET /ping/dashboard</code></p>
 <ul>
 <li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: Every ticket investigated, with its loss and jitter on the row, who ran it and where — and every graded figure shown against its target, so a supplier review argues about the line, not the arithmetic.</li>
-<li>📖 <strong>User Guide &amp; Operational Flow</strong>: An engineer's <strong>History</strong> is the tests they ran, with the note <em>These are the tests you ran. Administrators see everyone's.</em> An administrator's is everyone's, and narrows by <strong>Person</strong>, <strong>Place</strong> (<em>Where it was run, or a site or region</em>), <strong>Status</strong>, <strong>From</strong> and <strong>To</strong>; <strong>Clear filters</strong> puts them back. Both search by TT number or Customer ID. Each row shows reachable/total, breaches, loss and jitter, and who ran it and where: <em>Customer CUST-1 · Asha Rao · at MG Road, Pune</em>. <strong>Dashboard</strong> shows the monitored endpoints (and how many are enabled), the diagnostics run, the last sweep's reachable count, the licence (days remaining, and people on it of those it covers) and the recent tickets. The 30-day availability line went with automatic monitoring (<code>HIST-004</code>).</li>
+<li>📖 <strong>User Guide &amp; Operational Flow</strong>: An engineer's <strong>History</strong> is the tests they ran, with the note <em>These are the tests you ran. Administrators see everyone's.</em> An administrator's is everyone's, and narrows by <strong>Person</strong>, <strong>Place</strong> (<em>Where it was run, or a site or region</em>), <strong>Status</strong>, <strong>From</strong> and <strong>To</strong>; <strong>Clear filters</strong> puts them back. Both search by TT number or Customer ID. Each row shows reachable/total, breaches, loss and jitter, and who ran it and where: <em>Customer CUST-1 · Asha Rao · at MG Road, Pune</em>. <strong>Dashboard</strong> shows the monitored endpoints (and how many are enabled), the diagnostics run, the last sweep's reachable count, the licence (days remaining, and people on it of those it covers) and the recent tickets. The 30-day availability line went with automatic monitoring (<code>HIST-004</code>). A list with no period chosen is of the last 30 days, and says <em>The last 30 days. Choose a period to see earlier tests, or search by TT number for one ticket.</em>; a period may cover at most 366 days; a search by TT number or Customer ID is of all time (customer request, 28 October 2026: every report has a date filter).</li>
 <li>🧪 <strong>Manual Testing Playbook</strong>:<div class="tw"><table><thead>
 <tr>
 <th>ID</th>
@@ -2236,6 +2376,20 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>Sign in sharing your location; run a test; open <strong>History</strong> and the test's PDF</td>
 <td>The row reads <em>· <your name> · at <the address you signed in from></em>; the PDF's foot says the same. A test run without a position names the person only</td>
 </tr>
+<tr>
+<td><code>HIST-009</code></td>
+<td>Engineer</td>
+<td>A list is of a period, a search of all time</td>
+<td>Open <strong>History</strong> with a ticket from 45 days ago in it; then search its TT number; then <code>GET /diagnostic/list?from=2025-01-01</code></td>
+<td><em>The last 30 days…</em> and the old ticket not listed; found by its number; 422 <em>A list covers at most 366 days…</em>. 🛑 <strong>Must NOT</strong> list every ticket ever filed</td>
+</tr>
+<tr>
+<td><code>HIST-010</code></td>
+<td>Administrator</td>
+<td>The dashboard counts a period's runs</td>
+<td>Open <strong>Dashboard</strong></td>
+<td><strong>Diagnostics run</strong> reads the runs of the last 30 days, <em>In the last 30 days</em> under it (customer request, 28 October 2026: every count has a date filter). 🛑 <strong>Must NOT</strong> count every run ever made</td>
+</tr>
 </tbody>
 </table></div>
 </li>
@@ -2256,8 +2410,8 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <li>📖 <strong>User Guide &amp; Operational Flow</strong>:
 <ul>
 <li><strong>By reflector site / All sites combined</strong>, <strong>Daily / Weekly / Monthly / Yearly</strong>, and the period button (a calendar). It opens on today so far, so a test just run is in it: the period button reads <em>…, so far (to 09:12)</em>, the PDF says <em>So far, to 09:12 IST</em>, the files are named <code>…-so-far</code>, and each CSV row's <code>period_end</code> is when it was made. Any earlier period is picked from the calendar. Days, weeks (Monday to Sunday), months and years begin at midnight in the organisation's time zone: its own choice with the scheduled reports on <strong>Result export</strong>, else its country's (India Standard Time for India). The zone is said under the controls.</li>
-<li><strong>By reflector site</strong>: one card per site — the <strong>Region</strong> given in <strong>DNS sites</strong>. Its first rows, in bold, are the site over all its endpoints (<em>All endpoints</em>); each endpoint's rows follow. Endpoints with none set are <em>City not set on the endpoint</em>. UDP tests to the PacketPulse network, with no endpoint, have a card of their own.</li>
-<li><strong>All sites combined</strong>: every site as one, then the period before, a trend hour by hour (a day), day by day (a week or a month) or month by month (a year), quiet steps included — a period so far stops at the step under way — and, for each method and family, the five sites that lost the most packets. Methods are never ranked against one another.</li>
+<li><strong>By reflector site</strong>: one card per site — the <strong>Region</strong> given in <strong>DNS sites</strong> — with the individual tests first and the summary below them (customer request, 28 October 2026): <strong>Individual tests</strong>, newest first, each with when it was checked (on the organisation's clock), its endpoint, method, whether a <strong>Device</strong> or the <strong>Server</strong> measured it, the <strong>User IPv4</strong> and <strong>User IPv6</strong> a device's test came from (a dash for a sweep), and its own sent, lost, loss, latency and jitter - the first ten, <strong>Show all</strong> for the rest, and past the latest 100 <em>Showing the latest 100 of n tests. The CSV of this report lists every one.</em>; then <strong>Each endpoint</strong> (only where the site has more than one); then <em>Summary: every endpoint in <city></em>, in bold (<em>All endpoints</em>); then <strong>How these figures were calculated</strong>, open and foldable, working each summary row out from its own numbers (since 29 October 2026 a line per figure, not a paragraph): under <em>UDP (reflector) IPv4 · 14 tests</em>, columns <strong>Figure</strong>, <strong>Value</strong> and <strong>How it is worked out</strong> - <em>Average loss · 0.48% · 20 lost ÷ 4,200 sent: every test's packets together, so a long test counts for more</em>, <em>Loss, lowest to highest · 0% to 1%</em>, <em>Average latency</em> with its replies, <em>Latency, quickest to slowest</em>, <em>Average jitter</em>, <em>Jitter, lowest to highest</em> - and <em>These tests count queries, not packets, so they state no loss</em> for HTTPS, <em>No test received a reply</em> where none did. On a phone each figure's value and sum stand under it. The PDF prints the same lines, on the page of the summary they explain. Endpoints with none set are <em>City not set on the endpoint</em>. UDP tests to the PacketPulse network, with no endpoint, have a card of their own, laid out the same way. <strong>City</strong> narrows the report to one of the organisation's cities (<em>All cities</em> unless chosen; an older name - <em>Bombay</em> - finds <em>Mumbai</em>); its files are named for it (<code>packetpulse-city-mumbai-daily-…</code>) and the PDF's title ends <em>- Mumbai</em>. The PDF lays each site out the same way.</li>
+<li><strong>All sites combined</strong> (<em>Pan India</em>): the summary alone - no test is listed one by one - with <strong>How these figures were calculated</strong> under it; every site as one, then the period before, a trend hour by hour (a day), day by day (a week or a month) or month by month (a year), quiet steps included — a period so far stops at the step under way — and, for each method and family, the five sites that lost the most packets. Methods are never ranked against one another.</li>
 <li>Each figure as its <strong>average, minimum and maximum</strong>: loss (packets lost over packets sent across the row, so a long test counts for more; minimum and maximum of single tests), latency (the round trip: the average weighted by replies; minimum and maximum of single replies) and jitter. HTTPS rows show no loss.</li>
 <li>One method and family a row (UDP to an endpoint's reflector, UDP to the PacketPulse network, ICMP or TCP from the device or the server, HTTPS; IPv4 or IPv6): no row adds one to another. A row on fewer than 5 tests is marked <code>*</code>.</li>
 <li>Under each report, what it covers: results from devices and from the server, over IPv4 and over IPv6, each count in words that agree with it (<em>1 result</em>, <em>2 results</em>).</li>
@@ -2279,14 +2433,14 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>Administrator</td>
 <td>A site's figures add up</td>
 <td>Two device UDP tests of Mumbai endpoints — one losing 10 of 1000 packets, one 5 of 10 — and one of a Pune endpoint; open <strong>Network reports</strong> on that day</td>
-<td>Mumbai's <em>All endpoints</em> row shows <strong>2</strong> tests, loss average <strong>1.5%</strong> (15 of 1010), minimum <strong>1%</strong>, maximum <strong>50%</strong>; each endpoint has its own row beneath. 🛑 <strong>Must NOT</strong> average the two percentages</td>
+<td>Mumbai's <em>All endpoints</em> row shows <strong>2</strong> tests, loss average <strong>1.5%</strong> (15 of 1010), minimum <strong>1%</strong>, maximum <strong>50%</strong>; its tests are listed above it, newest first, and <em>How these figures were calculated</em> reads <em>…Average loss 1.5%: 15 lost of 1,010 packets sent…</em>. 🛑 <strong>Must NOT</strong> average the two percentages</td>
 </tr>
 <tr>
 <td><code>RPT-002</code></td>
 <td>Administrator</td>
 <td>A test is filed under its endpoint's site, never its tester's city</td>
-<td>Run a server sweep (§3.2) of an endpoint whose <strong>Region</strong> is <code>Agra</code>, from a sign-in in Pune</td>
-<td>An <strong>Agra</strong> card with <em>ICMP (server)</em>; no Pune card. 🛑 <strong>Must NOT</strong> file a measurement under where its tester stood</td>
+<td>File a device test (§4.1) of an endpoint whose <strong>Region</strong> is <code>Agra</code>, from a sign-in in Pune</td>
+<td>An <strong>Agra</strong> card with the test's method; no Pune card. 🛑 <strong>Must NOT</strong> file a measurement under where its tester stood</td>
 </tr>
 <tr>
 <td><code>RPT-003</code></td>
@@ -2342,7 +2496,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>Administrator</td>
 <td>The files are the report on screen</td>
 <td><strong>Export CSV</strong>, then <strong>Export PDF</strong></td>
-<td><code>packetpulse-city-daily-&lt;day&gt;.csv</code> under the contracted header (<code>packetpulsetest/contracts/network_report_columns.json</code>), the organisation's name in the first column of every row, each figure's <code>_avg</code>, <code>_min</code> and <code>_max</code>, and the PDF with the same figures, the organisation, the zone and the definitions; <em>Pan India</em> files are <code>packetpulse-pan-india-…</code></td>
+<td><code>packetpulse-city-daily-&lt;day&gt;.csv</code> under the contracted header - its site rows each test (<code>level</code> <code>test</code>, with <code>checked_on</code>, <code>measured_from</code>, <code>user_ipv4</code> and <code>user_ipv6</code> at the end), then each endpoint, then the site - (<code>packetpulsetest/contracts/network_report_columns.json</code>), the organisation's name in the first column of every row, each figure's <code>_avg</code>, <code>_min</code> and <code>_max</code>, and the PDF with the same figures, the organisation, the zone and the definitions; <em>Pan India</em> files are <code>packetpulse-pan-india-…</code></td>
 </tr>
 <tr>
 <td><code>RPT-013</code></td>
@@ -2373,6 +2527,48 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td><em>Hour by hour</em> lists 00:00 to 09:00 and stops; pick yesterday: all 24 hours. 🛑 <strong>Must NOT</strong> list the hours still to come as quiet ones</td>
 </tr>
 <tr>
+<td><code>RPT-017</code></td>
+<td>Administrator</td>
+<td>Each test is listed under its city, with where it came from</td>
+<td>From a dual-stack phone, two UDP tests of a Mumbai endpoint; on a server with <code>SERVER_SWEEPS_ENABLED=true</code>, one server sweep of it; open <strong>Network reports</strong>, <strong>Daily</strong></td>
+<td><strong>Individual tests</strong> lists the three, newest first, at their IST times: the phone's with its <strong>User IPv4</strong> and <strong>User IPv6</strong>, the sweep's <em>Server</em> with dashes; <em>3 tests</em>. With 12 tests, ten and <strong>Show all</strong>. 🛑 <strong>Must NOT</strong> list another city's test, or show a Resolved IP</td>
+</tr>
+<tr>
+<td><code>RPT-018</code></td>
+<td>Administrator</td>
+<td>A report narrowed to one city</td>
+<td><strong>City</strong> → <em>Pune</em>; <strong>Export CSV</strong> and <strong>Export PDF</strong>; then <strong>All sites combined</strong>; then <code>GET /api/v1/report/network?city=Atlantis</code> and <code>?view=country&amp;city=Pune</code></td>
+<td>Only Pune's card; <code>packetpulse-city-pune-daily-…</code>, the PDF titled <em>…by reflector site - Pune</em>; <strong>City</strong> gone on every site combined; both requests 422 naming <code>city</code>. A city of another organisation is refused the same way. 🛑 <strong>Must NOT</strong> read another tenant's city</td>
+</tr>
+<tr>
+<td><code>RPT-019</code></td>
+<td>Administrator</td>
+<td>Pan India is the summary</td>
+<td><strong>All sites combined</strong></td>
+<td>No <strong>Individual tests</strong> anywhere; <strong>How these figures were calculated</strong> under <em>Every reflector site combined</em>. 🛑 <strong>Must NOT</strong> list tests one by one</td>
+</tr>
+<tr>
+<td><code>RPT-020</code></td>
+<td>Administrator</td>
+<td>A figure reads the same on screen and in the PDF</td>
+<td>A day whose jitter averages exactly 3.25 ms (two tests at 3.0 and 3.5 ms); the screen; then <strong>Export PDF</strong></td>
+<td><em>3.3 ms</em> in both (found 28 October 2026: the PDF read 3.2). 🛑 <strong>Must NOT</strong> round one value two ways</td>
+</tr>
+<tr>
+<td><code>RPT-021</code></td>
+<td>Tester</td>
+<td>A report reads only its period</td>
+<td>On a database seeded with a year of another tenant's results, <code>EXPLAIN</code> the report's query for one day (<code>TestADaysReportReadsOnlyItsMonthThroughTheIndex</code>)</td>
+<td>One month's partition, through <code>ping_result_org_checked_idx</code>. 🛑 <strong>Must NOT</strong> read every month, or every run the organisation ever made</td>
+</tr>
+<tr>
+<td><code>RPT-022</code></td>
+<td>Customer</td>
+<td>Each summary figure can be checked</td>
+<td>A day with three Mumbai tests - 10 of 1,000, 5 of 10 and 0 of 100 lost; <strong>Network reports</strong>, <strong>Daily</strong>; read <em>How these figures were calculated</em>; then <strong>Export PDF</strong>; then the same on a phone</td>
+<td><em>Average loss · 1.4% · 15 lost ÷ 1,110 sent…</em>, <em>Loss, lowest to highest · 0% to 50%</em>, and a line each for latency and jitter, each value the summary row's own; in the PDF the same lines under the summary, on its page, the column titles apart (<em>Latency min</em>, <em>Latency max</em>); on the phone each figure over its sum. 🛑 <strong>Must NOT</strong> print the workings a page away from their summary, or as one paragraph</td>
+</tr>
+<tr>
 <td><code>RPT-011</code></td>
 <td>Administrator</td>
 <td>A failed load is not a quiet day</td>
@@ -2392,7 +2588,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <li>⚙️ <strong>Developer Guide &amp; Release Confidence</strong>:
 <ul>
 <li><code>packetpulsego/pkg/reportmicroservice/</code>: <code>reportstats</code> holds every rule — periods in the zone (<code>ReportPeriod.go</code>), weighting, minimum and maximum, and grouping by site, endpoint, method and family (<code>ReportStats.go</code>); <code>reportfile</code> writes the CSV and PDF; <code>reportservice</code> resolves a query and runs the scheduled drops; <code>reportdomain/repository</code> reads a period's results with their endpoint's region and their family.</li>
-<li>🔒 One organisation predicate on <code>ping_run</code>, and the test (<code>diagnostic_request</code>) and the endpoint (<code>dns_site</code>) are joined <em>within</em> that organisation, so a row naming another tenant's run or endpoint describes nothing.</li>
+<li>🔒 One organisation predicate on the result itself (<code>ping_result.organisation_id</code>, set from its run by a trigger, migration 0038) with its period, so a day's report is one range of <code>ping_result_org_checked_idx</code> in that month's partition; and the test (<code>diagnostic_request</code>) and the endpoint (<code>dns_site</code>) are joined <em>within</em> that organisation, so a row naming another tenant's run or endpoint describes nothing.</li>
 <li>The organisation's zone: <code>report_settings.time_zone</code>, else its country's (<code>packetpulsego/pkg/common/orgzone/OrgZone.go</code>); the same zone writes a ticket's PDF and CSV and the result export.</li>
 <li>Coverage: <code>packetpulsego/pkg/reportmicroservice/**</code>, <code>packetpulseflutter/test/network_report_screen_test.dart</code>, <code>packetpulsetest/golang/apicontract/network_report_test.go</code>, <code>packetpulsetest/golang/tenancyisolation/tenancy_isolation_test.go</code>.</li>
 </ul>
@@ -2411,11 +2607,11 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <li>Above the controls, three cards: the <strong>IPv4</strong> address, the <strong>IPv6</strong> address (or <em>No IPv6 connectivity</em>) and the <strong>Nearest edge</strong> that answered, with an <em>IPv6 active</em> or <em>IPv4 only</em> badge. No network operator or AS number is shown: finding one would send the engineer's address to a third party.</li>
 <li>In a browser the test is <strong>UDP, like a call</strong> (§4.2), and nothing else: since the review of 13 October 2026 there is no <strong>Measurement method</strong> choice and no <em>HTTPS to the endpoint</em> beside it. The app on a desktop or phone sends a real ICMP echo where the device allows it, and offers no UDP test. Only a browser without WebRTC falls back to an HTTPS request to the endpoint's address; an endpoint that does not serve HTTPS — most routers and resolvers do not — then shows every sample unanswered, even when it is up, and the note beside the figures says so.</li>
 <li>Below the controls, the route says what the test goes to (since 2026-10-09): <em>Start will test</em>, then <em>Testing now</em>, then <em>This run tested</em>, over <em>This device → method → destination</em>. With a ticket it is marked <strong>Path to the endpoint</strong> (green, a tick) or <strong>Not the endpoint</strong> (amber, a warning sign) and says why in one sentence: <em>HTTPS requests from this device to Pune Edge…</em>, <em>A real ping from this device to Pune Edge…</em>, or, for the UDP test, the reflector beside the endpoint or the PacketPulse network (§4.2). With no ticket it reads <em>The test target</em>, naming no host, and carries no mark.</li>
-<li><strong>IP version</strong> — <em>Auto</em>, <em>IPv4 only</em>, <em>IPv6 only</em> — holds a run against the default target to one address family, to compare the two paths. It is offered only on the test with no ticket, when the organisation tests the default over HTTPS: an endpoint is reached at its own address, a browser cannot choose the family a hostname resolves to, and the native ping is IPv4.</li>
+<li><strong>IP version</strong> — <em>Auto</em>, <em>IPv4 only</em>, <em>IPv6 only</em> — holds a run against the default target to one address family, to compare the two paths. It is offered only where the server tests IPv6 as well (<code>IPV6_TESTS_ENABLED=true</code>): since 28 October 2026 tests run over IPv4 alone by default (customer requirement: the goal is packet loss over IPv4), so there is no switch, a run against the default target is held to IPv4 and its log says <em>· IPv4 only</em>, and <em>How this test works</em> says <em>IPv4 only: every test is run over IPv4…</em>. Where IPv6 is tested, it is offered only on the test with no ticket, when the organisation tests the default over HTTPS: an endpoint is reached at its own address, a browser cannot choose the family a hostname resolves to (a named target is left to the browser), and the native ping is IPv4.</li>
 <li>While a run goes, six figures fill in — average, fastest, slowest, jitter, loss and progress, and for the UDP test <strong>Lost up · down</strong> — with <strong>Round-trip, sample by sample</strong> (jitter as a band, the average dashed, a red mark per unanswered sample; point at it to read one), <strong>Round-trips by band</strong> (under 20, 20–50, 50–100, 100–200, 200 ms and over) and a <strong>Probe log</strong> of every reply. <strong>Clear results</strong> empties the figures and charts and keeps the log; <strong>Clear log</strong> empties the log. No standard deviation is shown, here or on the public self-test (review of 13 October 2026): beside jitter it read as a second figure for the same thing. It is still measured and filed. Nor is the voice-quality estimate (MOS), on any screen or report or on the self-test (review of 13 October 2026): it is still computed, filed, graded against a MOS target and exported in the CSV, and one switch shows it again — <code>PacketPulseConfig.voiceQualityShown</code> in the app, <code>ReportOptions.ShowVoiceQuality</code> for the PDF.</li>
 <li><strong>Attach to a ticket</strong> files the finished run against the ticket at the top of the page and says <em>Attached to ticket TT-…</em> beside the button, with <strong>View ticket</strong> (since 14 October 2026). It opens the ticket as <strong>History</strong> shows it — its results and grades, the notes, <strong>Export PDF</strong> and <strong>Export CSV</strong> — over the test, from what the server returned on filing, so nothing more is fetched; on a phone it takes the whole screen. Closing it leaves the run on screen as it was. Running again clears the confirmation and the button with it.</li>
 <li><strong>Notes</strong>, typed at the top of the page, are filed with the run and shown with the ticket in History (<strong>Notes</strong>, a row of its own in the ticket's details) and on its PDF (<strong>Notes</strong>, the last row of the details under the headline figures). Until the review of 13 October 2026 they were stored and shown nowhere.</li>
-<li><strong>User IPv4</strong> and <strong>User IPv6</strong> (26 October 2026) are where the run came from. The IPv4 is the address the device attached it from, as PacketPulse's server saw the connection (through its own nginx; never a value the device sends - a body naming <code>user_ip</code> is refused). The IPv6 is the device's own report, <code>egress_ipv6</code>: the address its <strong>IPv6</strong> card shows, from the same lookup (Cloudflare's 1.1.1.1 over IPv6), because PacketPulse is reached over IPv4 and never sees it; the server keeps it only when it is a public IPv6. The ticket shows both first in its details, each with a copy button; the PDF leads the details under its headline figures with them; and the CSV and the Results API carry <code>user_ip</code> and <code>user_ipv6</code>. Every other address on a ticket - the endpoint, its <em>Resolved IP</em>, the reflector - is where the test went; for an endpoint whose address is its own reflector they are all the reflector's, which is why the customer asked for this (<em>&quot;Resolved IP is taking the reflector IP instead of User IP&quot;</em>). On a fixed line the IPv6 is often the better identifier: a public IPv4 may be shared behind carrier-grade NAT, while the IPv6 prefix is the line's own (its second half changes as devices rotate privacy addresses). Tickets filed before 26 October 2026 have neither.</li>
+<li><strong>User IPv4</strong> and <strong>User IPv6</strong> (26 October 2026) are where the run came from. The IPv4 is the address the device attached it from, as PacketPulse's server saw the connection (through its own nginx; never a value the device sends - a body naming <code>user_ip</code> is refused). The IPv6 is the device's own report, <code>egress_ipv6</code>: the address its <strong>IPv6</strong> card shows, from the same lookup (Cloudflare's 1.1.1.1 over IPv6), because PacketPulse is reached over IPv4 and never sees it; the server keeps it only when it is a public IPv6. The ticket shows both first in its details, each with a copy button; the PDF leads the details under its headline figures with them; and the CSV and the Results API carry <code>user_ip</code> and <code>user_ipv6</code>. Every other address on a ticket - the endpoint and the reflector - is where the test went (there is no <em>Resolved IP</em> since 28 October 2026, at the customer's request); for an endpoint whose address is its own reflector they are all the reflector's, which is why the customer asked for this (<em>&quot;Resolved IP is taking the reflector IP instead of User IP&quot;</em>). On a fixed line the IPv6 is often the better identifier: a public IPv4 may be shared behind carrier-grade NAT, while the IPv6 prefix is the line's own (its second half changes as devices rotate privacy addresses). Tickets filed before 26 October 2026 have neither.</li>
 </ul>
 </li>
 <li>🧪 <strong>Manual Testing Playbook</strong>:<div class="tw"><table><thead>
@@ -2495,21 +2691,21 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td><code>DEV-010</code></td>
 <td>Engineer</td>
 <td>The figures fill in as the run goes</td>
-<td>Set 25 samples and 500 ms interval; <strong>Start test</strong> and watch</td>
+<td>On a server with <code>DEVICE_TEST_INTERVAL_MS=500</code>, <strong>Start test</strong> and watch</td>
 <td><strong>Progress</strong> counts up (<em>4 of 25 samples</em>, …) and the average, fastest, slowest, jitter and loss change with each answer; at the end <em>100%</em>, <em>25 of 25 samples</em>. 🛑 <strong>Must NOT</strong> show zeros before the first answer — dashes until then</td>
 </tr>
 <tr>
 <td><code>DEV-011</code></td>
 <td>Viewer</td>
 <td>IPv6 only</td>
-<td>On a dual-stack connection choose <strong>IP version → IPv6 only</strong>; run with the browser's network panel open; then repeat on a connection with no IPv6</td>
+<td>With <code>IPV6_TESTS_ENABLED=true</code> on the server, on a dual-stack connection choose <strong>IP version → IPv6 only</strong>; run with the browser's network panel open; then repeat on a connection with no IPv6</td>
 <td>Every probe goes to the resolver's IPv6 address, and the log reads <em>Started: DNS over HTTPS · IPv6 only, …</em>; with no IPv6, every sample is <em>No answer</em> and loss is 100%. Choosing another version clears the run on screen. 🛑 <strong>Must NOT</strong> name the address or the resolver anywhere on the page</td>
 </tr>
 <tr>
 <td><code>DEV-012</code></td>
 <td>Administrator, then Viewer</td>
 <td>No switch where it cannot hold</td>
-<td>Open <strong>Run diagnostic</strong> as the administrator; then <code>PUT /organisation/settings</code> with <code>device_test_target</code> <code>dns.google</code> and open it as a Viewer</td>
+<td>With <code>IPV6_TESTS_ENABLED=true</code>, open <strong>Run diagnostic</strong> as the administrator; then <code>PUT /organisation/settings</code> with <code>device_test_target</code> <code>dns.google</code> and open it as a Viewer</td>
 <td>No <strong>IP version</strong> control for the administrator's endpoint, nor for the Viewer's host, and <em>How this test works</em> has no <em>One family at a time</em> point. On the desktop app with <strong>ICMP echo</strong> chosen, no <strong>IP version</strong> either. 🛑 <strong>Must NOT</strong> offer a choice the run would ignore</td>
 </tr>
 <tr>
@@ -2523,7 +2719,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td><code>DEV-014</code></td>
 <td>Engineer</td>
 <td>The probe log</td>
-<td>Set <strong>Timeout</strong> to 200 ms on a slow line; run; <strong>Clear results</strong>; then <strong>Clear log</strong></td>
+<td>On a server with <code>DEVICE_TEST_TIMEOUT_MS=200</code>, run on a slow line; <strong>Clear results</strong>; then <strong>Clear log</strong></td>
 <td>Each line is stamped <em>[HH:MM:SS]</em>: replies in green, <em>No answer: seq=n, timed out after 200 ms</em> in red, then <em>Finished. Queries: Sent = …</em> (amber when anything was lost). <strong>Clear results</strong> keeps the log; <strong>Clear log</strong> empties it to <em>Nothing logged yet.</em></td>
 </tr>
 <tr>
@@ -2622,7 +2818,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>Engineer</td>
 <td>The ticket says where the test came from</td>
 <td>Note this device's public IPv4 and IPv6 (the <strong>IPv4</strong> and <strong>IPv6</strong> cards); run a UDP test of an endpoint whose address is its own reflector (live: TATA-MUMBAI); <strong>Attach to a ticket</strong>; <strong>View ticket</strong>; <strong>Export PDF</strong>; then open a ticket filed before 26 October 2026</td>
-<td><strong>User IPv4</strong> <em>a.b.c.d</em> first in the ticket's details, that IPv4, then from a network with IPv6 <strong>User IPv6</strong> with the <strong>IPv6</strong> card's address, each copied whole by its copy button; the PDF's details start with the same two; <em>Resolved IP</em> in the PDF table is still the endpoint's address. From a network without IPv6 there is no <em>User IPv6</em> line; the older ticket shows neither. 🛑 <strong>Must NOT</strong> show the reflector's IP, or an address from an <code>X-Forwarded-For</code> the device sent, as the user IPv4</td>
+<td><strong>User IPv4</strong> <em>a.b.c.d</em> first in the ticket's details, that IPv4, then from a network with IPv6 <strong>User IPv6</strong> with the <strong>IPv6</strong> card's address, each copied whole by its copy button; the PDF's details start with the same two; the PDF table has no <em>Resolved IP</em> column. From a network without IPv6 there is no <em>User IPv6</em> line; the older ticket shows neither. 🛑 <strong>Must NOT</strong> show the reflector's IP, or an address from an <code>X-Forwarded-For</code> the device sent, as the user IPv4</td>
 </tr>
 <tr>
 <td><code>DEV-030</code></td>
@@ -2630,6 +2826,34 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>A ticket's details read at a glance</td>
 <td>Attach a run; <strong>View ticket</strong>; read the details; copy the <strong>Run ID</strong>; <strong>Export PDF</strong>; then open the same ticket on a phone</td>
 <td>Labelled facts, in order: <strong>User IPv4</strong>, <strong>User IPv6</strong>, <strong>Tested from</strong> (with <em>within N m</em>), <strong>Run by</strong>, <strong>Signed in at</strong>, <strong>Run ID</strong>, then <strong>Endpoints</strong> and <strong>Notes</strong> on rows of their own; addresses and the run ID in a fixed-width face, each on one line, with copy buttons; the PDF's details are the same facts four across, its position a map link, its place whole, <em>Duration</em> and <em>Packets per site 1,486</em>. On a phone, one fact per row. 🛑 <strong>Must NOT</strong> cut a place short, break an address or the run ID across lines, or read <em>endpoint(s)</em>, <em>packet(s)</em> or <em>Sweep took</em> on a device test</td>
+</tr>
+<tr>
+<td><code>DEV-031</code></td>
+<td>Viewer</td>
+<td>IPv4 alone by default</td>
+<td>On a server with <code>IPV6_TESTS_ENABLED</code> unset, from a dual-stack connection, open <strong>Test from this device</strong> and run against the default target with the network panel open</td>
+<td>No <strong>IP version</strong> control; every probe goes to <code>1.1.1.1</code>; the log reads <em>Started: DNS over HTTPS · IPv4 only, …</em>; <em>How this test works</em> says <em>IPv4 only…</em> and not <em>IPv4 and IPv6 apart</em>. The <strong>IPv6</strong> address card still shows the device's IPv6. 🛑 <strong>Must NOT</strong> send any probe over IPv6</td>
+</tr>
+<tr>
+<td><code>DEV-032</code></td>
+<td>Viewer</td>
+<td>How each test runs is the server's</td>
+<td>Open <strong>Run diagnostic</strong> with no ticket; then restart the server with <code>DEVICE_TEST_SAMPLES=50</code>, <code>DEVICE_TEST_INTERVAL_MS=100</code>, <code>DEVICE_TEST_TIMEOUT_MS=1000</code>, sign in again and run</td>
+<td><strong>How each test runs</strong> <em>25 samples, 200 ms apart, 2000 ms time-out</em> and <em>Set by PacketPulse for every test, so one test compares with another.</em>; no Samples, Interval or Timeout to change. Then <em>50 samples, 100 ms apart, 1000 ms time-out</em>, and the run takes 50. 🛑 <strong>Must NOT</strong> offer a stepper (customer decision, 28 October 2026)</td>
+</tr>
+<tr>
+<td><code>DEV-033</code></td>
+<td>Engineer</td>
+<td>A test sampled otherwise is refused</td>
+<td><code>POST /diagnostic/clientobservation</code> an HTTPS or ICMP observation with <code>sample_count</code> 50 (or <code>timeout_ms</code> 500) on a server at the defaults</td>
+<td>422 with <code>sample_count</code> <em>PacketPulse sets how each test runs. Reload the page, then run the test again.</em>; nothing filed. A UDP test is not held to it</td>
+</tr>
+<tr>
+<td><code>DEV-034</code></td>
+<td>Engineer</td>
+<td>The ticket's limits are characters</td>
+<td>Type a Customer ID of 64 Devanagari letters and a TT number of 64 Devanagari letters; run; <strong>Attach to a ticket</strong>; then add one letter to each and attach again</td>
+<td>The first is filed, and the ticket shows both in full; the second is refused with <em>Customer ID is too long.</em> and <em>TT number is too long.</em>, and nothing is filed. 🛑 <strong>Must NOT</strong> refuse a value of 64 characters or fewer, in any script</td>
 </tr>
 <tr>
 <td><code>DEV-022</code></td>
@@ -2665,15 +2889,15 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <p><strong>Pages:</strong> Operate → <strong>Run diagnostic</strong>, in a browser · <strong>Routes:</strong> <code>POST /reflector/session</code> (public, limited per address; no page calls it since the self-test's UDP option was removed on 17 October 2026), <code>POST /diagnostic/endpoint/{dnsSiteId}/webrtc-offer</code> (<code>diagnostic_run</code>, licensed), <code>POST /diagnostic/endpoint/{dnsSiteId}/reflector-key</code> (<code>dns_site_manage</code>, licensed, audited)</p>
 <ul>
 <li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: The only browser test that sees real packet loss, and says which way it was lost. Run from <strong>Run diagnostic</strong> where the customer is, in 30 seconds it tells the engineer whether the customer's uplink drops packets, their downlink does, or packets arrive too late to play — the three causes of a choppy call, told apart from where the customer sits.</li>
-<li>📖 <strong>User Guide &amp; Operational Flow</strong>: The UDP test runs in <strong>Run diagnostic</strong> (below). It sends small UDP packets at the chosen rate (50 a second, 200 bytes each, for a call) to a reflector. The public self-test offered it too, as <strong>PacketPulse network — UDP, like a call</strong>, until 17 October 2026, when it was removed with the site's links to the self-test: it needed PacketPulse's own reflector, which the live host keeps off. Loss is counted at the end, per packet, when the reflector says which packets reached it; until then the loss tile shows a dash. A packet back more than a second after it was sent is <em>late</em>, and counts in the loss figure, because a call would have played silence. <em>Not sent (device busy)</em> counts slots the browser could not keep; they are left out of every percentage. Keep the tab in front: a hidden tab stops the test.
+<li>📖 <strong>User Guide &amp; Operational Flow</strong>: The UDP test runs in <strong>Run diagnostic</strong> (below). It sends small UDP packets (200 bytes each) to a reflector at the server's pace - 10 a second unless <code>UDP_TEST_RATE_PPS</code> sets another, never the person's choice (customer request, 28 October 2026) - over IPv4. The public self-test offered it too, as <strong>PacketPulse network — UDP, like a call</strong>, until 17 October 2026, when it was removed with the site's links to the self-test: it needed PacketPulse's own reflector, which the live host keeps off. Loss is counted at the end, per packet, when the reflector says which packets reached it; until then the loss tile shows a dash. A packet back more than a second after it was sent is <em>late</em>, and counts in the loss figure, because a call would have played silence. <em>Not sent (device busy)</em> counts slots the browser could not keep; they are left out of every percentage. Keep the tab in front: a hidden tab stops the test. While a test runs the page keeps the screen on (the browser's screen wake lock, where it has one), and the controls say <em>Keep PacketPulse on screen until the test finishes…</em>.
 <ul>
 <li>When UDP cannot get through, the test says <em>UDP is blocked on this network</em>, and never shows that as 100% loss. It says so only after a second, fresh connection got nothing through either (since 14 October 2026): a first connection that gets no answer is retried at once, with <em>No UDP came back on that connection; trying once more on a fresh one.</em> in the log, and a run that then measures logs <em>The first connection got no UDP through and the second did…</em> beside its figures. A browser that sent no UDP at all — a setting, an extension or a VPN keeping WebRTC off it — is told <em>This browser sent no UDP, so the network was not tested…</em>, not that the network blocks UDP.</li>
 <li>The reflector logs how each session ended (<code>/opt/packetpulse/logs/packetpulse.log</code>, <em>reflector session ended</em>): <code>connected</code>, <code>checks_received</code> (the browser's connectivity checks that reached it), <code>answers_sent</code>, <code>probes_received</code> and <code>lifetime_ms</code>. For a run told <em>UDP is blocked</em>, <code>checks_received=0</code> means the network dropped the browser's packets on the way in; checks received and answered with <code>connected=false</code> means the answers were lost on the way back. It was added for a laptop in Dubai that was intermittently told UDP was blocked while one in Bengaluru was not.</li>
 <li>A customer's own reflector (<code>packetpulsereflector</code>, on a PoP, an SBC's neighbour or a VPS) is installed with its endpoint's key: <code>POST /diagnostic/endpoint/{dnsSiteId}/reflector-key</code> returns the key and the install line, <code>sudo ./install-reflector.sh --key &lt;key&gt; [--public-ip &lt;address&gt;]</code>. Sessions on it are then opened only through <code>POST /diagnostic/endpoint/{dnsSiteId}/webrtc-offer</code>, which signs the request and checks that the answer is signed back.</li>
 <li><strong>A customer release is node-locked</strong> (since 16 October 2026). It is built per customer by <code>packetpulserelease/reflector/BuildReflectorRelease.sh</code> into <code>packetpulserelease/&lt;Customer&gt;/&lt;yyyy-mm&gt;/packetpulse-reflector-&lt;version&gt;/</code> (filed by the month of its UTC build time; <code>&lt;Customer&gt;/RELEASES.md</code> lists every build and <code>&lt;Customer&gt;/current</code> links to the one to send), with a licence (<code>packetpulsereflector.licence</code>) that names the public IP(s) the reflector may run at, each sealed to that build so the file does not show it, and signed with the release machine's key (<code>~/.packetpulse/reflector-keys</code>, outside the repository). The release binary will not start without the licence, refuses <code>-open</code>, starts only when its <code>-public-ip</code> (or an interface address) is one the licence names, refuses any session the relay sent to another address (403), warns daily in the licence's last 30 days and stops when it ends (exit 2). <code>packetpulsereflector -check</code> reports all of it without serving, and the installer runs it before starting anything. The install line becomes <code>sudo ./install-reflector.sh --key &lt;key&gt; --licence packetpulsereflector.licence --public-ip &lt;licensed address&gt; --server-ip &lt;PacketPulse server&gt;</code>; it also opens firewalld, warns about an unsynchronised clock and installs <code>reflector-diagnostics.sh</code>, which collects a support bundle with the key redacted. Each delivery carries <code>PacketPulse_Reflector_Installation_Guide.pdf</code>, printed from the customer edition, <code>packetpulserelease/reflector/docs/PacketPulse_Reflector_Installation_Guide_Customer.html</code>: installation only, the engineer's account only, the licence in one line, since PacketPulse sets up the DNS site and sends the endpoint key itself (review of 17 October 2026). The full guide, <code>packetpulserelease/reflector/docs/PacketPulse_Reflector_Installation_Guide.html</code>, is printed into each build's <code>vendor/</code> as PacketPulse's reference and never shipped; <code>release.sh guide</code> prints both again into an existing build.</li>
 <li><strong>Across the layers</strong>: a signed request the reflector refuses is logged there with its cause (<em>reflector refused a session request</em>, <code>reason=</code> clock with <code>clock_offset_s</code>, key, replay or unsigned), because the server sees all of them as <em>installed with a different key</em>. The server logs every failed relay (<em>reflector relay failed</em>: <code>endpoint_id</code>, <code>reflector_address</code>, the dial error and a <code>hint</code> naming the layer to check), and a node-locked reflector reached at an unlicensed address answers 403, shown as 409 <em>The reflector on that endpoint is not licensed for the address PacketPulse reached it at…</em>. Every reflector error on screen says what happened, then the next step, then <em>Details for your engineer</em>: the address dialled, the time (UTC) and what came back — a timeout (a firewall drop), a refusal (nothing listening), a failed lookup, or the reflector's HTTP status. The <strong>Reference</strong> under it is the request ID, and the server's <em>reflector relay failed</em> line carries it as <code>reference=</code> with <code>reason</code>, <code>reflector_status</code> and <code>waited_ms</code> (<code>ReflectorRelayError</code> in <code>packetpulsego/pkg/diagnosticmicroservice/diagnosticservice/DiagnosticReflectorRelay.go</code>; the wording in <code>reflectorMessage</code>, <code>packetpulsego/pkg/diagnosticmicroservice/diagnosticapp/DiagnosticHandlers.go</code>).</li>
-<li><strong>In Run diagnostic</strong> (since 2026-10-09), in a browser with a ticket, the test is <strong>UDP, like a call</strong>, the only method offered, with <strong>Test length</strong> 10, 30 or 60 seconds and <strong>Packets per second</strong> 10, 25, 50 or 100 (a call's 50 unless chosen; since 13 October 2026) in place of the HTTPS steppers. The note under the figures says the rate run: <em>…100 packets a second from this browser…</em>. It is set up through the signed-in relay, so the person's session caps it, not the office's address. It measures to the reflector beside the ticket's endpoint when the endpoint has a <strong>UDP reflector address</strong> (§3.1), and otherwise to the PacketPulse network. The route below the controls (§4.1) says which before <strong>Start test</strong>, while the test runs and after it: <em>UDP over WebRTC → The reflector beside Pune Edge</em>, <strong>Path to the endpoint</strong>; or <em>UDP over WebRTC → The PacketPulse network</em>, <strong>Not the endpoint</strong>, in amber, with <em>Pune Edge has no UDP reflector, so this test goes to the PacketPulse network instead…</em> — or <em>…rather than to Pune Edge…</em> when the PacketPulse network was chosen after the endpoint's reflector failed, or when the endpoint's reflector address is PacketPulse's own. The route follows the server: once it answers, the route shows the reflector that answered, and the probe log says <em>Answered by the PacketPulse network, not Pune Edge</em> or <em>Answered by the reflector beside Pune Edge</em>. <em>What this run found</em> says which: <em>The reflector beside Pune Edge</em>, or <em>The PacketPulse network: the customer's access line, not the path to the endpoint</em> — and then no endpoint line. <strong>Lost up · down</strong> and <em>n late</em> sit with the figures; <em>Where packets went</em> reads, for example, <em>Upstream lost 4 (0.3%); Downstream lost 2 (0.1%); Late 4; Jitter up 9.4 ms, down 4.6 ms</em>. <strong>Attach to a ticket</strong> files it with the split; the ticket's page and PDF print the same line. A test to the PacketPulse network is filed as <em>PacketPulse network</em> at PacketPulse's address, never under the endpoint.</li>
-<li><strong>Progress</strong> counts the run's packet slots against what the reflector allows, not against what was asked for: <em>Testing 383/1500</em> and <em>Packet 383 of 1500</em> while it runs. A slot this device was too busy to keep is skipped, not sent late, and still counts, so a finished run reads <strong>100%</strong> with <em>1492 sent · 8 skipped</em> (since 2026-10-09; it used to stop at <em>99%</em>). Under the figures, <strong>What happened</strong> says the run in words: <em>The test ran its full 30 s, with room for 1500 packets at 50 a second. This device sent 1492. The other 8 were skipped: the device was too busy to send them on time… Skipped packets are not counted as lost, and say nothing about the network. All 1492 came back in time.</em> A stopped run says <em>The test was stopped part-way: n of its 1500 packets had their turn.</em>; a run the reflector's limits cut down adds <em>That is what the reflector's limits allowed, rather than the 1500 packets asked for.</em> The log adds <em>Pacing: 1500 packets, 50 a second</em> and, when any were skipped, <em>Skipped: 8 of 1500 packets, this device was busy</em>.</li>
+<li><strong>In Run diagnostic</strong> (since 2026-10-09), in a browser with a ticket, the test is <strong>UDP, like a call</strong>, the only method offered, with <strong>Test length</strong> in place of the sampling an HTTPS test is described by: a slider from 30 s to 5 min, ten seconds at a time, and chips <em>30 s · 1 min · 2 min · 3 min · 5 min</em> (1 min unless chosen; the server's bounds hold the offer), with <em>600 packets at 10 a second · finishes about 14:32</em> under it (customer request, 28 October 2026; it was 10, 30 or 60 s). <strong>Packets per second</strong> is shown, not offered: <em>10 a second</em>, <em>Set by PacketPulse for every test, so one test compares with another.</em> The run keeps to the pace the server's offer answer carries (<code>rate_pps</code>), whatever the page asked. The note under the figures says the rate run: <em>…10 packets a second from this browser…</em>. It is set up through the signed-in relay, so the person's session caps it, not the office's address. It measures to the reflector beside the ticket's endpoint when the endpoint has a <strong>UDP reflector address</strong> (§3.1), and otherwise to the PacketPulse network. The route below the controls (§4.1) says which before <strong>Start test</strong>, while the test runs and after it: <em>UDP over WebRTC → The reflector beside Pune Edge</em>, <strong>Path to the endpoint</strong>; or <em>UDP over WebRTC → The PacketPulse network</em>, <strong>Not the endpoint</strong>, in amber, with <em>Pune Edge has no UDP reflector, so this test goes to the PacketPulse network instead…</em> — or <em>…rather than to Pune Edge…</em> when the PacketPulse network was chosen after the endpoint's reflector failed, or when the endpoint's reflector address is PacketPulse's own. The route follows the server: once it answers, the route shows the reflector that answered, and the probe log says <em>Answered by the PacketPulse network, not Pune Edge</em> or <em>Answered by the reflector beside Pune Edge</em>. <em>What this run found</em> says which: <em>The reflector beside Pune Edge</em>, or <em>The PacketPulse network: the customer's access line, not the path to the endpoint</em> — and then no endpoint line. <strong>Lost up · down</strong> and <em>n late</em> sit with the figures; <em>Where packets went</em> reads, for example, <em>Upstream lost 4 (0.3%); Downstream lost 2 (0.1%); Late 4; Jitter up 9.4 ms, down 4.6 ms</em>. <strong>Attach to a ticket</strong> files it with the split; the ticket's page and PDF print the same line. A test to the PacketPulse network is filed as <em>PacketPulse network</em> at PacketPulse's address, never under the endpoint.</li>
+<li><strong>Progress</strong> counts the run's packet slots against what the reflector allows, not against what was asked for: <em>Testing 383/600</em> and <em>Packet 383 of 600 · 22 s left</em> while it runs. A slot this device was too busy to keep is skipped, not sent late, and still counts, so a finished run reads <strong>100%</strong> with <em>592 sent · 8 skipped</em> (since 2026-10-09; it used to stop at <em>99%</em>). Under the figures, <strong>What happened</strong> says the run in words: <em>The test ran its full 60 s, with room for 600 packets at 10 a second. This device sent 592. The other 8 were skipped: the device was too busy to send them on time… Skipped packets are not counted as lost, and say nothing about the network. All 592 came back in time.</em> A stopped run says <em>The test was stopped part-way: n of its 600 packets had their turn.</em>; a run the reflector's limits cut down adds <em>That is what the reflector's limits allowed, rather than the 600 packets asked for.</em>, or - for a reflector that holds a test for less time than was asked (one released before 28 October 2026 holds about two and a half minutes) - <em>This reflector holds a test for at most 2 min 25 s, so the test ran for that long. A newer reflector release holds 5 minutes.</em> The run is fitted to what is left of the reflector's session after the connection was set up, so a slow handshake shortens it rather than spilling past the cap (found 28 October 2026: the spill read as upstream loss). The log adds <em>Pacing: 600 packets, 10 a second</em> and, when any were skipped, <em>Skipped: 8 of 600 packets, this device was busy</em>.</li>
 <li>When the endpoint's reflector cannot run the test — down, busy, or installed with another key — the page shows the server's reason and offers <strong>Test to the PacketPulse network instead</strong>. <em>UDP is blocked on this network</em> is said only when not one UDP packet got through — the browser's ICE checks never answered within 8 s — and offers <strong>Try again</strong>; there is no HTTPS test in its place. When UDP got through but the connection over it did not open within 14 s — DTLS and SCTP shake hands after ICE, and on a lossy line each lost handshake packet waits out a retransmission timer — the page says <em>UDP got through, but the connection over it could not be completed…</em> instead, also with <strong>Try again</strong>. Until 13 October 2026 both were called blocked after 8 s. A refusal for who the person is (signed out, no permission, no licence) offers nothing else. <strong>Stop</strong> ends sending early; the packets already sent are still waited for, so a stopped run is a shorter run, not a lossy one.</li>
 <li>A filed UDP test is graded against the organisation's targets like a sweep (§5.1), and a breach is counted on the ticket.</li>
 </ul>
@@ -2692,8 +2916,8 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td><code>UDP-001</code></td>
 <td>Engineer</td>
 <td>A clean line reads clean</td>
-<td>In <strong>Run diagnostic</strong>, in a browser, with a ticket, choose an endpoint with a <strong>UDP reflector address</strong> (§3.1); 30 seconds at 50 a second; <strong>Start test</strong></td>
-<td><strong>Lost up · down</strong> <em>0 · 0</em> with <em>0 late</em>; <em>What happened</em> ends <em>All 1500 came back in time.</em> (fewer, the rest skipped, on a busy device). 🛑 <strong>Must NOT</strong> show any downstream loss on a clean line (the first cut showed 4.8%)</td>
+<td>In <strong>Run diagnostic</strong>, in a browser, with a ticket, choose an endpoint with a <strong>UDP reflector address</strong> (§3.1); the default 1 min; <strong>Start test</strong></td>
+<td><strong>Lost up · down</strong> <em>0 · 0</em> with <em>0 late</em>; <em>What happened</em> ends <em>All 600 came back in time.</em> (fewer, the rest skipped, on a busy device). 🛑 <strong>Must NOT</strong> show any downstream loss on a clean line (the first cut showed 4.8%)</td>
 </tr>
 <tr>
 <td><code>UDP-002</code></td>
@@ -2854,7 +3078,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>Engineer</td>
 <td>UDP is the browser's only method</td>
 <td>In a browser open <strong>Run diagnostic</strong>; fill the ticket; then open it in the desktop app</td>
-<td>No <strong>Measurement method</strong> row; <strong>Test length</strong> <em>10 s · 30 s · 60 s</em> with 30 chosen and <strong>Packets per second</strong> <em>10 · 25 · 50 · 100</em> with 50 chosen; no Samples, Interval or Timeout. The desktop app has no UDP choice and keeps <strong>ICMP echo</strong>. 🛑 <strong>Must NOT</strong> offer <em>HTTPS to the endpoint</em></td>
+<td>No <strong>Measurement method</strong> row; <strong>Test length</strong> a slider from 30 s to 5 min with <em>1 min</em> chosen and the chips <em>30 s · 1 min · 2 min · 3 min · 5 min</em>, and <strong>Packets per second</strong> <em>10 a second</em> with nothing to choose; no Samples, Interval or Timeout. The desktop app has no UDP choice and keeps <strong>ICMP echo</strong>. 🛑 <strong>Must NOT</strong> offer <em>HTTPS to the endpoint</em></td>
 </tr>
 <tr>
 <td><code>UDP-017</code></td>
@@ -2902,14 +3126,14 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td><code>UDP-045</code></td>
 <td>Engineer</td>
 <td>Each IP family is tested on its own</td>
-<td>Run a UDP test of an endpoint whose reflector has both an IPv4 and an IPv6 address, from a network with both; attach</td>
+<td>With <code>IPV6_TESTS_ENABLED=true</code> on the server, run a UDP test of an endpoint whose reflector has both an IPv4 and an IPv6 address, from a network with both; attach</td>
 <td><em>The same test over IPv6.</em> after the first run; <strong>By IP version</strong> shows IPv4 and IPv6 figures; two observations filed, each with its <code>reflector_ip</code> (one <code>x.x.x.x</code>, one <code>…:…</code>). 🛑 <strong>Must NOT</strong> let the browser pick one family and report it as both</td>
 </tr>
 <tr>
 <td><code>UDP-046</code></td>
 <td>Engineer</td>
 <td>A family that could not be tested says why</td>
-<td>Run the same test from a network without IPv6; then to a reflector with no IPv6 address; then with IPv6 UDP blocked at a firewall</td>
+<td>With <code>IPV6_TESTS_ENABLED=true</code>, run the same test from a network without IPv6; then to a reflector with no IPv6 address; then with IPv6 UDP blocked at a firewall</td>
 <td><strong>By IP version</strong>: <em>Not tested: this device has no IPv6 connection.</em>, then <em>Not tested: the reflector has no IPv6 address.</em>, then <em>Not tested: UDP over IPv6 did not get through.</em>; the IPv4 run is filed alone each time. 🛑 <strong>Must NOT</strong> call a missing IPv6 path <em>UDP blocked</em>, or fail the IPv4 run because of it</td>
 </tr>
 <tr>
@@ -2957,9 +3181,51 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <tr>
 <td><code>UDP-029</code></td>
 <td>Engineer</td>
-<td>The rate is a choice</td>
-<td>Choose <strong>Packets per second</strong> <em>100</em> and <strong>Test length</strong> <em>10 s</em>; <strong>Start test</strong>; then <em>10</em> and run again</td>
-<td>The log's <em>Pacing: 1000 packets, 100 a second</em>, <strong>What happened</strong> <em>…room for 1000 packets at 100 a second</em>, the note <em>…100 packets a second…</em>; then <em>100 packets, 10 a second</em>. Changing the rate while a test runs is not possible. 🛑 <strong>Must NOT</strong> clamp 100 a second on PacketPulse's network (it allows 120 a second and 6000 packets)</td>
+<td>The pace is the server's</td>
+<td>Open <strong>Run diagnostic</strong> in a browser; read <strong>Packets per second</strong>; <strong>Start test</strong> at <em>30 s</em>; then set <code>UDP_TEST_RATE_PPS=20</code> on the server, restart it, refresh the app and run again</td>
+<td><em>10 a second</em> with no control to change it; the log's <em>Pacing: 300 packets, 10 a second</em> and <strong>What happened</strong> <em>…room for 300 packets at 10 a second</em>; after the change <em>20 a second</em> and <em>600 packets, 20 a second</em>. A <code>UDP_TEST_RATE_PPS</code> of 0 or 21 stops the server at boot. 🛑 <strong>Must NOT</strong> offer a rate, or run at any pace but the server's</td>
+</tr>
+<tr>
+<td><code>UDP-047</code></td>
+<td>Engineer</td>
+<td>Tests run over IPv4 alone</td>
+<td>On a server with <code>IPV6_TESTS_ENABLED</code> unset, run a UDP test of an endpoint whose reflector has both an IPv4 and an IPv6 address, from a network with both; attach</td>
+<td>One run, over IPv4: no <em>The same test over IPv6.</em>, no <strong>By IP version</strong> card; one observation filed, its <code>reflector_ip</code> <code>x.x.x.x</code>. 🛑 <strong>Must NOT</strong> run or file anything over IPv6</td>
+</tr>
+<tr>
+<td><code>UDP-048</code></td>
+<td>Engineer</td>
+<td>No IPv4 on either end is said</td>
+<td>With IPv6 testing off, test an endpoint whose reflector has an IPv6 address alone; then from a device with no IPv4 (an IPv6-only hotspot)</td>
+<td><em>This endpoint's reflector has no IPv4 address, and PacketPulse tests over IPv4 only, so the test could not run.</em>; then <em>This device has no IPv4 connection, and PacketPulse tests over IPv4 only…</em>; nothing runs over IPv6 instead. 🛑 <strong>Must NOT</strong> read <em>The UDP test could not run in this browser</em></td>
+</tr>
+<tr>
+<td><code>UDP-049</code></td>
+<td>Engineer</td>
+<td>Five minutes, on a reflector that holds it</td>
+<td>Run a <strong>5 min</strong> test to the Oracle host's reflector on release 20261028 or later; then to a reflector released before 28 October 2026 (TATA-MUMBAI until Tata installs the new one)</td>
+<td><em>Testing 3000/3000</em>, <em>The test ran its full 300 s, with room for 3000 packets at 10 a second.</em>; then the run stops at about two and a half minutes with <em>This reflector holds a test for at most 2 min 25 s, so the test ran for that long. A newer reflector release holds 5 minutes.</em> 🛑 <strong>Must NOT</strong> show the old reflector's cut-off as packet loss</td>
+</tr>
+<tr>
+<td><code>UDP-050</code></td>
+<td>Engineer</td>
+<td>The screen stays on through a test</td>
+<td>On a phone whose screen locks after 30 s, run a <strong>2 min</strong> test without touching it</td>
+<td>The screen stays on until the test ends, then dims as usual; the controls say <em>Keep PacketPulse on screen until the test finishes…</em>. 🛑 <strong>Must NOT</strong> lock part-way and stop the test</td>
+</tr>
+<tr>
+<td><code>UDP-051</code></td>
+<td>Administrator</td>
+<td>The server files IPv4 alone</td>
+<td>With IPv6 testing off, <code>POST /diagnostic/clientobservation</code> a UDP observation whose <code>reflector_ip</code> is an IPv6 address</td>
+<td>422 with <code>observations</code> <em>PacketPulse tests over IPv4 only. Reload the page, then run the test again.</em>; nothing filed. 🛑 <strong>Must NOT</strong> file a test over IPv6</td>
+</tr>
+<tr>
+<td><code>UDP-052</code></td>
+<td>Engineer</td>
+<td>A ticket starts when its test did</td>
+<td>Run a 3-minute UDP test; open the ticket in <strong>History</strong>, its PDF, and <code>GET /result/bytt/{TT}</code> with a key</td>
+<td><strong>Started</strong> is when the test began, about three minutes before <strong>Finished</strong>, and the same as the result's checked time; <code>started_on</code> and <code>finished_on</code> are <code>duration_ms</code> apart. 🛑 <strong>Must NOT</strong> read as starting when it finished (fixed 28 October 2026)</td>
 </tr>
 <tr>
 <td><code>UDP-030</code></td>
@@ -3025,7 +3291,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <li>Coverage, in-app: <code>packetpulsego/pkg/diagnosticmicroservice/diagnosticservice/DiagnosticUdpObservation_test.go</code>, the <code>contract</code> suite's <code>udp_observation_test.go</code>, <code>packetpulseflutter/test/run_diagnostic_udp_test.dart</code>, <code>packetpulseflutter/test/udp_probe_run_test.dart</code>.</li>
 <li>Connecting: <code>connect</code> in <code>packetpulseweb/assets/packetpulse-udp.js</code> opens one connection; <code>runUdpTest</code> tries <code>CONNECT_ATTEMPTS</code> (2) when nothing came back, and <code>iceDiagnosis</code> reads the browser's own candidate-pair counts to tell <em>no UDP sent</em> (<code>no-udp</code>) and <em>answered</em> (<code>handshake</code>) from <em>nothing came back</em> (<code>udp-blocked</code>). The server's half is <code>logOutcome</code> and <code>iceChecks</code> in <code>packetpulsego/pkg/reflectormicroservice/reflectorcore/ReflectorEngine.go</code>, held by <code>TestASessionThatNeverConnectedSaysNoCheckArrived</code> and <code>TestASessionThatConnectedIsLoggedWithWhatItReceived</code>.</li>
 <li>The page's half: <code>packetpulseweb/assets/packetpulse-udp.js</code> (pacing that skips a missed slot rather than bursting, the per-sequence split, per-direction RFC 3550 jitter from the reflector's stamps, and the connect wait: <code>CONNECT_WAIT_MS</code> for ICE, <code>HANDSHAKE_WAIT_MS</code> once ICE has got through, kept under the hosted reflector's 15 s idle limit), tested on a virtual clock in <code>packetpulseweb/assets/packetpulse-udp.test.mjs</code> (part of <code>unit</code>).</li>
-<li>The rate: <code>_udpRates</code> in <code>packetpulseflutter/lib/diagnosticmicroservice/presentation/screens/ClientProbeScreen.dart</code>, passed to the engine as <code>ratePps</code> by <code>UdpProbeRunnerWeb.dart</code>. <code>HostedLimits</code> in <code>packetpulsego/pkg/reflectormicroservice/reflectorcore/ReflectorSession.go</code> allow the fastest for the longest test with a fifth of headroom (<code>TestThePagesLongestRunFitsTheHostedCaps</code>).</li>
+<li>The length and the pace (customer request, 28 October 2026): the bounds are <code>TestMinSeconds</code>, <code>TestMaxSeconds</code>, <code>TestDefaultSeconds</code>, <code>TestDefaultRatePps</code> and <code>TestMaxRatePps</code> in <code>packetpulsego/pkg/reflectormicroservice/reflectorconstants/ReflectorAPI.go</code>, held to <code>packetpulsetest/contracts/udp_test_limits.json</code> by <code>TestEveryReflectorHoldsTheLongestTestAtTheFastestPace</code> (<code>reflectorcore/ReflectorSession_test.go</code>) and by the engine's own test (<code>SETUP_BUDGET_MS</code>). The server's pace is <code>UDP_TEST_RATE_PPS</code> (<code>pkg/common/config/Config.go</code>, 1 to 20) and its IPv6 switch <code>IPV6_TESTS_ENABLED</code>; <code>pkg/common/devicetest</code> carries both on every session (<code>device_test</code>, at sign-in and on <code>/user/me</code>) and <code>paced</code> in <code>DiagnosticReflectorRelay.go</code> on every offer answer (<code>rate_pps</code>, <code>over_ipv6</code>, and <code>limits.max_rate_pps</code> lowered to the pace). The screen's slider and chips are <code>_udpLengthSelector</code> in <code>ClientProbeScreen.dart</code>; the engine runs at <code>answer.rate_pps</code> and <code>planRun</code> fits the run to the session time left since the offer. The screen is kept on through <code>PacketPulseWakeLock</code> (<code>lib/common/services/</code>). <code>HostedLimits</code> and <code>CustomerLimits</code> both hold six minutes.</li>
 <li>Live: <code>REFLECTOR_UDP_PORT=50000</code> and <code>REFLECTOR_PUBLIC_IP</code> on the server; UDP 50000 open in the Oracle security list and the host firewall; <code>AF_NETLINK</code> in <code>scripts/deploy/packetpulse.service</code> (the reflector lists the host's interfaces through it). nginx needs nothing: the session route is under <code>/api/</code>, and the packets go straight to the UDP port. Since 16 October 2026 the built-in reflector is off (<code>REFLECTOR_UDP_PORT=0</code>, <code>REFLECTOR_PUBLIC_IP</code> unset) and the licensed standalone <code>packetpulsereflector</code> answers on 50000; since 17 October it holds the network key and its address is in <code>REFLECTOR_NETWORK_HOSTS</code>, so every endpoint naming it is answered (<code>UDP-044</code>).</li>
 </ul>
 </li>
@@ -3124,10 +3390,10 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <p>How results reach the operator's own systems, and how its directory signs people in.</p>
 <hr>
 <h3 id="61-results-api-keys">6.1 🔌 Results API keys<a class="anchor" href="#61-results-api-keys" aria-label="Link to this section">#</a></h3>
-<p><strong>Screen:</strong> Configure → <strong>Results API keys</strong> · <strong>Routes:</strong> <code>GET /apikey/list</code>, <code>POST /apikey/add</code>, <code>DELETE /apikey/{credentialId}</code>; with a key: <code>GET /result/bytt/{ttNumber}</code>, <code>GET /result/export.csv</code> · <strong>Capability:</strong> <code>apikey_manage</code></p>
+<p><strong>Screen:</strong> Configure → <strong>Results API keys</strong> · <strong>Routes:</strong> <code>GET /apikey/list</code>, <code>POST /apikey/add</code>, <code>DELETE /apikey/{credentialId}</code>; with a key: <code>GET /result/bytt/{ttNumber}</code>, <code>GET /result/bycustomer/{customerId}</code>, <code>GET /result/export.csv</code> · <strong>Capability:</strong> <code>apikey_manage</code></p>
 <ul>
-<li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: The ticketing system pulls the evidence itself — one ticket as JSON, or a month of results as CSV — with a key scoped to the operator's own organisation, readable even if a renewal is late. The key is shown once and stored only as a hash.</li>
-<li>📖 <strong>User Guide &amp; Operational Flow</strong>: <strong>Issue key</strong> with a label and an optional expiry; copy it — it is never shown again. Your system sends it as <code>Authorization: Bearer &lt;key&gt;</code>. <code>GET /api/v1/result/export.csv?from=…&amp;to=…</code> takes RFC 3339 times, at most 31 days apart; with no <code>from</code>, the day before <code>to</code> (default now).</li>
+<li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: The ticketing system pulls the evidence itself — one ticket as JSON, a customer's tickets of a period as JSON, or a month of results as CSV — with a key scoped to the operator's own organisation, readable even if a renewal is late. The key is shown once and stored only as a hash.</li>
+<li>📖 <strong>User Guide &amp; Operational Flow</strong>: <strong>Issue key</strong> with a label and an optional expiry; copy it — it is never shown again. Your system sends it as <code>Authorization: Bearer &lt;key&gt;</code>. <code>GET /api/v1/result/export.csv?from=…&amp;to=…</code> takes RFC 3339 times, at most 31 days apart; with no <code>from</code>, the day before <code>to</code> (default now). <code>GET /api/v1/result/bycustomer/{customerId}?from=…&amp;to=…</code> gives a customer's tickets run in that period, newest first, each as <code>/result/bytt</code> gives one: the last 30 days when no <code>from</code> is given, any period otherwise, and the newest 200 a call, with <code>more</code> true when there were others - the count, not the period, bounds a call (customer decision, 29 October 2026), and the read stops at it through the customer's own index.</li>
 <li>🧪 <strong>Manual Testing Playbook</strong>:<div class="tw"><table><thead>
 <tr>
 <th>ID</th>
@@ -3150,7 +3416,14 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>Integrator</td>
 <td>One ticket as JSON</td>
 <td><code>curl -H &quot;Authorization: Bearer &lt;key&gt;&quot; https://…/api/v1/result/bytt/TT-MAN-001</code></td>
-<td>The ticket with every result, including <code>ip_version</code>, <code>report_only</code>, and each UDP result's <code>reflector_address</code> and <code>reflector_ip</code>; at the top, <code>user_ip</code> and <code>user_ipv6</code>, the public IPv4 and IPv6 a device test came from (empty for a server sweep)</td>
+<td>The ticket with every result, including <code>ip_version</code>, <code>report_only</code>, and each UDP result's <code>reflector_address</code> and <code>reflector_ip</code>; at the top, <code>user_ip</code> and <code>user_ipv6</code>, the public IPv4 and IPv6 a device test came from (empty for a server sweep). 🛑 <strong>Must NOT</strong> carry <code>resolved_ip</code> (customer request, 28 October 2026)</td>
+</tr>
+<tr>
+<td><code>API-007</code></td>
+<td>Integrator</td>
+<td>A customer's tickets by Customer ID</td>
+<td>Run two tickets for <code>CUST-MAN-001</code> and one for another customer; <code>curl -H &quot;Authorization: Bearer &lt;key&gt;&quot; https://…/api/v1/result/bycustomer/CUST-MAN-001</code>; then with <code>from</code> and <code>to</code> two and three days back; then <code>from=yesterday</code>; then <code>from</code> 400 days before now</td>
+<td><code>customer_id</code>, <code>from</code> and <code>to</code> (the last 30 days), <code>count</code> 2, <code>more</code> false, and <code>tickets</code> with the two, newest first, each with its results and no <code>resolved_ip</code>; the earlier period: <code>count</code> 0; then 400 (unreadable time); the long period 200 with every ticket in it. 🛑 <strong>Must NOT</strong> list the other customer's ticket, nor another organisation's with RIVAL's key</td>
 </tr>
 <tr>
 <td><code>API-003</code></td>
@@ -3170,15 +3443,22 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td><code>API-005</code></td>
 <td>Integrator</td>
 <td>The wrong credential is refused</td>
-<td>No header; a person's session token; a revoked key</td>
+<td>No header; a person's session token; a revoked key, on <code>/result/bytt</code> and <code>/result/bycustomer</code></td>
 <td>401 each</td>
 </tr>
 <tr>
 <td><code>API-006</code></td>
 <td>RIVAL integrator</td>
 <td>A key reads only its own organisation</td>
-<td>RIVAL's key for ACME's TT, and a period covering ACME's tickets</td>
-<td>404; a CSV with none of ACME's rows</td>
+<td>RIVAL's key for ACME's TT, ACME's Customer ID, and a period covering ACME's tickets</td>
+<td>404; <code>count</code> 0; a CSV with none of ACME's rows</td>
+</tr>
+<tr>
+<td><code>API-008</code></td>
+<td>Integrator</td>
+<td>A key never starts a test</td>
+<td><code>curl -X POST -H &quot;Authorization: Bearer &lt;key&gt;&quot; -d '{&quot;customer_id&quot;:&quot;CUST-MAN-008&quot;,&quot;tt_number&quot;:&quot;TT-MAN-008&quot;}' https://…/api/v1/diagnostic/submit</code>; the same to <code>/ping/run</code>; then, signed in, open TT <code>TT-MAN-008</code> in <strong>History</strong></td>
+<td>401 each; no ticket <code>TT-MAN-008</code> and no new sweep. Only a signed-in person starts a test. 🛑 <strong>Must NOT</strong> run or open anything for a key</td>
 </tr>
 </tbody>
 </table></div>
@@ -4385,7 +4665,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <h2 id="54-deploy-and-verify">5.4 Deploy and verify<a class="anchor" href="#54-deploy-and-verify" aria-label="Link to this section">#</a></h2>
 <pre class="code"><code>scripts/deploy/PacketPulseDeploy.sh --host mshop.rummaan53.com
 </code></pre>
-<p>The script backs the live database up before the new release boots and migrates it. It does not install the nginx vhost: when <code>scripts/deploy/packetpulse-nginx.conf</code> changes, copy it to <code>/etc/nginx/conf.d/packetpulse.conf</code> on the host, run <code>sudo certbot --nginx -d packetpulse.rummaan53.com --reinstall</code> to put the TLS lines back, then <code>sudo nginx -t</code> and reload. Afterwards:</p>
+<p>Before anything is switched, the script runs the new release's <code>packetpulseserver check-config</code> on the host, as the unit runs it (its user, <code>/opt/packetpulse/.env</code>): a setting the new release would refuse - a value it cannot read, a range it narrowed - stops the deploy with <em>refuses the live settings … nothing was activated</em>, rather than the server at boot (since 29 October 2026). The script then backs the live database up before the new release boots and migrates it. It does not install the nginx vhost: when <code>scripts/deploy/packetpulse-nginx.conf</code> changes, copy it to <code>/etc/nginx/conf.d/packetpulse.conf</code> on the host, run <code>sudo certbot --nginx -d packetpulse.rummaan53.com --reinstall</code> to put the TLS lines back, then <code>sudo nginx -t</code> and reload. Afterwards:</p>
 <div class="tw"><table><thead>
 <tr>
 <th>ID</th>
@@ -4434,6 +4714,11 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td><code>curl -sI</code> on <code>/</code>, <code>/app/</code> and <code>/assets/packetpulse-site.css</code></td>
 <td><code>X-Frame-Options: SAMEORIGIN</code> and <code>X-Content-Type-Options: nosniff</code> on each. 🛑 <strong>Must NOT</strong> be missing: an <code>add_header</code> inside a location drops every header set on the server block</td>
 </tr>
+<tr>
+<td><code>REL-015</code></td>
+<td>The deploy's output before <em>activating</em></td>
+<td><em>the live settings boot <version></em>; with a setting the release cannot read put in a copy of the host's <code>.env</code> (on a scratch host), <em>refuses the live settings in /opt/packetpulse/.env … nothing was activated</em>, and <code>current</code> unchanged</td>
+</tr>
 </tbody>
 </table></div>
 <h2 id="55-rollback">5.5 Rollback<a class="anchor" href="#55-rollback" aria-label="Link to this section">#</a></h2>
@@ -4446,7 +4731,7 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/packetpulse/releases/&lt;previous&gt;
 <hr>
 <h1 id="appendices">Appendices<a class="anchor" href="#appendices" aria-label="Link to this section">#</a></h1>
 <h2 id="appendix-a-every-api-route">Appendix A — Every API route<a class="anchor" href="#appendix-a-every-api-route" aria-label="Link to this section">#</a></h2>
-<p>All routes are under <code>/api/v1</code>. <strong>Access</strong>: <em>public</em> (no session), <em>session</em> (signed in), <em>member</em> (signed in <strong>and</strong> in an organisation), <em>superuser</em> (the platform operator), <em>api key</em> (a Results API key with <code>read:results</code>). <strong>Licence</strong>: refused while the organisation's licence is suspended, revoked or expired. <strong>Audited</strong>: recorded by the audit middleware from <code>packetpulsego/pkg/auditlogmicroservice/auditlogconstants/AuditLogRegistry.go</code>; sign-in, sign-out and failed sign-ins are recorded by the user service itself (§2.5). <code>./packetpulsetest.sh docs</code> derives this table from the route handlers and fails if it drifts.</p>
+<p>All routes are under <code>/api/v1</code>. <strong>Access</strong>: <em>public</em> (no session), <em>session</em> (signed in), <em>member</em> (signed in <strong>and</strong> in an organisation), <em>superuser</em> (the platform operator), <em>api key</em> (a Results API key with <code>read:results</code>); <em>when switched on</em> means the route exists only while <code>SERVER_SWEEPS_ENABLED=true</code> - off by default, so a test is started only by a person, from their device (decision of 30 October 2026). <strong>Licence</strong>: refused while the organisation's licence is suspended, revoked or expired. <strong>Audited</strong>: recorded by the audit middleware from <code>packetpulsego/pkg/auditlogmicroservice/auditlogconstants/AuditLogRegistry.go</code>; sign-in, sign-out and failed sign-ins are recorded by the user service itself (§2.5). <code>./packetpulsetest.sh docs</code> derives this table from the route handlers and fails if it drifts.</p>
 <div class="tw"><table><thead>
 <tr>
 <th>Method</th>
@@ -4533,7 +4818,7 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/packetpulse/releases/&lt;previous&gt;
 <tr>
 <td><code>POST</code></td>
 <td><code>/diagnostic/submit</code></td>
-<td>member</td>
+<td>member when switched on</td>
 <td><code>diagnostic_run</code></td>
 <td style="text-align:center">required</td>
 <td style="text-align:center">✅</td>
@@ -4805,7 +5090,7 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/packetpulse/releases/&lt;previous&gt;
 <tr>
 <td><code>POST</code></td>
 <td><code>/ping/run</code></td>
-<td>member</td>
+<td>member when switched on</td>
 <td><code>diagnostic_run</code></td>
 <td style="text-align:center">required</td>
 <td style="text-align:center">—</td>
@@ -4965,6 +5250,14 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/packetpulse/releases/&lt;previous&gt;
 <tr>
 <td><code>GET</code></td>
 <td><code>/result/bytt/{ttNumber}</code></td>
+<td>api key</td>
+<td>—</td>
+<td style="text-align:center">—</td>
+<td style="text-align:center">—</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/result/bycustomer/{customerId}</code></td>
 <td>api key</td>
 <td>—</td>
 <td style="text-align:center">—</td>
@@ -5543,10 +5836,14 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/packetpulse/releases/&lt;previous&gt;
 <td><code>0037_2026_10_26_user_ipv6.sql</code></td>
 <td>The user IPv6 of a device test, beside its user IP (<code>diagnostic_request.user_ipv6</code>): the public IPv6 the device's IPv6 traffic leaves from, as its own lookup found it, kept only when it is a public IPv6 - PacketPulse is reached over IPv4 and never sees it.</td>
 </tr>
+<tr>
+<td><code>0038_2026_10_28_result_organisation.sql</code></td>
+<td>The organisation of every result on the result itself (<code>ping_result.organisation_id</code>), set from its run by a trigger on every insert and filled for the results already filed, with <code>ping_result_org_checked_idx</code> (organisation, <code>checked_on</code>) in every monthly partition: a report of a day reads that day of that month's partition, however long the organisation has been testing (customer request, 28 October 2026). NULL where the run has none.</td>
+</tr>
 </tbody>
 </table></div>
 <h2 id="appendix-d-settings">Appendix D — Settings<a class="anchor" href="#appendix-d-settings" aria-label="Link to this section">#</a></h2>
-<p>Read from the environment, falling back to <code>.env</code> (see <code>.env.example</code>); defined in <code>packetpulsego/pkg/common/config/Config.go</code>.</p>
+<p>Read from the environment, falling back to <code>.env</code> (see <code>.env.example</code>); defined in <code>packetpulsego/pkg/common/config/Config.go</code>. A number, a switch or a duration given a value that cannot be read - <code>PING_TIMEOUT=900</code> with no unit, <code>IPV6_TESTS_ENABLED=yes</code> - stops the server at boot, naming every such setting, what it was given and what it wants (since 29 October 2026: it used to mean the default, quietly). An empty value is no value: the default.</p>
 <div class="tw"><table><thead>
 <tr>
 <th>Setting</th>
@@ -5668,7 +5965,7 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/packetpulse/releases/&lt;previous&gt;
 <tr>
 <td><code>PING_COUNT</code>, <code>PING_TIMEOUT</code>, <code>PING_INTERVAL</code>, <code>PING_CONCURRENCY</code></td>
 <td><code>4</code>, <code>5s</code>, <code>200ms</code>, <code>16</code></td>
-<td>The probe engine's defaults</td>
+<td>How every server sweep runs: packets to each site, the wait for each reply, the gap between packets, sites at once. The server's alone: a sweep request naming <code>packet_count</code> or <code>timeout_ms</code> is refused (customer decision, 28 October 2026). The test servers run <code>PING_COUNT=1</code>, <code>PING_TIMEOUT=900ms</code> so the suites' sweeps are quick</td>
 </tr>
 <tr>
 <td><code>PING_TCP_FALLBACK</code></td>
@@ -5729,6 +6026,31 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/packetpulse/releases/&lt;previous&gt;
 <td><code>REFLECTOR_NETWORK_HOSTS</code></td>
 <td>—</td>
 <td>PacketPulse's own standalone reflectors, as IP addresses separated by commas (live <code>140.245.28.232</code>). An endpoint whose <strong>UDP reflector address</strong> is one of them, or a name resolving to one, is signed for with the network key rather than its own endpoint key, so the one reflector answers every endpoint of every organisation. Install it with the key <code>packetpulseserver reflector-network-key</code> prints on the server. A name, not an IP, stops the server at boot</td>
+</tr>
+<tr>
+<td><code>UDP_TEST_RATE_PPS</code></td>
+<td><code>10</code></td>
+<td>The pace of every UDP test a person runs from a device, in packets a second: set here, never by the person (customer request, 28 October 2026). 1 to 20 - every reflector holds the longest test, 300 s, at 20 - or the server stops at boot. Sent to the app on every session and with every offer answer.</td>
+</tr>
+<tr>
+<td><code>IPV6_TESTS_ENABLED</code></td>
+<td><code>false</code></td>
+<td>Whether tests also run over IPv6: a device's UDP test over each family its reflector offers, and the server's sweep of a dual-stack endpoint over both. Off, every test runs over IPv4 alone and a test over IPv6 is refused when filed (customer requirement, 28 October 2026); set aside for a later release, not removed.</td>
+</tr>
+<tr>
+<td><code>DEVICE_TEST_SAMPLES</code></td>
+<td><code>25</code></td>
+<td>How many samples every ICMP or HTTPS test a person runs from a device takes: set here, never by the person (customer decision, 28 October 2026). 3 to 200, or the server stops at boot. Sent to the app on every session; a test filed with another count is refused.</td>
+</tr>
+<tr>
+<td><code>DEVICE_TEST_INTERVAL_MS</code></td>
+<td><code>200</code></td>
+<td>The gap between those samples, in milliseconds. 0 to 2000, or the server stops at boot. Sent to the app on every session.</td>
+</tr>
+<tr>
+<td><code>DEVICE_TEST_TIMEOUT_MS</code></td>
+<td><code>2000</code></td>
+<td>How long each of those samples may take to answer, in milliseconds, before it counts as unanswered. 200 to 10000, or the server stops at boot. Sent to the app on every session; a test filed with another time-out is refused.</td>
 </tr>
 </tbody>
 </table></div>
