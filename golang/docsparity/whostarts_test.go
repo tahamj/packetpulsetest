@@ -13,8 +13,9 @@ import (
 // startedBy ties something outside PacketPulse - a scheduler, a ticketing
 // system, an integration - to starting a test, within a few words of it.
 var (
-	outsider   = `\b(?:schedulers?|ticketing systems?|own systems?|your systems?|IT systems?|integrations?)\b`
-	startsTest = `\b(?:sweeps?|start\w*|trigger\w*|asks? for one|request\w*|call\w*)\b`
+	outsider = `\b(?:schedulers?|ticketing systems?|own systems?|your systems?|IT systems?|integrations?)\b`
+	// "Call" starts a test only as calling one: "database calls" do not.
+	startsTest = `\b(?:sweeps?|start\w*|trigger\w*|asks? for one|request\w*|call\w* (?:a|an|the) (?:server )?(?:sweep|test|diagnostic))\b`
 	startedBy  = regexp.MustCompile(`(?i)` + outsider + `.{0,50}?` + startsTest + `|` + startsTest + `.{0,50}?` + outsider)
 	// readsOnly is wording that already says the outsider only reads.
 	readsOnly = regexp.MustCompile(`(?i)\b(?:cannot|can't|never|no API key|only read|pull\w*|fetch\w*|reads?)\b`)
@@ -25,10 +26,6 @@ var (
 type readingPassage struct{ file, text, why string }
 
 var readingPassages = []readingPassage{
-	{"docs/PacketPulse_Future_Features_Estimates.html", "integration team can call",
-		"FF-16: an integration team calling the Results API, which only reads"},
-	{"docs/PacketPulse_Product_Briefing_and_Feature_Guide.html", "The ticketing system calls",
-		"UC-6: the ticketing system calls /result/bytt, which only reads"},
 	{"docs/PacketPulse_Product_Briefing_and_Feature_Guide.html", "request). Integration",
 		"a retention set on request, then the next row's integration secrets"},
 	{"docs/PacketPulse_Product_Briefing_and_Feature_Guide.html", "started by a signed-in person; your ticketing system",
@@ -114,6 +111,7 @@ func TestTheStartWordingGuardCatchesTheOldClaims(t *testing.T) {
 		"A customer's ticketing system or scheduler can ask for one through the API.",
 		"Only scripts and integrations can start a server sweep today.",
 		"<h4>Server sweeps when your systems ask</h4>",
+		"An integration can call the sweep API whenever it likes.",
 	} {
 		if len(startClaimsIn(claim)) == 0 {
 			t.Errorf("not caught: %q", claim)
@@ -123,6 +121,7 @@ func TestTheStartWordingGuardCatchesTheOldClaims(t *testing.T) {
 		"Outside systems connect with read-only API keys: they can fetch results but cannot start a test.",
 		"A key lets your ticketing system pull results into the ticket.",
 		"A signed-in member can still start one through the API; no API key can.",
+		"Integration: OpenTelemetry tracing, spans across database calls.",
 	} {
 		if claims := startClaimsIn(right); len(claims) != 0 {
 			t.Errorf("flagged a right sentence %q: %v", right, claims)
