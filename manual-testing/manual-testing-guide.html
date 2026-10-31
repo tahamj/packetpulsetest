@@ -241,7 +241,7 @@ nav.side .nohit.on{display:block}
 <td style="text-align:center"><strong>101</strong> <br><sub>under <code>/api/v1</code></sub></td>
 <td style="text-align:center"><strong>16</strong> <br><sub>3 built-in roles</sub></td>
 <td style="text-align:center"><strong>39</strong> <br><sub>applied at boot</sub></td>
-<td style="text-align:center"><strong>1334</strong> <br><sub>English, server-served</sub></td>
+<td style="text-align:center"><strong>1336</strong> <br><sub>English, server-served</sub></td>
 <td style="text-align:center"><strong>20</strong> <br><sub>one per screen</sub></td>
 <td style="text-align:center"><strong>11</strong> <br><sub>+ <code>load</code>, opt-in</sub></td>
 </tr>
@@ -1970,6 +1970,13 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>On a server with <code>SERVER_SWEEPS_ENABLED=true</code>: endpoints <code>Andheri POP</code> (<code>Mumbai</code>, placed in Andheri), <code>BKC resolver</code> (<code>Bombay</code>), <code>Fort gateway</code> (<code>मुंबई</code>) and <code>Vashi POP</code> (<code>Navi Mumbai</code>, placed in Vashi); a sweep from a position in Andheri</td>
 <td>The ticket tests Andheri POP, BKC resolver and Fort gateway, <em>The city nearest the device, Mumbai, …</em>. 🛑 <strong>Must NOT</strong> leave out an endpoint typed with another name for the city, or sweep Navi Mumbai's</td>
 </tr>
+<tr>
+<td><code>SITE-020</code></td>
+<td>Administrator</td>
+<td>The city is offered as it is typed</td>
+<td>With an endpoint in <code>West</code>: <strong>Add site</strong>, type <code>we</code> in <strong>City or region</strong>, then <code>Mumabi</code>; then <strong>Bulk import</strong> and type <code>Wes</code> in its region</td>
+<td><code>West</code> is offered first; <code>Mumabi</code> offers <em>Mumbai</em>, and choosing it writes <em>Mumbai</em>; the bulk import offers <code>West</code> too; anything else may still be typed. 🛑 <strong>Must NOT</strong> force a choice from the offer, or offer a neighbouring town as a city</td>
+</tr>
 </tbody>
 </table></div>
 </li>
@@ -2336,7 +2343,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <p><strong>Screens:</strong> Operate → <strong>History</strong>, <strong>Dashboard</strong> · <strong>Routes:</strong> <code>GET /diagnostic/list</code>, <code>GET /diagnostic/tt/{ttNumber}</code>, <code>GET /ping/dashboard</code></p>
 <ul>
 <li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: Every ticket investigated, led by its grade as the network reports lead each test, with its loss and jitter on the row, who ran it and where — and every graded figure shown against its target, so a supplier review argues about the line, not the arithmetic.</li>
-<li>📖 <strong>User Guide &amp; Operational Flow</strong>: An engineer's <strong>History</strong> is the tests they ran, with the note <em>These are the tests you ran. Administrators see everyone's.</em> An administrator's is everyone's, and narrows by <strong>Person</strong>, <strong>Place</strong> (<em>Where it was run, or a site or region</em>), <strong>Status</strong>, <strong>From</strong> and <strong>To</strong>; <strong>Clear filters</strong> puts them back. Both search by TT number or Customer ID. Each row leads with the ticket's grade in a column of its own: the worst of its results — <em>Breached</em>, <em>Degraded</em> or <em>OK</em> — as a network report grades a test, <em>Not graded</em> when none of them was graded (a device's HTTPS test), and <em>Running</em> or <em>Failed</em> until it has finished. Then the ticket, who ran it and where (<em>Customer CUST-1 · Asha Rao · at MG Road, Pune</em>), <em>Device</em> or <em>Server</em> for what measured it, reachable/total, the loss as the packet line writes it (<em>&lt;0.1%</em>, <em>25%</em>), the jitter and, for a ticket of several endpoints, how many breached and were degraded; and when. On a phone a row stacks: grade and ticket, whose it is, what measured it and when, then its figures, each figure whole on its line. A list reads 50 tickets at a time, newest first; <strong>Show more</strong> reads the next 50 (the next of each list, for a search). A ticket opens over the list, led by its grade, and closing it returns to the list as it was. Filters that match nothing say <em>No diagnostic matches these filters.</em>; a period with no tests says <em>No tests were run in these days.</em> <strong>Dashboard</strong> shows the endpoints (and how many are enabled), the diagnostics run in the last 30 days, the licence (days remaining, and people on it of those it covers), <strong>Tests by grade</strong> — the same days' tests counted Breached, Degraded, OK and Not graded with a bar, as a report counts a city's, for whoever reads everyone's tests — and the recent tickets, in History's rows, each opening over the dashboard. The <em>Last sweep</em> tile went once tests came to be started from a device, and the endpoints are no longer called monitored (review of 30 October 2026). The 30-day availability line went with automatic monitoring (<code>HIST-004</code>). A list with no period chosen is of the last 30 days, and says <em>The last 30 days. Choose a period to see earlier tests, or search by TT number for one ticket.</em>; a period may cover at most 366 days; a search by TT number or Customer ID is of all time (customer request, 28 October 2026: every report has a date filter).</li>
+<li>📖 <strong>User Guide &amp; Operational Flow</strong>: An engineer's <strong>History</strong> is the tests they ran, with the note <em>These are the tests you ran. Administrators see everyone's.</em> An administrator's is everyone's, and narrows by <strong>Person</strong>, <strong>Place</strong> (<em>Where it was run, or a site or region</em>) - which offers cities as one is typed, the organisation's own first and each beside its drawing, a slip of the keyboard forgiven (<em>Chenai</em> offers Chennai, <em>Closest to what you typed</em>; <em>Bombay</em> offers Mumbai, <em>Also known as Bombay</em>), choosing one searching at once, and which finds a city under every name it goes by (a search for <em>Bengaluru</em> finds an endpoint typed <em>Bangalore</em>), <strong>Status</strong>, <strong>From</strong> and <strong>To</strong>; <strong>Clear filters</strong> puts them back. Both search by TT number or Customer ID. Each row leads with the ticket's grade in a column of its own: the worst of its results — <em>Breached</em>, <em>Degraded</em> or <em>OK</em> — as a network report grades a test, <em>Not graded</em> when none of them was graded (a device's HTTPS test), and <em>Running</em> or <em>Failed</em> until it has finished. Then the ticket, who ran it and where (<em>Customer CUST-1 · Asha Rao · at MG Road, Pune</em>), <em>Device</em> or <em>Server</em> for what measured it, reachable/total, the loss as the packet line writes it (<em>&lt;0.1%</em>, <em>25%</em>), the jitter and, for a ticket of several endpoints, how many breached and were degraded; and when. On a phone a row stacks: grade and ticket, whose it is, what measured it and when, then its figures, each figure whole on its line. A list reads 50 tickets at a time, newest first; <strong>Show more</strong> reads the next 50 (the next of each list, for a search). A ticket opens over the list, led by its grade, and closing it returns to the list as it was. Filters that match nothing say <em>No diagnostic matches these filters.</em>; a period with no tests says <em>No tests were run in these days.</em> <strong>Dashboard</strong> shows the endpoints (and how many are enabled), the diagnostics run in the last 30 days, the licence (days remaining, and people on it of those it covers), <strong>Tests by grade</strong> — the same days' tests counted Breached, Degraded, OK and Not graded with a bar, as a report counts a city's, for whoever reads everyone's tests — and the recent tickets, in History's rows, each opening over the dashboard. The <em>Last sweep</em> tile went once tests came to be started from a device, and the endpoints are no longer called monitored (review of 30 October 2026). The 30-day availability line went with automatic monitoring (<code>HIST-004</code>). A list with no period chosen is of the last 30 days, and says <em>The last 30 days. Choose a period to see earlier tests, or search by TT number for one ticket.</em>; a period may cover at most 366 days; a search by TT number or Customer ID is of all time (customer request, 28 October 2026: every report has a date filter).</li>
 <li>🧪 <strong>Manual Testing Playbook</strong>:<div class="tw"><table><thead>
 <tr>
 <th>ID</th>
@@ -2480,6 +2487,20 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>On a slow line, search a customer, then clear the search before it answers</td>
 <td>The list of the period, never the late search's tickets under the cleared box</td>
 </tr>
+<tr>
+<td><code>HIST-020</code></td>
+<td>Administrator</td>
+<td>The place filter offers cities, forgiving a slip</td>
+<td>Endpoints in <code>Chennai</code> and <code>Lab</code>; in <strong>History</strong> type <code>Chenai</code> in <strong>Place</strong>, then <code>la</code>; then sign in as someone without <code>dns_site_view</code> and type <code>Nagpr</code></td>
+<td><em>Chennai</em> is offered first beside its drawing with <em>Closest to what you typed</em>; choosing it lists Chennai's tests at once; <code>la</code> offers <em>Lab</em>; without the endpoints, <em>Nagpur</em> is still offered. 🛑 <strong>Must NOT</strong> offer a city for two letters found inside another name, or need the search button after a city is chosen</td>
+</tr>
+<tr>
+<td><code>HIST-021</code></td>
+<td>Administrator</td>
+<td>A place is searched for under every name the city goes by</td>
+<td>A test of an endpoint whose city is typed <code>Bangalore</code>, and one by an engineer signed in at <em>Baner Road, Pune</em>; search <strong>Place</strong> for <code>Bengaluru</code>, then <code>Poona</code>, then <code>pune.</code></td>
+<td><code>Bengaluru</code> lists the first; <code>Poona</code> and <code>pune.</code> the second. 🛑 <strong>Must NOT</strong> miss a city's tests because they were filed under another of its names, or read <code>%</code> as a wildcard</td>
+</tr>
 </tbody>
 </table></div>
 </li>
@@ -2490,6 +2511,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <li>A loss is written only by <code>formatLossPercent</code>; <code>packetpulseflutter/test/presentation_rules_test.dart</code> fails on a percent built anywhere else but the places it names. A retired catalogue string named by any screen or by the server stops the string generator (<code>scripts/intellicodegen/packetpulsestrings.py</code>).</li>
 <li>🔒 Whose tests come back is the server's decision, made in SQL: <code>readerOf</code> (<code>packetpulsego/pkg/diagnosticmicroservice/diagnosticapp/DiagnosticHandlers.go</code>) gives an engineer <code>OwnOnly</code> and anyone with <code>diagnostic_view_all</code> <code>WholeOrganisation</code>, and every read — list, detail, ticket, PDF, CSV — passes it to the repository's <code>submitted_by_user_id</code> predicate. The Results API reads the whole organisation, as its key does.</li>
 <li>Place is the check-in address of the session the test was run from (<code>diagnostic_request.session_id</code>, <code>packetpulsego/pkg/common/dbclient/migrations/0026_2026_10_05_own_results_places_and_indexes.sql</code>) or, matched by the filter, a probed site's region or name. The same migration indexes a person's own tests and the administrator's filters.</li>
+<li>City suggestions: <code>packetpulseflutter/lib/common/cities/PacketPulseCitySuggestions.dart</code> ranks the organisation's cities and the drawn ones for what was typed (prefix, then word, then held inside, then the Levenshtein distance with a swap counted once); <code>packetpulseflutter/lib/common/widgets/PacketPulseCityField.dart</code> offers them in <strong>History</strong> (cities from <code>GET /dnssite/list</code> under <code>dns_site_view</code>) and the <strong>DNS sites</strong> editor and bulk import. The place search widens a city to every name it goes by (<code>cityname.Names</code> in <code>packetpulsego/pkg/common/cityname/CityName.go</code>, <code>placePatterns</code> in <code>packetpulsego/pkg/diagnosticmicroservice/diagnosticdomain/repository/DiagnosticRepositoryPostgres.go</code>). Coverage: <code>packetpulseflutter/test/city_suggestions_test.dart</code>.</li>
 <li>Coverage: <code>packetpulseflutter/test/diagnostic_history_screen_test.dart</code>, <code>packetpulseflutter/test/dashboard_screen_test.dart</code>, <code>packetpulseflutter/test/diagnostic_row_test.dart</code>, <code>packetpulsego/pkg/diagnosticmicroservice/diagnosticdomain/repository/DiagnosticRepositoryPostgres_test.go</code> (scope, who and where, every filter), <code>packetpulsego/pkg/diagnosticmicroservice/diagnosticdomain/repository/DiagnosticGradesPostgres_test.go</code> (the tallies and the migration), <code>packetpulsego/pkg/pingmicroservice/pingdomain/repository/PingResultGrades_test.go</code>, <code>packetpulsego/pkg/diagnosticmicroservice/diagnosticapp/DiagnosticRouteHandler_test.go</code>, <code>packetpulsetest/golang/gradingconformance/</code>.</li>
 </ul>
 </li>
@@ -2695,6 +2717,13 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>The banner takes the theme, and the device's wish for less motion</td>
 <td>Open a report by site in <strong>Operations</strong>, <strong>Fiber</strong>, <strong>Warm</strong> and <strong>Graphite</strong>, light and dark, then <strong>High Contrast</strong>; then set the device to reduce motion and open it again; then open it on a phone</td>
 <td>The drawing is tinted from each theme (greys in Graphite) and fades out behind the words, which stay readable; High Contrast shows the words alone; with less motion the trace is drawn whole at once, with no moving point; on a phone the title is set smaller and nothing is cut off. 🛑 <strong>Must NOT</strong> put the drawing over a figure or a grade, or animate for ever</td>
+</tr>
+<tr>
+<td><code>RPT-028</code></td>
+<td>Administrator</td>
+<td>Stray punctuation does not split a city</td>
+<td>Endpoints with city <code>Thane</code> and <code>Thane.</code>, and <code>Mumbai</code> and <code>Mumbai.</code>; a test of each; <strong>Network reports</strong>, <strong>Daily</strong></td>
+<td>One <em>Thane</em> card with both tests, one <em>Mumbai</em> card with both. 🛑 <strong>Must NOT</strong> show a site for <code>Thane.</code> beside one for <code>Thane</code></td>
 </tr>
 <tr>
 <td><code>RPT-011</code></td>
