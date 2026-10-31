@@ -4,8 +4,9 @@
 // The service tests prove the rules against the database; this suite proves
 // them against the running stack, through the routes the app uses: a
 // device's UDP test is graded like a sweep and its breach counted on the
-// ticket, an HTTPS round-trip is never graded, and automatic monitoring -
-// removed in October 2026 - answers nothing.
+// ticket, an HTTPS round-trip is never graded, a ticket counts its results by
+// grade wherever it is read, and automatic monitoring - removed in October
+// 2026 - answers nothing.
 //
 // It replaces the monitor suite, whose alerting, damping and planned-work
 // tests went with the feature they tested.
@@ -33,6 +34,12 @@ func udpObservation(ttNumber string) map[string]any {
 	}
 }
 
+// grades is a ticket's results counted by grade: OK, Degraded, Breached.
+func grades(request map[string]any) [3]float64 {
+	count := func(name string) float64 { value, _ := request[name].(float64); return value }
+	return [3]float64{count("ok_count"), count("degraded_count"), count("breach_count")}
+}
+
 func file(t *testing.T, token string, body map[string]any) (map[string]any, []any) {
 	t.Helper()
 	response := packetpulsetest.Call(t, http.MethodPost, "/diagnostic/clientobservation", token, body)
@@ -58,8 +65,8 @@ func TestADevicesUdpTestIsGradedAndItsBreachCounted(t *testing.T) {
 	if status := results[0].(map[string]any)["sla_status"]; status != "breached" {
 		t.Errorf("sla_status = %v, want breached", status)
 	}
-	if breaches, _ := request["breach_count"].(float64); breaches != 1 {
-		t.Errorf("breach_count = %v, want 1", breaches)
+	if got := grades(request); got != [3]float64{0, 0, 1} {
+		t.Errorf("OK, degraded, breached = %v, want 0, 0, 1", got)
 	}
 }
 
@@ -81,8 +88,57 @@ func TestAUdpTestIsHeldToTheOrganisationsOwnTargets(t *testing.T) {
 	if status := results[0].(map[string]any)["sla_status"]; status != "ok" {
 		t.Errorf("sla_status = %v, want ok against the organisation's lenient targets", status)
 	}
-	if breaches, _ := request["breach_count"].(float64); breaches != 0 {
-		t.Errorf("breach_count = %v, want 0", breaches)
+	if got := grades(request); got != [3]float64{1, 0, 0} {
+		t.Errorf("OK, degraded, breached = %v, want 1, 0, 0", got)
+	}
+}
+
+// A ticket counts its results by grade, and is read with them wherever it
+// is listed, so History and the Dashboard lead it with its worst: a test
+// graded Degraded read OK on its row while the network report called it
+// Degraded (review of 30 October 2026). The dashboard counts the days' tests
+// by grade for whoever reads everyone's, as the owner does.
+func TestATicketIsCountedByGradeWhereverItIsRead(t *testing.T) {
+	packetpulsetest.RequireServer(t)
+	token, _ := packetpulsetest.SignUpOrganisation(t, "grddeg")
+
+	// 189.8 ms is past 80% of 220 ms, short of it; every other figure well
+	// inside its target: Degraded.
+	policy := packetpulsetest.Call(t, http.MethodPost, "/monitor/sla/add", token, map[string]any{
+		"policy_name": "Close", "max_latency_ms": 220, "max_jitter_ms": 50,
+		"max_loss_pct": 10, "min_mos_score": 2, "is_default": true,
+	})
+	if policy.Status != http.StatusCreated && policy.Status != http.StatusOK {
+		t.Fatalf("add policy: %d %s", policy.Status, policy.Raw)
+	}
+
+	request, results := file(t, token, udpObservation("TT-GRADE-DEG"))
+	if status := results[0].(map[string]any)["sla_status"]; status != "degraded" {
+		t.Fatalf("sla_status = %v, want degraded", status)
+	}
+	if got := grades(request); got != [3]float64{0, 1, 0} {
+		t.Errorf("filed: OK, degraded, breached = %v, want 0, 1, 0", got)
+	}
+
+	listed := packetpulsetest.Call(t, http.MethodGet, "/diagnostic/list?tt_number=TT-GRADE-DEG", token, nil)
+	rows, _ := listed.Body["diagnostics"].([]any)
+	if listed.Status != http.StatusOK || len(rows) != 1 {
+		t.Fatalf("list: %d %s", listed.Status, listed.Raw)
+	}
+	if got := grades(rows[0].(map[string]any)); got != [3]float64{0, 1, 0} {
+		t.Errorf("listed: OK, degraded, breached = %v, want 0, 1, 0", got)
+	}
+
+	dashboard := packetpulsetest.Call(t, http.MethodGet, "/ping/dashboard", token, nil)
+	counted, _ := dashboard.Body["recent_grades"].(map[string]any)
+	if dashboard.Status != http.StatusOK || counted == nil {
+		t.Fatalf("dashboard: %d %s, want the recent tests by grade", dashboard.Status, dashboard.Raw)
+	}
+	if counted["ok"] != 0.0 || counted["degraded"] != 1.0 || counted["breached"] != 0.0 || counted["ungraded"] != 0.0 {
+		t.Errorf("recent_grades = %v, want the one degraded test", counted)
+	}
+	if _, kept := dashboard.Body["last_run"]; kept {
+		t.Error("the dashboard still sends the latest run, which read as a sweep's")
 	}
 }
 
@@ -100,8 +156,9 @@ func TestAnHttpsObservationIsNeverABreach(t *testing.T) {
 			"packets_sent": 10, "packets_recv": 2, "packets_lost": 8, "packet_loss": 80, "avg_rtt_ms": 950,
 		}},
 	})
-	if breaches, _ := request["breach_count"].(float64); breaches != 0 {
-		t.Errorf("breach_count = %v, want 0", breaches)
+	// Counted under no grade at all: its ticket reads Not graded, never OK.
+	if got := grades(request); got != [3]float64{0, 0, 0} {
+		t.Errorf("OK, degraded, breached = %v, want none", got)
 	}
 	if status := results[0].(map[string]any)["sla_status"]; status != "unknown" {
 		t.Errorf("sla_status = %v, want unknown", status)

@@ -240,8 +240,8 @@ nav.side .nohit.on{display:block}
 <td style="text-align:center"><strong>17</strong> <br><sub>in the navigation rail</sub></td>
 <td style="text-align:center"><strong>101</strong> <br><sub>under <code>/api/v1</code></sub></td>
 <td style="text-align:center"><strong>16</strong> <br><sub>3 built-in roles</sub></td>
-<td style="text-align:center"><strong>38</strong> <br><sub>applied at boot</sub></td>
-<td style="text-align:center"><strong>1312</strong> <br><sub>English, server-served</sub></td>
+<td style="text-align:center"><strong>39</strong> <br><sub>applied at boot</sub></td>
+<td style="text-align:center"><strong>1334</strong> <br><sub>English, server-served</sub></td>
 <td style="text-align:center"><strong>20</strong> <br><sub>one per screen</sub></td>
 <td style="text-align:center"><strong>11</strong> <br><sub>+ <code>load</code>, opt-in</sub></td>
 </tr>
@@ -611,6 +611,12 @@ nav.side .nohit.on{display:block}
 <td>An engineer sees the tests they ran. An administrator sees everyone's, narrowed by person, place, status and dates. Each test records who ran it and where.</td>
 <td><code>HIST-*</code></td>
 <td><code>packetpulsego/pkg/common/dbclient/migrations/0026_2026_10_05_own_results_places_and_indexes.sql</code></td>
+</tr>
+<tr>
+<td><strong>Tickets read as the reports do</strong></td>
+<td>History and the Dashboard lead every ticket with its grade - the worst of its results, <em>Not graded</em> when none was graded - say whether a device or the server measured it, write a loss as the packet line does, stack on a phone, and open a ticket over the list. History reads 50 at a time with <strong>Show more</strong>; the Dashboard counts the last 30 days' tests by grade for whoever reads everyone's.</td>
+<td><code>HIST-011</code>–<code>HIST-019</code></td>
+<td><code>packetpulsego/pkg/common/dbclient/migrations/0039_2026_10_30_ticket_grades.sql</code><br><code>packetpulseflutter/lib/diagnosticmicroservice/presentation/widgets/DiagnosticRow.dart</code></td>
 </tr>
 <tr>
 <td><strong>Path analysis removed</strong></td>
@@ -1950,6 +1956,20 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>Edit an endpoint with a <strong>UDP reflector address</strong>: <strong>Reports show</strong> <em>The reflector only</em>; save. As a NOC Engineer, run a UDP test of it; open the ticket, its PDF and <strong>Export CSV</strong>; then as the Administrator</td>
 <td>The engineer sees the reflector and the IP the browser reached it at (<em>Reflector … at …</em>), and an empty address in the screen, the PDF and the CSV (none of them shows a resolved IP since 28 October 2026); the Administrator sees both. An edit that does not name the choice keeps it. 🛑 <strong>Must NOT</strong> show the endpoint's address to anyone without <code>dns_site_manage</code>, or clear the choice on an edit from an older app</td>
 </tr>
+<tr>
+<td><code>SITE-018</code></td>
+<td>Administrator</td>
+<td>Each endpoint's city is shown beside its drawing</td>
+<td>Endpoints with <strong>City or region</strong> <code>Pune</code>, <code>Poona</code>, <code>मुंबई</code>, <code>Lab</code>, <code>Navi Mumbai</code> and one left blank</td>
+<td><code>Pune</code> and <code>Poona</code> beside Shaniwar Wada, <code>मुंबई</code> beside the Gateway of India, each as typed; <code>Lab</code> and <code>Navi Mumbai</code> beside the plain grey network; the blank one with nothing. 🛑 <strong>Must NOT</strong> give Navi Mumbai Mumbai's skyline, or rewrite what was typed</td>
+</tr>
+<tr>
+<td><code>SITE-019</code></td>
+<td>Administrator</td>
+<td>A test sweeps the nearest city under every name it was typed as</td>
+<td>On a server with <code>SERVER_SWEEPS_ENABLED=true</code>: endpoints <code>Andheri POP</code> (<code>Mumbai</code>, placed in Andheri), <code>BKC resolver</code> (<code>Bombay</code>), <code>Fort gateway</code> (<code>मुंबई</code>) and <code>Vashi POP</code> (<code>Navi Mumbai</code>, placed in Vashi); a sweep from a position in Andheri</td>
+<td>The ticket tests Andheri POP, BKC resolver and Fort gateway, <em>The city nearest the device, Mumbai, …</em>. 🛑 <strong>Must NOT</strong> leave out an endpoint typed with another name for the city, or sweep Navi Mumbai's</td>
+</tr>
 </tbody>
 </table></div>
 </li>
@@ -1987,6 +2007,13 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>The server's sweep is switched off</td>
 <td>On a server with <code>SERVER_SWEEPS_ENABLED</code> unset, as a member with <code>diagnostic_run</code>: <code>POST /diagnostic/submit</code> with TT <code>TT-MAN-023</code>; then <code>POST /ping/run</code>; then open TT <code>TT-MAN-023</code> in <strong>History</strong></td>
 <td>405 and 404: neither route exists; no ticket <code>TT-MAN-023</code> and no new run. Only a person starts a test, from their device. 🛑 <strong>Must NOT</strong> sweep anything</td>
+</tr>
+<tr>
+<td><code>DIAG-024</code></td>
+<td>Administrator</td>
+<td>A nearest-city ticket opens on its city</td>
+<td>Open, in <strong>History</strong>, a ticket from a sweep aimed at the nearest city (<code>SITE-019</code>); then a device ticket</td>
+<td>The sweep's ticket has a banner under its heading: <em>NEAREST CITY · 3.2 KM</em>, <strong>Mumbai</strong>, <em>The city that never sleeps</em>, the city's drawing; the device ticket has none. 🛑 <strong>Must NOT</strong> show a banner on a ticket whose endpoints were not chosen by city</td>
 </tr>
 <tr>
 <td><code>DIAG-001</code></td>
@@ -2035,7 +2062,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>Engineer</td>
 <td>Loss and jitter on the ticket</td>
 <td>Open the result; open <strong>History</strong></td>
-<td>Headline cards show average loss and average jitter; the history row shows the same figures</td>
+<td>Headline cards show average loss and average jitter; the history row shows the same figures, the loss written the same way</td>
 </tr>
 <tr>
 <td><code>DIAG-006</code></td>
@@ -2308,8 +2335,8 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <h3 id="35-history-and-dashboard">3.5 🗂️ History and dashboard<a class="anchor" href="#35-history-and-dashboard" aria-label="Link to this section">#</a></h3>
 <p><strong>Screens:</strong> Operate → <strong>History</strong>, <strong>Dashboard</strong> · <strong>Routes:</strong> <code>GET /diagnostic/list</code>, <code>GET /diagnostic/tt/{ttNumber}</code>, <code>GET /ping/dashboard</code></p>
 <ul>
-<li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: Every ticket investigated, with its loss and jitter on the row, who ran it and where — and every graded figure shown against its target, so a supplier review argues about the line, not the arithmetic.</li>
-<li>📖 <strong>User Guide &amp; Operational Flow</strong>: An engineer's <strong>History</strong> is the tests they ran, with the note <em>These are the tests you ran. Administrators see everyone's.</em> An administrator's is everyone's, and narrows by <strong>Person</strong>, <strong>Place</strong> (<em>Where it was run, or a site or region</em>), <strong>Status</strong>, <strong>From</strong> and <strong>To</strong>; <strong>Clear filters</strong> puts them back. Both search by TT number or Customer ID. Each row shows reachable/total, breaches, loss and jitter, and who ran it and where: <em>Customer CUST-1 · Asha Rao · at MG Road, Pune</em>. <strong>Dashboard</strong> shows the monitored endpoints (and how many are enabled), the diagnostics run, the last sweep's reachable count, the licence (days remaining, and people on it of those it covers) and the recent tickets. The 30-day availability line went with automatic monitoring (<code>HIST-004</code>). A list with no period chosen is of the last 30 days, and says <em>The last 30 days. Choose a period to see earlier tests, or search by TT number for one ticket.</em>; a period may cover at most 366 days; a search by TT number or Customer ID is of all time (customer request, 28 October 2026: every report has a date filter).</li>
+<li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: Every ticket investigated, led by its grade as the network reports lead each test, with its loss and jitter on the row, who ran it and where — and every graded figure shown against its target, so a supplier review argues about the line, not the arithmetic.</li>
+<li>📖 <strong>User Guide &amp; Operational Flow</strong>: An engineer's <strong>History</strong> is the tests they ran, with the note <em>These are the tests you ran. Administrators see everyone's.</em> An administrator's is everyone's, and narrows by <strong>Person</strong>, <strong>Place</strong> (<em>Where it was run, or a site or region</em>), <strong>Status</strong>, <strong>From</strong> and <strong>To</strong>; <strong>Clear filters</strong> puts them back. Both search by TT number or Customer ID. Each row leads with the ticket's grade in a column of its own: the worst of its results — <em>Breached</em>, <em>Degraded</em> or <em>OK</em> — as a network report grades a test, <em>Not graded</em> when none of them was graded (a device's HTTPS test), and <em>Running</em> or <em>Failed</em> until it has finished. Then the ticket, who ran it and where (<em>Customer CUST-1 · Asha Rao · at MG Road, Pune</em>), <em>Device</em> or <em>Server</em> for what measured it, reachable/total, the loss as the packet line writes it (<em>&lt;0.1%</em>, <em>25%</em>), the jitter and, for a ticket of several endpoints, how many breached and were degraded; and when. On a phone a row stacks: grade and ticket, whose it is, what measured it and when, then its figures, each figure whole on its line. A list reads 50 tickets at a time, newest first; <strong>Show more</strong> reads the next 50 (the next of each list, for a search). A ticket opens over the list, led by its grade, and closing it returns to the list as it was. Filters that match nothing say <em>No diagnostic matches these filters.</em>; a period with no tests says <em>No tests were run in these days.</em> <strong>Dashboard</strong> shows the endpoints (and how many are enabled), the diagnostics run in the last 30 days, the licence (days remaining, and people on it of those it covers), <strong>Tests by grade</strong> — the same days' tests counted Breached, Degraded, OK and Not graded with a bar, as a report counts a city's, for whoever reads everyone's tests — and the recent tickets, in History's rows, each opening over the dashboard. The <em>Last sweep</em> tile went once tests came to be started from a device, and the endpoints are no longer called monitored (review of 30 October 2026). The 30-day availability line went with automatic monitoring (<code>HIST-004</code>). A list with no period chosen is of the last 30 days, and says <em>The last 30 days. Choose a period to see earlier tests, or search by TT number for one ticket.</em>; a period may cover at most 366 days; a search by TT number or Customer ID is of all time (customer request, 28 October 2026: every report has a date filter).</li>
 <li>🧪 <strong>Manual Testing Playbook</strong>:<div class="tw"><table><thead>
 <tr>
 <th>ID</th>
@@ -2338,8 +2365,8 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td><code>HIST-003</code></td>
 <td>Engineer</td>
 <td>A device run reads as one</td>
-<td>Attach a device test (§4.1); find it in History</td>
-<td>Marked as measured on a device; its loss is <em>query</em> loss</td>
+<td>Attach a device test (§4.1); find it in History and on the Dashboard; open it</td>
+<td>The row says <em>Device</em>; a server sweep's says <em>Server</em>; an HTTPS ticket's loss is <em>query</em> loss. 🛑 <strong>Must NOT</strong> mark a device's test with the clock of a scheduled run</td>
 </tr>
 <tr>
 <td><code>HIST-004</code></td>
@@ -2390,15 +2417,80 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>Open <strong>Dashboard</strong></td>
 <td><strong>Diagnostics run</strong> reads the runs of the last 30 days, <em>In the last 30 days</em> under it (customer request, 28 October 2026: every count has a date filter). 🛑 <strong>Must NOT</strong> count every run ever made</td>
 </tr>
+<tr>
+<td><code>HIST-011</code></td>
+<td>Engineer</td>
+<td>A ticket leads with its grade</td>
+<td>File a UDP test that is graded <em>Degraded</em> (a round trip of 85 ms against the built-in 100 ms target) and a device HTTPS test; open <strong>History</strong>, the <strong>Dashboard</strong> and the <strong>Network reports</strong> for the day</td>
+<td>Each row leads with its grade, in a column of its own so every ticket number starts in line: the UDP ticket <em>Degraded</em> in History, on the Dashboard and in the report alike; the HTTPS ticket <em>Not graded</em>. 🛑 <strong>Must NOT</strong> call a Degraded or ungraded ticket <em>OK</em></td>
+</tr>
+<tr>
+<td><code>HIST-012</code></td>
+<td>Customer</td>
+<td>The ticket says its grade and its breaches agree</td>
+<td>Open the Degraded ticket of <code>HIST-011</code></td>
+<td>Its heading leads with <em>Degraded</em>; <strong>SLA breaches</strong> reads <em>0</em> in amber with <em>1 degraded</em> under it. A ticket with a breach is red, a clean one green, one nothing graded grey. 🛑 <strong>Must NOT</strong> show a green <em>0</em> beside a Degraded result</td>
+</tr>
+<tr>
+<td><code>HIST-013</code></td>
+<td>Engineer</td>
+<td>A loss reads as the packet line writes it</td>
+<td>File a UDP test that loses 1 packet of 3,000; open it from History</td>
+<td>The row says <em>&lt;0.1% loss</em>, and the ticket's <strong>Average loss</strong> <em>&lt;0.1%</em> and <em>Worst site &lt;0.1%</em>, as its packet line <em>(&lt;0.1% loss)</em>; a 25% loss reads <em>25%</em>. 🛑 <strong>Must NOT</strong> print <em>0.0%</em> or <em>25.0%</em></td>
+</tr>
+<tr>
+<td><code>HIST-014</code></td>
+<td>Administrator</td>
+<td>Every ticket of the period can be read</td>
+<td>With more than 50 tickets in the last 30 days, open <strong>History</strong>; scroll to the end; <strong>Show more</strong> until it goes</td>
+<td>50, then 100, … newest first, each once; <strong>Show more</strong> goes with the last page. 🛑 <strong>Must NOT</strong> stop at 50 with nothing to say there are more</td>
+</tr>
+<tr>
+<td><code>HIST-015</code></td>
+<td>Administrator</td>
+<td>Filters that match nothing say so</td>
+<td><strong>Status</strong> = <em>Failed</em> on a period with no failed test; then clear the filters on a period with no tests at all</td>
+<td><em>No diagnostic matches these filters.</em>; then <em>No tests were run in these days.</em> 🛑 <strong>Must NOT</strong> say <em>Diagnostics you run will be listed here</em></td>
+</tr>
+<tr>
+<td><code>HIST-016</code></td>
+<td>Engineer</td>
+<td>A ticket opens over the list</td>
+<td>In History, <strong>Show more</strong> once, scroll half way, open a ticket, close it</td>
+<td>The list is as it was: both pages, scrolled where it was, not read again. The Dashboard's recent tickets open the same way</td>
+</tr>
+<tr>
+<td><code>HIST-017</code></td>
+<td>Engineer</td>
+<td>History on a phone</td>
+<td>Open <strong>History</strong> and the <strong>Dashboard</strong> on a phone (360–400 px wide)</td>
+<td>Each row stacks: grade and ticket number whole on the first line, whose it is, <em>Device</em>/<em>Server</em> and when, then the figures, each figure whole on its line. 🛑 <strong>Must NOT</strong> break a ticket number in two or run the figures down the screen a few letters a line</td>
+</tr>
+<tr>
+<td><code>HIST-018</code></td>
+<td>Administrator</td>
+<td>The dashboard counts the days' tests by grade</td>
+<td>Open <strong>Dashboard</strong> as an administrator; then as an engineer who reads only their own tests</td>
+<td><strong>Tests by grade</strong>, <em>In the last 30 days</em>: a bar and <em>n breached · n degraded · n OK</em> (and <em>n not graded</em> when there are any), counting both address families as the reports do. The engineer sees no such card, and <code>GET /ping/dashboard</code> carries no <code>recent_grades</code> for them. 🛑 <strong>Must NOT</strong> show a <em>Last sweep</em> tile</td>
+</tr>
+<tr>
+<td><code>HIST-019</code></td>
+<td>Tester</td>
+<td>A slow answer is not shown under a newer search</td>
+<td>On a slow line, search a customer, then clear the search before it answers</td>
+<td>The list of the period, never the late search's tickets under the cleared box</td>
+</tr>
 </tbody>
 </table></div>
 </li>
 <li>⚙️ <strong>Developer Guide &amp; Release Confidence</strong>:
 <ul>
-<li>Row figures: <code>packetpulseflutter/lib/diagnosticmicroservice/presentation/widgets/DiagnosticFigures.dart</code>.</li>
+<li>Rows: <code>packetpulseflutter/lib/diagnosticmicroservice/presentation/widgets/DiagnosticRow.dart</code> (one widget for History and the Dashboard), figures in <code>DiagnosticFigures.dart</code>, the grade pill, bar and strip in <code>packetpulseflutter/lib/common/widgets/PacketPulseGrades.dart</code> (shared with the network reports), and a ticket opened over its page by <code>DiagnosticTicketDialog.dart</code> (Run diagnostic, History and the Dashboard).</li>
+<li>A ticket's grade is <code>DiagnosticRequest.grade</code>, from <code>ok_count</code>, <code>degraded_count</code> and <code>breach_count</code>: counted when it is closed (<code>gradesOf</code> in <code>packetpulsego/pkg/diagnosticmicroservice/diagnosticservice/DiagnosticService.go</code>, a dual-stack site's IPv6 result under none), kept on the ticket because results age out of the store, and filled for older tickets by <code>packetpulsego/pkg/common/dbclient/migrations/0039_2026_10_30_ticket_grades.sql</code>. The Dashboard's <code>recent_grades</code> is <code>PingResultGrades</code> (<code>packetpulsego/pkg/pingmicroservice/pingdomain/repository/PingRepositoryPostgres.go</code>), asked only when the caller holds <code>diagnostic_view_all</code>.</li>
+<li>A loss is written only by <code>formatLossPercent</code>; <code>packetpulseflutter/test/presentation_rules_test.dart</code> fails on a percent built anywhere else but the places it names. A retired catalogue string named by any screen or by the server stops the string generator (<code>scripts/intellicodegen/packetpulsestrings.py</code>).</li>
 <li>🔒 Whose tests come back is the server's decision, made in SQL: <code>readerOf</code> (<code>packetpulsego/pkg/diagnosticmicroservice/diagnosticapp/DiagnosticHandlers.go</code>) gives an engineer <code>OwnOnly</code> and anyone with <code>diagnostic_view_all</code> <code>WholeOrganisation</code>, and every read — list, detail, ticket, PDF, CSV — passes it to the repository's <code>submitted_by_user_id</code> predicate. The Results API reads the whole organisation, as its key does.</li>
 <li>Place is the check-in address of the session the test was run from (<code>diagnostic_request.session_id</code>, <code>packetpulsego/pkg/common/dbclient/migrations/0026_2026_10_05_own_results_places_and_indexes.sql</code>) or, matched by the filter, a probed site's region or name. The same migration indexes a person's own tests and the administrator's filters.</li>
-<li>Coverage: <code>packetpulseflutter/test/diagnostic_history_screen_test.dart</code>, <code>packetpulseflutter/test/dashboard_screen_test.dart</code>, <code>packetpulsego/pkg/diagnosticmicroservice/diagnosticdomain/repository/DiagnosticRepositoryPostgres_test.go</code> (scope, who and where, every filter), <code>packetpulsego/pkg/diagnosticmicroservice/diagnosticapp/DiagnosticRouteHandler_test.go</code>.</li>
+<li>Coverage: <code>packetpulseflutter/test/diagnostic_history_screen_test.dart</code>, <code>packetpulseflutter/test/dashboard_screen_test.dart</code>, <code>packetpulseflutter/test/diagnostic_row_test.dart</code>, <code>packetpulsego/pkg/diagnosticmicroservice/diagnosticdomain/repository/DiagnosticRepositoryPostgres_test.go</code> (scope, who and where, every filter), <code>packetpulsego/pkg/diagnosticmicroservice/diagnosticdomain/repository/DiagnosticGradesPostgres_test.go</code> (the tallies and the migration), <code>packetpulsego/pkg/pingmicroservice/pingdomain/repository/PingResultGrades_test.go</code>, <code>packetpulsego/pkg/diagnosticmicroservice/diagnosticapp/DiagnosticRouteHandler_test.go</code>, <code>packetpulsetest/golang/gradingconformance/</code>.</li>
 </ul>
 </li>
 </ul>
@@ -2412,6 +2504,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <li><strong>By reflector site / All sites combined</strong>, <strong>Daily / Weekly / Monthly / Yearly</strong>, and the period button (a calendar). It opens on today so far, so a test just run is in it: the period button reads <em>…, so far (to 09:12)</em>, the PDF says <em>So far, to 09:12 IST</em>, the files are named <code>…-so-far</code>, and each CSV row's <code>period_end</code> is when it was made. Any earlier period is picked from the calendar. Days, weeks (Monday to Sunday), months and years begin at midnight in the organisation's time zone: its own choice with the scheduled reports on <strong>Result export</strong>, else its country's (India Standard Time for India). The zone is said under the controls.</li>
 <li><strong>By reflector site</strong>: one card per site — the <strong>Region</strong> given in <strong>DNS sites</strong> — with the individual tests first and the summary below them (customer request, 28 October 2026): <strong>Individual tests</strong>, each method's under one band, newest first, each with when it was checked (on the organisation's clock), its endpoint, whether a <strong>Device</strong> or the <strong>Server</strong> measured it, the <strong>User IPv4</strong> and <strong>User IPv6</strong> a device's test came from (a dash for a sweep), and its own sent, lost, loss, latency and jitter - the first ten, <strong>Show all</strong> for the rest, and past the latest 100 <em>Showing the latest 100 of n tests. The CSV of this report lists every one.</em>; then <strong>Each endpoint</strong> (only where the site has more than one); then <em>Summary: every endpoint in <city></em>, in bold (<em>All endpoints</em>); then <strong>How these figures were calculated</strong>, open and foldable, working each summary row out from its own numbers (since 30 October 2026 one table under the summary's own columns, not a line per figure): a sentence saying what every row shows, then <strong>Method</strong>, <strong>Loss</strong>, <strong>Latency</strong> and <strong>Jitter</strong>, a row per method - <em>UDP (reflector) IPv4</em> over <em>14 tests</em>, <em>0.48% = 20 lost ÷ 4,200 sent</em> over <em>0% to 1% over 14 tests</em>, <em>22.0 ms = mean of 4,180 replies</em> over its quickest to slowest reply, <em>3.3 ms = mean of 14 tests</em> over its range. A range of one test or reply is not said again, and one whose ends meet reads <em>4% in each of 2 tests</em>. <em>These tests count queries, not packets, so they state no loss</em> for HTTPS, <em>No test received a reply</em> or <em>No test measured jitter</em> where none did. On a phone each method is a card of its three figures. The PDF prints the same table, on the page of the summary it explains. Endpoints with none set are <em>City not set on the endpoint</em>. UDP tests to the PacketPulse network, with no endpoint, have a card of their own, laid out the same way. <strong>City</strong> narrows the report to one of the organisation's cities (<em>All cities</em> unless chosen; an older name - <em>Bombay</em> - finds <em>Mumbai</em>); its files are named for it (<code>packetpulse-city-mumbai-daily-…</code>) and the PDF's title ends <em>- Mumbai</em>. The PDF lays each site out the same way.</li>
 <li><strong>All sites combined</strong> (<em>Pan India</em>): the summary alone - no test is listed one by one - with <strong>How these figures were calculated</strong> under it; every site as one, then the period before, a trend hour by hour (a day), day by day (a week or a month) or month by month (a year), quiet steps included — a period so far stops at the step under way — and, for each method and family, the five sites that lost the most packets. Methods are never ranked against one another.</li>
+<li><strong>City banners</strong> (31 October 2026): each site's card opens on its city - the name the report files it under, how many endpoints it has above it (<em>REFLECTOR SITE · 1 ENDPOINT</em>, <em>· 2 ENDPOINTS</em>), its tagline under it (<em>The city that never sleeps</em>, <em>Queen of the Deccan</em>) and its landmarks drawn behind, standing on a pulse that traces itself in once. Nine cities are drawn: Mumbai, Pune, Delhi, Bengaluru, Chennai, Hyderabad, Kolkata, Nagpur and Ahmedabad. An older name or another spelling of one is that city (<em>Bombay</em>, <em>Poona</em>, <em>Bangalore</em>, <em>मुंबई</em>) and its endpoints are filed under it; any other place - a neighbouring town (<em>Navi Mumbai</em>, <em>Secunderabad</em>), <em>Lab</em>, <em>City not set on the endpoint</em> - has a plain grey network and no tagline. <strong>All sites combined</strong> for an organisation in India opens on <strong>Pan India</strong>, <em>Unity in diversity</em>: every drawn city's landmark in one line along the foot, the Himalaya behind the north, then the cities it adds up beside their drawings; anywhere else, <strong>Every reflector site combined</strong> over the plain network. The drawing takes the person's theme and fades out behind the words; High Contrast shows the words alone, and a device set to reduce motion has the trace drawn whole. The PDF and CSV are unchanged.</li>
 <li>Each figure as its <strong>average, minimum and maximum</strong>: loss (packets lost over packets sent across the row, so a long test counts for more; minimum and maximum of single tests), latency (the round trip: the average weighted by replies; minimum and maximum of single replies) and jitter. HTTPS rows show no loss.</li>
 <li>One method and family a row (UDP to an endpoint's reflector, UDP to the PacketPulse network, ICMP or TCP from the device or the server, HTTPS; IPv4 or IPv6): no row adds one to another. A row on fewer than 5 tests is marked <code>*</code>.</li>
 <li>Under each report, what it covers: results from devices and from the server, over IPv4 and over IPv6, each count in words that agree with it (<em>1 result</em>, <em>2 results</em>).</li>
@@ -2576,6 +2669,34 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>Under the city a bar in red, amber, green and grey with <em>1 breached</em>, <em>1 degraded</em>, <em>1 OK</em>, <em>1 not graded</em>; every test led by its grade (<em>BREACHED</em> in red with its icon, <em>NOT GRADED</em> in grey), each method's tests under one band naming it, with no <strong>Method</strong> column (the same in the trend and the worst sites, where a page break says the band again); each summary led by a bar of its tests by grade, and showing <strong>Sent</strong> <em>4,466</em> and <strong>Lost</strong> <em>2</em> beside <strong>Tests</strong>; the workings add <em>lost 0 + 1 + 1 = 2</em> and <em>sent 1,486 + 1,487 + 1,493 = 4,466</em>, newest test first, <em>(98.5 × 1,486 + 69.5 × 1,486 + 53.9 × 1,492) ÷ 4,464</em> and <em>(25.8 + 19.1 + 11.9) ÷ 3</em>; in the PDF a <strong>Grade</strong> column in words and colour, a mark in the margin of every row, the city's bar with its counts, the same sums. 🛑 <strong>Must NOT</strong> count an ungraded test as OK, write out a sum when a test behind it is missing from the list or there are more than six, or colour a row on few tests as a warning</td>
 </tr>
 <tr>
+<td><code>RPT-024</code></td>
+<td>Administrator</td>
+<td>Each city opens on its banner</td>
+<td>Endpoints in Mumbai, one of them with the city typed <code>Bombay</code>, and one with no city; a device test of each; <strong>Network reports</strong>, <strong>Daily</strong></td>
+<td>Mumbai's card opens on <em>REFLECTOR SITE · 2 ENDPOINTS</em>, <strong>Mumbai</strong>, <em>The city that never sleeps</em> and the Gateway of India beside the Sea Link, a pulse tracing itself in under them once; the <code>Bombay</code> endpoint's test is in Mumbai's card; <em>City not set on the endpoint</em> opens on a plain grey network with no tagline. 🛑 <strong>Must NOT</strong> file <code>Bombay</code> as a site of its own, or draw a city's landmarks for a place that is not that city</td>
+</tr>
+<tr>
+<td><code>RPT-025</code></td>
+<td>Customer</td>
+<td>Pan India opens on every city it adds up</td>
+<td>An organisation in India with endpoints in seven cities; <strong>All sites combined</strong></td>
+<td><em>7 CITIES</em>, <strong>Pan India</strong>, <em>Unity in diversity</em>, every drawn city's landmark in one line along the foot under the words, then each of the seven cities beside its drawing; on a phone the skyline spans the width. 🛑 <strong>Must NOT</strong> draw a map outline, or lay the skyline under the words</td>
+</tr>
+<tr>
+<td><code>RPT-026</code></td>
+<td>Customer</td>
+<td>A whole-country report outside India is drawn plainly</td>
+<td>An organisation whose country is the United Arab Emirates; <strong>All sites combined</strong></td>
+<td><strong>Every reflector site combined</strong> over the plain grey network, with no tagline. 🛑 <strong>Must NOT</strong> show <em>Pan India</em> or <em>Unity in diversity</em></td>
+</tr>
+<tr>
+<td><code>RPT-027</code></td>
+<td>Any</td>
+<td>The banner takes the theme, and the device's wish for less motion</td>
+<td>Open a report by site in <strong>Operations</strong>, <strong>Fiber</strong>, <strong>Warm</strong> and <strong>Graphite</strong>, light and dark, then <strong>High Contrast</strong>; then set the device to reduce motion and open it again; then open it on a phone</td>
+<td>The drawing is tinted from each theme (greys in Graphite) and fades out behind the words, which stay readable; High Contrast shows the words alone; with less motion the trace is drawn whole at once, with no moving point; on a phone the title is set smaller and nothing is cut off. 🛑 <strong>Must NOT</strong> put the drawing over a figure or a grade, or animate for ever</td>
+</tr>
+<tr>
 <td><code>RPT-011</code></td>
 <td>Administrator</td>
 <td>A failed load is not a quiet day</td>
@@ -2597,6 +2718,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <li><code>packetpulsego/pkg/reportmicroservice/</code>: <code>reportstats</code> holds every rule — periods in the zone (<code>ReportPeriod.go</code>), weighting, minimum and maximum, and grouping by site, endpoint, method and family (<code>ReportStats.go</code>); <code>reportfile</code> writes the CSV and PDF; <code>reportservice</code> resolves a query and runs the scheduled drops; <code>reportdomain/repository</code> reads a period's results with their endpoint's region and their family.</li>
 <li>🔒 One organisation predicate on the result itself (<code>ping_result.organisation_id</code>, set from its run by a trigger, migration 0038) with its period, so a day's report is one range of <code>ping_result_org_checked_idx</code> in that month's partition; and the test (<code>diagnostic_request</code>) and the endpoint (<code>dns_site</code>) are joined <em>within</em> that organisation, so a row naming another tenant's run or endpoint describes nothing.</li>
 <li>The organisation's zone: <code>report_settings.time_zone</code>, else its country's (<code>packetpulsego/pkg/common/orgzone/OrgZone.go</code>); the same zone writes a ticket's PDF and CSV and the result export.</li>
+<li>City banners: the city table and its matcher are <code>packetpulseflutter/lib/common/cities/PacketPulseCities.dart</code> (adding a city is three steps, written at its top), the drawings <code>packetpulseflutter/assets/cities/</code>, the banner and emblem <code>packetpulseflutter/lib/common/widgets/PacketPulseCityArt.dart</code>, each palette's artwork colours <code>packetpulseflutter/lib/common/theme/PacketPulseColors.dart</code>. The server files a site, and sweeps the nearest city, by the same names (<code>packetpulsego/pkg/common/cityname/CityName.go</code>), held equal by <code>packetpulsetest/golang/apicontract/city_names_test.go</code>; what the banners read from a report is <code>packetpulsetest/contracts/city_banner_fields.json</code>. Coverage: <code>packetpulseflutter/test/city_artwork_test.dart</code>, <code>packetpulseflutter/test/city_banner_test.dart</code>, <code>packetpulseflutter/test/packetpulse_theme_test.dart</code> (the words over a drawing keep 4.5:1), <code>packetpulsetest/golang/apicontract/city_banner_test.go</code>, <code>packetpulsetest/golang/translationcoverage/city_taglines_test.go</code>.</li>
 <li>Coverage: <code>packetpulsego/pkg/reportmicroservice/**</code>, <code>packetpulseflutter/test/network_report_screen_test.dart</code>, <code>packetpulseflutter/test/network_report_grades_test.dart</code>, <code>packetpulsetest/golang/apicontract/network_report_test.go</code>, <code>packetpulsetest/golang/tenancyisolation/tenancy_isolation_test.go</code>.</li>
 </ul>
 </li>
@@ -3316,7 +3438,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <li>Targets are set through the API: a default for the organisation, and any number more, each site naming one (§3.1). A result with no site — a UDP test to the PacketPulse network — is held to the organisation's default; with no targets set, to the built-in defaults (100 ms, 30 ms jitter, 1% loss, MOS 3.6).</li>
 <li>What is graded: a sweep's results, and a device's <strong>UDP test</strong> or <strong>ICMP echo</strong>, which put real packets on the wire. An <strong>HTTPS</strong> round-trip from a device is not graded — the targets are set for packets, and TCP turns loss into delay — and reads <em>Not graded</em> (stored as <code>unknown</code>), with the reason under the results (§3.2). Until the review of 13 October 2026 every device result read <em>Unknown</em>, the UDP test included.</li>
 <li>A graded result keeps each figure against its target - the metric, what was measured, the target, where Degraded begins (80% of a ceiling, 105% of the MOS floor) and that figure's verdict - in <code>ping_result.sla_checks</code> (migration 0033; 0032 kept breaches alone, the same day). History, <strong>View ticket</strong>, the attach card on <strong>Run diagnostic</strong> and the PDF show them (§3.2, <code>DIAG-019</code>). Grading always knew and kept only the grade: a ticket read <em>Breached</em> beside 0% loss and 2.9 ms jitter, for a 117.6 ms round trip, and <em>Degraded</em> with nothing behind it; its PDF showed only <em>UP</em>.</li>
-<li>A ticket counts its breaches (<em>SLA breaches</em> in History); a dual-stack site's IPv6 result is reported but never counted. The <strong>Service level</strong> chart draws each grade as itself: <em>Within SLA</em>, <em>Degraded</em>, <em>Breached</em>, and <em>Not graded</em> for what was not graded — and <em>Excluded</em> for a result filed under planned work before October 2026. Until 13 October 2026 it drew anything ungraded as <em>Breached</em>, so every device test read <em>Breached 100%</em> beside a tile that said no breach.</li>
+<li>A ticket counts its results by grade - OK, Degraded and Breached (migration 0039 added the first two; <em>SLA breaches</em> on the ticket) - and History, the Dashboard and the ticket lead with its worst; a dual-stack site's IPv6 result is reported but never counted. The <strong>Service level</strong> chart draws each grade as itself: <em>Within SLA</em>, <em>Degraded</em>, <em>Breached</em>, and <em>Not graded</em> for what was not graded — and <em>Excluded</em> for a result filed under planned work before October 2026. Until 13 October 2026 it drew anything ungraded as <em>Breached</em>, so every device test read <em>Breached 100%</em> beside a tile that said no breach.</li>
 <li><strong>Automatic monitoring was removed</strong> after the review of 13 October 2026: scheduled sweeps, alert channels and alerts, planned work (maintenance windows), the month-end SLA report and its PDF, and the dashboard's 30-day availability trend, with the <strong>Monitoring</strong> screen and the <code>schedule_manage</code> capability. Their routes answer 404. What they stored stays in its tables, unread; nothing runs on a timer but the result store's housekeeping. Policies no longer take <code>breach_threshold_runs</code> or <code>alert_cooldown_minutes</code>: a request naming either is refused (400) for naming a field the request does not accept.</li>
 </ul>
 </li>
@@ -5846,6 +5968,10 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/packetpulse/releases/&lt;previous&gt;
 <tr>
 <td><code>0038_2026_10_28_result_organisation.sql</code></td>
 <td>The organisation of every result on the result itself (<code>ping_result.organisation_id</code>), set from its run by a trigger on every insert and filled for the results already filed, with <code>ping_result_org_checked_idx</code> (organisation, <code>checked_on</code>) in every monthly partition: a report of a day reads that day of that month's partition, however long the organisation has been testing (customer request, 28 October 2026). NULL where the run has none.</td>
+</tr>
+<tr>
+<td><code>0039_2026_10_30_ticket_grades.sql</code></td>
+<td>A ticket's results counted by grade (<code>diagnostic_request.ok_count</code>, <code>degraded_count</code>) beside its breaches, counted when it is closed and filled from their results for the tickets already closed: History and the Dashboard lead each ticket with its worst grade, and <em>Not graded</em> when none was graded (review of 30 October 2026). Kept on the ticket, because results are dropped as they age past retention.</td>
 </tr>
 </tbody>
 </table></div>

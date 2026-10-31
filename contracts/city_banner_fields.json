@@ -1,0 +1,6 @@
+{
+  "_comment": "What the app's city banners read from a network report (GET /report/network): each reflector site's 'city' as the report files it - an older name or another spelling under the city's own name (packetpulsego/pkg/common/cityname), the same names the app matches to a drawing and a tagline (packetpulsetest's apicontract suite holds the two lists equal); 'cities', every city the organisation has an endpoint in, which the Pan India banner counts and shows as emblems; and 'country_code' on a report of every site combined, because the Pan India drawing and tagline are India's alone ('pan_india_country_code') and a whole-country report anywhere else is drawn plainly. The client's test parses a report holding exactly these fields; the integration suite asserts the server sends them.",
+  "report": ["kind", "country_code", "cities", "sites"],
+  "site": ["city"],
+  "pan_india_country_code": "IN"
+}
