@@ -131,6 +131,21 @@ func TestTheNetworkReportsKeepTheirContract(t *testing.T) {
 		len(packetpulsetest.ListOf(t, country, "all")) != 1 {
 		t.Errorf("country report = %d %s", country.Status, country.Raw)
 	}
+	// The Pan India CSV calls itself pan-india on every row, as its file
+	// name does, never country (customer request, 2 November 2026).
+	panIndia := packetpulsetest.Call(t, http.MethodGet, "/report/network.csv?view=country&period=week&date="+today, ownerToken, nil)
+	if !strings.HasPrefix(panIndia.Header.Get("Content-Disposition"), `attachment; filename="packetpulse-pan-india-weekly-`) {
+		t.Errorf("Pan India CSV = %d %q", panIndia.Status, panIndia.Header.Get("Content-Disposition"))
+	}
+	panIndiaRows := readCsv(t, panIndia)
+	if len(panIndiaRows) < 2 {
+		t.Errorf("the Pan India CSV has no rows: %v", panIndiaRows)
+	}
+	for _, row := range panIndiaRows[1:] {
+		if row[1] != "pan-india" {
+			t.Errorf("a %s row of the Pan India CSV is a %q report", row[2], row[1])
+		}
+	}
 
 	pdf := packetpulsetest.Call(t, http.MethodGet, "/report/network.pdf?view=country&period=month&date="+today, ownerToken, nil)
 	if pdf.Status != http.StatusOK || pdf.Header.Get("Content-Type") != "application/pdf" || !strings.HasPrefix(string(pdf.Raw), "%PDF-") ||

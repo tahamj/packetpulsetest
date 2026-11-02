@@ -156,6 +156,7 @@ nav.side .nohit.on{display:block}
     </div>
     <a class="n1" href="#packetpulse-manual-testing-guide">📡 PacketPulse Manual Testing Guide</a>
     <a class="n2" href="#how-to-read-this-manual">🧭 How To Read This Manual</a>
+    <a class="n2" href="#what-changed-on-2-november-2026">📋 What Changed on 2 November 2026</a>
     <a class="n2" href="#what-changed-for-the-28-october-2026-feedback">📋 What Changed for the 28 October 2026 Feedback</a>
     <a class="n2" href="#what-changed-in-the-17-october-2026-review">📋 What Changed in the 17 October 2026 Review</a>
     <a class="n2" href="#what-changed-on-16-october-2026">📋 What Changed on 16 October 2026</a>
@@ -238,10 +239,10 @@ nav.side .nohit.on{display:block}
 <tbody>
 <tr>
 <td style="text-align:center"><strong>17</strong> <br><sub>in the navigation rail</sub></td>
-<td style="text-align:center"><strong>101</strong> <br><sub>under <code>/api/v1</code></sub></td>
+<td style="text-align:center"><strong>102</strong> <br><sub>under <code>/api/v1</code></sub></td>
 <td style="text-align:center"><strong>16</strong> <br><sub>3 built-in roles</sub></td>
-<td style="text-align:center"><strong>39</strong> <br><sub>applied at boot</sub></td>
-<td style="text-align:center"><strong>1336</strong> <br><sub>English, server-served</sub></td>
+<td style="text-align:center"><strong>41</strong> <br><sub>applied at boot</sub></td>
+<td style="text-align:center"><strong>1353</strong> <br><sub>English, server-served</sub></td>
 <td style="text-align:center"><strong>20</strong> <br><sub>one per screen</sub></td>
 <td style="text-align:center"><strong>11</strong> <br><sub>+ <code>load</code>, opt-in</sub></td>
 </tr>
@@ -341,6 +342,39 @@ nav.side .nohit.on{display:block}
 </div>
 <div class="alert a-caution"><div class="alert-h">🛑 CAUTION</div><p><strong>Never test against live customer data.</strong> Use a local server with a disposable database (Part 0 §0.2), or the live demo organisation for read-only walkthroughs. Tenancy, ACL and audit cases need <strong>two organisations</strong> of your own — testing them from a single account proves nothing.</p>
 </div>
+<hr>
+<h2 id="what-changed-on-2-november-2026">📋 What Changed on 2 November 2026<a class="anchor" href="#what-changed-on-2-november-2026" aria-label="Link to this section">#</a></h2>
+<div class="alert a-important"><div class="alert-h">📌 IMPORTANT</div><p><strong>Asked on 2 November 2026.</strong> A ticket said in words where its engineer signed in, and where the test itself was run only as coordinates - but an engineer signs in at the office and tests at the customer's home. And every <em>How these figures were calculated</em> on a network report opened by itself. Where this table and an older one disagree, this one is current.</p>
+</div>
+<div class="tw"><table><thead>
+<tr>
+<th>Change</th>
+<th>What changed</th>
+<th>Where to test</th>
+<th>Source of truth</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Tested from has its own address</strong></td>
+<td>Where a test was run gets its own address, looked up from the test's own position a moment after it is filed - never copied from the sign-in - on the one queue sign-ins use too, and kept on the ticket (<code>diagnostic_request.test_address</code>, migration <code>0041</code>). The ticket, its PDF (both ways up) and the Results API say it over the position, its accuracy and its map link, beside <strong>Signed in at</strong>; the result CSV gains <code>test_address</code> and <code>test_address_source</code> at its end; History's row says it, and <strong>Place</strong> finds a test by it. Each address from OpenStreetMap is credited under it, on screen and in the PDF - <strong>Signed in at</strong> too, which the PDF had not credited. At boot the server looks up every test still without one, older tickets included, whenever nothing newer is waiting.</td>
+<td><code>DIAG-016</code>, <code>DIAG-025</code>, <code>DEV-016</code>, <code>DEV-030</code>, <code>CSV-006</code>, <code>HIST-022</code>, <code>API-002</code></td>
+<td><code>packetpulsego/pkg/common/geocode/Queue.go</code><br><code>packetpulsego/pkg/diagnosticmicroservice/diagnosticservice/DiagnosticService.go</code><br><code>packetpulsego/pkg/pingmicroservice/pingreport/PingReportPdfBuilder.go</code><br><code>packetpulseflutter/lib/diagnosticmicroservice/presentation/screens/DiagnosticResultView.dart</code></td>
+</tr>
+<tr>
+<td><strong>Every Latin-1 letter prints</strong></td>
+<td>A ticket whose notes held <em>×</em>, <em>÷</em> or <em>·</em> could not be exported as a PDF at all, and <em>José</em> or <em>São Paulo</em> printed as <em>Jos?</em> and <em>S?o Paulo</em> - on tickets and network reports alike. Every Latin-1 letter and sign now prints as itself; a letter beyond it (Devanagari, say) still prints as <em>?</em>.</td>
+<td><code>DIAG-026</code></td>
+<td><code>packetpulsego/pkg/pingmicroservice/pingreport/PingReportPdfBuilder.go</code><br><code>packetpulsego/pkg/reportmicroservice/reportfile/ReportPdf.go</code></td>
+</tr>
+<tr>
+<td><strong>How these figures were calculated starts closed</strong></td>
+<td>On <strong>Network reports</strong> each <em>How these figures were calculated</em> is closed until it is tapped, and closes again on a tap. Its sums are unchanged, and the PDF still prints them under their summary.</td>
+<td><code>RPT-029</code>, <code>RPT-022</code></td>
+<td><code>packetpulseflutter/lib/reportmicroservice/presentation/screens/NetworkReportScreen.dart</code></td>
+</tr>
+</tbody>
+</table></div>
 <hr>
 <h2 id="what-changed-for-the-28-october-2026-feedback">📋 What Changed for the 28 October 2026 Feedback<a class="anchor" href="#what-changed-for-the-28-october-2026-feedback" aria-label="Link to this section">#</a></h2>
 <div class="alert a-important"><div class="alert-h">📌 IMPORTANT</div><p><strong>Live since 2026-10-30 (release 20261030-014228).</strong> Tata Play Fiber's minutes of 28 October 2026 asked for each test in the daily, weekly and monthly reports, Pan India as a summary, a city filter, a test length from 30 to 300 seconds, a fixed 10 packets a second, tests over IPv4 alone, the user's IPv6 shown where it is known, no Resolved IP, and samples of the API by Customer ID and TT number. Where this table and an older one disagree, this one is the product.</p>
@@ -473,15 +507,21 @@ nav.side .nohit.on{display:block}
 </tr>
 <tr>
 <td><strong>Every endpoint has a position</strong></td>
-<td><strong>Latitude *</strong> and <strong>Longitude *</strong> are required on the endpoint form, and for a file's new rows. Run diagnostic picks the endpoint nearest the device only when every enabled endpoint has a position; until then everyone chooses, and the page says why. <strong>Bulk import</strong> still adds plain addresses, which show <em>No position</em>.</td>
-<td><code>SITE-006</code>, <code>SITE-015</code>, <code>SITE-016</code>, <code>DEV-028</code></td>
+<td><strong>Latitude *</strong> and <strong>Longitude *</strong> are required on the endpoint form, and for a file's new rows. Run diagnostic picks the endpoint nearest the device only when every enabled endpoint has a position; until then whoever manages the endpoints chooses, an engineer gets no test (see the next row), and the page says why. <strong>Bulk import</strong> still adds plain addresses, which show <em>No position</em>.</td>
+<td><code>SITE-006</code>, <code>SITE-015</code>, <code>SITE-016</code>, <code>DEV-028</code>, <code>DEV-037</code></td>
 <td><code>packetpulsego/pkg/dnssitemicroservice/dnssiteservice/DnsSiteService.go</code><br><code>packetpulseflutter/lib/diagnosticmicroservice/presentation/widgets/DiagnosticEndpointField.dart</code></td>
 </tr>
 <tr>
+<td><strong>No position, no engineer's test</strong></td>
+<td>Since 2 November 2026 (gap G6 of the SOW) an engineer never picks the endpoint: without a position from the device no test starts, and the page gives the steps to allow location for the browser or app in use, with <strong>Try again</strong> and, in the apps, <strong>Open settings</strong>. The same steps appear under a sign-in refused for want of a position. Whoever manages the endpoints still picks by hand.</td>
+<td><code>DEV-035</code>, <code>DEV-036</code>, <code>DEV-037</code>, <code>DEV-020</code>, <code>LOC-002</code></td>
+<td><code>packetpulseflutter/lib/diagnosticmicroservice/presentation/widgets/DiagnosticEndpointField.dart</code><br><code>packetpulseflutter/lib/common/widgets/PacketPulseLocationGuide.dart</code></td>
+</tr>
+<tr>
 <td><strong>An ended session lands on sign-in</strong></td>
-<td>When a session's twelve hours run out the app returns to sign-in then, not at the next click, and closes any dialog left open. A token the device thinks has expired is still sent, so the server's refusal is read as the session ending; sign-in says <em>Your session has ended. Sign in again to continue.</em></td>
-<td><code>AUTH-014</code>, <code>AUTH-017</code>, <code>AUTH-018</code></td>
-<td><code>packetpulseflutter/lib/main.dart</code><br><code>packetpulseflutter/lib/common/services/PacketPulseSessionStore.dart</code></td>
+<td>When a session's twelve hours run out, or it goes thirty minutes unused (<code>SESSION_IDLE_TIMEOUT</code>, since 2 November 2026; the app asks the server, so another tab in use keeps it), the app returns to sign-in then, not at the next click, and closes any dialog left open. A token the device thinks has expired is still sent, so the server's refusal is read as the session ending; sign-in says <em>Your session has ended. Sign in again to continue.</em></td>
+<td><code>AUTH-014</code>, <code>AUTH-017</code>–<code>AUTH-022</code>, <code>PLAT-019</code></td>
+<td><code>packetpulseflutter/lib/common/services/PacketPulseSessionWatch.dart</code><br><code>packetpulseflutter/lib/common/services/PacketPulseSessionStore.dart</code><br><code>packetpulsego/pkg/staffmicroservice/staffdomain/repository/StaffSessionRepositoryPostgres.go</code></td>
 </tr>
 <tr>
 <td><strong>PacketPulse's reflector answers every endpoint</strong></td>
@@ -841,7 +881,7 @@ PORT=18080 APP_ENV=test REVERSE_GEOCODING=off go run ./cmd/packetpulseserver
 cd ../packetpulseflutter
 flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18080
 </code></pre>
-<p><code>REVERSE_GEOCODING=off</code> stops sign-in positions being sent to a map service from a test run. Every other setting comes from <code>.env</code> (copy <code>.env.example</code>); Appendix D lists them all.</p>
+<p><code>REVERSE_GEOCODING=off</code> stops sign-in and test positions being sent to a map service from a test run - including the boot catch-up, which otherwise looks up every test in the database still without an address. Every other setting comes from <code>.env</code> (copy <code>.env.example</code>); Appendix D lists them all.</p>
 <p>With the development key pair in <code>.env</code> (<code>LICENCE_PUBLIC_KEY</code> and <code>LICENCE_SIGNING_KEY</code>), the stack is a <strong>console</strong>: the superuser can sign in and issue licence files (<strong>Platform → Download licence file</strong>). Copy a file into <code>LICENCE_DIR</code> and its organisation can sign in; the server verifies it at every sign-in. Only the demo's own licence is written there for you. A customer's server has no signing key, only the licence files copied into its <code>LICENCE_DIR</code>.</p>
 <h2 id="04-accounts-and-sign-in-codes">0.4 Accounts and sign-in codes<a class="anchor" href="#04-accounts-and-sign-in-codes" aria-label="Link to this section">#</a></h2>
 <div class="tw"><table><thead>
@@ -1010,7 +1050,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <h2 id="l6-two-step-sign-in">L.6 Two-step sign-in<a class="anchor" href="#l6-two-step-sign-in" aria-label="Link to this section">#</a></h2>
 <p>After the password, everyone enters a one-time <strong>6-digit code</strong>. It is <strong>emailed</strong> to their sign-in address, or <strong>texted</strong> to their mobile when an administrator chose text for them and the organisation's own SMS gateway is on. An owner's code is always emailed, so the account that runs the organisation never depends on a gateway. A code is good for ten minutes and five tries; ten wrong codes in all lock the account for fifteen minutes, and nobody is sent more than ten codes an hour. A wrong <em>password</em> never locks anything, so a stranger cannot lock someone out by typing their address. A lost phone is handled by an administrator, who signs that device out and switches the person to email.</p>
 <h2 id="l7-location-at-sign-in">L.7 Location at sign-in<a class="anchor" href="#l7-location-at-sign-in" aria-label="Link to this section">#</a></h2>
-<p>For people set to <strong>Record location</strong>, the device's position is recorded when they sign in and out — with the browser's or phone's permission, and a refusal recorded as one. A field engineer's appear on <strong>Check-ins</strong>; an administrator's beside their entries in <strong>Activity</strong>. An organisation can make sharing a position a condition of signing in. The address is looked up afterwards (Google, or OpenStreetMap when no key is set), so it may appear a moment later; the position is the record.</p>
+<p>For people set to <strong>Record location</strong>, the device's position is recorded when they sign in and out — with the browser's or phone's permission, and a refusal recorded as one. A field engineer's appear on <strong>Check-ins</strong>; an administrator's beside their entries in <strong>Activity</strong>. An organisation can make sharing a position a condition of signing in. The address is looked up afterwards (Google, or OpenStreetMap when no key is set), so it may appear a moment later; the position is the record. A test's own position gets its own address the same way - <em>Tested from</em> on the ticket - which can be far from where the session began: an engineer signs in at the office and tests at the customer's home.</p>
 <h2 id="l8-the-activity-trail">L.8 The activity trail<a class="anchor" href="#l8-the-activity-trail" aria-label="Link to this section">#</a></h2>
 <p>Every successful change — who, what, from where, when — is written to a <strong>hash chain</strong>: each entry's hash covers the one before, so altering or removing any entry breaks every entry after it, and <strong>Verify</strong> names the first that does not follow. Administrators' sign-ins and sign-outs are in it, and so are <strong>failed</strong> sign-ins to administrators' accounts (at most twenty an hour per account). A position is shown beside an entry but never sealed into its hash: it is personal data that may have to be erased, and a chain entry never can be.</p>
 <h2 id="l9-results-leaving-packetpulse">L.9 Results leaving PacketPulse<a class="anchor" href="#l9-results-leaving-packetpulse" aria-label="Link to this section">#</a></h2>
@@ -1099,7 +1139,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <p>Signing in, the second step, and the organisation's own rules for both.</p>
 <hr>
 <h3 id="11-sign-in-and-the-second-step">1.1 🔑 Sign-in and the second step<a class="anchor" href="#11-sign-in-and-the-second-step" aria-label="Link to this section">#</a></h3>
-<p><strong>Screen:</strong> the sign-in page at <code>/app/</code> · <strong>Routes:</strong> <code>POST /user/signin</code>, <code>/user/signin/verify</code>, <code>/user/signin/resend</code>, <code>/user/signout</code></p>
+<p><strong>Screen:</strong> the sign-in page at <code>/app/</code> · <strong>Routes:</strong> <code>POST /user/signin</code>, <code>/user/signin/verify</code>, <code>/user/signin/resend</code>, <code>/user/signout</code>, <code>GET /staff/session/current</code></p>
 <ul>
 <li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: Two-step sign-in for <em>everyone</em>, not a premium add-on. A stolen password alone opens nothing: after it comes a one-time code, emailed to the person's sign-in address or — for field staff the administrator chooses — texted through <strong>the operator's own Twilio account</strong> (their sender, their DLT registration, their bill). Owners always get theirs by email, so the account that matters most never depends on a gateway someone else configures. There is no app to install and nothing to recover: a lost phone is one action for an administrator.</li>
 <li>📖 <strong>User Guide &amp; Operational Flow</strong>:
@@ -1108,7 +1148,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <li><strong>The owner's first sign-in:</strong> <em>First time here? Set up the owner's account</em> — only the address named in this server's licence can do this (§7.1). The emailed code finishes it, and the owner arrives as the Administrator.</li>
 <li><strong>Lost phone:</strong> your administrator signs that device out under <strong>Who is signed in</strong> (§2.3) and changes your number or switches you to email under <strong>Staff → How they sign in</strong>.</li>
 <li><strong>Location:</strong> if you are asked to share your location, the browser or phone asks your permission. See §1.2 for when sharing is required.</li>
-<li><strong>When a session ends:</strong> a session lasts twelve hours (<code>JWT_TTL</code>). When it runs out, or an administrator signs the device out, the app returns to sign-in and says <em>Your session has ended. Sign in again to continue.</em>; a dialog left open closes with it. Nothing typed in an unsaved form survives.</li>
+<li><strong>When a session ends:</strong> a session lasts twelve hours (<code>JWT_TTL</code>), and ends sooner when it goes thirty minutes without being used (<code>SESSION_IDLE_TIMEOUT</code>, since 2 November 2026; <code>0</code> turns that off). Every request the app makes is a use, so someone working is never signed out; another tab of the same browser counts too, because the tabs share one session. When it runs out, is left unused, or an administrator signs the device out, the app returns to sign-in and says <em>Your session has ended. Sign in again to continue.</em>; a dialog left open closes with it. Nothing typed in an unsaved form survives.</li>
 </ul>
 </li>
 <li>🧪 <strong>Manual Testing Playbook</strong>:<div class="tw"><table><thead>
@@ -1227,6 +1267,34 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>The dialog closes and sign-in shows <em>Your session has ended…</em> at the two-minute mark; no <code>POST /user/signout</code> is sent. 🛑 <strong>Must NOT</strong> stay on the screen until the next click, or leave the dialog over the sign-in page</td>
 </tr>
 <tr>
+<td><code>AUTH-019</code></td>
+<td>Engineer</td>
+<td>A session left unused lands on sign-in by itself</td>
+<td>On a test server with <code>SESSION_IDLE_TIMEOUT=2m</code>, sign in, open <strong>DNS sites → Edit</strong> on an endpoint, and leave the app untouched for three minutes</td>
+<td>At the two-minute mark the network panel shows one <code>GET /staff/session/current</code> answered 401; the dialog closes and sign-in shows <em>Your session has ended…</em>; no <code>POST /user/signout</code> is sent. 🛑 <strong>Must NOT</strong> stay on the screen until the next click, or ask the server over and over</td>
+</tr>
+<tr>
+<td><code>AUTH-020</code></td>
+<td>Engineer</td>
+<td>A tab left alone is not signed out while another is used</td>
+<td><code>SESSION_IDLE_TIMEOUT=2m</code>; open the app in two tabs of one browser; use tab A (move between screens every 30 seconds) for five minutes without touching tab B</td>
+<td>Tab B stays signed in; its network panel shows a <code>GET /staff/session/current</code> about every two minutes, each answered 200. Then leave both alone: both return to sign-in two minutes after the last use. 🛑 <strong>Must NOT</strong> sign tab B out while tab A is in use</td>
+</tr>
+<tr>
+<td><code>AUTH-021</code></td>
+<td>Tester</td>
+<td>Asking how long is left does not keep a session alive</td>
+<td>With a token: <code>GET /staff/session/current</code>; wait 10 seconds; ask again; then <code>GET /user/me</code>; ask again</td>
+<td><code>seconds_left</code> falls by about 10 between the first two answers, then is back near <code>idle_timeout_seconds</code> after <code>/user/me</code>. Without a token the route answers 401. 🛑 <strong>Must NOT</strong> count the question as a use of the session</td>
+</tr>
+<tr>
+<td><code>AUTH-022</code></td>
+<td>Tester</td>
+<td>An idle timeout under a minute is refused</td>
+<td>Boot the server with <code>SESSION_IDLE_TIMEOUT=30s</code>; then with <code>30</code></td>
+<td>The boot stops with <em>SESSION_IDLE_TIMEOUT must be 0 (off) or at least 1m0s</em>; then with <em>SESSION_IDLE_TIMEOUT=&quot;30&quot; is not a duration</em>. 🛑 <strong>Must NOT</strong> start and sign everyone out between two clicks</td>
+</tr>
+<tr>
 <td><code>AUTH-018</code></td>
 <td>Engineer</td>
 <td>A device whose clock runs fast still gets the server's answer</td>
@@ -1273,7 +1341,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>Tester</td>
 <td>A walkthrough left idle gives up its place</td>
 <td>Fill the demo as in <code>DEMO-003</code>; close every tab without signing out; wait 30 minutes; sign in again</td>
-<td>Admitted: only sessions used in the last 30 minutes count. Reopening a closed tab within its 12 hours still works. 🛑 <strong>Must NOT</strong> keep visitors out because earlier ones walked away</td>
+<td>Admitted: only sessions used in the last 30 minutes count. A closed tab reopened within 30 minutes of its last use is still signed in; after that its session has ended (<code>SESSION_IDLE_TIMEOUT</code>) and the visitor signs in again. 🛑 <strong>Must NOT</strong> keep visitors out because earlier ones walked away</td>
 </tr>
 <tr>
 <td><code>DEMO-004</code></td>
@@ -1299,8 +1367,9 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <li>Limits: <code>maxAttempts = 5</code>, <code>lockAfter = 10</code>, <code>lockFor = 15m</code>, <code>resendAfter = 30s</code>, <code>maxSendsPerChallenge = 3</code>, <code>maxCodesPerHour = 10</code> by either channel; a separate rate limiter for the second step (<code>SECOND_STEP_ATTEMPTS_PER_MINUTE</code>).</li>
 <li>Email: <code>packetpulsego/pkg/common/mailer/Mailer.go</code> — STARTTLS with a verified certificate (credentials are never sent otherwise), header injection refused, the load spread over up to four sending accounts (<code>SMTP_FROM_0…3</code>, <code>SMTP_PASSWORD_0…3</code>). A development or test server writes codes to <code>OTP_OUTBOX_FILE</code> instead (<code>packetpulsego/pkg/common/mailer/Outbox.go</code>); production refuses it.</li>
 <li>Client IPs: <code>packetpulsego/pkg/common/apiratelimit/ApiRateLimit.go</code> walks <code>X-Forwarded-For</code> from the right past <code>TRUSTED_PROXIES</code> only, and returns canonical addresses (<code>::ffff:a.b.c.d</code> → <code>a.b.c.d</code>).</li>
-<li>An ended session (since 2026-10-17): <code>PacketPulseApiClient</code> names the token a 401 refused, and the auth bloc's <code>PacketPulseAuthSessionEnded</code> acts only while that token is the session in use - a late refusal of a session already replaced ends nothing. <code>readToken</code> in <code>packetpulseflutter/lib/common/services/PacketPulseSessionStore.dart</code> sends a token past its time rather than dropping it, so the server decides. <code>packetpulseflutter/lib/main.dart</code> ends a session when its <code>expires_on</code> comes and closes every route above sign-in when the session changes.</li>
-<li>Coverage: <code>packetpulsego/pkg/usermicroservice/userservice/UserSignInSteps_test.go</code>, <code>packetpulsego/pkg/common/mailer/Mailer_test.go</code>, the <code>assignment</code> and <code>audit</code> suites (every integration test finishes its sign-in with the code from the outbox); for an ended session, <code>packetpulseflutter/test/app_test.dart</code>, <code>packetpulseflutter/test/plumbing_test.dart</code> and <code>packetpulseflutter/test/sign_in_test.dart</code>.</li>
+<li>An ended session (since 2026-10-17): <code>PacketPulseApiClient</code> names the token a 401 refused, and the auth bloc's <code>PacketPulseAuthSessionEnded</code> acts only while that token is the session in use - a late refusal of a session already replaced ends nothing. <code>readToken</code> in <code>packetpulseflutter/lib/common/services/PacketPulseSessionStore.dart</code> sends a token past its time rather than dropping it, so the server decides. <code>packetpulseflutter/lib/main.dart</code> closes every route above sign-in when the session changes, and <code>packetpulseflutter/lib/common/services/PacketPulseSessionWatch.dart</code> ends the session when its <code>expires_on</code> comes.</li>
+<li>The idle timeout (since 2026-11-02): <code>SESSION_IDLE_TIMEOUT</code> (<code>packetpulsego/pkg/common/config/Config.go</code>, default <code>30m</code>, <code>0</code> off, under <code>1m</code> refused) is applied by the server. A session is live while <code>sessionLive</code> in <code>packetpulsego/pkg/staffmicroservice/staffdomain/repository/StaffSessionRepositoryPostgres.go</code> says so: not revoked, before <code>expires_on</code>, and <code>last_accessed_on</code> within the timeout. That one test is used by the check on every request, the person's and the organisation's sessions, an administrator ending one, the demo's count and the check-ins' <em>Expired</em>, so nothing is written when a session goes idle. Every request touches <code>last_accessed_on</code>; <code>GET /staff/session/current</code> sits behind <code>RequireAuthWithoutUse</code> (<code>packetpulsego/pkg/common/apiauth/ApiAuthMiddleware.go</code>) and does not. Every session carries <code>idle_timeout_seconds</code>, and <code>/user/me</code> reads it fresh. When a session could first have gone unused for the timeout, the session watch asks <code>GET /staff/session/current</code> with a read that does not report a refusal as an ended session, waits the <code>seconds_left</code> it is told, and ends the session only on a 401, sending nothing. Tabs share one session in <code>localStorage</code>, so a tab left alone keeps to the server's answer. A support session names the console session it was opened from (<code>staff_session.support_from_session_id</code>, migration <code>packetpulsego/pkg/common/dbclient/migrations/0040_2026_11_02_session_idle_timeout.sql</code>), and using it keeps the console in use; ending support asks about the console session before going back to it (<code>endSupport</code> in <code>packetpulseflutter/lib/usermicroservice/service/UserService.dart</code>).</li>
+<li>Coverage: <code>packetpulsego/pkg/usermicroservice/userservice/UserSignInSteps_test.go</code>, <code>packetpulsego/pkg/common/mailer/Mailer_test.go</code>, the <code>assignment</code> and <code>audit</code> suites (every integration test finishes its sign-in with the code from the outbox); for an ended session, <code>packetpulseflutter/test/app_test.dart</code>, <code>packetpulseflutter/test/plumbing_test.dart</code> and <code>packetpulseflutter/test/sign_in_test.dart</code>; for the idle timeout, <code>packetpulsego/pkg/staffmicroservice/staffdomain/repository/StaffSessionIdle_test.go</code>, <code>packetpulsego/pkg/staffmicroservice/staffapp/StaffSessionCurrent_test.go</code>, <code>packetpulsego/pkg/usermicroservice/userservice/UserSessionIdle_test.go</code>, <code>packetpulsego/pkg/common/apiauth/ApiAuthMiddleware_test.go</code>, the <em>a session left unused</em> group in <code>packetpulseflutter/test/app_test.dart</code>, and the <code>contract</code> suite (<code>packetpulsetest/golang/apicontract/session_idle_test.go</code>, against the server as it boots).</li>
 </ul>
 </li>
 </ul>
@@ -1372,7 +1441,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>Engineer</td>
 <td>Required means refused without a position</td>
 <td>Rule on; engineer with <em>Record location</em> on; deny the browser's location prompt at sign-in</td>
-<td>Refused (<code>location_required</code>, action <em>share location</em>) with guidance to allow it. Allowing it signs in. The owner, denying it, still signs in</td>
+<td>Refused (<code>location_required</code>, action <em>share location</em>) with guidance to allow it: under the refusal, the steps to allow location for this browser or device (the same as <code>DEV-036</code>), and in the apps <strong>Open settings</strong>; a wrong code shows no such steps. Allowing it and pressing <strong>Verify</strong> again signs in. The owner, denying it, still signs in</td>
 </tr>
 <tr>
 <td><code>LOC-003</code></td>
@@ -1673,8 +1742,8 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td><code>CHK-003</code></td>
 <td>Engineer</td>
 <td>A session left to expire says so</td>
-<td>Sign in; let the session expire (or shorten <code>JWT_TTL</code>)</td>
-<td><em>Expired</em>, not a sign-out time</td>
+<td>Sign in; let the session expire (or shorten <code>JWT_TTL</code>); separately, sign in and leave it unused past <code>SESSION_IDLE_TIMEOUT</code></td>
+<td><em>Expired</em> for both, not a sign-out time and not <em>Active</em></td>
 </tr>
 <tr>
 <td><code>CHK-004</code></td>
@@ -1703,7 +1772,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <li>⚙️ <strong>Developer Guide &amp; Release Confidence</strong>:
 <ul>
 <li><code>session_checkin</code>, one row per session, keyed by <code>staff_session.session_id</code> (<code>packetpulsego/pkg/common/dbclient/migrations/0020_2026_10_03_session_checkin.sql</code>); coordinates only with status <code>captured</code>, checked by <code>CHECK</code>s.</li>
-<li>Addresses: a background worker (<code>packetpulsego/pkg/common/geocode/Geocode.go</code>) — Google with <code>GOOGLE_MAPS_API_KEY</code>, else OpenStreetMap Nominatim at one request a second. <code>REVERSE_GEOCODING=off</code> disables it.</li>
+<li>Addresses: one background queue (<code>packetpulsego/pkg/common/geocode/Queue.go</code>) for sign-ins, sign-outs and tests, new ones before the boot catch-up's (<code>packetpulsego/pkg/common/geocode/Geocode.go</code>) — Google with <code>GOOGLE_MAPS_API_KEY</code>, else OpenStreetMap Nominatim at one request a second. <code>REVERSE_GEOCODING=off</code> disables it.</li>
 <li>Coverage: <code>packetpulsego/pkg/staffmicroservice/staffservice/</code>, <code>packetpulseflutter/test/checkin_screen_test.dart</code>, <code>packetpulsetest/golang/tenancyisolation/</code>.</li>
 </ul>
 </li>
@@ -2166,8 +2235,22 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td><code>DIAG-016</code></td>
 <td>Engineer</td>
 <td>The PDF says where</td>
-<td><strong>Export PDF</strong> of <code>DIAG-012</code></td>
-<td>In the details under the headline figures: <strong>Tested from</strong> <em>12.97…, 77.75…</em> with <em>within N m</em> beside it, a link that opens the position on a map, and <strong>Endpoints</strong> <em>the city nearest the device, Bengaluru, N km away</em> on a row of its own</td>
+<td>On a server with <code>REVERSE_GEOCODING=auto</code>, <strong>Export PDF</strong> of <code>DIAG-012</code>, landscape then portrait</td>
+<td>In the details under the headline figures: <strong>Tested from</strong> the address of the device's position over <em>12.97…, 77.75…</em> with <em>within N m</em> beside it - the position, not the address, a link that opens it on a map - and <em>© OpenStreetMap contributors</em> under it when OpenStreetMap supplied it, as under <strong>Signed in at</strong>; <strong>Endpoints</strong> <em>the city nearest the device, Bengaluru, N km away</em> on a row of its own. With <code>REVERSE_GEOCODING=off</code>, the position alone. 🛑 <strong>Must NOT</strong> print the sign-in's address as where the test was run</td>
+</tr>
+<tr>
+<td><code>DIAG-025</code></td>
+<td>Tester</td>
+<td>An older ticket gets its address</td>
+<td>File a test with a <code>location</code> on a server with <code>REVERSE_GEOCODING=off</code>; restart it with <code>auto</code>; open the ticket a few seconds later</td>
+<td><strong>Tested from</strong> now has the address of the test's own position over it; <strong>Signed in at</strong> unchanged. A test with no position gets none. 🛑 <strong>Must NOT</strong> copy the sign-in's address into <strong>Tested from</strong>, or hold up a sign-in or a new test's lookup behind the old ones</td>
+</tr>
+<tr>
+<td><code>DIAG-026</code></td>
+<td>Engineer</td>
+<td>Every Latin-1 letter prints</td>
+<td>Run a test with the notes <em>Calls drop 3 × 4 times · evenings, at José's, São Paulo ÷ two</em>; <strong>Export PDF</strong>, landscape and portrait</td>
+<td>The PDF exports, and its <strong>Notes</strong> read as typed. 🛑 <strong>Must NOT</strong> fail to export, or print <em>Jos?</em> or <em>S?o</em></td>
 </tr>
 </tbody>
 </table></div>
@@ -2312,7 +2395,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>Engineer</td>
 <td>Where the test ran, as numbers</td>
 <td>Export <code>DIAG-012</code>'s CSV; export one of a sweep submitted with no <code>location</code></td>
-<td>Six-place <code>test_latitude</code>/<code>test_longitude</code> on every row of the first; empty on the second. A longitude west of Greenwich is a plain negative number. 🛑 <strong>Must NOT</strong> be written as text starting <code>'-</code>, or as 0</td>
+<td>Six-place <code>test_latitude</code>/<code>test_longitude</code> on every row of the first; empty on the second. On a server with <code>REVERSE_GEOCODING=auto</code>, the last two columns, <code>test_address</code> and <code>test_address_source</code> (<em>osm</em> or <em>google</em>), carry the first test's address on every row once it is found; empty on the second. A longitude west of Greenwich is a plain negative number. 🛑 <strong>Must NOT</strong> be written as text starting <code>'-</code>, or as 0</td>
 </tr>
 <tr>
 <td><code>CSV-007</code></td>
@@ -2495,6 +2578,13 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td><em>Chennai</em> is offered first beside its drawing with <em>Closest to what you typed</em>; choosing it lists Chennai's tests at once; <code>la</code> offers <em>Lab</em>; without the endpoints, <em>Nagpur</em> is still offered. 🛑 <strong>Must NOT</strong> offer a city for two letters found inside another name, or need the search button after a city is chosen</td>
 </tr>
 <tr>
+<td><code>HIST-022</code></td>
+<td>Administrator</td>
+<td>A test is found by where it was run</td>
+<td>On a server with <code>REVERSE_GEOCODING=auto</code>, an engineer signs in at one address and runs a test at another; once both addresses are found, search <strong>Place</strong> for a word of the test's address, then of the sign-in's</td>
+<td>Both searches list the test; its row reads <em>Customer … · <name> · at &lt;the test's address&gt;</em>. 🛑 <strong>Must NOT</strong> find a test only by where its engineer signed in, or show the sign-in's address on the row once the test's own is known</td>
+</tr>
+<tr>
 <td><code>HIST-021</code></td>
 <td>Administrator</td>
 <td>A place is searched for under every name the city goes by</td>
@@ -2524,7 +2614,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <li>📖 <strong>User Guide &amp; Operational Flow</strong>:
 <ul>
 <li><strong>By reflector site / All sites combined</strong>, <strong>Daily / Weekly / Monthly / Yearly</strong>, and the period button (a calendar). It opens on today so far, so a test just run is in it: the period button reads <em>…, so far (to 09:12)</em>, the PDF says <em>So far, to 09:12 IST</em>, the files are named <code>…-so-far</code>, and each CSV row's <code>period_end</code> is when it was made. Any earlier period is picked from the calendar. Days, weeks (Monday to Sunday), months and years begin at midnight in the organisation's time zone: its own choice with the scheduled reports on <strong>Result export</strong>, else its country's (India Standard Time for India). The zone is said under the controls.</li>
-<li><strong>By reflector site</strong>: one card per site — the <strong>Region</strong> given in <strong>DNS sites</strong> — with the individual tests first and the summary below them (customer request, 28 October 2026): <strong>Individual tests</strong>, each method's under one band, newest first, each with when it was checked (on the organisation's clock), its endpoint, whether a <strong>Device</strong> or the <strong>Server</strong> measured it, the <strong>User IPv4</strong> and <strong>User IPv6</strong> a device's test came from (a dash for a sweep), and its own sent, lost, loss, latency and jitter - the first ten, <strong>Show all</strong> for the rest, and past the latest 100 <em>Showing the latest 100 of n tests. The CSV of this report lists every one.</em>; then <strong>Each endpoint</strong> (only where the site has more than one); then <em>Summary: every endpoint in <city></em>, in bold (<em>All endpoints</em>); then <strong>How these figures were calculated</strong>, open and foldable, working each summary row out from its own numbers (since 30 October 2026 one table under the summary's own columns, not a line per figure): a sentence saying what every row shows, then <strong>Method</strong>, <strong>Loss</strong>, <strong>Latency</strong> and <strong>Jitter</strong>, a row per method - <em>UDP (reflector) IPv4</em> over <em>14 tests</em>, <em>0.48% = 20 lost ÷ 4,200 sent</em> over <em>0% to 1% over 14 tests</em>, <em>22.0 ms = mean of 4,180 replies</em> over its quickest to slowest reply, <em>3.3 ms = mean of 14 tests</em> over its range. A range of one test or reply is not said again, and one whose ends meet reads <em>4% in each of 2 tests</em>. <em>These tests count queries, not packets, so they state no loss</em> for HTTPS, <em>No test received a reply</em> or <em>No test measured jitter</em> where none did. On a phone each method is a card of its three figures. The PDF prints the same table, on the page of the summary it explains. Endpoints with none set are <em>City not set on the endpoint</em>. UDP tests to the PacketPulse network, with no endpoint, have a card of their own, laid out the same way. <strong>City</strong> narrows the report to one of the organisation's cities (<em>All cities</em> unless chosen; an older name - <em>Bombay</em> - finds <em>Mumbai</em>); its files are named for it (<code>packetpulse-city-mumbai-daily-…</code>) and the PDF's title ends <em>- Mumbai</em>. The PDF lays each site out the same way.</li>
+<li><strong>By reflector site</strong>: one card per site — the <strong>Region</strong> given in <strong>DNS sites</strong> — with the individual tests first and the summary below them (customer request, 28 October 2026): <strong>Individual tests</strong>, each method's under one band, newest first, each with when it was checked (on the organisation's clock), its endpoint, whether a <strong>Device</strong> or the <strong>Server</strong> measured it, the <strong>User IPv4</strong> and <strong>User IPv6</strong> a device's test came from (a dash for a sweep), and its own sent, lost, loss, latency and jitter - the first ten, <strong>Show all</strong> for the rest, and past the latest 100 <em>Showing the latest 100 of n tests. The CSV of this report lists every one.</em>; then <strong>Each endpoint</strong> (only where the site has more than one); then <em>Summary: every endpoint in <city></em>, in bold (<em>All endpoints</em>); then <strong>How these figures were calculated</strong>, closed until tapped (2 November 2026), working each summary row out from its own numbers (since 30 October 2026 one table under the summary's own columns, not a line per figure): a sentence saying what every row shows, then <strong>Method</strong>, <strong>Loss</strong>, <strong>Latency</strong> and <strong>Jitter</strong>, a row per method - <em>UDP (reflector) IPv4</em> over <em>14 tests</em>, <em>0.48% = 20 lost ÷ 4,200 sent</em> over <em>0% to 1% over 14 tests</em>, <em>22.0 ms = mean of 4,180 replies</em> over its quickest to slowest reply, <em>3.3 ms = mean of 14 tests</em> over its range. A range of one test or reply is not said again, and one whose ends meet reads <em>4% in each of 2 tests</em>. <em>These tests count queries, not packets, so they state no loss</em> for HTTPS, <em>No test received a reply</em> or <em>No test measured jitter</em> where none did. On a phone each method is a card of its three figures. The PDF prints the same table, on the page of the summary it explains. Endpoints with none set are <em>City not set on the endpoint</em>. UDP tests to the PacketPulse network, with no endpoint, have a card of their own, laid out the same way. <strong>City</strong> narrows the report to one of the organisation's cities (<em>All cities</em> unless chosen; an older name - <em>Bombay</em> - finds <em>Mumbai</em>); its files are named for it (<code>packetpulse-city-mumbai-daily-…</code>) and the PDF's title ends <em>- Mumbai</em>. The PDF lays each site out the same way.</li>
 <li><strong>All sites combined</strong> (<em>Pan India</em>): the summary alone - no test is listed one by one - with <strong>How these figures were calculated</strong> under it; every site as one, then the period before, a trend hour by hour (a day), day by day (a week or a month) or month by month (a year), quiet steps included — a period so far stops at the step under way — and, for each method and family, the five sites that lost the most packets. Methods are never ranked against one another.</li>
 <li><strong>City banners</strong> (31 October 2026): each site's card opens on its city - the name the report files it under, how many endpoints it has above it (<em>REFLECTOR SITE · 1 ENDPOINT</em>, <em>· 2 ENDPOINTS</em>), its tagline under it (<em>The city that never sleeps</em>, <em>Queen of the Deccan</em>) and its landmarks drawn behind, standing on a pulse that traces itself in once. Nine cities are drawn: Mumbai, Pune, Delhi, Bengaluru, Chennai, Hyderabad, Kolkata, Nagpur and Ahmedabad. An older name or another spelling of one is that city (<em>Bombay</em>, <em>Poona</em>, <em>Bangalore</em>, <em>मुंबई</em>) and its endpoints are filed under it; any other place - a neighbouring town (<em>Navi Mumbai</em>, <em>Secunderabad</em>), <em>Lab</em>, <em>City not set on the endpoint</em> - has a plain grey network and no tagline. <strong>All sites combined</strong> for an organisation in India opens on <strong>Pan India</strong>, <em>Unity in diversity</em>: every drawn city's landmark in one line along the foot, the Himalaya behind the north, then the cities it adds up beside their drawings; anywhere else, <strong>Every reflector site combined</strong> over the plain network. The drawing takes the person's theme and fades out behind the words; High Contrast shows the words alone, and a device set to reduce motion has the trace drawn whole. The PDF and CSV are unchanged.</li>
 <li>Each figure as its <strong>average, minimum and maximum</strong>: loss (packets lost over packets sent across the row, so a long test counts for more; minimum and maximum of single tests), latency (the round trip: the average weighted by replies; minimum and maximum of single replies) and jitter. HTTPS rows show no loss.</li>
@@ -2611,7 +2701,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>Administrator</td>
 <td>The files are the report on screen</td>
 <td><strong>Export CSV</strong>, then <strong>Export PDF</strong></td>
-<td><code>packetpulse-city-daily-&lt;day&gt;.csv</code> under the contracted header - its site rows each test (<code>level</code> <code>test</code>, with <code>checked_on</code>, <code>measured_from</code>, <code>user_ipv4</code> and <code>user_ipv6</code> at the end), then each endpoint, then the site - (<code>packetpulsetest/contracts/network_report_columns.json</code>), the organisation's name in the first column of every row, each figure's <code>_avg</code>, <code>_min</code> and <code>_max</code>, and the PDF with the same figures, the organisation, the zone and the definitions; <em>Pan India</em> files are <code>packetpulse-pan-india-…</code></td>
+<td><code>packetpulse-city-daily-&lt;day&gt;.csv</code> under the contracted header - its site rows each test (<code>level</code> <code>test</code>, with <code>checked_on</code>, <code>measured_from</code>, <code>user_ipv4</code> and <code>user_ipv6</code> at the end), then each endpoint, then the site - (<code>packetpulsetest/contracts/network_report_columns.json</code>), the organisation's name in the first column of every row, each figure's <code>_avg</code>, <code>_min</code> and <code>_max</code>, and the PDF with the same figures, the organisation, the zone and the definitions; <em>Pan India</em> files are <code>packetpulse-pan-india-…</code>, and every row's <code>report</code> column says <code>pan-india</code> (<code>city</code> in a by-site file). 🛑 <strong>Must NOT</strong> say <code>country</code> in a Pan India file</td>
 </tr>
 <tr>
 <td><code>RPT-013</code></td>
@@ -2680,7 +2770,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td><code>RPT-022</code></td>
 <td>Customer</td>
 <td>Each summary figure can be checked</td>
-<td>A day with three Mumbai tests - 10 of 1,000, 5 of 10 and 0 of 100 lost; <strong>Network reports</strong>, <strong>Daily</strong>; read <em>How these figures were calculated</em>; then <strong>Export PDF</strong>; then the same on a phone</td>
+<td>A day with three Mumbai tests - 10 of 1,000, 5 of 10 and 0 of 100 lost; <strong>Network reports</strong>, <strong>Daily</strong>; open <em>How these figures were calculated</em>; then <strong>Export PDF</strong>; then the same on a phone</td>
 <td>Under <strong>Method</strong>, <strong>Loss</strong>, <strong>Latency</strong> and <strong>Jitter</strong>, said once, a row per method: <em>1.4% = 15 lost ÷ 1,110 sent</em> with <em>0% to 50% over 3 tests</em> under it, <em>… = mean of … replies</em> with its quickest to slowest reply, <em>… = mean of 3 tests</em> with its range, each value the summary row's own and set in bold; in the PDF the same table under the summary, on its page, the column titles apart (<em>Latency min</em>, <em>Latency max</em>); on the phone a card per method, each figure under its name. 🛑 <strong>Must NOT</strong> print the workings a page away from their summary, repeat their headings for each method, or print a range from a value to itself</td>
 </tr>
 <tr>
@@ -2717,6 +2807,13 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>The banner takes the theme, and the device's wish for less motion</td>
 <td>Open a report by site in <strong>Operations</strong>, <strong>Fiber</strong>, <strong>Warm</strong> and <strong>Graphite</strong>, light and dark, then <strong>High Contrast</strong>; then set the device to reduce motion and open it again; then open it on a phone</td>
 <td>The drawing is tinted from each theme (greys in Graphite) and fades out behind the words, which stay readable; High Contrast shows the words alone; with less motion the trace is drawn whole at once, with no moving point; on a phone the title is set smaller and nothing is cut off. 🛑 <strong>Must NOT</strong> put the drawing over a figure or a grade, or animate for ever</td>
+</tr>
+<tr>
+<td><code>RPT-029</code></td>
+<td>Customer</td>
+<td>The workings open only when asked</td>
+<td><strong>Network reports</strong>, by reflector site and then all sites combined; tap a <em>How these figures were calculated</em>; tap it again</td>
+<td>Each is closed at first, its title shown; a tap opens it on its sums, another closes it. <strong>Export PDF</strong> still prints them under each summary. 🛑 <strong>Must NOT</strong> open by itself</td>
 </tr>
 <tr>
 <td><code>RPT-028</code></td>
@@ -2760,7 +2857,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <p><strong>Screen:</strong> Operate → <strong>Run diagnostic</strong> · <strong>Routes:</strong> <code>GET /dnssite/list</code> (<code>dns_site_view</code>), <code>POST /diagnostic/clientobservation</code> (<code>diagnostic_run</code>, licensed), and <code>GET /organisation/settings</code> for the test with no ticket; that test's target is set with <code>PUT /organisation/settings</code> (<code>staff_manage</code>), not on this screen</p>
 <ul>
 <li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: &quot;Is it slow for me?&quot; answered from the customer's own connection, to the customer's own endpoint: the engineer opens the page and the endpoint nearest them is already chosen, from the position entered for each endpoint. It shows the device's IPv4 <strong>and</strong> IPv6 addresses, then files the run against the ticket, under the endpoint it measured — labelled as measured on a device.</li>
-<li>📖 <strong>User Guide &amp; Operational Flow</strong>: <strong>Run diagnostic</strong> is the test from this device, filed against a ticket (since 2026-10-07 the page no longer sweeps from the server). The ticket comes first: <strong>Customer ID</strong>, <strong>TT number</strong>, optional <strong>Notes</strong> and the <strong>Endpoint</strong>; <strong>Start test</strong> does nothing until the customer, the TT number and the endpoint are given, and marks the one missing. As the page opens the device is asked where it is, and the endpoint nearest it — by the latitude and longitude entered under DNS sites (§3.1) — is chosen, with <em>Nearest to this device, N km away</em>. An engineer is given that endpoint and cannot change it (<em>Chosen for you: the endpoint nearest where this device is.</em>). Whoever manages the endpoints (<code>dns_site_manage</code>) may pick another, and go back with <strong>Choose by my location</strong>. With no position to go by — location refused or unknown, or an enabled endpoint not placed yet — everyone picks by hand, and the page says why. Every enabled endpoint must have a position before one is chosen for anyone (since 2026-10-17): chosen from the placed ones alone, a test went to the one placed endpoint, however far, while a nearer one waited for its position. Choosing another endpoint empties a finished run, and stops one under way. The position chooses; it is filed with a run only for people whose location is recorded (§2.1). Someone who may not run diagnostics, or has no organisation, gets the device test alone, with no ticket, against the organisation's internal host or Cloudflare DNS, which the screen does not name. The line-speed test is hidden. On the public demo the <strong>Customer ID</strong> and <strong>TT number</strong> open filled in with the example the fields show, <code>CUST-88412</code> and <code>TT-2026-00731</code>, so a walkthrough goes straight to <strong>Start test</strong>; they can be changed, and what is in them is what is filed (since 2026-10-09).
+<li>📖 <strong>User Guide &amp; Operational Flow</strong>: <strong>Run diagnostic</strong> is the test from this device, filed against a ticket (since 2026-10-07 the page no longer sweeps from the server). The ticket comes first: <strong>Customer ID</strong>, <strong>TT number</strong>, optional <strong>Notes</strong> and the <strong>Endpoint</strong>; <strong>Start test</strong> does nothing until the customer, the TT number and the endpoint are given, and marks the one missing. As the page opens the device is asked where it is, and the endpoint nearest it — by the latitude and longitude entered under DNS sites (§3.1) — is chosen, with <em>Nearest to this device, N km away</em>. An engineer is given that endpoint and cannot change it (<em>Chosen for you: the endpoint nearest where this device is.</em>). Whoever manages the endpoints (<code>dns_site_manage</code>) may pick another, and go back with <strong>Choose by my location</strong>. With no position to go by — location refused or unknown, or an enabled endpoint not placed yet — whoever manages the endpoints picks by hand, and the page says why. An engineer does not (since 2026-11-02, gap G6 of the SOW): no test starts without a position. With location refused or unknown the field reads <em>Location is needed to start a test</em>, says which of the two it was, and gives the steps to allow location for where PacketPulse is running — a computer's browser, a browser on an Android phone, Safari on an iPhone, or the app on Android, iPhone, Mac or Windows — with <strong>Try again</strong>, which asks the device again, and in the apps <strong>Open settings</strong>, which opens the platform's own page (the app's permission after a refusal, the location switch when the device could not tell). With an endpoint not placed it says that whoever manages the endpoints must place it, with <strong>Try again</strong>, which reads the endpoints again. <strong>Start test</strong> then says <em>A test cannot start until this device's location is known.</em> or <em>A test cannot start until every endpoint has a position.</em> The same steps appear under a sign-in refused for want of a position (<code>LOC-002</code>). The server does not check an engineer's endpoint against a position: the position is the device's own word, and it is sent only for people whose location is recorded. Every enabled endpoint must have a position before one is chosen for anyone (since 2026-10-17): chosen from the placed ones alone, a test went to the one placed endpoint, however far, while a nearer one waited for its position. Choosing another endpoint empties a finished run, and stops one under way. The position chooses; it is filed with a run only for people whose location is recorded (§2.1). Someone who may not run diagnostics, or has no organisation, gets the device test alone, with no ticket, against the organisation's internal host or Cloudflare DNS, which the screen does not name. The line-speed test is hidden. On the public demo the <strong>Customer ID</strong> and <strong>TT number</strong> open filled in with the example the fields show, <code>CUST-88412</code> and <code>TT-2026-00731</code>, so a walkthrough goes straight to <strong>Start test</strong>; they can be changed, and what is in them is what is filed (since 2026-10-09).
 <ul>
 <li>Above the controls, three cards: the <strong>IPv4</strong> address, the <strong>IPv6</strong> address (or <em>No IPv6 connectivity</em>) and the <strong>Nearest edge</strong> that answered, with an <em>IPv6 active</em> or <em>IPv4 only</em> badge. No network operator or AS number is shown: finding one would send the engineer's address to a third party.</li>
 <li>In a browser the test is <strong>UDP, like a call</strong> (§4.2), and nothing else: since the review of 13 October 2026 there is no <strong>Measurement method</strong> choice and no <em>HTTPS to the endpoint</em> beside it. The app on a desktop or phone sends a real ICMP echo where the device allows it, and offers no UDP test. Only a browser without WebRTC falls back to an HTTPS request to the endpoint's address; an endpoint that does not serve HTTPS — most routers and resolvers do not — then shows every sample unanswered, even when it is up, and the note beside the figures says so.</li>
@@ -2892,7 +2989,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>Engineer</td>
 <td>A filed run says where it was taken</td>
 <td>With location recorded for the engineer, run on a phone and <strong>Attach to a ticket</strong></td>
-<td>The ticket shows <em>Tested from</em> the phone's coordinates as it was filed, beside the sign-in place. With location refused: <em>Unknown: location was refused on the device</em></td>
+<td>The ticket shows <em>Tested from</em> the phone's coordinates as it was filed, beside the sign-in place; with <code>REVERSE_GEOCODING=auto</code>, a moment later the address of those coordinates over them - the test's own, which can be a long way from where the engineer signed in - with <em>Address © OpenStreetMap contributors</em> under it when OpenStreetMap supplied it. With location refused: <em>Unknown: location was refused on the device</em></td>
 </tr>
 <tr>
 <td><code>DEV-017</code></td>
@@ -2910,24 +3007,45 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 </tr>
 <tr>
 <td><code>DEV-019</code></td>
-<td>Engineer</td>
-<td>No position, choose by hand</td>
+<td>Administrator</td>
+<td>No position, a manager chooses by hand</td>
 <td>Refuse location in the browser; open <strong>Run diagnostic</strong>; then, with location allowed, in an organisation whose endpoints all came from <strong>Bulk import</strong> (no positions)</td>
 <td>Chips with no endpoint chosen and <em>This device's location is not available, so choose the endpoint to test.</em>; then <em>None of your endpoints has a position yet, so choose the endpoint to test.</em></td>
 </tr>
 <tr>
 <td><code>DEV-028</code></td>
-<td>Engineer</td>
-<td>One endpoint not yet placed means everyone chooses</td>
+<td>Administrator</td>
+<td>One endpoint not yet placed means a manager chooses</td>
 <td>With Pune and Mumbai placed, <strong>Bulk import</strong> a third endpoint (no position); open <strong>Run diagnostic</strong> on a phone in Pune, allowing location</td>
-<td>No endpoint chosen; chips for all three; <em>Not every endpoint has a position yet, so choose the endpoint to test.</em> The engineer may pick any one, and that is what is probed. Give the third a position and reopen: Pune is chosen again, with no chips. 🛑 <strong>Must NOT</strong> choose the nearest of only the placed endpoints, or lock an engineer to it</td>
+<td>No endpoint chosen; chips for all three; <em>Not every endpoint has a position yet, so choose the endpoint to test.</em> The administrator may pick any one, and that is what is probed. Give the third a position and reopen: Pune is chosen again. 🛑 <strong>Must NOT</strong> choose the nearest of only the placed endpoints</td>
+</tr>
+<tr>
+<td><code>DEV-035</code></td>
+<td>Engineer</td>
+<td>No position, no test (G6)</td>
+<td>Refuse location in the browser; open <strong>Run diagnostic</strong>; fill the ticket; <strong>Start test</strong>; then set Location to Allow from the icon beside the address and press <strong>Try again</strong></td>
+<td>No endpoint chips. <em>Location is needed to start a test</em>, <em>The endpoint is chosen by where this device is, and this device refused to share its location.</em> and the browser's steps, with <strong>Try again</strong> and no <strong>Open settings</strong>. <strong>Start test</strong>: <em>A test cannot start until this device's location is known.</em>, scrolled into view, and the network panel shows no probe. After <strong>Try again</strong>: the nearest endpoint, <em>Chosen for you…</em>, and <strong>Start test</strong> probes it. 🛑 <strong>Must NOT</strong> offer an engineer any endpoint to pick</td>
+</tr>
+<tr>
+<td><code>DEV-036</code></td>
+<td>Engineer</td>
+<td>The steps fit the device</td>
+<td>Refuse location in turn on: Chrome on Windows; Chrome on an Android phone; Safari on an iPhone; the Android app; the iPhone app; the Mac app; the Windows app. Then, on an Android phone with Location switched off in quick settings, open the app</td>
+<td>Each shows its own steps. The browsers name the icon beside the address (on a phone, the phone's own location setting too) and offer no <strong>Open settings</strong>. Each app offers <strong>Open settings</strong>, which opens: on Android the app's info page, on an iPhone PacketPulse's settings, on a Mac <em>Privacy &amp; Security › Location Services</em>, on Windows <em>Privacy &amp; security › Location</em>. With Location switched off: <em>…could not tell: location may be switched off, or there is no fix indoors.</em>, and <strong>Open settings</strong> opens Android's location switch. 🛑 <strong>Must NOT</strong> offer <strong>Open settings</strong> in a browser, or press it and show nothing when no page opened (<em>Settings did not open…</em>)</td>
+</tr>
+<tr>
+<td><code>DEV-037</code></td>
+<td>Engineer</td>
+<td>An endpoint not placed means no test (G6)</td>
+<td>With Pune and Mumbai placed, <strong>Bulk import</strong> a third endpoint (no position); open <strong>Run diagnostic</strong> on a phone in Pune, allowing location; <strong>Start test</strong>; then give the third a position and press <strong>Try again</strong></td>
+<td>No chips; <em>Not every endpoint has a position yet, so none can be chosen for you. Ask whoever manages the endpoints to give each one its latitude and longitude.</em>; <strong>Start test</strong>: <em>A test cannot start until every endpoint has a position.</em>, and no probe. After <strong>Try again</strong>: Pune, chosen for you. With no endpoint placed at all: <em>None of your endpoints has a position yet, so none can be chosen for you…</em> 🛑 <strong>Must NOT</strong> let an engineer pick an endpoint</td>
 </tr>
 <tr>
 <td><code>DEV-020</code></td>
-<td>Engineer</td>
+<td>Engineer, then Administrator</td>
 <td>Nothing runs without the ticket</td>
-<td>With location refused, press <strong>Start test</strong> with every field empty</td>
-<td><em>Enter the Customer ID.</em>, <em>Enter the TT number.</em> and <em>Choose the endpoint to test.</em>, scrolled into view; the network panel shows no probe. 🛑 <strong>Must NOT</strong> test the internal target in the endpoint's place</td>
+<td>With location refused, press <strong>Start test</strong> with every field empty; then as the administrator</td>
+<td><em>Enter the Customer ID.</em>, <em>Enter the TT number.</em> and <em>A test cannot start until this device's location is known.</em>, scrolled into view; the network panel shows no probe. The administrator, who may choose the endpoint, is told <em>Choose the endpoint to test.</em> instead. 🛑 <strong>Must NOT</strong> test the internal target in the endpoint's place</td>
 </tr>
 <tr>
 <td><code>DEV-021</code></td>
@@ -2983,7 +3101,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>Engineer</td>
 <td>A ticket's details read at a glance</td>
 <td>Attach a run; <strong>View ticket</strong>; read the details; copy the <strong>Run ID</strong>; <strong>Export PDF</strong>; then open the same ticket on a phone</td>
-<td>Labelled facts, in order: <strong>User IPv4</strong>, <strong>User IPv6</strong>, <strong>Tested from</strong> (with <em>within N m</em>), <strong>Run by</strong>, <strong>Signed in at</strong>, <strong>Run ID</strong>, then <strong>Endpoints</strong> and <strong>Notes</strong> on rows of their own; addresses and the run ID in a fixed-width face, each on one line, with copy buttons; the PDF's details are the same facts four across, its position a map link, its place whole, <em>Duration</em> and <em>Packets per site 1,486</em>. On a phone, one fact per row. 🛑 <strong>Must NOT</strong> cut a place short, break an address or the run ID across lines, or read <em>endpoint(s)</em>, <em>packet(s)</em> or <em>Sweep took</em> on a device test</td>
+<td>Labelled facts, in order: <strong>User IPv4</strong>, <strong>User IPv6</strong>, <strong>Tested from</strong> (its address over its position, with <em>within N m</em>), <strong>Run by</strong>, <strong>Signed in at</strong>, <strong>Run ID</strong>, then <strong>Endpoints</strong> and <strong>Notes</strong> on rows of their own; addresses and the run ID in a fixed-width face, each on one line, with copy buttons; the PDF's details are the same facts four across, its position a map link, its place whole, <em>Duration</em> and <em>Packets per site 1,486</em>. On a phone, one fact per row. 🛑 <strong>Must NOT</strong> cut a place short, break an address or the run ID across lines, or read <em>endpoint(s)</em>, <em>packet(s)</em> or <em>Sweep took</em> on a device test</td>
 </tr>
 <tr>
 <td><code>DEV-031</code></td>
@@ -3026,6 +3144,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <li>⚙️ <strong>Developer Guide &amp; Release Confidence</strong>:
 <ul>
 <li>The page: <code>packetpulseflutter/lib/diagnosticmicroservice/presentation/screens/RunDiagnosticScreen.dart</code>, with the ticket in <code>packetpulseflutter/lib/diagnosticmicroservice/presentation/widgets/DiagnosticTicket.dart</code> and the endpoint in <code>packetpulseflutter/lib/diagnosticmicroservice/presentation/widgets/DiagnosticEndpointField.dart</code>. The nearest endpoint is <code>nearestEndpoint</code> in <code>packetpulseflutter/lib/dnssitemicroservice/domain/shared/DnsSite.dart</code>, the same haversine on the same radius as the server's <code>DistanceKm</code>. An endpoint's probe target is <code>ClientProbeTarget.endpoint</code> in <code>packetpulseflutter/lib/diagnosticmicroservice/service/ClientProbeEngine.dart</code>.</li>
+<li>No position, no engineer's test (G6, 2026-11-02): <code>_canChoose</code>, <code>_missing</code> and <code>_notChosenForYou</code> in <code>packetpulseflutter/lib/diagnosticmicroservice/presentation/widgets/DiagnosticEndpointField.dart</code>. The steps to allow location are <code>packetpulseflutter/lib/common/widgets/PacketPulseLocationGuide.dart</code>, shared with the sign-in refused for want of a position (<code>packetpulseflutter/lib/usermicroservice/presentation/screens/UserSignInScreen.dart</code>); <strong>Open settings</strong> is <code>openSettings</code> in <code>packetpulseflutter/lib/common/services/PacketPulseGeolocatorReader.dart</code> (the browser's plugin refuses it, so a browser is never offered it). Tests: <code>packetpulseflutter/test/run_diagnostic_screen_test.dart</code>, <code>packetpulseflutter/test/location_guide_test.dart</code> (every platform, in a browser and as the app), <code>packetpulseflutter/test/platform_services_test.dart</code>, <code>packetpulseflutter/test/location_test.dart</code>.</li>
 <li>Filing: the client sends <code>dns_site_id</code>. <code>ClientObservationRecord</code> in <code>packetpulsego/pkg/diagnosticmicroservice/diagnosticservice/DiagnosticService.go</code> reads it among the caller's organisation's <strong>enabled</strong> endpoints only, refuses anything else on <code>dns_site_id</code> (422), and stores each result against the endpoint, named as the inventory names it. The server does not demand one: a client older than the change still files, as the internal target.</li>
 <li>A browser cannot send ICMP, so the web build measures the endpoint with UDP over WebRTC (§4.2) — over HTTPS only where WebRTC is missing — and DNS-over-HTTPS (Cloudflare) or an HTTPS reach to the organisation's host on the test with no ticket; the app on a desktop or phone can also ping. Jitter is RFC 3550. The standard deviation is computed and filed (<code>stddev_rtt_ms</code>) but shown nowhere: <code>packetpulseflutter/test/client_probe_live_panels_test.dart</code> holds the page to it.</li>
 <li>Notes: filed as the request's <code>notes</code>, read back by <code>DiagnosticRequest.fromJson</code> in <code>packetpulseflutter/lib/diagnosticmicroservice/domain/shared/Diagnostic.dart</code>, shown by <code>packetpulseflutter/lib/diagnosticmicroservice/presentation/screens/DiagnosticResultView.dart</code> and printed by <code>ReportOptions.Notes</code> in <code>packetpulsego/pkg/pingmicroservice/pingreport/PingReportPdfBuilder.go</code>; <code>TestTheTicketsNotesArePrintedOnItsReport</code> and <code>packetpulseflutter/test/diagnostic_result_selection_test.dart</code> hold them there.</li>
@@ -3574,7 +3693,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>Integrator</td>
 <td>One ticket as JSON</td>
 <td><code>curl -H &quot;Authorization: Bearer &lt;key&gt;&quot; https://…/api/v1/result/bytt/TT-MAN-001</code></td>
-<td>The ticket with every result, including <code>ip_version</code>, <code>report_only</code>, and each UDP result's <code>reflector_address</code> and <code>reflector_ip</code>; at the top, <code>user_ip</code> and <code>user_ipv6</code>, the public IPv4 and IPv6 a device test came from (empty for a server sweep). 🛑 <strong>Must NOT</strong> carry <code>resolved_ip</code> (customer request, 28 October 2026)</td>
+<td>The ticket with every result, including <code>ip_version</code>, <code>report_only</code>, and each UDP result's <code>reflector_address</code> and <code>reflector_ip</code>; at the top, <code>user_ip</code> and <code>user_ipv6</code>, the public IPv4 and IPv6 a device test came from (empty for a server sweep), and <code>test_location</code> with its <code>address</code> and <code>address_source</code> once the test's own address is found. 🛑 <strong>Must NOT</strong> carry <code>resolved_ip</code> (customer request, 28 October 2026)</td>
 </tr>
 <tr>
 <td><code>API-007</code></td>
@@ -4299,8 +4418,15 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td><code>PLAT-017</code></td>
 <td>Superuser</td>
 <td>Support ends back in the console</td>
-<td>Press <strong>End support</strong>; then sign in as support again and wait an hour</td>
-<td>Back on <strong>Platform</strong> as the operator each time, without signing in again. 🛑 <strong>Must NOT</strong> leave the operator signed in to the organisation, or send them to the sign-in page while their own session lasts</td>
+<td>Press <strong>End support</strong>; then sign in as support again and keep using it, a click at least every 20 minutes, until its hour runs out</td>
+<td>Back on <strong>Platform</strong> as the operator each time, without signing in again: using support kept the console session in use. 🛑 <strong>Must NOT</strong> leave the operator signed in to the organisation, or send them to the sign-in page while their own session lasts</td>
+</tr>
+<tr>
+<td><code>PLAT-019</code></td>
+<td>Superuser</td>
+<td>Support left unused ends both sessions</td>
+<td>Sign in as support and leave the app untouched for 31 minutes (or <code>SESSION_IDLE_TIMEOUT=2m</code> and three minutes)</td>
+<td>The sign-in page, saying <em>Your session has ended…</em>: the network panel shows <code>GET /staff/session/current</code> refused for the support token, then for the console's. 🛑 <strong>Must NOT</strong> show the console for a moment before signing out, or leave the console signed in on an unattended device</td>
 </tr>
 <tr>
 <td><code>PLAT-018</code></td>
@@ -5543,6 +5669,14 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/packetpulse/releases/&lt;previous&gt;
 </tr>
 <tr>
 <td><code>GET</code></td>
+<td><code>/staff/session/current</code></td>
+<td>session</td>
+<td>—</td>
+<td style="text-align:center">—</td>
+<td style="text-align:center">—</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
 <td><code>/staff/session/list</code></td>
 <td>session</td>
 <td>—</td>
@@ -6002,6 +6136,14 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/packetpulse/releases/&lt;previous&gt;
 <td><code>0039_2026_10_30_ticket_grades.sql</code></td>
 <td>A ticket's results counted by grade (<code>diagnostic_request.ok_count</code>, <code>degraded_count</code>) beside its breaches, counted when it is closed and filled from their results for the tickets already closed: History and the Dashboard lead each ticket with its worst grade, and <em>Not graded</em> when none was graded (review of 30 October 2026). Kept on the ticket, because results are dropped as they age past retention.</td>
 </tr>
+<tr>
+<td><code>0040_2026_11_02_session_idle_timeout.sql</code></td>
+<td>A support session names the console session it was opened from (<code>staff_session.support_from_session_id</code>), so using support keeps the operator's console from the idle timeout (<code>SESSION_IDLE_TIMEOUT</code>, request of 2 November 2026). The timeout itself needs no column: a session is live while its <code>last_accessed_on</code> is within it.</td>
+</tr>
+<tr>
+<td><code>0041_2026_11_02_test_address.sql</code></td>
+<td>Where a test was run, in words (<code>diagnostic_request.test_address</code>, <code>test_address_source</code>): the address looked up from the test's own position after it is filed - not the sign-in's, which can be somewhere else entirely - with who supplied it, which OpenStreetMap's licence requires to be credited. An address only beside a position (<code>diagnostic_request_test_address_needs_position</code>). Empty until found, and for tests filed before, until the boot catch-up finds it (request of 2 November 2026).</td>
+</tr>
 </tbody>
 </table></div>
 <h2 id="appendix-d-settings">Appendix D — Settings<a class="anchor" href="#appendix-d-settings" aria-label="Link to this section">#</a></h2>
@@ -6043,6 +6185,11 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/packetpulse/releases/&lt;previous&gt;
 <td><code>JWT_TTL</code></td>
 <td><code>12h</code></td>
 <td>How long a session lasts</td>
+</tr>
+<tr>
+<td><code>SESSION_IDLE_TIMEOUT</code></td>
+<td><code>30m</code></td>
+<td>How long a session may go unused before it ends, however much of <code>JWT_TTL</code> is left; <code>0</code> is off, under <code>1m</code> is refused</td>
 </tr>
 <tr>
 <td><code>CORS_ORIGINS</code></td>
@@ -6152,7 +6299,7 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/packetpulse/releases/&lt;previous&gt;
 <tr>
 <td><code>REVERSE_GEOCODING</code></td>
 <td><code>auto</code></td>
-<td><code>off</code> stops addresses being looked up for sign-in positions</td>
+<td><code>off</code> stops addresses being looked up for sign-in and test positions</td>
 </tr>
 <tr>
 <td><code>GOOGLE_MAPS_API_KEY</code></td>

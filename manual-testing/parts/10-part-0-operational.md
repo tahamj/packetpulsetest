@@ -41,7 +41,7 @@ cd ../packetpulseflutter
 flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18080
 ```
 
-`REVERSE_GEOCODING=off` stops sign-in positions being sent to a map service from a test run. Every other setting comes from `.env` (copy `.env.example`); Appendix D lists them all.
+`REVERSE_GEOCODING=off` stops sign-in and test positions being sent to a map service from a test run - including the boot catch-up, which otherwise looks up every test in the database still without an address. Every other setting comes from `.env` (copy `.env.example`); Appendix D lists them all.
 
 With the development key pair in `.env` (`LICENCE_PUBLIC_KEY` and `LICENCE_SIGNING_KEY`), the stack is a **console**: the superuser can sign in and issue licence files (**Platform → Download licence file**). Copy a file into `LICENCE_DIR` and its organisation can sign in; the server verifies it at every sign-in. Only the demo's own licence is written there for you. A customer's server has no signing key, only the licence files copied into its `LICENCE_DIR`.
 

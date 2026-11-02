@@ -40,7 +40,7 @@ After the password, everyone enters a one-time **6-digit code**. It is **emailed
 
 ## L.7 Location at sign-in
 
-For people set to **Record location**, the device's position is recorded when they sign in and out — with the browser's or phone's permission, and a refusal recorded as one. A field engineer's appear on **Check-ins**; an administrator's beside their entries in **Activity**. An organisation can make sharing a position a condition of signing in. The address is looked up afterwards (Google, or OpenStreetMap when no key is set), so it may appear a moment later; the position is the record.
+For people set to **Record location**, the device's position is recorded when they sign in and out — with the browser's or phone's permission, and a refusal recorded as one. A field engineer's appear on **Check-ins**; an administrator's beside their entries in **Activity**. An organisation can make sharing a position a condition of signing in. The address is looked up afterwards (Google, or OpenStreetMap when no key is set), so it may appear a moment later; the position is the record. A test's own position gets its own address the same way - *Tested from* on the ticket - which can be far from where the session began: an engineer signs in at the office and tests at the customer's home.
 
 ## L.8 The activity trail
 

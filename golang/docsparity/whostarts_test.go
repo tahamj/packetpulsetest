@@ -19,7 +19,7 @@ var (
 	startedBy  = regexp.MustCompile(`(?i)` + outsider + `.{0,50}?` + startsTest + `|` + startsTest + `.{0,50}?` + outsider)
 	// readsOnly is wording that already says the outsider only reads.
 	readsOnly = regexp.MustCompile(`(?i)\b(?:cannot|can't|never|no API key|only read|pull\w*|fetch\w*|reads?)\b`)
-	markup    = regexp.MustCompile(`<[^>]+>|&[a-z]+;`)
+	markup    = regexp.MustCompile(htmlTag.String() + `|&[a-z]+;`)
 )
 
 // readingPassage is a match that is about reading results, not starting a test.

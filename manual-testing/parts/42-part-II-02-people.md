@@ -86,13 +86,13 @@ Who is in the organisation, what each may do, who is signed in, and the record o
   |---|---|---|---|---|
   | `CHK-001` | Engineer | A sign-in records where | *Record location* on; sign in and allow location | **Check-ins** shows the time, the position ± accuracy and — a moment later — the address; *Open in Maps* opens the spot |
   | `CHK-002` | Engineer | A sign-out records where it ended | Sign out, allowing location | The same row gains the sign-out time and place |
-  | `CHK-003` | Engineer | A session left to expire says so | Sign in; let the session expire (or shorten `JWT_TTL`) | *Expired*, not a sign-out time |
+  | `CHK-003` | Engineer | A session left to expire says so | Sign in; let the session expire (or shorten `JWT_TTL`); separately, sign in and leave it unused past `SESSION_IDLE_TIMEOUT` | *Expired* for both, not a sign-out time and not *Active* |
   | `CHK-004` | Engineer | A refusal is recorded as one | Deny the location prompt (rule off) | *Location refused* — no position, no map link |
   | `CHK-005` | Administrator | Administrators are not on Check-ins | The owner signs in with location | No Check-ins row; the sign-in is in **Activity** (`AUD-001`) |
   | `CHK-006` | RIVAL administrator | Another organisation's check-ins are never shown | RIVAL opens Check-ins | Only RIVAL's people. 🛑 **Must NOT** show ACME's |
 - ⚙️ **Developer Guide & Release Confidence**:
   - `session_checkin`, one row per session, keyed by `staff_session.session_id` (`packetpulsego/pkg/common/dbclient/migrations/0020_2026_10_03_session_checkin.sql`); coordinates only with status `captured`, checked by `CHECK`s.
-  - Addresses: a background worker (`packetpulsego/pkg/common/geocode/Geocode.go`) — Google with `GOOGLE_MAPS_API_KEY`, else OpenStreetMap Nominatim at one request a second. `REVERSE_GEOCODING=off` disables it.
+  - Addresses: one background queue (`packetpulsego/pkg/common/geocode/Queue.go`) for sign-ins, sign-outs and tests, new ones before the boot catch-up's (`packetpulsego/pkg/common/geocode/Geocode.go`) — Google with `GOOGLE_MAPS_API_KEY`, else OpenStreetMap Nominatim at one request a second. `REVERSE_GEOCODING=off` disables it.
   - Coverage: `packetpulsego/pkg/staffmicroservice/staffservice/`, `packetpulseflutter/test/checkin_screen_test.dart`, `packetpulsetest/golang/tenancyisolation/`.
 
 ---

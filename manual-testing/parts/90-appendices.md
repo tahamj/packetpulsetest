@@ -86,6 +86,7 @@ All routes are under `/api/v1`. **Access**: *public* (no session), *session* (si
 | `GET` | `/staff/role/list` | member | `acl_manage` | — | — |
 | `DELETE` | `/staff/role/{roleId}` | member | `acl_manage` | — | ✅ |
 | `PUT` | `/staff/role/{roleId}` | member | `acl_manage` | — | ✅ |
+| `GET` | `/staff/session/current` | session | — | — | — |
 | `GET` | `/staff/session/list` | session | — | — | — |
 | `GET` | `/staff/session/organisation` | member | `staff_manage` | — | — |
 | `DELETE` | `/staff/session/organisation/{sessionId}` | member | `staff_manage` | — | ✅ |
@@ -176,6 +177,8 @@ Embedded in the server binary and applied in order at boot (`packetpulsego/pkg/c
 | `0037_2026_10_26_user_ipv6.sql` | The user IPv6 of a device test, beside its user IP (`diagnostic_request.user_ipv6`): the public IPv6 the device's IPv6 traffic leaves from, as its own lookup found it, kept only when it is a public IPv6 - PacketPulse is reached over IPv4 and never sees it. |
 | `0038_2026_10_28_result_organisation.sql` | The organisation of every result on the result itself (`ping_result.organisation_id`), set from its run by a trigger on every insert and filled for the results already filed, with `ping_result_org_checked_idx` (organisation, `checked_on`) in every monthly partition: a report of a day reads that day of that month's partition, however long the organisation has been testing (customer request, 28 October 2026). NULL where the run has none. |
 | `0039_2026_10_30_ticket_grades.sql` | A ticket's results counted by grade (`diagnostic_request.ok_count`, `degraded_count`) beside its breaches, counted when it is closed and filled from their results for the tickets already closed: History and the Dashboard lead each ticket with its worst grade, and *Not graded* when none was graded (review of 30 October 2026). Kept on the ticket, because results are dropped as they age past retention. |
+| `0040_2026_11_02_session_idle_timeout.sql` | A support session names the console session it was opened from (`staff_session.support_from_session_id`), so using support keeps the operator's console from the idle timeout (`SESSION_IDLE_TIMEOUT`, request of 2 November 2026). The timeout itself needs no column: a session is live while its `last_accessed_on` is within it. |
+| `0041_2026_11_02_test_address.sql` | Where a test was run, in words (`diagnostic_request.test_address`, `test_address_source`): the address looked up from the test's own position after it is filed - not the sign-in's, which can be somewhere else entirely - with who supplied it, which OpenStreetMap's licence requires to be credited. An address only beside a position (`diagnostic_request_test_address_needs_position`). Empty until found, and for tests filed before, until the boot catch-up finds it (request of 2 November 2026). |
 
 ## Appendix D — Settings
 
@@ -189,6 +192,7 @@ Read from the environment, falling back to `.env` (see `.env.example`); defined 
 | `DATABASE_URL` | local `packetpulsedb` | The database (through PgBouncer on the live host) |
 | `JWT_SECRET` | — (required, 32+ characters) | Signs sessions **and** seals every stored secret: rotating it signs everyone out and makes stored SMS tokens, bind passwords and export credentials unreadable until re-entered |
 | `JWT_TTL` | `12h` | How long a session lasts |
+| `SESSION_IDLE_TIMEOUT` | `30m` | How long a session may go unused before it ends, however much of `JWT_TTL` is left; `0` is off, under `1m` is refused |
 | `CORS_ORIGINS` | `*` | Must be explicit origins in production |
 | `TRUSTED_PROXIES` | `127.0.0.0/8, ::1/128` | Whose `X-Forwarded-For` is believed — the client address in sessions, limits and the trail |
 | `AUTH_ATTEMPTS_PER_MINUTE` | `10` | Password-step requests per client address |
@@ -210,7 +214,7 @@ Read from the environment, falling back to `.env` (see `.env.example`); defined 
 | `PING_ALLOW_PRIVATE` | `true` | Whether RFC 1918 and unique-local addresses may be probed |
 | `LDAP_ALLOW_LOOPBACK` | `false` | A directory on PacketPulse's own host (development only) |
 | `EXPORT_ALLOW_LOOPBACK` | `false` | A result-export server on PacketPulse's own host (development only) |
-| `REVERSE_GEOCODING` | `auto` | `off` stops addresses being looked up for sign-in positions |
+| `REVERSE_GEOCODING` | `auto` | `off` stops addresses being looked up for sign-in and test positions |
 | `GOOGLE_MAPS_API_KEY` | — | Google Geocoding; without it, OpenStreetMap Nominatim |
 | `GEOCODE_CONTACT` | `https://packetpulse.rummaan53.com` | Sent to Nominatim, which requires a contact |
 | `REFLECTOR_UDP_PORT` | `0` (off) | Runs the UDP reflector behind the public self-test page on this UDP port (50000 on the live host). Off, the page's UDP test says *UDP testing is not enabled on this server*. The host firewall and the cloud security list must admit the port |

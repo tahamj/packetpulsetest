@@ -163,7 +163,7 @@ func udpSources(t *testing.T, root string) []string {
 }
 
 var (
-	tag     = regexp.MustCompile(`<[^>]+>`)
+	tag     = htmlTag
 	dataURI = regexp.MustCompile(`data:[a-z]+/[a-z0-9.+-]+;base64,[A-Za-z0-9+/=]+`)
 	pace    = regexp.MustCompile(`\b(\d{2,3}) ?(?:UDP )?(?:(?:packets?|probes?) )?(?:a|per) second\b|\b(\d{2,3}) ?(?:/s|pkt/s|packets/s)\b`)
 	// The sending windows before 28 October 2026: 75 s on PacketPulse's own

@@ -17,9 +17,11 @@ import (
 )
 
 // contractFields are the top-level fields the Results API promises.
+// test_location - where the test was run, with its address once found - was
+// added on 2 November 2026.
 var contractFields = []string{
 	"tt_number", "customer_id", "status", "site_count",
-	"success_count", "failure_count", "started_on", "results",
+	"success_count", "failure_count", "started_on", "results", "test_location",
 }
 
 // resultFields are the per-site fields it promises.
