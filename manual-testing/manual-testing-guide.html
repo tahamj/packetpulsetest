@@ -239,9 +239,9 @@ nav.side .nohit.on{display:block}
 <tbody>
 <tr>
 <td style="text-align:center"><strong>17</strong> <br><sub>in the navigation rail</sub></td>
-<td style="text-align:center"><strong>102</strong> <br><sub>under <code>/api/v1</code></sub></td>
+<td style="text-align:center"><strong>104</strong> <br><sub>under <code>/api/v1</code></sub></td>
 <td style="text-align:center"><strong>16</strong> <br><sub>3 built-in roles</sub></td>
-<td style="text-align:center"><strong>41</strong> <br><sub>applied at boot</sub></td>
+<td style="text-align:center"><strong>42</strong> <br><sub>applied at boot</sub></td>
 <td style="text-align:center"><strong>1353</strong> <br><sub>English, server-served</sub></td>
 <td style="text-align:center"><strong>20</strong> <br><sub>one per screen</sub></td>
 <td style="text-align:center"><strong>11</strong> <br><sub>+ <code>load</code>, opt-in</sub></td>
@@ -5843,6 +5843,22 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/packetpulse/releases/&lt;previous&gt;
 <td style="text-align:center">—</td>
 <td style="text-align:center">✅</td>
 </tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/visitor/stats</code></td>
+<td>public</td>
+<td>—</td>
+<td style="text-align:center">—</td>
+<td style="text-align:center">—</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/visitor/track</code></td>
+<td>public</td>
+<td>—</td>
+<td style="text-align:center">—</td>
+<td style="text-align:center">—</td>
+</tr>
 </tbody>
 </table></div>
 <h2 id="appendix-b-capabilities-and-the-built-in-roles">Appendix B — Capabilities and the built-in roles<a class="anchor" href="#appendix-b-capabilities-and-the-built-in-roles" aria-label="Link to this section">#</a></h2>
@@ -6143,6 +6159,10 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/packetpulse/releases/&lt;previous&gt;
 <tr>
 <td><code>0041_2026_11_02_test_address.sql</code></td>
 <td>Where a test was run, in words (<code>diagnostic_request.test_address</code>, <code>test_address_source</code>): the address looked up from the test's own position after it is filed - not the sign-in's, which can be somewhere else entirely - with who supplied it, which OpenStreetMap's licence requires to be credited. An address only beside a position (<code>diagnostic_request_test_address_needs_position</code>). Empty until found, and for tests filed before, until the boot catch-up finds it (request of 2 November 2026).</td>
+</tr>
+<tr>
+<td><code>0042_2026_11_16_visitor_tracking.sql</code></td>
+<td>Privacy-safe web and app visitor tracking (<code>visitor_location</code> with each structured street-address column stored separately, <code>visitor_visit</code>, <code>visitor_unique_visitor</code>, <code>visitor_unique_daily</code>, <code>visitor_stats</code>, and <code>visitor_stats_apply_visit</code>). Raw IPs are never persisted; unique visitor counts are aggregated via trigger.</td>
 </tr>
 </tbody>
 </table></div>

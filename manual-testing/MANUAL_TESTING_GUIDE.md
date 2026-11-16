@@ -14,7 +14,7 @@
 
 | 🧭 Screens | 🔌 API routes | 🔐 Capabilities | 🗄️ Migrations | 💬 Catalogue strings | ❓ Help topics | 🧪 Guard suites |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| **17** <br><sub>in the navigation rail</sub> | **102** <br><sub>under `/api/v1`</sub> | **16** <br><sub>3 built-in roles</sub> | **41** <br><sub>applied at boot</sub> | **1353** <br><sub>English, server-served</sub> | **20** <br><sub>one per screen</sub> | **11** <br><sub>+ `load`, opt-in</sub> |
+| **17** <br><sub>in the navigation rail</sub> | **104** <br><sub>under `/api/v1`</sub> | **16** <br><sub>3 built-in roles</sub> | **42** <br><sub>applied at boot</sub> | **1353** <br><sub>English, server-served</sub> | **20** <br><sub>one per screen</sub> | **11** <br><sub>+ `load`, opt-in</sub> |
 
 <br>
 
@@ -1597,6 +1597,8 @@ All routes are under `/api/v1`. **Access**: *public* (no session), *session* (si
 | `POST` | `/user/signout` | session | — | — | — |
 | `POST` | `/user/signup` | public | — | — | — |
 | `PATCH` | `/user/{userId}` | member | `user_manage` | — | ✅ |
+| `GET` | `/visitor/stats` | public | — | — | — |
+| `POST` | `/visitor/track` | public | — | — | — |
 
 ## Appendix B — Capabilities and the built-in roles
 
@@ -1668,6 +1670,7 @@ Embedded in the server binary and applied in order at boot (`packetpulsego/pkg/c
 | `0039_2026_10_30_ticket_grades.sql` | A ticket's results counted by grade (`diagnostic_request.ok_count`, `degraded_count`) beside its breaches, counted when it is closed and filled from their results for the tickets already closed: History and the Dashboard lead each ticket with its worst grade, and *Not graded* when none was graded (review of 30 October 2026). Kept on the ticket, because results are dropped as they age past retention. |
 | `0040_2026_11_02_session_idle_timeout.sql` | A support session names the console session it was opened from (`staff_session.support_from_session_id`), so using support keeps the operator's console from the idle timeout (`SESSION_IDLE_TIMEOUT`, request of 2 November 2026). The timeout itself needs no column: a session is live while its `last_accessed_on` is within it. |
 | `0041_2026_11_02_test_address.sql` | Where a test was run, in words (`diagnostic_request.test_address`, `test_address_source`): the address looked up from the test's own position after it is filed - not the sign-in's, which can be somewhere else entirely - with who supplied it, which OpenStreetMap's licence requires to be credited. An address only beside a position (`diagnostic_request_test_address_needs_position`). Empty until found, and for tests filed before, until the boot catch-up finds it (request of 2 November 2026). |
+| `0042_2026_11_16_visitor_tracking.sql` | Privacy-safe web and app visitor tracking (`visitor_location` with each structured street-address column stored separately, `visitor_visit`, `visitor_unique_visitor`, `visitor_unique_daily`, `visitor_stats`, and `visitor_stats_apply_visit`). Raw IPs are never persisted; unique visitor counts are aggregated via trigger. |
 
 ## Appendix D — Settings
 
