@@ -274,6 +274,13 @@ func TestATestOverIpv6IsRefusedWhileTestsRunOverIpv4(t *testing.T) {
 	if settings["samples"] != 25.0 || settings["interval_ms"] != 200.0 || settings["timeout_ms"] != 2000.0 {
 		t.Errorf("device_test = %v, want 25 samples 200 ms apart with a 2000 ms time-out", settings)
 	}
+	// And for how long the line's speed is then measured to the reflector,
+	// each way: the server's, five seconds unless it is set otherwise
+	// (customer request, November 2026). The page says so before a test
+	// starts, because it moves data.
+	if settings["speed_seconds"] != 5.0 {
+		t.Errorf("device_test = %v, want the line's speed measured for 5 seconds each way", settings)
+	}
 
 	ttNumber := fmt.Sprintf("TT-UDP6-%d", time.Now().UnixNano())
 	run := udpRun(ttNumber, endpoint, "packetpulse")

@@ -563,5 +563,6 @@
     }
    ]
   }
- }
+ },
+  "speed": {"seconds": 5, "downloadMbps": 80, "uploadMbps": 20, "downloadBytes": 49999823, "uploadBytes": 12385726, "reason": null, "downloadAtLeast": false, "uploadAtLeast": false}
 }

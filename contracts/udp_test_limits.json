@@ -5,5 +5,331 @@
   "default_seconds": 60,
   "default_rate_pps": 10,
   "max_rate_pps": 20,
-  "setup_allowance_ms": 40000
+  "setup_allowance_ms": 40000,
+  "_speed": "The line's speed, measured after the test to the same reflector over the same connection (customer request, November 2026): numbered packets are sent each way for speed_default_seconds unless UDP_TEST_SPEED_SECONDS says otherwise - 0 measures none - and never for more than speed_max_seconds, which every reflector that measures speed allows. speed_pacing is how a sender paces them from what its receiver counts - the reflector for a download (reflectorcore/ReflectorSpeed.go), the page's engine for an upload (packetpulse-udp.js) - and cases are counts with the pace a sender must be at after each: both implementations are run through them, so the two cannot come to pace differently.",
+  "speed_default_seconds": 5,
+  "speed_max_seconds": 10,
+  "speed_pacing": {
+    "frame_bytes": 1100,
+    "packet_bytes": 1193,
+    "start_bytes_per_second": 1000000,
+    "floor_bytes_per_second": 12500,
+    "kept_up": 0.95,
+    "rate_short": 0.9,
+    "back_off": 0.97,
+    "search_growth": 2,
+    "hold_growth": 1.05,
+    "report_every_ms": 100,
+    "report_packets": 20,
+    "report_at_latest_ms": 500,
+    "most_bytes_per_second": 62500000,
+    "cases": [
+      {
+        "name": "it doubles while every packet arrives as fast as it is paced, and only on a count of packets sent at that pace alone",
+        "steps": [
+          {
+            "packets": 84,
+            "highest": 83,
+            "ms": 100,
+            "next": 90,
+            "rate": 2000000.0,
+            "holding": false
+          },
+          {
+            "packets": 168,
+            "highest": 167,
+            "ms": 200,
+            "next": 250,
+            "rate": 2000000.0,
+            "holding": false
+          },
+          {
+            "packets": 336,
+            "highest": 335,
+            "ms": 300,
+            "next": 420,
+            "rate": 4000000.0,
+            "holding": false
+          }
+        ]
+      },
+      {
+        "name": "too few of the packets arrive: it drops to just under what arrives, and holds",
+        "steps": [
+          {
+            "packets": 84,
+            "highest": 83,
+            "ms": 100,
+            "next": 90,
+            "rate": 2000000.0,
+            "holding": false
+          },
+          {
+            "packets": 150,
+            "highest": 250,
+            "ms": 200,
+            "next": 260,
+            "rate": 763758.6,
+            "holding": true
+          }
+        ]
+      },
+      {
+        "name": "they all arrive, but slower than they were paced: the line is full",
+        "steps": [
+          {
+            "packets": 84,
+            "highest": 83,
+            "ms": 100,
+            "next": 90,
+            "rate": 2000000.0,
+            "holding": false
+          },
+          {
+            "packets": 168,
+            "highest": 167,
+            "ms": 200,
+            "next": 250,
+            "rate": 2000000.0,
+            "holding": false
+          },
+          {
+            "packets": 300,
+            "highest": 299,
+            "ms": 300,
+            "next": 420,
+            "rate": 1527517.2,
+            "holding": true
+          }
+        ]
+      },
+      {
+        "name": "a sender that was itself held back is not read as a full line, nor raised, until a count holds none of what it held",
+        "steps": [
+          {
+            "packets": 84,
+            "highest": 83,
+            "ms": 100,
+            "next": 90,
+            "rate": 2000000.0,
+            "holding": false
+          },
+          {
+            "packets": 168,
+            "highest": 167,
+            "ms": 200,
+            "next": 250,
+            "rate": 2000000.0,
+            "holding": false
+          },
+          {
+            "packets": 200,
+            "highest": 199,
+            "ms": 300,
+            "next": 420,
+            "held_back": true,
+            "rate": 2000000.0,
+            "holding": false
+          },
+          {
+            "packets": 240,
+            "highest": 239,
+            "ms": 400,
+            "next": 500,
+            "rate": 2000000.0,
+            "holding": false
+          },
+          {
+            "packets": 600,
+            "highest": 599,
+            "ms": 500,
+            "next": 650,
+            "rate": 2000000.0,
+            "holding": false
+          },
+          {
+            "packets": 768,
+            "highest": 767,
+            "ms": 600,
+            "next": 800,
+            "rate": 4000000.0,
+            "holding": false
+          }
+        ]
+      },
+      {
+        "name": "after a loss it climbs straight back to what the line was seen to carry, then in small steps",
+        "steps": [
+          {
+            "packets": 84,
+            "highest": 83,
+            "ms": 100,
+            "next": 90,
+            "rate": 2000000.0,
+            "holding": false
+          },
+          {
+            "packets": 168,
+            "highest": 167,
+            "ms": 200,
+            "next": 250,
+            "rate": 2000000.0,
+            "holding": false
+          },
+          {
+            "packets": 336,
+            "highest": 335,
+            "ms": 300,
+            "next": 420,
+            "rate": 4000000.0,
+            "holding": false
+          },
+          {
+            "packets": 504,
+            "highest": 503,
+            "ms": 400,
+            "next": 600,
+            "rate": 4000000.0,
+            "holding": false
+          },
+          {
+            "packets": 560,
+            "highest": 700,
+            "ms": 500,
+            "next": 760,
+            "rate": 648037.6,
+            "holding": true
+          },
+          {
+            "packets": 630,
+            "highest": 770,
+            "ms": 600,
+            "next": 800,
+            "rate": 648037.6,
+            "holding": true
+          },
+          {
+            "packets": 700,
+            "highest": 840,
+            "ms": 700,
+            "next": 860,
+            "rate": 1296075.2,
+            "holding": true
+          },
+          {
+            "packets": 800,
+            "highest": 940,
+            "ms": 800,
+            "next": 1000,
+            "rate": 1296075.2,
+            "holding": true
+          },
+          {
+            "packets": 910,
+            "highest": 1050,
+            "ms": 900,
+            "next": 1100,
+            "rate": 1944112.8,
+            "holding": true
+          },
+          {
+            "packets": 1073,
+            "highest": 1213,
+            "ms": 1000,
+            "next": 1300,
+            "rate": 1944112.8,
+            "holding": true
+          },
+          {
+            "packets": 1236,
+            "highest": 1376,
+            "ms": 1100,
+            "next": 1500,
+            "rate": 2041318.4,
+            "holding": true
+          }
+        ]
+      },
+      {
+        "name": "it never passes the most it may",
+        "most": 3000000.0,
+        "steps": [
+          {
+            "packets": 84,
+            "highest": 83,
+            "ms": 100,
+            "next": 90,
+            "rate": 2000000.0,
+            "holding": false
+          },
+          {
+            "packets": 168,
+            "highest": 167,
+            "ms": 200,
+            "next": 250,
+            "rate": 2000000.0,
+            "holding": false
+          },
+          {
+            "packets": 336,
+            "highest": 335,
+            "ms": 300,
+            "next": 420,
+            "rate": 3000000.0,
+            "holding": false
+          }
+        ]
+      },
+      {
+        "name": "a count that arrives out of turn is ignored",
+        "steps": [
+          {
+            "packets": 84,
+            "highest": 83,
+            "ms": 100,
+            "next": 90,
+            "rate": 2000000.0,
+            "holding": false
+          },
+          {
+            "packets": 80,
+            "highest": 80,
+            "ms": 90,
+            "next": 95,
+            "rate": 2000000.0,
+            "holding": false
+          },
+          {
+            "packets": 84,
+            "highest": 83,
+            "ms": 150,
+            "next": 95,
+            "rate": 2000000.0,
+            "holding": false
+          },
+          {
+            "packets": 70,
+            "highest": 200,
+            "ms": 200,
+            "next": 95,
+            "rate": 2000000.0,
+            "holding": false
+          }
+        ]
+      },
+      {
+        "name": "it never drops below the floor, however little arrives",
+        "steps": [
+          {
+            "packets": 1,
+            "highest": 800,
+            "ms": 500,
+            "next": 801,
+            "rate": 12500,
+            "holding": true
+          }
+        ]
+      }
+    ]
+  }
 }

@@ -102,6 +102,80 @@ func TestTheExportsCarryTheContractedHeader(t *testing.T) {
 	}
 }
 
+// The line's speed a device filed is in every place an IT system reads a
+// result from, as the same two figures (customer request, 17 November 2026):
+// the ticket's CSV, the Results API's bulk pull, and the Results API's ticket
+// as JSON - megabits a second, two places in a file and as filed in JSON, on
+// every row of the test; and a test that measured none says nothing in a file
+// and null in JSON, never 0.
+func TestTheLinesSpeedIsInTheCsvAndTheResultsApi(t *testing.T) {
+	packetpulsetest.RequireServer(t)
+	ownerToken, _ := packetpulsetest.SignUpOrganisation(t, "csvspeed")
+	packetpulsetest.Call(t, http.MethodPost, "/dnssite/add", ownerToken, map[string]any{
+		"latitude": 12.9716, "longitude": 77.5946, "site_name": "loopback", "ip_address": "127.0.0.1",
+	})
+	stamp := time.Now().UnixNano()
+	measured, plain := fmt.Sprintf("TT-CSVSPEED-%d", stamp), fmt.Sprintf("TT-CSVNOSPEED-%d", stamp)
+	filed := packetpulsetest.FileDeviceTest(t, ownerToken, "CUST-CSVSPEED", measured,
+		map[string]any{"download_mbps": 87.436, "upload_mbps": 12.254})
+	if filed.Status != http.StatusCreated {
+		t.Fatalf("could not file a test: %d %s", filed.Status, filed.Raw)
+	}
+	if none := packetpulsetest.FileDeviceTest(t, ownerToken, "CUST-CSVSPEED", plain, nil); none.Status != http.StatusCreated {
+		t.Fatalf("could not file a test: %d %s", none.Status, none.Raw)
+	}
+	requestId, _ := filed.Body["request"].(map[string]any)["request_id"].(string)
+	columns := exportColumns(t)
+	if len(columns) < 2 || columns[len(columns)-2] != "download_mbps" || columns[len(columns)-1] != "upload_mbps" {
+		t.Fatalf("the last columns of the contract are %v, want download_mbps and upload_mbps", columns[max(0, len(columns)-2):])
+	}
+	speeds := func(records [][]string, ticket string) (download, upload string, found bool) {
+		for _, record := range records[1:] {
+			if record[3] == ticket {
+				return record[len(columns)-2], record[len(columns)-1], true
+			}
+		}
+		return "", "", false
+	}
+
+	fromTicket := readCsv(t, packetpulsetest.Call(t, http.MethodGet, "/diagnostic/"+requestId+"/report.csv", ownerToken, nil))
+	if down, up, ok := speeds(fromTicket, measured); !ok || down != "87.44" || up != "12.25" {
+		t.Errorf("ticket CSV speed = %q / %q (found %v), want 87.44 / 12.25", down, up, ok)
+	}
+
+	apiKey := issueKey(t, ownerToken)
+	from := url.QueryEscape(time.Now().UTC().Add(-time.Hour).Format(time.RFC3339))
+	pulled := readCsv(t, packetpulsetest.Call(t, http.MethodGet, "/result/export.csv?from="+from, apiKey, nil))
+	if down, up, ok := speeds(pulled, measured); !ok || down != "87.44" || up != "12.25" {
+		t.Errorf("pulled CSV speed = %q / %q (found %v), want 87.44 / 12.25", down, up, ok)
+	}
+	if down, up, ok := speeds(pulled, plain); !ok || down != "" || up != "" {
+		t.Errorf("a test that measured no speed has %q / %q in the pull (found %v), want empty cells", down, up, ok)
+	}
+
+	ticketJson := packetpulsetest.Call(t, http.MethodGet, "/result/bytt/"+measured, apiKey, nil)
+	if ticketJson.Body["download_mbps"] != 87.436 || ticketJson.Body["upload_mbps"] != 12.254 {
+		t.Errorf("Results API speed = %v / %v, want 87.436 / 12.254", ticketJson.Body["download_mbps"], ticketJson.Body["upload_mbps"])
+	}
+	noneJson := packetpulsetest.Call(t, http.MethodGet, "/result/bytt/"+plain, apiKey, nil)
+	for _, field := range []string{"download_mbps", "upload_mbps"} {
+		if value, present := noneJson.Body[field]; !present || value != nil {
+			t.Errorf("%s = %v (present %v) for a test that measured none, want null", field, value, present)
+		}
+	}
+	// And by Customer ID: each ticket in the shape of one by TT number.
+	byCustomer := packetpulsetest.Call(t, http.MethodGet, "/result/bycustomer/CUST-CSVSPEED?from="+from, apiKey, nil)
+	sawSpeed := false
+	for _, ticket := range packetpulsetest.ListOf(t, byCustomer, "tickets") {
+		if ticket["tt_number"] == measured && ticket["download_mbps"] == 87.436 && ticket["upload_mbps"] == 12.254 {
+			sawSpeed = true
+		}
+	}
+	if !sawSpeed {
+		t.Errorf("a customer's tickets do not carry the line's speed: %s", byCustomer.Raw)
+	}
+}
+
 func TestTheBulkPullRefusesTheWrongCredential(t *testing.T) {
 	packetpulsetest.RequireServer(t)
 	sessionToken, _ := packetpulsetest.SignUpOrganisation(t, "csvauth")

@@ -242,7 +242,7 @@ nav.side .nohit.on{display:block}
 <td style="text-align:center"><strong>104</strong> <br><sub>under <code>/api/v1</code></sub></td>
 <td style="text-align:center"><strong>16</strong> <br><sub>3 built-in roles</sub></td>
 <td style="text-align:center"><strong>42</strong> <br><sub>applied at boot</sub></td>
-<td style="text-align:center"><strong>1353</strong> <br><sub>English, server-served</sub></td>
+<td style="text-align:center"><strong>1383</strong> <br><sub>English, server-served</sub></td>
 <td style="text-align:center"><strong>20</strong> <br><sub>one per screen</sub></td>
 <td style="text-align:center"><strong>11</strong> <br><sub>+ <code>load</code>, opt-in</sub></td>
 </tr>
@@ -399,6 +399,12 @@ nav.side .nohit.on{display:block}
 <td>The view by country lists no tests: its summary and how it was calculated.</td>
 <td><code>RPT-019</code></td>
 <td><code>packetpulsego/pkg/reportmicroservice/reportstats/ReportStats.go</code></td>
+</tr>
+<tr>
+<td><strong>Line speed in the network reports</strong></td>
+<td>Under each place's summary, its line speed: each row that measured one, with the tests that did and each way's average, minimum and maximum in Mbit/s; each test's own <em>Download</em> and <em>Upload</em> in its row; the CSV's last eight columns. Only a browser's UDP test measures it, to its reflector, and a test over both IP families counts its speed once.</td>
+<td><code>RPT-030</code>, <code>RPT-031</code></td>
+<td><code>packetpulsego/pkg/reportmicroservice/reportstats/ReportStats.go</code><br><code>packetpulseflutter/lib/reportmicroservice/presentation/screens/NetworkReportScreen.dart</code></td>
 </tr>
 <tr>
 <td><strong>A city filter</strong></td>
@@ -665,10 +671,10 @@ nav.side .nohit.on{display:block}
 <td><code>packetpulsego/pkg/common/dbclient/migrations/0027_2026_10_05_path_analysis_removed.sql</code></td>
 </tr>
 <tr>
-<td><strong>Speed test hidden</strong></td>
-<td><strong>Measure speed</strong> is no longer offered. A speed filed with a run before still shows with it.</td>
-<td><code>DEV-*</code></td>
-<td><code>packetpulseflutter/lib/common/config/PacketPulseConfig.dart</code></td>
+<td><strong>Line speed, measured to the reflector</strong></td>
+<td>After a browser's UDP test the line's download and upload speed are measured to the same reflector, over the same connection, for the server's <code>UDP_TEST_SPEED_SECONDS</code> (5) each way, and filed with the run: on the ticket and on its PDF (customer request, November 2026). A reflector released before November 2026 measures none, and the run says so; a line the browser could not fill in the time reads <em>At least …</em>, and is not filed. The run, its ticket and the Measure speed card show it alike, a tile each way; the PDF prints <strong>Download speed</strong> and <strong>Upload speed</strong>. The CSV (last two columns) and the Results API carry it as <code>download_mbps</code> and <code>upload_mbps</code>. The <strong>Measure speed</strong> button, which measured through Cloudflare, stays set aside; a speed filed with a run before still shows with it.</td>
+<td><code>UDP-053</code> to <code>UDP-060</code>, <code>CSV-009</code>, <code>API-009</code>, <code>DEV-005</code></td>
+<td><code>packetpulsego/pkg/reflectormicroservice/reflectorcore/ReflectorSpeed.go</code><br><code>packetpulseweb/assets/packetpulse-udp.js</code><br><code>packetpulseflutter/lib/common/config/PacketPulseConfig.dart</code><br><code>packetpulseflutter/lib/diagnosticmicroservice/presentation/widgets/LineSpeedPanel.dart</code></td>
 </tr>
 <tr>
 <td><strong>One Run diagnostic page</strong></td>
@@ -771,7 +777,7 @@ nav.side .nohit.on{display:block}
 </tr>
 <tr>
 <td><strong>8. Load testing</strong></td>
-<td>A platform load suite: 20 people at once, a 200-site sweep, API and CSV pulls against p95 budgets. <em>The device line-speed test of v1 is hidden in v2.</em></td>
+<td>A platform load suite: 20 people at once, a 200-site sweep, API and CSV pulls against p95 budgets. <em>The device line-speed button of v1 stays set aside; a line's speed is measured to the reflector after a UDP test (<code>UDP-053</code>).</em></td>
 <td>Part IV §4.5</td>
 <td><code>packetpulsetest/golang/loadtest/load_test.go</code><br><code>.github/workflows/packetpulse-load.yml</code></td>
 </tr>
@@ -2360,7 +2366,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>Engineer</td>
 <td>The file has the contracted header</td>
 <td><strong>Export CSV</strong>; open it</td>
-<td>Header exactly as in <code>packetpulsetest/contracts/result_export_columns.json</code>, <code>result_id</code> first; <code>checked_on</code> in the organisation's zone with its offset (<code>…+05:30</code> in India), never <code>…Z</code>; an unreachable row has empty round-trip cells</td>
+<td>Header exactly as in <code>packetpulsetest/contracts/result_export_columns.json</code>, <code>result_id</code> first and <code>download_mbps</code>, <code>upload_mbps</code> last; <code>checked_on</code> in the organisation's zone with its offset (<code>…+05:30</code> in India), never <code>…Z</code>; an unreachable row has empty round-trip cells</td>
 </tr>
 <tr>
 <td><code>CSV-002</code></td>
@@ -2410,6 +2416,13 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>A device test says where it came from</td>
 <td>Note this device's public IPv4 (the <strong>IPv4</strong> card on <strong>Run diagnostic</strong>); run a UDP test of an endpoint whose address is its own reflector (live: TATA-MUMBAI); <strong>Attach to a ticket</strong>; <strong>Export CSV</strong>; then export a server sweep's CSV</td>
 <td><code>user_ip</code> is that IPv4 and, from a network with IPv6, <code>user_ipv6</code> the address on the <strong>IPv6</strong> card, on every row of the device test; <code>reflector_ip</code> is still the endpoint's own address; the sweep's are empty. 🛑 <strong>Must NOT</strong> put the reflector's IP, or any address the device sent itself, in <code>user_ip</code></td>
+</tr>
+<tr>
+<td><code>CSV-009</code></td>
+<td>Engineer</td>
+<td>The line's speed is in the file</td>
+<td>In a browser, run a UDP test to a reflector of the November 2026 release (<code>UDP-053</code>) and attach it; <strong>Export CSV</strong>; and pull the day through the Results API (<code>API-003</code>); then export a test that measured no speed</td>
+<td>The last two columns, <code>download_mbps</code> and <code>upload_mbps</code>, hold the figures the run showed, in Mbit/s to two places, on <strong>every</strong> row of that test, in the ticket's file and in the pulled one; the test that measured none has empty cells. A direction the run showed as <em>At least …</em> is empty: a figure in the file is the line's speed. 🛑 <strong>Must NOT</strong> write 0 for a speed that was not measured, or a figure that was only a floor</td>
 </tr>
 </tbody>
 </table></div>
@@ -2701,7 +2714,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>Administrator</td>
 <td>The files are the report on screen</td>
 <td><strong>Export CSV</strong>, then <strong>Export PDF</strong></td>
-<td><code>packetpulse-city-daily-&lt;day&gt;.csv</code> under the contracted header - its site rows each test (<code>level</code> <code>test</code>, with <code>checked_on</code>, <code>measured_from</code>, <code>user_ipv4</code> and <code>user_ipv6</code> at the end), then each endpoint, then the site - (<code>packetpulsetest/contracts/network_report_columns.json</code>), the organisation's name in the first column of every row, each figure's <code>_avg</code>, <code>_min</code> and <code>_max</code>, and the PDF with the same figures, the organisation, the zone and the definitions; <em>Pan India</em> files are <code>packetpulse-pan-india-…</code>, and every row's <code>report</code> column says <code>pan-india</code> (<code>city</code> in a by-site file). 🛑 <strong>Must NOT</strong> say <code>country</code> in a Pan India file</td>
+<td><code>packetpulse-city-daily-&lt;day&gt;.csv</code> under the contracted header - its site rows each test (<code>level</code> <code>test</code>, with <code>checked_on</code>, <code>measured_from</code>, <code>user_ipv4</code> and <code>user_ipv6</code> at the end), then each endpoint, then the site - (<code>packetpulsetest/contracts/network_report_columns.json</code>), the organisation's name in the first column of every row, each figure's <code>_avg</code>, <code>_min</code> and <code>_max</code>, the line's speed last (<code>download_tests</code> to <code>upload_max_mbps</code>, <code>RPT-030</code>), and the PDF with the same figures, the organisation, the zone and the definitions; <em>Pan India</em> files are <code>packetpulse-pan-india-…</code>, and every row's <code>report</code> column says <code>pan-india</code> (<code>city</code> in a by-site file). 🛑 <strong>Must NOT</strong> say <code>country</code> in a Pan India file</td>
 </tr>
 <tr>
 <td><code>RPT-013</code></td>
@@ -2823,6 +2836,20 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>One <em>Thane</em> card with both tests, one <em>Mumbai</em> card with both. 🛑 <strong>Must NOT</strong> show a site for <code>Thane.</code> beside one for <code>Thane</code></td>
 </tr>
 <tr>
+<td><code>RPT-030</code></td>
+<td>Customer</td>
+<td>Each place states its line speed</td>
+<td>On one day, three browser UDP tests of Mumbai's Andheri endpoint that measured 80 and 40 down, 10 and 20 up, and one of Worli that measured 60 down and no upload (<code>UDP-053</code>); open <strong>Network reports</strong> by reflector site; <strong>Export PDF</strong>; <strong>Export CSV</strong></td>
+<td>Under Mumbai's summary and how it was calculated, <strong>Line speed in Mumbai</strong>: each endpoint's row, then <em>All endpoints</em> in bold, with <strong>Tests 3</strong>, <strong>Download avg 60.0 Mbit/s</strong>, min <strong>40.0</strong>, max <strong>80.0</strong>, <strong>Upload avg 15.0 Mbit/s</strong>, min <strong>10.0</strong>, max <strong>20.0</strong>, and no Grade column. Each test's row ends in <strong>Download</strong> and <strong>Upload</strong> (<em>—</em> for Worli's upload). The PDF prints the same under <em>Line speed in Mumbai, Mbit/s</em>, each test's <em>Down</em> and <em>Up</em>; the CSV's last eight columns are <code>download_tests</code>, <code>download_avg_mbps</code>, <code>download_min_mbps</code>, <code>download_max_mbps</code> and the same for upload. <strong>All sites combined</strong> states <strong>Line speed</strong> under its summary and under the day before's. 🛑 <strong>Must NOT</strong> show a speed table of dashes for a place no test measured, a 0 for a way no test filed, or a Grade on a speed</td>
+</tr>
+<tr>
+<td><code>RPT-031</code></td>
+<td>Tester</td>
+<td>A test's speed is counted once, and only a UDP test's</td>
+<td>With <code>IPV6_TESTS_ENABLED=true</code>, one browser UDP test over IPv4 then IPv6 that measured 90 down (<code>V6-005</code>); and a ticket filed in October 2026 with a Measure speed (Cloudflare) figure on an HTTPS test; open <strong>Network reports</strong> for each day</td>
+<td>The <em>UDP (reflector) IPv4</em> row's line speed has <strong>1</strong> test at <strong>90.0 Mbit/s</strong>; the IPv6 row is not in <strong>Line speed</strong> and its test lists <em>—</em>; the HTTPS test's day has no <strong>Line speed</strong> at all, and its CSV rows have <code>download_tests</code> <strong>0</strong>. 🛑 <strong>Must NOT</strong> count one test's speed on both families, or count a speed measured to Cloudflare in a report of reflector sites</td>
+</tr>
+<tr>
 <td><code>RPT-011</code></td>
 <td>Administrator</td>
 <td>A failed load is not a quiet day</td>
@@ -2910,9 +2937,9 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <tr>
 <td><code>DEV-005</code></td>
 <td>Engineer</td>
-<td>The speed test is hidden</td>
-<td>Open <strong>Run diagnostic</strong>; then open a ticket that had a speed filed before the test was hidden</td>
-<td>No <strong>Measure speed</strong> button and no ~12 MB note. The older ticket still shows its line speed. 🛑 <strong>Must NOT</strong> move any data to the speed-test endpoints</td>
+<td>The Measure speed button is set aside</td>
+<td>Open <strong>Run diagnostic</strong>; then open a ticket that had a speed filed before the button was set aside</td>
+<td>No <strong>Measure speed</strong> button and no note about megabytes through Cloudflare. The older ticket still shows its line speed. A browser's UDP test measures its own, to its reflector (<code>UDP-053</code>). 🛑 <strong>Must NOT</strong> move any data to <code>speed.cloudflare.com</code></td>
 </tr>
 <tr>
 <td><code>DEV-006</code></td>
@@ -3101,7 +3128,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>Engineer</td>
 <td>A ticket's details read at a glance</td>
 <td>Attach a run; <strong>View ticket</strong>; read the details; copy the <strong>Run ID</strong>; <strong>Export PDF</strong>; then open the same ticket on a phone</td>
-<td>Labelled facts, in order: <strong>User IPv4</strong>, <strong>User IPv6</strong>, <strong>Tested from</strong> (its address over its position, with <em>within N m</em>), <strong>Run by</strong>, <strong>Signed in at</strong>, <strong>Run ID</strong>, then <strong>Endpoints</strong> and <strong>Notes</strong> on rows of their own; addresses and the run ID in a fixed-width face, each on one line, with copy buttons; the PDF's details are the same facts four across, its position a map link, its place whole, <em>Duration</em> and <em>Packets per site 1,486</em>. On a phone, one fact per row. 🛑 <strong>Must NOT</strong> cut a place short, break an address or the run ID across lines, or read <em>endpoint(s)</em>, <em>packet(s)</em> or <em>Sweep took</em> on a device test</td>
+<td>Labelled facts, in order: <strong>User IPv4</strong>, <strong>User IPv6</strong>, <strong>Download speed</strong> and <strong>Upload speed</strong> on the PDF when the test measured one (<code>UDP-054</code>), <strong>Tested from</strong> (its address over its position, with <em>within N m</em>), <strong>Run by</strong>, <strong>Signed in at</strong>, <strong>Run ID</strong>, then <strong>Endpoints</strong> and <strong>Notes</strong> on rows of their own; addresses and the run ID in a fixed-width face, each on one line, with copy buttons; the PDF's details are the same facts four across, its position a map link, its place whole, <em>Duration</em> and <em>Packets per site 1,486</em>. On a phone, one fact per row. 🛑 <strong>Must NOT</strong> cut a place short, break an address or the run ID across lines, or read <em>endpoint(s)</em>, <em>packet(s)</em> or <em>Sweep took</em> on a device test</td>
 </tr>
 <tr>
 <td><code>DEV-031</code></td>
@@ -3138,6 +3165,13 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td><code>POST /diagnostic/clientobservation</code> with ACME's <code>dns_site_id</code>; then with a made-up one</td>
 <td>422 <code>validation_failed</code> on <code>dns_site_id</code>, the same for both, naming neither; nothing is filed under the ticket. 🛑 <strong>Must NOT</strong> file a run under, or name, another organisation's endpoint</td>
 </tr>
+<tr>
+<td><code>DEV-038</code></td>
+<td>Engineer</td>
+<td>The figures sit in even boxes</td>
+<td>Open <strong>Run diagnostic</strong> before a test, in a wide window and then on a phone; then run a test</td>
+<td>On a wide screen each line of figure cards (<em>Round-trip · average</em>, <em>Fastest</em>, <em>Slowest</em>, <em>Jitter</em>; <em>Packet loss</em>, <em>Lost up · down</em>, <em>Progress</em>) is one height: the labels, the figures and the captions are level across the line, and a card's meter bar sits at its foot, whether or not the card beside it has one. The last line's cards are as wide as the others. On a phone they stack, one a line. 🛑 <strong>Must NOT</strong> leave a card shorter than its neighbour, or a meter floating mid-card</td>
+</tr>
 </tbody>
 </table></div>
 </li>
@@ -3150,10 +3184,10 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <li>Notes: filed as the request's <code>notes</code>, read back by <code>DiagnosticRequest.fromJson</code> in <code>packetpulseflutter/lib/diagnosticmicroservice/domain/shared/Diagnostic.dart</code>, shown by <code>packetpulseflutter/lib/diagnosticmicroservice/presentation/screens/DiagnosticResultView.dart</code> and printed by <code>ReportOptions.Notes</code> in <code>packetpulsego/pkg/pingmicroservice/pingreport/PingReportPdfBuilder.go</code>; <code>TestTheTicketsNotesArePrintedOnItsReport</code> and <code>packetpulseflutter/test/diagnostic_result_selection_test.dart</code> hold them there.</li>
 <li>Voice quality hidden: the MOS tile, the results' MOS column and the PDF's are kept and tested behind <code>voiceQualityShown = false</code> in <code>packetpulseflutter/lib/common/config/PacketPulseConfig.dart</code> (<code>packetpulseflutter/test/client_probe_live_panels_test.dart</code>, <code>packetpulseflutter/test/diagnostic_result_selection_test.dart</code>) and <code>ReportOptions.ShowVoiceQuality</code> in <code>packetpulsego/pkg/pingmicroservice/pingreport/PingReportPdfBuilder.go</code>, whose hidden column's width goes to the site (<code>PingReportPdfBuilder_test.go</code>). <code>EvaluateSla</code> still grades <code>mos_score</code>.</li>
 <li>View ticket: <code>_viewTicket</code> in <code>packetpulseflutter/lib/diagnosticmicroservice/presentation/screens/ClientProbeScreen.dart</code> shows the <code>DiagnosticDetail</code> the filing returned in a dialog (full screen under 720 px) through <code>DiagnosticResultView</code>, the view <strong>History</strong> uses; held by <code>packetpulseflutter/test/client_probe_run_test.dart</code>. Below 560 px <code>PacketPulseSectionHeader</code> puts its action under the heading, which keeps the ticket's export buttons on a phone screen.</li>
-<li>Target hidden: the <em>Testing against</em> panel, the <em>Target</em> line and the <strong>Change target</strong> dialog are kept and tested behind <code>testTargetShown = false</code> in <code>packetpulseflutter/lib/common/config/PacketPulseConfig.dart</code>, as the speed test is.</li>
+<li>Target hidden: the <em>Testing against</em> panel, the <em>Target</em> line and the <strong>Change target</strong> dialog are kept and tested behind <code>testTargetShown = false</code> in <code>packetpulseflutter/lib/common/config/PacketPulseConfig.dart</code>, as the <strong>Measure speed</strong> button is.</li>
 <li>A filed device run with no endpoint keeps its host in <code>ping_result</code>. It is replaced when read back — the diagnostic detail, the Results API's ticket, the PDF, and every CSV (ticket, pulled, scheduled push) — by <code>hideDeviceTargets</code> in <code>packetpulsego/pkg/diagnosticmicroservice/diagnosticservice/DiagnosticService.go</code> and <code>Row.shown</code> in <code>packetpulsego/pkg/diagnosticmicroservice/diagnosticexport/DiagnosticExport.go</code>; a result with a <code>dns_site_id</code> measured the organisation's own endpoint and is shown as stored. The raw <code>/ping/run/{runId}</code> routes, which the app does not call, still show it. The page's wording is held to naming no host by <code>TestTheRunDiagnosticPageNamesNoDeviceTarget</code> in <code>packetpulsego/pkg/initmicroservice/initconstants/PacketPulseStrings_test.go</code>.</li>
 <li>Target normalisation (pasted URL → host, lower case, canonical IPs, zones refused): <code>NormaliseTestTarget</code> in <code>packetpulsego/pkg/staffmicroservice/staffservice/StaffCheckinService.go</code>.</li>
-<li>Speed, hidden: <code>packetpulseflutter/lib/diagnosticmicroservice/service/ClientThroughput.dart</code> (Cloudflare <code>__down</code>/<code>__up</code>, median after a warm-up) is kept and tested behind <code>speedTestEnabled = false</code> in <code>packetpulseflutter/lib/common/config/PacketPulseConfig.dart</code>; turning it back on is that one line. Egress: <code>packetpulseflutter/lib/diagnosticmicroservice/service/ClientEgress.dart</code>.</li>
+<li>The <strong>Measure speed</strong> button, set aside: <code>packetpulseflutter/lib/diagnosticmicroservice/service/ClientThroughput.dart</code> (Cloudflare <code>__down</code>/<code>__up</code>: after a warm-up, transfers of 1, 5 and 15 MB, each asked for only while the last finished in under a second, the fastest counted - inside 25 MB each way) is kept and tested behind <code>speedTestEnabled = false</code> in <code>packetpulseflutter/lib/common/config/PacketPulseConfig.dart</code>; offering it again is that one line. It is not how a line's speed is measured: a browser's UDP test measures it to its reflector (the UDP chapter below, <code>UDP-053</code>), and a run files its own speed in preference to this button's. Egress: <code>packetpulseflutter/lib/diagnosticmicroservice/service/ClientEgress.dart</code>.</li>
 <li>A UDP run's progress and <strong>What happened</strong>: <code>_progressDone</code>, <code>_progressCaption</code> and <code>_udpAccount</code> in <code>packetpulseflutter/lib/diagnosticmicroservice/presentation/screens/ClientProbeScreen.dart</code>, counting against the engine's plan (<code>UdpPlan</code> in <code>packetpulseflutter/lib/diagnosticmicroservice/service/udp/UdpProbeRun.dart</code>, passed from the engine's <code>measuring</code> phase by <code>packetpulseflutter/lib/diagnosticmicroservice/service/udp/UdpProbeRunnerWeb.dart</code>). Coverage: <code>packetpulseflutter/test/run_diagnostic_udp_test.dart</code>, <code>packetpulseflutter/test/udp_probe_run_test.dart</code>.</li>
 <li>The route: <code>packetpulseflutter/lib/diagnosticmicroservice/presentation/widgets/ClientProbeRoute.dart</code>, built by <code>_route</code> in <code>packetpulseflutter/lib/diagnosticmicroservice/presentation/screens/ClientProbeScreen.dart</code>. Before a run it is foreseen from the endpoint; a UDP run's comes from the server's answer the moment it arrives. Its strings are held to naming no host by the same Go test. Coverage: <code>packetpulseflutter/test/run_diagnostic_screen_test.dart</code>, <code>packetpulseflutter/test/run_diagnostic_udp_test.dart</code>, <code>packetpulseflutter/test/client_probe_run_test.dart</code>.</li>
 <li>Live panels: the address cards in <code>packetpulseflutter/lib/diagnosticmicroservice/presentation/widgets/ClientEgressPanel.dart</code>; the timeline, the bands, <code>runningJitter</code> and <code>latencyBands</code> in <code>packetpulseflutter/lib/diagnosticmicroservice/presentation/widgets/ClientProbeCharts.dart</code>; the log in <code>packetpulseflutter/lib/diagnosticmicroservice/presentation/widgets/ClientProbeConsole.dart</code>. The figures are <code>ClientProbeSummary.from</code> over the samples so far, so the live numbers and the filed ones are one calculation. <strong>IPv6 only</strong> is <code>ClientProbeTarget.resolverV6</code> (<code>ClientProbeTarget.defaultFor</code>) in <code>packetpulseflutter/lib/diagnosticmicroservice/service/ClientProbeEngine.dart</code>; a filed run keeps the IPv6 address in <code>ping_result</code>, hidden on read like any device target. The new strings are held to naming no host, the IPv6 literals included, by the same Go test.</li>
@@ -3168,6 +3202,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: The only browser test that sees real packet loss, and says which way it was lost. Run from <strong>Run diagnostic</strong> where the customer is, in 30 seconds it tells the engineer whether the customer's uplink drops packets, their downlink does, or packets arrive too late to play — the three causes of a choppy call, told apart from where the customer sits.</li>
 <li>📖 <strong>User Guide &amp; Operational Flow</strong>: The UDP test runs in <strong>Run diagnostic</strong> (below). It sends small UDP packets (200 bytes each) to a reflector at the server's pace - 10 a second unless <code>UDP_TEST_RATE_PPS</code> sets another, never the person's choice (customer request, 28 October 2026) - over IPv4. The public self-test offered it too, as <strong>PacketPulse network — UDP, like a call</strong>, until 17 October 2026, when it was removed with the site's links to the self-test: it needed PacketPulse's own reflector, which the live host keeps off. Loss is counted at the end, per packet, when the reflector says which packets reached it; until then the loss tile shows a dash. A packet back more than a second after it was sent is <em>late</em>, and counts in the loss figure, because a call would have played silence. <em>Not sent (device busy)</em> counts slots the browser could not keep; they are left out of every percentage. Keep the tab in front: a hidden tab stops the test. While a test runs the page keeps the screen on (the browser's screen wake lock, where it has one), and the controls say <em>Keep PacketPulse on screen until the test finishes…</em>.
 <ul>
+<li><strong>The line's speed</strong> (customer request, November 2026) is measured after the packets, over the same connection, to the same reflector: a download and then an upload, each for as long as the server says - 5 seconds unless <code>UDP_TEST_SPEED_SECONDS</code> sets another, 0 for none - never beside the paced packets, where it would be measured as loss. Each way the sender sends numbered packets that are never sent again, and the receiver counts what arrives: the sender raises its pace while everything arrives as fast as it is sent, and settles just under what arrives once the line is full. The speed is the fastest rate of arrival the line kept up for a second, each packet counted whole as the line carried it. The controls say so before <strong>Start test</strong>, with what it moves (<em>…about 63 MB each way on a 100 Mbit/s line…</em>); while it runs they say <em>Measuring download</em>, then <em>Measuring upload</em>, and the <strong>Line speed</strong> card stands where the figures will be, the direction under way <em>Measuring…</em> with a moving bar (still where motion is turned down) and the other <em>Next</em> or <em>Done</em>. The run then shows the card with a tile each way - an arrow, <strong>Download</strong> or <strong>Upload</strong>, the figure large and <em>Mbit/s</em> apart, side by side or one above the other on a phone - and <em>Measured after the test, to the same reflector, for 5 seconds each way.</em> (review of 17 November 2026: it was two label-and-value lines, a floor in the same type as a full figure). It is filed with the run: the ticket shows the same card, smaller, and its PDF prints <strong>Download speed</strong> and <strong>Upload speed</strong> after the user's addresses, a direction with no figure <em>Not recorded</em>. A direction with no figure is a dash over <em>Could not be measured</em>, and the card says why: the reflector measures no speed (every reflector released before November 2026 - install the new release, <code>UDP-042</code>), it was measuring four at once already, the test was stopped, the page was hidden, or the measurement was cut short. A line that was never filled - it is faster than the measurement paced (500 Mbit/s at most, and about 300 through a browser), or the browser's own connection would not let packets go fast enough, as it sometimes will not on a fast line over a path longer than about 50 ms there and back - reads with an <em>At least</em> badge in front of its figure and <em>Not filed with the ticket</em> under it, and that figure is not filed: a ticket's speed is the line's, never a floor under it. The test's own loss and jitter stand in every case. Checked against lines of known speed in Chrome (November 2026): within about 5% from 0.5 to 300 Mbit/s down and up on paths up to 50 ms there and back, and on the download on every path tried; it is the speed to the operator's reflector over UDP, and will not match a speed-test site that measures to somewhere else over many TCP streams.</li>
 <li>When UDP cannot get through, the test says <em>UDP is blocked on this network</em>, and never shows that as 100% loss. It says so only after a second, fresh connection got nothing through either (since 14 October 2026): a first connection that gets no answer is retried at once, with <em>No UDP came back on that connection; trying once more on a fresh one.</em> in the log, and a run that then measures logs <em>The first connection got no UDP through and the second did…</em> beside its figures. A browser that sent no UDP at all — a setting, an extension or a VPN keeping WebRTC off it — is told <em>This browser sent no UDP, so the network was not tested…</em>, not that the network blocks UDP.</li>
 <li>The reflector logs how each session ended (<code>/opt/packetpulse/logs/packetpulse.log</code>, <em>reflector session ended</em>): <code>connected</code>, <code>checks_received</code> (the browser's connectivity checks that reached it), <code>answers_sent</code>, <code>probes_received</code> and <code>lifetime_ms</code>. For a run told <em>UDP is blocked</em>, <code>checks_received=0</code> means the network dropped the browser's packets on the way in; checks received and answered with <code>connected=false</code> means the answers were lost on the way back. It was added for a laptop in Dubai that was intermittently told UDP was blocked while one in Bengaluru was not.</li>
 <li>A customer's own reflector (<code>packetpulsereflector</code>, on a PoP, an SBC's neighbour or a VPS) is installed with its endpoint's key: <code>POST /diagnostic/endpoint/{dnsSiteId}/reflector-key</code> returns the key and the install line, <code>sudo ./install-reflector.sh --key &lt;key&gt; [--public-ip &lt;address&gt;]</code>. Sessions on it are then opened only through <code>POST /diagnostic/endpoint/{dnsSiteId}/webrtc-offer</code>, which signs the request and checks that the answer is signed back.</li>
@@ -3553,11 +3588,68 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>Set <code>REFLECTOR_UDP_PORT=50000</code> in the development <code>.env</code>; run <code>go run -tags packetpulsedev ./cmd/packetpulseserver</code> and the app in a browser against it (<code>flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:8080</code>); in <strong>Run diagnostic</strong> test an endpoint with no <strong>UDP reflector address</strong></td>
 <td>The test runs to the development server's own reflector: <em>UDP over WebRTC → The PacketPulse network</em>. (Until 17 October 2026 this loop used the self-test with <code>?reflector=</code>; the engine still honours the override, but no page offers a UDP test to use it)</td>
 </tr>
+<tr>
+<td><code>UDP-053</code></td>
+<td>Engineer</td>
+<td>The line's speed follows the test</td>
+<td>In a browser, test an endpoint whose reflector is of the November 2026 release (<code>UDP-042</code>, <code>UDP-011</code>); <strong>Start test</strong> at <em>30 s</em>; watch the controls after the last packet</td>
+<td>Before the start, the note under <strong>Test length</strong> says the speed is measured afterwards, 5 s each way, and what that moves. After the packets: <em>Measuring download</em>, then <em>Measuring upload</em> beside <strong>Stop</strong>, about five seconds each, and where the figures will be a <strong>Line speed</strong> card whose <strong>Download</strong> tile reads <em>Measuring…</em> with a moving bar while <strong>Upload</strong> reads <em>Next</em>, then <em>Done</em> and <em>Measuring…</em>. Then the card shows a tile each way - an arrow, <strong>Download</strong> or <strong>Upload</strong>, the figure large with <em>Mbit/s</em> beside it - and <em>Measured after the test, to the same reflector, for 5 seconds each way.</em> On a line whose plan is known, each figure is within about a twentieth of it. The loss, jitter and round trips are those of the packets alone. 🛑 <strong>Must NOT</strong> measure speed while packets are paced, show a zero for a direction it did not measure, or leave the run reading <em>Testing 600/600</em> with nothing else moving while the speed is measured</td>
+</tr>
+<tr>
+<td><code>UDP-054</code></td>
+<td>Engineer</td>
+<td>The speed is filed with the run</td>
+<td>After <code>UDP-053</code>, <strong>Attach to a ticket</strong>; <strong>View ticket</strong>; <strong>Export PDF</strong></td>
+<td>The ticket shows the run's <strong>Line speed</strong> card, smaller: a <strong>Download</strong> and an <strong>Upload</strong> tile with the figures the run showed, and a direction it has no figure for - not measured, or only a floor - as a dash over <em>Not recorded</em>. The PDF prints <strong>Download speed</strong> and <strong>Upload speed</strong>, each <em>… Mbit/s</em> or <em>Not recorded</em>, after <strong>User IPv4</strong> and <strong>User IPv6</strong>. A ticket whose test measured no speed says nothing of one, on screen or in the PDF. 🛑 <strong>Must NOT</strong> print a speed fact with nothing after it, or a zero for a direction with no figure</td>
+</tr>
+<tr>
+<td><code>UDP-055</code></td>
+<td>Engineer</td>
+<td>A reflector that measures no speed</td>
+<td>Test an endpoint whose reflector is a release from before November 2026 (its <code>/healthz</code> has no <code>max_speed_seconds</code>, or 0)</td>
+<td>The test runs and files as before; the <strong>Line speed</strong> card reads <em>The reflector this test went to does not measure speed. A reflector released before November 2026 needs its new release for that.</em>; no speed is filed. 🛑 <strong>Must NOT</strong> fail the test, or open a channel the reflector would close</td>
+</tr>
+<tr>
+<td><code>UDP-056</code></td>
+<td>Operator</td>
+<td>The seconds are the server's</td>
+<td>Set <code>UDP_TEST_SPEED_SECONDS=0</code>, restart, refresh the app and run; then <code>10</code>; then <code>11</code></td>
+<td>At 0 the note under <strong>Test length</strong> is gone, no speed is measured and none is filed; at 10 each direction runs ten seconds; at 11 the server stops at boot, naming the setting. 🛑 <strong>Must NOT</strong> offer the person a control for it</td>
+</tr>
+<tr>
+<td><code>UDP-057</code></td>
+<td>Engineer ×5</td>
+<td>A busy reflector refuses one more</td>
+<td>Five people start a 30 s test of the same endpoint within a second of each other</td>
+<td>Four runs show a speed; the fifth's card reads <em>The reflector was measuring as many speeds as it does at once, so this run has none. Run the test again for one.</em>, and its loss and jitter are measured all the same. The reflector's <code>/healthz</code> never shows <code>speed_transfers</code> above 4. 🛑 <strong>Must NOT</strong> queue the fifth, or slow the four</td>
+</tr>
+<tr>
+<td><code>UDP-058</code></td>
+<td>RIVAL tester</td>
+<td>A download nobody may pull</td>
+<td>Against a development reflector (<code>packetpulsereflector -open</code>), open a session and a <code>packetpulse-speed</code> channel that is reliable, or in order; then one as the page opens it, unordered and never retransmitted: ask for a download of 60 s and say nothing of what arrives; then say everything arrives, on a reflector started for a line of your own</td>
+<td>The reliable and the ordered channel are closed unserved. Nobody counting, the download stays at its starting 8 Mbit/s and stops at the reflector's 10 s; a second request starts nothing. Told everything arrives, it is never paced past 500 Mbit/s, and falls back to 8 a second after the counts stop. 🛑 <strong>Must NOT</strong> send a download to a session that did not ask, a second to one that did, faster than twice what its receiver last counted, or at all from the hosted reflector</td>
+</tr>
+<tr>
+<td><code>UDP-059</code></td>
+<td>Engineer</td>
+<td>A line that was not filled says so</td>
+<td>Test from a browser a long way from the reflector (more than about 50 ms there and back, as the round trip on the ticket shows) on a line of 40 Mbit/s up or more; or any line past 500 Mbit/s</td>
+<td>Where the browser could not fill the line in its five seconds, that direction's tile turns amber, puts an <em>At least</em> badge in front of its figure and says <em>Not filed with the ticket</em> under it; under the tiles the card says once <em>At least means the line was not filled in the time the measurement had…</em>; and the ticket files no speed for it. The other direction is a full figure and is filed as usual. 🛑 <strong>Must NOT</strong> file a floor as the line's speed, or call a filled line <em>At least</em></td>
+</tr>
+<tr>
+<td><code>UDP-060</code></td>
+<td>Engineer</td>
+<td>The line's speed reads at a glance</td>
+<td>After <code>UDP-053</code>, look at the <strong>Line speed</strong> card at full width; narrow the window to a phone's width; switch the theme to dark; then read the card with a screen reader (VoiceOver or TalkBack)</td>
+<td>At full width the <strong>Download</strong> and <strong>Upload</strong> tiles sit side by side, as tall as each other, each with its arrow (down, up), its name, its figure in large fixed-width type and <em>Mbit/s</em> beside it; at a phone's width one above the other, a four-figure speed made smaller to fit, never cut. In the dark theme every word stays readable. The screen reader reads each tile as one item - <em>Download, 87.4, Mbit/s</em>; a floor <em>Upload, At least, 5.5, Mbit/s, Not filed with the ticket</em>. 🛑 <strong>Must NOT</strong> tell the two ways apart by colour alone, run a figure past its tile's edge, or read a tile as stray words</td>
+</tr>
 </tbody>
 </table></div>
 </li>
 <li>⚙️ <strong>Developer Guide &amp; Release Confidence</strong>:
 <ul>
+<li>The line's speed (November 2026): on the wire, a third data channel, <code>packetpulse-speed</code>, unordered and never retransmitted as the probe channel is, opened on the open connection after the summary; its frames, and why it is not a reliable transfer (through a line that drops what it cannot carry, the WebRTC library's recovery read 100 Mbit/s as 6), are at the top of <code>packetpulsego/pkg/reflectormicroservice/reflectorcore/ReflectorSpeed.go</code>. The reflector's half is there too - <code>onSpeed</code>, <code>startDownload</code>, <code>download</code>, the pace <code>speedPace.hear</code>, and <code>countUpload</code>: one download a session, no longer than <code>Limits.MaxSpeedDuration</code> (10 s on a customer's reflector, none on the hosted one), no faster than <code>Limits.MaxSpeedMbps</code> (500), no more than <code>Limits.MaxSpeedTransfers</code> (4) at once, never faster than twice what its receiver last counted, and only down a connection whose DTLS handshake the browser completed; <code>SetSCTPMinCwnd</code> in <code>packetpulsego/pkg/reflectormicroservice/reflectorcore/ReflectorEngine.go</code> keeps the library's own congestion window from pacing it as well. Held, against a real WebRTC peer on loopback, by <code>packetpulsego/pkg/reflectormicroservice/reflectorcore/ReflectorSpeed_test.go</code>. The page's half is <code>measureSpeed</code>, <code>speedPace</code> and <code>fastestMbps</code> in <code>packetpulseweb/assets/packetpulse-udp.js</code> (the fastest second, the upload paced from the reflector's counts, <em>at least</em> when the line was never found full), tested against a simulated line and browser on a virtual clock in <code>packetpulseweb/assets/packetpulse-udp.test.mjs</code>. The two pace by the same numbers and are run through the same cases: <code>speed_pacing</code> in <code>packetpulsetest/contracts/udp_test_limits.json</code>. The server's seconds are <code>UDP_TEST_SPEED_SECONDS</code> (<code>packetpulsego/pkg/common/config/Config.go</code>, 0 to 10), carried by <code>packetpulsego/pkg/common/devicetest/DeviceTest.go</code> on every session and by <code>paced</code> on every offer answer (<code>speed_seconds</code>); the reflector's own limit is <code>limits.max_speed_seconds</code> in its signed answer and <code>max_speed_seconds</code> on its <code>/healthz</code>. In the app: <code>UdpSpeed</code> in <code>packetpulseflutter/lib/diagnosticmicroservice/service/udp/UdpProbeRun.dart</code>, the card <code>_lineSpeed</code> in <code>ClientProbeScreen.dart</code>, filed as <code>download_mbps</code> and <code>upload_mbps</code> (migration 0021) and printed by <code>lineSpeed</code> in <code>packetpulsego/pkg/pingmicroservice/pingreport/PingReportPdfBuilder.go</code>. The CSV's last two columns, <code>download_mbps</code> and <code>upload_mbps</code> (two places, on every row of the test), and the Results API ticket's <code>download_mbps</code> and <code>upload_mbps</code> (as filed, <code>null</code> where none) carry it (<code>CSV-009</code>, <code>API-009</code>); <code>packetpulsego/pkg/diagnosticmicroservice/diagnosticexport/DiagnosticExport.go</code> writes them, <code>exportColumns</code> in <code>DiagnosticExportPostgres.go</code> reads them, <code>resultsTicket</code> in <code>DiagnosticHandlers.go</code> serves them, and the shared contract is <code>packetpulsetest/contracts/result_export_columns.json</code>.</li>
 <li>The reflector: <code>packetpulsego/pkg/reflectormicroservice/reflectorcore/ReflectorEngine.go</code> (pion, ICE-lite, passive DTLS, multicast DNS off, one multiplexed UDP port), <code>packetpulsego/pkg/reflectormicroservice/reflectorcore/ReflectorSession.go</code> (the caps and the per-sequence bitmap) and <code>packetpulsego/pkg/reflectormicroservice/reflectorcore/ReflectorProtocol.go</code> (the frames). An echo is exactly as long as its probe, so the reflector cannot amplify. Offers declaring <code>a=ice-lite</code> are refused: with both ends lite, pion selects a pair without any check and sends to it, and <code>TestALiteOfferNeverMakesTheReflectorSendToACallerChosenAddress</code> proves a caller-chosen address hears nothing.</li>
 <li>Real loss: <code>TestRealLossIsSplitExactlyByDirection</code> in <code>packetpulsego/pkg/reflectormicroservice/reflectorcore/ReflectorLoss_test.go</code> drops real datagrams through a UDP proxy and checks the bitmap and the echoes against the drops; it also fails if the probe channel ever retransmits.</li>
 <li>Signalling: <code>packetpulsego/pkg/reflectormicroservice/reflectorapp/ReflectorRouteHandler.go</code> (per-address limit, signatures, replay refusal, the signed answer) with <code>packetpulsego/pkg/reflectormicroservice/reflectorsign/ReflectorSign.go</code> (keys derived from <code>REFLECTOR_KEY_SECRET</code>, never stored). The hosted reflector: <code>packetpulsego/cmd/packetpulseserver/PacketPulseReflector.go</code>. The customer daemon: <code>packetpulsego/cmd/packetpulsereflector/main.go</code>, <code>scripts/reflector/install-reflector.sh</code>, <code>scripts/reflector/packetpulsereflector.service</code>.</li>
@@ -3693,7 +3785,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>Integrator</td>
 <td>One ticket as JSON</td>
 <td><code>curl -H &quot;Authorization: Bearer &lt;key&gt;&quot; https://…/api/v1/result/bytt/TT-MAN-001</code></td>
-<td>The ticket with every result, including <code>ip_version</code>, <code>report_only</code>, and each UDP result's <code>reflector_address</code> and <code>reflector_ip</code>; at the top, <code>user_ip</code> and <code>user_ipv6</code>, the public IPv4 and IPv6 a device test came from (empty for a server sweep), and <code>test_location</code> with its <code>address</code> and <code>address_source</code> once the test's own address is found. 🛑 <strong>Must NOT</strong> carry <code>resolved_ip</code> (customer request, 28 October 2026)</td>
+<td>The ticket with every result, including <code>ip_version</code>, <code>report_only</code>, and each UDP result's <code>reflector_address</code> and <code>reflector_ip</code>; at the top, <code>user_ip</code> and <code>user_ipv6</code>, the public IPv4 and IPv6 a device test came from (empty for a server sweep), and <code>test_location</code> with its <code>address</code> and <code>address_source</code> once the test's own address is found, and <code>download_mbps</code> and <code>upload_mbps</code>, the line's speed in Mbit/s as the test measured it (<code>null</code> where it measured none). 🛑 <strong>Must NOT</strong> carry <code>resolved_ip</code> (customer request, 28 October 2026)</td>
 </tr>
 <tr>
 <td><code>API-007</code></td>
@@ -3736,6 +3828,13 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>A key never starts a test</td>
 <td><code>curl -X POST -H &quot;Authorization: Bearer &lt;key&gt;&quot; -d '{&quot;customer_id&quot;:&quot;CUST-MAN-008&quot;,&quot;tt_number&quot;:&quot;TT-MAN-008&quot;}' https://…/api/v1/diagnostic/submit</code>; the same to <code>/ping/run</code>; then, signed in, open TT <code>TT-MAN-008</code> in <strong>History</strong></td>
 <td>401 each; no ticket <code>TT-MAN-008</code> and no new sweep. Only a signed-in person starts a test. 🛑 <strong>Must NOT</strong> run or open anything for a key</td>
+</tr>
+<tr>
+<td><code>API-009</code></td>
+<td>Integrator</td>
+<td>The line's speed is in the ticket</td>
+<td>After <code>CSV-009</code>: <code>curl -H &quot;Authorization: Bearer &lt;key&gt;&quot; https://…/api/v1/result/bytt/&lt;TT number&gt;</code> for the test that measured a speed, then for one that did not; and <code>…/result/bycustomer/&lt;customer ID&gt;</code></td>
+<td>At the top of each ticket, <code>download_mbps</code> and <code>upload_mbps</code> in Mbit/s as filed (87.436, not rounded), the same for every result of it; <code>null</code> - present, not absent, never 0 - for the one that measured none. Each ticket of the by-customer list has them too. 🛑 <strong>Must NOT</strong> carry a floor as a figure, or leave the fields out of a ticket that has none</td>
 </tr>
 </tbody>
 </table></div>
@@ -6360,6 +6459,11 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/packetpulse/releases/&lt;previous&gt;
 <td><code>UDP_TEST_RATE_PPS</code></td>
 <td><code>10</code></td>
 <td>The pace of every UDP test a person runs from a device, in packets a second: set here, never by the person (customer request, 28 October 2026). 1 to 20 - every reflector holds the longest test, 300 s, at 20 - or the server stops at boot. Sent to the app on every session and with every offer answer.</td>
+</tr>
+<tr>
+<td><code>UDP_TEST_SPEED_SECONDS</code></td>
+<td><code>5</code></td>
+<td>How long data is moved each way, after a UDP test, to measure the line's download and upload speed to the same reflector (customer request, November 2026): set here, never by the person. 0 to 10 - 0 measures none, and past 10, the longest a reflector allows, the server stops at boot. Sent to the app on every session and with every offer answer (<code>speed_seconds</code>). A reflector released before November 2026 measures none whatever is set.</td>
 </tr>
 <tr>
 <td><code>IPV6_TESTS_ENABLED</code></td>
