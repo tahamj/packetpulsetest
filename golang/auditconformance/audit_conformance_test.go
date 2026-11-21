@@ -144,6 +144,8 @@ func TestEveryMutationRouteIsRegistered(t *testing.T) {
 		"RouteSetAppearance":       "a personal theme preference, not authority",
 		"RouteReflectorSession":    "public: an anonymous UDP test on the self-test page; it changes nothing and names nobody",
 		"RouteEndpointWebRtcOffer": "relays a test's offer and changes nothing; attaching its result is /diagnostic/clientobservation, audited",
+		"RouteLaunch":              "public: the field app's server, which no principal names; each link it asks for is recorded by PartnerMS itself, naming its certificate (migration 0043)",
+		"RouteSignInLaunch":        "public; it opens the session of a link PartnerMS recorded when it was asked for, and a field engineer's sign-in is their check-in",
 	}
 
 	// The registry matches on a path SUFFIX, so collect the suffixes it

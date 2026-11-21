@@ -239,12 +239,12 @@ nav.side .nohit.on{display:block}
 <tbody>
 <tr>
 <td style="text-align:center"><strong>17</strong> <br><sub>in the navigation rail</sub></td>
-<td style="text-align:center"><strong>104</strong> <br><sub>under <code>/api/v1</code></sub></td>
+<td style="text-align:center"><strong>110</strong> <br><sub>under <code>/api/v1</code></sub></td>
 <td style="text-align:center"><strong>16</strong> <br><sub>3 built-in roles</sub></td>
-<td style="text-align:center"><strong>42</strong> <br><sub>applied at boot</sub></td>
-<td style="text-align:center"><strong>1383</strong> <br><sub>English, server-served</sub></td>
+<td style="text-align:center"><strong>44</strong> <br><sub>applied at boot</sub></td>
+<td style="text-align:center"><strong>1415</strong> <br><sub>English, server-served</sub></td>
 <td style="text-align:center"><strong>20</strong> <br><sub>one per screen</sub></td>
-<td style="text-align:center"><strong>11</strong> <br><sub>+ <code>load</code>, opt-in</sub></td>
+<td style="text-align:center"><strong>12</strong> <br><sub>+ <code>load</code>, opt-in</sub></td>
 </tr>
 </tbody>
 </table></div>
@@ -672,9 +672,9 @@ nav.side .nohit.on{display:block}
 </tr>
 <tr>
 <td><strong>Line speed, measured to the reflector</strong></td>
-<td>After a browser's UDP test the line's download and upload speed are measured to the same reflector, over the same connection, for the server's <code>UDP_TEST_SPEED_SECONDS</code> (5) each way, and filed with the run: on the ticket and on its PDF (customer request, November 2026). A reflector released before November 2026 measures none, and the run says so; a line the browser could not fill in the time reads <em>At least …</em>, and is not filed. The run, its ticket and the Measure speed card show it alike, a tile each way; the PDF prints <strong>Download speed</strong> and <strong>Upload speed</strong>. The CSV (last two columns) and the Results API carry it as <code>download_mbps</code> and <code>upload_mbps</code>. The <strong>Measure speed</strong> button, which measured through Cloudflare, stays set aside; a speed filed with a run before still shows with it.</td>
-<td><code>UDP-053</code> to <code>UDP-060</code>, <code>CSV-009</code>, <code>API-009</code>, <code>DEV-005</code></td>
-<td><code>packetpulsego/pkg/reflectormicroservice/reflectorcore/ReflectorSpeed.go</code><br><code>packetpulseweb/assets/packetpulse-udp.js</code><br><code>packetpulseflutter/lib/common/config/PacketPulseConfig.dart</code><br><code>packetpulseflutter/lib/diagnosticmicroservice/presentation/widgets/LineSpeedPanel.dart</code></td>
+<td>After a browser's UDP test the line's download and upload speed are measured to the same reflector, over the same connection, for the server's <code>UDP_TEST_SPEED_SECONDS</code> (5) each way, and filed with the run: on the ticket and on its PDF (customer request, November 2026). A reflector released before November 2026 measures none, and the run says so; one of the release of 19 November 2026 or later sends the download as video packets the browser counts itself, so a phone's slow uplink no longer holds its download down; a line the browser could not fill in the time reads <em>At least …</em>, and is not filed. While each way is measured a dial follows what the line carries. The run, its ticket and the Measure speed card show it alike, a tile each way; the PDF prints <strong>Download speed</strong> and <strong>Upload speed</strong>. The CSV (last two columns) and the Results API carry it as <code>download_mbps</code> and <code>upload_mbps</code>. The <strong>Measure speed</strong> button, which measured through Cloudflare, stays set aside; a speed filed with a run before still shows with it.</td>
+<td><code>UDP-053</code> to <code>UDP-065</code>, <code>CSV-009</code>, <code>API-009</code>, <code>DEV-005</code></td>
+<td><code>packetpulsego/pkg/reflectormicroservice/reflectorcore/ReflectorSpeed.go</code><br><code>packetpulsego/pkg/reflectormicroservice/reflectorcore/ReflectorMedia.go</code><br><code>packetpulseweb/assets/packetpulse-udp.js</code><br><code>packetpulseflutter/lib/common/config/PacketPulseConfig.dart</code><br><code>packetpulseflutter/lib/diagnosticmicroservice/presentation/widgets/LineSpeedPanel.dart</code><br><code>packetpulseflutter/lib/diagnosticmicroservice/presentation/widgets/LineSpeedDial.dart</code></td>
 </tr>
 <tr>
 <td><strong>One Run diagnostic page</strong></td>
@@ -1361,7 +1361,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>Visitor, then Engineer</td>
 <td>A walkthrough is given the example ticket</td>
 <td>Sign in to the demo (<code>DEMO-001</code>, or any account in the <code>DEMO_ORGANISATION_CODE</code> organisation); open <strong>Run diagnostic</strong>; change the TT number to <code>TT-DEMO-2</code>; <strong>Start test</strong>; <strong>Attach to a ticket</strong>. Then sign in as an engineer of a non-demo organisation and open <strong>Run diagnostic</strong></td>
-<td>The demo's <strong>Customer ID</strong> reads <code>CUST-88412</code> and its <strong>TT number</strong> <code>TT-2026-00731</code> as the page opens; the run is filed under <code>CUST-88412</code> and <code>TT-DEMO-2</code>. The other organisation's fields are empty. 🛑 <strong>Must NOT</strong> fill in a ticket for any organisation but the demo, or put back the example over what the visitor typed</td>
+<td>The demo's <strong>Customer ID</strong> reads <code>CUST-88412</code> and its <strong>TT number</strong> <code>TT-2026-00731</code> as the page opens; the run is filed under <code>CUST-88412</code> and <code>TT-DEMO-2</code>. The other organisation's fields are empty. 🛑 <strong>Must NOT</strong> fill in a ticket for any organisation but the demo, or put back the example over what the visitor typed or over a field app's ticket (<code>FAPP-013</code>)</td>
 </tr>
 </tbody>
 </table></div>
@@ -3202,7 +3202,7 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: The only browser test that sees real packet loss, and says which way it was lost. Run from <strong>Run diagnostic</strong> where the customer is, in 30 seconds it tells the engineer whether the customer's uplink drops packets, their downlink does, or packets arrive too late to play — the three causes of a choppy call, told apart from where the customer sits.</li>
 <li>📖 <strong>User Guide &amp; Operational Flow</strong>: The UDP test runs in <strong>Run diagnostic</strong> (below). It sends small UDP packets (200 bytes each) to a reflector at the server's pace - 10 a second unless <code>UDP_TEST_RATE_PPS</code> sets another, never the person's choice (customer request, 28 October 2026) - over IPv4. The public self-test offered it too, as <strong>PacketPulse network — UDP, like a call</strong>, until 17 October 2026, when it was removed with the site's links to the self-test: it needed PacketPulse's own reflector, which the live host keeps off. Loss is counted at the end, per packet, when the reflector says which packets reached it; until then the loss tile shows a dash. A packet back more than a second after it was sent is <em>late</em>, and counts in the loss figure, because a call would have played silence. <em>Not sent (device busy)</em> counts slots the browser could not keep; they are left out of every percentage. Keep the tab in front: a hidden tab stops the test. While a test runs the page keeps the screen on (the browser's screen wake lock, where it has one), and the controls say <em>Keep PacketPulse on screen until the test finishes…</em>.
 <ul>
-<li><strong>The line's speed</strong> (customer request, November 2026) is measured after the packets, over the same connection, to the same reflector: a download and then an upload, each for as long as the server says - 5 seconds unless <code>UDP_TEST_SPEED_SECONDS</code> sets another, 0 for none - never beside the paced packets, where it would be measured as loss. Each way the sender sends numbered packets that are never sent again, and the receiver counts what arrives: the sender raises its pace while everything arrives as fast as it is sent, and settles just under what arrives once the line is full. The speed is the fastest rate of arrival the line kept up for a second, each packet counted whole as the line carried it. The controls say so before <strong>Start test</strong>, with what it moves (<em>…about 63 MB each way on a 100 Mbit/s line…</em>); while it runs they say <em>Measuring download</em>, then <em>Measuring upload</em>, and the <strong>Line speed</strong> card stands where the figures will be, the direction under way <em>Measuring…</em> with a moving bar (still where motion is turned down) and the other <em>Next</em> or <em>Done</em>. The run then shows the card with a tile each way - an arrow, <strong>Download</strong> or <strong>Upload</strong>, the figure large and <em>Mbit/s</em> apart, side by side or one above the other on a phone - and <em>Measured after the test, to the same reflector, for 5 seconds each way.</em> (review of 17 November 2026: it was two label-and-value lines, a floor in the same type as a full figure). It is filed with the run: the ticket shows the same card, smaller, and its PDF prints <strong>Download speed</strong> and <strong>Upload speed</strong> after the user's addresses, a direction with no figure <em>Not recorded</em>. A direction with no figure is a dash over <em>Could not be measured</em>, and the card says why: the reflector measures no speed (every reflector released before November 2026 - install the new release, <code>UDP-042</code>), it was measuring four at once already, the test was stopped, the page was hidden, or the measurement was cut short. A line that was never filled - it is faster than the measurement paced (500 Mbit/s at most, and about 300 through a browser), or the browser's own connection would not let packets go fast enough, as it sometimes will not on a fast line over a path longer than about 50 ms there and back - reads with an <em>At least</em> badge in front of its figure and <em>Not filed with the ticket</em> under it, and that figure is not filed: a ticket's speed is the line's, never a floor under it. The test's own loss and jitter stand in every case. Checked against lines of known speed in Chrome (November 2026): within about 5% from 0.5 to 300 Mbit/s down and up on paths up to 50 ms there and back, and on the download on every path tried; it is the speed to the operator's reflector over UDP, and will not match a speed-test site that measures to somewhere else over many TCP streams.</li>
+<li><strong>The line's speed</strong> (customer request, November 2026) is measured after the packets, over the same connection, to the same reflector: a download and then an upload, each for as long as the server says - 5 seconds unless <code>UDP_TEST_SPEED_SECONDS</code> sets another, 0 for none - never beside the paced packets, where it would be measured as loss. Each way the sender sends numbered packets at a pace and the receiver counts what arrives: the sender raises its pace while everything arrives as fast as it is sent, and settles just under what arrives once the line is full. The speed is the fastest rate of arrival the line kept up for a second, each packet counted whole as the line carried it. To a reflector of the release of 19 November 2026 or later, the download comes as video packets (RTP) on a track the page adds to the same connection once the test is over, and the browser counts them itself: on a data channel the browser acknowledges every second packet, up the line the download comes down, and a phone whose mobile uplink carried 3.7 Mbit/s had its 250 Mbit/s download held to about 100 by its own acknowledgements, and read anything from 2 to 82 (review of 19 November 2026). Before each way the line is let go quiet - the last of what went before has arrived - and while each runs, small probes read the queue in front of the line each way: a full line keeps a queue, and a browser whose own connection will not fill the line leaves none. The controls say so before <strong>Start test</strong>, with what it moves (<em>…about 63 MB each way on a 100 Mbit/s line…</em>); while it runs they say <em>Measuring download</em>, then <em>Measuring upload</em>, and the <strong>Line speed</strong> card stands where the figures will be, the direction under way <em>Measuring…</em> with a moving bar (still where motion is turned down) and the other <em>Next</em> or <em>Done</em>. The run then shows the card with a tile each way - an arrow, <strong>Download</strong> or <strong>Upload</strong>, the figure large and <em>Mbit/s</em> apart, side by side or one above the other on a phone - and <em>Measured after the test, to the same reflector, for 5 seconds each way.</em> (review of 17 November 2026: it was two label-and-value lines, a floor in the same type as a full figure). It is filed with the run: the ticket shows the same card, smaller, and its PDF prints <strong>Download speed</strong> and <strong>Upload speed</strong> after the user's addresses, a direction with no figure <em>Not recorded</em>. A direction with no figure is a dash over <em>Could not be measured</em>, and the card says why: the reflector measures no speed (every reflector released before November 2026 - install the new release, <code>UDP-042</code>), it was measuring four at once already, the test was stopped, the page was hidden, or the measurement was cut short. A line that was not seen full where its speed was read - it is faster than the measurement paced (500 Mbit/s at most, and about 300 through a browser), or the browser's own connection would not let packets go fast enough, as it will not on a fast line over a long path, or a lossy one: no queue stood in front of the line, and nothing was lost more than once - reads with an <em>At least</em> badge in front of its figure and <em>Not filed with the ticket</em> under it, and that figure is not filed: a ticket's speed is the line's, never a floor under it. The test's own loss and jitter stand in every case. Checked against lines of known speed in Chrome, through a shaping relay that also gives a line a mobile radio's pauses, random loss and swings (19 November 2026): the download within 1-5% from 2 to 300 Mbit/s on every line tried - 250.0 on a line of 250 down and 3.7 up, where the release before read 46 - and the upload within 5% wherever the browser fills the line; on a lossy uplink the browser's own connection holds the upload back, and it reads <em>At least</em>. It is the speed to the operator's reflector: a speed-test site measures to a server of its own, usually nearer, over TCP, and a path to the reflector that is longer or lossier reads less - which is the line's speed to the reflector.</li>
 <li>When UDP cannot get through, the test says <em>UDP is blocked on this network</em>, and never shows that as 100% loss. It says so only after a second, fresh connection got nothing through either (since 14 October 2026): a first connection that gets no answer is retried at once, with <em>No UDP came back on that connection; trying once more on a fresh one.</em> in the log, and a run that then measures logs <em>The first connection got no UDP through and the second did…</em> beside its figures. A browser that sent no UDP at all — a setting, an extension or a VPN keeping WebRTC off it — is told <em>This browser sent no UDP, so the network was not tested…</em>, not that the network blocks UDP.</li>
 <li>The reflector logs how each session ended (<code>/opt/packetpulse/logs/packetpulse.log</code>, <em>reflector session ended</em>): <code>connected</code>, <code>checks_received</code> (the browser's connectivity checks that reached it), <code>answers_sent</code>, <code>probes_received</code> and <code>lifetime_ms</code>. For a run told <em>UDP is blocked</em>, <code>checks_received=0</code> means the network dropped the browser's packets on the way in; checks received and answered with <code>connected=false</code> means the answers were lost on the way back. It was added for a laptop in Dubai that was intermittently told UDP was blocked while one in Bengaluru was not.</li>
 <li>A customer's own reflector (<code>packetpulsereflector</code>, on a PoP, an SBC's neighbour or a VPS) is installed with its endpoint's key: <code>POST /diagnostic/endpoint/{dnsSiteId}/reflector-key</code> returns the key and the install line, <code>sudo ./install-reflector.sh --key &lt;key&gt; [--public-ip &lt;address&gt;]</code>. Sessions on it are then opened only through <code>POST /diagnostic/endpoint/{dnsSiteId}/webrtc-offer</code>, which signs the request and checks that the answer is signed back.</li>
@@ -3628,14 +3628,14 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>RIVAL tester</td>
 <td>A download nobody may pull</td>
 <td>Against a development reflector (<code>packetpulsereflector -open</code>), open a session and a <code>packetpulse-speed</code> channel that is reliable, or in order; then one as the page opens it, unordered and never retransmitted: ask for a download of 60 s and say nothing of what arrives; then say everything arrives, on a reflector started for a line of your own</td>
-<td>The reliable and the ordered channel are closed unserved. Nobody counting, the download stays at its starting 8 Mbit/s and stops at the reflector's 10 s; a second request starts nothing. Told everything arrives, it is never paced past 500 Mbit/s, and falls back to 8 a second after the counts stop. 🛑 <strong>Must NOT</strong> send a download to a session that did not ask, a second to one that did, faster than twice what its receiver last counted, or at all from the hosted reflector</td>
+<td>The reliable and the ordered channel are closed unserved. Nobody counting, the download stays at its starting 8 Mbit/s and stops at the reflector's 10 s; a second request starts nothing. Told everything arrives, it is never paced past 500 Mbit/s, and falls back to 8 a second after the counts stop. A <code>packetpulse-speed-words</code> channel is served only unordered and resending what it loses, and only where speed is measured; on it, a probe numbered 0 is echoed with the reflector's times and any other probe is not answered. 🛑 <strong>Must NOT</strong> send a download to a session that did not ask, a second to one that did, faster than twice what its receiver last counted, or at all from the hosted reflector</td>
 </tr>
 <tr>
 <td><code>UDP-059</code></td>
 <td>Engineer</td>
 <td>A line that was not filled says so</td>
-<td>Test from a browser a long way from the reflector (more than about 50 ms there and back, as the round trip on the ticket shows) on a line of 40 Mbit/s up or more; or any line past 500 Mbit/s</td>
-<td>Where the browser could not fill the line in its five seconds, that direction's tile turns amber, puts an <em>At least</em> badge in front of its figure and says <em>Not filed with the ticket</em> under it; under the tiles the card says once <em>At least means the line was not filled in the time the measurement had…</em>; and the ticket files no speed for it. The other direction is a full figure and is filed as usual. 🛑 <strong>Must NOT</strong> file a floor as the line's speed, or call a filled line <em>At least</em></td>
+<td>Test from a browser a long way from the reflector (more than about 50 ms there and back, as the round trip on the ticket shows) on a line of 40 Mbit/s up or more; or a phone on mobile data with some loss; or any line past 500 Mbit/s</td>
+<td>Where the line was not seen full where its speed was read - the browser could not fill it, so no queue stood in front of it and nothing was lost more than once - that direction's tile turns amber, puts an <em>At least</em> badge in front of its figure and says <em>Not filed with the ticket</em> under it; under the tiles the card says once <em>At least means the line was not filled in the time the measurement had…</em>; and the ticket files no speed for it. The other direction is a full figure and is filed as usual. A line filled for a while and then measured a little faster is still the line's speed. 🛑 <strong>Must NOT</strong> file a floor as the line's speed, call a filled line <em>At least</em>, or file a figure a brief pause on the line made look full</td>
 </tr>
 <tr>
 <td><code>UDP-060</code></td>
@@ -3644,12 +3644,47 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>After <code>UDP-053</code>, look at the <strong>Line speed</strong> card at full width; narrow the window to a phone's width; switch the theme to dark; then read the card with a screen reader (VoiceOver or TalkBack)</td>
 <td>At full width the <strong>Download</strong> and <strong>Upload</strong> tiles sit side by side, as tall as each other, each with its arrow (down, up), its name, its figure in large fixed-width type and <em>Mbit/s</em> beside it; at a phone's width one above the other, a four-figure speed made smaller to fit, never cut. In the dark theme every word stays readable. The screen reader reads each tile as one item - <em>Download, 87.4, Mbit/s</em>; a floor <em>Upload, At least, 5.5, Mbit/s, Not filed with the ticket</em>. 🛑 <strong>Must NOT</strong> tell the two ways apart by colour alone, run a figure past its tile's edge, or read a tile as stray words</td>
 </tr>
+<tr>
+<td><code>UDP-061</code></td>
+<td>Engineer</td>
+<td>A slow uplink does not hold the download down</td>
+<td>On a phone on mobile data, test an endpoint whose reflector is of the release of 19 November 2026 or later; then, from the same phone, run a speed-test site</td>
+<td>The download reads the line's speed to the reflector - close to the speed-test site's on a reflector as near, and never held to a fraction of it by the phone's upload: on a phone whose upload reads about 4 Mbit/s, a download of 250 reads about 250, not 100 or less. Two runs a few minutes apart read within the line's own swings of each other. The upload reads near the speed-test site's, or <em>At least</em> where the phone's own connection held it back. 🛑 <strong>Must NOT</strong> read a fast download as a fraction of itself because the uplink is slow, or differ run to run by a factor of three on the same line</td>
+</tr>
+<tr>
+<td><code>UDP-062</code></td>
+<td>Engineer</td>
+<td>A reflector of an earlier release still measures</td>
+<td>Test an endpoint whose reflector is the release of 17 November 2026 (its <code>/healthz</code> says <code>max_speed_seconds</code> but not <code>speed_media</code>), on a phone on mobile data as well as on a computer</td>
+<td>The speed is measured as before, the download on a data channel: the page offers that reflector no words channel and no track - neither of which it knows - and nothing waits on a probe it cannot answer, so the run takes no longer than before. 🛑 <strong>Must NOT</strong> open a channel that reflector closes - on a phone's line its close arrived a moment after the channel opened, the page sent on it, and every run's speed ended <em>cut short</em> (19 November 2026) - offer it a track, or fail the test</td>
+</tr>
+<tr>
+<td><code>UDP-063</code></td>
+<td>RIVAL tester</td>
+<td>An offer of a track may add one section, to receive on</td>
+<td>Against a development reflector (<code>packetpulsereflector -open</code>), open a session, then send on its control channel (<code>0x50 0x07</code> and an SDP) offers of a track that: restart ICE; change the DTLS fingerprint; add an audio section, or two video sections; send as well as receive; declare <code>a=ice-lite</code>; are not SDP at all; then a good offer twice; then any offer to the hosted reflector</td>
+<td>Each is answered <code>0x50 0x87</code> with no SDP, and the session's download goes on a data channel; only the first good offer is answered with a track, and the second is refused; the hosted reflector answers none. A good offer's answer lists the reflector's own address only: the page drops every candidate from it before taking it. 🛑 <strong>Must NOT</strong> take a new path, a new handshake or a second track from an offer, or send media from the hosted reflector</td>
+</tr>
+<tr>
+<td><code>UDP-064</code></td>
+<td>Engineer</td>
+<td>The line is let go quiet before each way</td>
+<td>On a phone on mobile data, test an endpoint whose reflector is of the release of 19 November 2026 or later; watch the controls between <em>Measuring download</em> and <em>Measuring upload</em></td>
+<td>Where the phone's uplink is still clearing what the download left, the upload starts once it is clear - up to three seconds later - and reads the line, not the queue: never a fifth of what a speed-test site reads from the same phone. 🛑 <strong>Must NOT</strong> start the upload behind the download's last packets</td>
+</tr>
+<tr>
+<td><code>UDP-065</code></td>
+<td>Engineer</td>
+<td>A dial follows the speed as it is measured</td>
+<td>Run a UDP test to an endpoint whose reflector measures speed, keep the tab in front, and watch the <strong>Line speed</strong> card through <em>Measuring download</em> and <em>Measuring upload</em>; then once more with motion turned down on the device, and once with a screen reader</td>
+<td>Above the two tiles a dial shows the way under way - its arrow, its name and its own colour - with a needle and a figure in Mbit/s that follow what the line carries, eased from one reading to the next about ten times a second, and a bar of how much of the way's time has gone. Its scale runs 0, 1, 5, 10, 25, 50, 100, 250, 500, each step the same share of the sweep, so a 2 Mbit/s line moves the needle as plainly as a 300 Mbit/s one. At the start of each way the figure is a dash; the upload's needle starts from nought, not from the download's figure. With motion turned down the needle jumps to each reading. The screen reader says <em>Download speed so far: 87.4 Mbit/s</em>, or <em>Download speed: starting</em>. When the run is over both dials stay, the same size, each resting at the figure kept - the fastest second, not the last reading - one above the other at a phone's width and side by side where both fit; a floor's dial wears the warning colour and says <em>At least</em>, a way with no figure rests at nought with a dash; the tiles under them say the same in words, and a screen reader reads the tiles, not the resting dials. A ticket opened from History shows the same two dials, subtler and side by side. 🛑 <strong>Must NOT</strong> show a reading of the other way, let the dials disappear once the run has its figures, shrink the run's dials once it is over, or read each mark of the scale aloud</td>
+</tr>
 </tbody>
 </table></div>
 </li>
 <li>⚙️ <strong>Developer Guide &amp; Release Confidence</strong>:
 <ul>
-<li>The line's speed (November 2026): on the wire, a third data channel, <code>packetpulse-speed</code>, unordered and never retransmitted as the probe channel is, opened on the open connection after the summary; its frames, and why it is not a reliable transfer (through a line that drops what it cannot carry, the WebRTC library's recovery read 100 Mbit/s as 6), are at the top of <code>packetpulsego/pkg/reflectormicroservice/reflectorcore/ReflectorSpeed.go</code>. The reflector's half is there too - <code>onSpeed</code>, <code>startDownload</code>, <code>download</code>, the pace <code>speedPace.hear</code>, and <code>countUpload</code>: one download a session, no longer than <code>Limits.MaxSpeedDuration</code> (10 s on a customer's reflector, none on the hosted one), no faster than <code>Limits.MaxSpeedMbps</code> (500), no more than <code>Limits.MaxSpeedTransfers</code> (4) at once, never faster than twice what its receiver last counted, and only down a connection whose DTLS handshake the browser completed; <code>SetSCTPMinCwnd</code> in <code>packetpulsego/pkg/reflectormicroservice/reflectorcore/ReflectorEngine.go</code> keeps the library's own congestion window from pacing it as well. Held, against a real WebRTC peer on loopback, by <code>packetpulsego/pkg/reflectormicroservice/reflectorcore/ReflectorSpeed_test.go</code>. The page's half is <code>measureSpeed</code>, <code>speedPace</code> and <code>fastestMbps</code> in <code>packetpulseweb/assets/packetpulse-udp.js</code> (the fastest second, the upload paced from the reflector's counts, <em>at least</em> when the line was never found full), tested against a simulated line and browser on a virtual clock in <code>packetpulseweb/assets/packetpulse-udp.test.mjs</code>. The two pace by the same numbers and are run through the same cases: <code>speed_pacing</code> in <code>packetpulsetest/contracts/udp_test_limits.json</code>. The server's seconds are <code>UDP_TEST_SPEED_SECONDS</code> (<code>packetpulsego/pkg/common/config/Config.go</code>, 0 to 10), carried by <code>packetpulsego/pkg/common/devicetest/DeviceTest.go</code> on every session and by <code>paced</code> on every offer answer (<code>speed_seconds</code>); the reflector's own limit is <code>limits.max_speed_seconds</code> in its signed answer and <code>max_speed_seconds</code> on its <code>/healthz</code>. In the app: <code>UdpSpeed</code> in <code>packetpulseflutter/lib/diagnosticmicroservice/service/udp/UdpProbeRun.dart</code>, the card <code>_lineSpeed</code> in <code>ClientProbeScreen.dart</code>, filed as <code>download_mbps</code> and <code>upload_mbps</code> (migration 0021) and printed by <code>lineSpeed</code> in <code>packetpulsego/pkg/pingmicroservice/pingreport/PingReportPdfBuilder.go</code>. The CSV's last two columns, <code>download_mbps</code> and <code>upload_mbps</code> (two places, on every row of the test), and the Results API ticket's <code>download_mbps</code> and <code>upload_mbps</code> (as filed, <code>null</code> where none) carry it (<code>CSV-009</code>, <code>API-009</code>); <code>packetpulsego/pkg/diagnosticmicroservice/diagnosticexport/DiagnosticExport.go</code> writes them, <code>exportColumns</code> in <code>DiagnosticExportPostgres.go</code> reads them, <code>resultsTicket</code> in <code>DiagnosticHandlers.go</code> serves them, and the shared contract is <code>packetpulsetest/contracts/result_export_columns.json</code>.</li>
+<li>The line's speed, as of 19 November 2026: the download as RTP on a track the page adds once the test is over, offered over the control channel and checked by <code>checkMediaOffer</code> in <code>packetpulsego/pkg/reflectormicroservice/reflectorcore/ReflectorMedia.go</code> (one video section added, to receive on; same ICE credentials and fingerprint; once a session); a fourth data channel, <code>packetpulse-speed-words</code>, reliable and unordered, for what the two ends say and the probes that read the queue (<code>onWords</code> in <code>ReflectorEngine.go</code>); the reflector says it can in <code>limits.speed_media</code> (<code>packetpulsego/pkg/reflectormicroservice/reflectorservice/ReflectorService.go</code>, through the relay) and <code>speed_media</code> on its <code>/healthz</code>. In the page: <code>addDownloadTrack</code>, <code>withoutCandidates</code>, <code>foundFull</code> and the probes' queue in <code>measureSpeed</code>. Held by <code>packetpulsego/pkg/reflectormicroservice/reflectorcore/ReflectorMedia_test.go</code> against a real pion peer that receives the RTP, and by the simulated browser in <code>packetpulseweb/assets/packetpulse-udp.test.mjs</code>. The speed channel itself (November 2026): on the wire, a third data channel, <code>packetpulse-speed</code>, unordered and never retransmitted as the probe channel is, opened on the open connection after the summary; its frames, and why it is not a reliable transfer (through a line that drops what it cannot carry, the WebRTC library's recovery read 100 Mbit/s as 6), are at the top of <code>packetpulsego/pkg/reflectormicroservice/reflectorcore/ReflectorSpeed.go</code>. The reflector's half is there too - <code>onSpeed</code>, <code>startDownload</code>, <code>download</code>, the pace <code>speedPace.hear</code>, and <code>countUpload</code>: one download a session, no longer than <code>Limits.MaxSpeedDuration</code> (10 s on a customer's reflector, none on the hosted one), no faster than <code>Limits.MaxSpeedMbps</code> (500), no more than <code>Limits.MaxSpeedTransfers</code> (4) at once, never faster than twice what its receiver last counted, and only down a connection whose DTLS handshake the browser completed; <code>SetSCTPMinCwnd</code> in <code>packetpulsego/pkg/reflectormicroservice/reflectorcore/ReflectorEngine.go</code> keeps the library's own congestion window from pacing it as well. Held, against a real WebRTC peer on loopback, by <code>packetpulsego/pkg/reflectormicroservice/reflectorcore/ReflectorSpeed_test.go</code>. The page's half is <code>measureSpeed</code>, <code>speedPace</code> and <code>fastestMbps</code> in <code>packetpulseweb/assets/packetpulse-udp.js</code> (the fastest second, the upload paced from the reflector's counts, <em>at least</em> when the line was never found full), tested against a simulated line and browser on a virtual clock in <code>packetpulseweb/assets/packetpulse-udp.test.mjs</code>. The two pace by the same numbers and are run through the same cases: <code>speed_pacing</code> in <code>packetpulsetest/contracts/udp_test_limits.json</code>. The server's seconds are <code>UDP_TEST_SPEED_SECONDS</code> (<code>packetpulsego/pkg/common/config/Config.go</code>, 0 to 10), carried by <code>packetpulsego/pkg/common/devicetest/DeviceTest.go</code> on every session and by <code>paced</code> on every offer answer (<code>speed_seconds</code>); the reflector's own limit is <code>limits.max_speed_seconds</code> in its signed answer and <code>max_speed_seconds</code> on its <code>/healthz</code>. In the app: <code>UdpSpeed</code> in <code>packetpulseflutter/lib/diagnosticmicroservice/service/udp/UdpProbeRun.dart</code>, the card <code>_lineSpeed</code> in <code>ClientProbeScreen.dart</code>, filed as <code>download_mbps</code> and <code>upload_mbps</code> (migration 0021) and printed by <code>lineSpeed</code> in <code>packetpulsego/pkg/pingmicroservice/pingreport/PingReportPdfBuilder.go</code>. The CSV's last two columns, <code>download_mbps</code> and <code>upload_mbps</code> (two places, on every row of the test), and the Results API ticket's <code>download_mbps</code> and <code>upload_mbps</code> (as filed, <code>null</code> where none) carry it (<code>CSV-009</code>, <code>API-009</code>); <code>packetpulsego/pkg/diagnosticmicroservice/diagnosticexport/DiagnosticExport.go</code> writes them, <code>exportColumns</code> in <code>DiagnosticExportPostgres.go</code> reads them, <code>resultsTicket</code> in <code>DiagnosticHandlers.go</code> serves them, and the shared contract is <code>packetpulsetest/contracts/result_export_columns.json</code>.</li>
 <li>The reflector: <code>packetpulsego/pkg/reflectormicroservice/reflectorcore/ReflectorEngine.go</code> (pion, ICE-lite, passive DTLS, multicast DNS off, one multiplexed UDP port), <code>packetpulsego/pkg/reflectormicroservice/reflectorcore/ReflectorSession.go</code> (the caps and the per-sequence bitmap) and <code>packetpulsego/pkg/reflectormicroservice/reflectorcore/ReflectorProtocol.go</code> (the frames). An echo is exactly as long as its probe, so the reflector cannot amplify. Offers declaring <code>a=ice-lite</code> are refused: with both ends lite, pion selects a pair without any check and sends to it, and <code>TestALiteOfferNeverMakesTheReflectorSendToACallerChosenAddress</code> proves a caller-chosen address hears nothing.</li>
 <li>Real loss: <code>TestRealLossIsSplitExactlyByDirection</code> in <code>packetpulsego/pkg/reflectormicroservice/reflectorcore/ReflectorLoss_test.go</code> drops real datagrams through a UDP proxy and checks the bitmap and the echoes against the drops; it also fails if the probe channel ever retransmits.</li>
 <li>Signalling: <code>packetpulsego/pkg/reflectormicroservice/reflectorapp/ReflectorRouteHandler.go</code> (per-address limit, signatures, replay refusal, the signed answer) with <code>packetpulsego/pkg/reflectormicroservice/reflectorsign/ReflectorSign.go</code> (keys derived from <code>REFLECTOR_KEY_SECRET</code>, never stored). The hosted reflector: <code>packetpulsego/cmd/packetpulseserver/PacketPulseReflector.go</code>. The customer daemon: <code>packetpulsego/cmd/packetpulsereflector/main.go</code>, <code>scripts/reflector/install-reflector.sh</code>, <code>scripts/reflector/packetpulsereflector.service</code>.</li>
@@ -4137,6 +4172,175 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <li>Filters are filled by <code>fillFilter</code> in <code>packetpulsego/pkg/common/ldapclient/LdapClient.go</code>: every <code>%s</code> (not only the first, as <code>fmt.Sprintf</code> did), <code>%u</code> in a group filter, <code>%%</code> as a percent sign; each value escaped.</li>
 <li>A user search answered with <code>sizeLimitExceeded</code> is the ambiguity (<code>ErrAmbiguousUser</code>), not an outage. Groups are read in pages of 500 with no cap on the count; a cap of 100 used to lose every group past it. Directory failures at sign-in are logged with their reason (<em>directory sign-in could not be completed</em>).</li>
 <li>Coverage: <code>packetpulsego/pkg/common/ldaptest/</code> (an in-process directory that answers as OpenLDAP or Active Directory: DN matching, AD's matching rules and sign-in names, size limits and paging, per-connection identity and access rules, unavailable binds, stalled StartTLS, silent hosts), <code>packetpulsego/pkg/common/ldapclient/LdapCustomerDirectory_test.go</code>, <code>packetpulsego/pkg/ldapmicroservice/ldapservice/LdapDirectoryProducts_test.go</code>, <code>packetpulsego/pkg/usermicroservice/userservice/UserDirectorySignIn_test.go</code>, <code>packetpulseflutter/test/ldap_settings_screen_test.dart</code>.</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h3 id="64-field-app-sign-in">6.4 📲 Field app sign-in<a class="anchor" href="#64-field-app-sign-in" aria-label="Link to this section">#</a></h3>
+<p><strong>Screen:</strong> Configure → <strong>Results API keys</strong> → <strong>Field app certificates</strong> (whoever may issue Results API keys, <code>apikey_manage</code>) · <strong>Routes:</strong> <code>POST /partner/launch</code> (the field app's server, through nginx's partner site), <code>POST /user/signin/launch</code> (the phone), <code>GET /partner/certificate/list</code>, <code>POST /partner/certificate/add</code>, <code>POST /partner/certificate/{certificateId}/revoke</code>, <code>GET /partner/role/list</code> (the roles the registrant may give: those whose rights they hold) · <strong>Access:</strong> the organisation's owner keeps the register; the launch takes the registered certificate</p>
+<ul>
+<li>🌟 <strong>Commercial Presentation &amp; Sales Pitch</strong>: Field engineers sign in once, to the operator's own Android/iOS app. One tap on a ticket opens PacketPulse's Run tests page already signed in as them, with the TT number and customer filled in - no second password, no code. The app's server proves itself with a certificate that never leaves it; PacketPulse answers with a link that works once, for a minute. Each engineer is named as the app names them, so every test, report and Results API answer says who ran it.</li>
+<li>📖 <strong>User Guide &amp; Operational Flow</strong>: The app's team makes a key and certificate on its server (<code>openssl req -x509 -newkey ec -pkeyopt ec_paramgen_curve:P-256 -nodes -days 397 …</code>) and sends PacketPulse's administrator the certificate only. Whoever may issue the organisation's Results API keys (<code>apikey_manage</code>; until 18 November 2026 the owner alone) pastes it under <strong>Field app certificates</strong>, names it, chooses the role the app's engineers get, and compares the SHA-256 fingerprint shown with the one the app's team reads out. The app's server then calls <code>POST https://partner.packetpulse.rummaan53.com/api/v1/partner/launch</code> presenting the certificate, with <code>engineer_id</code>, <code>email</code>, <code>name</code>, <code>tt_number</code> and <code>customer_id</code> - and, optionally, <code>return_url</code>, its own https page for the ticket - and opens the <code>url</code> it gets back at once. The phone sees PacketPulse's first screen at once (<em>Opening your ticket from the field app</em>), then Run tests with the ticket filled in under <em>Opened from your field app</em>, and - when the app sent <code>return_url</code> - <strong>Back to the field app</strong>, which returns in the same tab to the app's page, where the result appears by itself as soon as PacketPulse has graded it. The first launch for an engineer makes their account: it takes a place on the licence, has no password and cannot sign in on the website. Two certificates may be in use at once, so a renewal overlaps the old one; <strong>Revoke</strong> stops a certificate, and its unused links, from the next call. Field Eng App (<code>packetpulsetest/golang/fieldengapp/</code>) is a mock of such an app for trying all of this: <code>fiberapp-demo.rummaan53.com</code> live. It shows an engineer's day as a field app would: today's jobs by priority and SLA, a job's customer, line and timeline, the PacketPulse button, the result read back as a verdict, and <strong>Close job</strong>; a phone can install it on its home screen, so PacketPulse opens from it in the phone's in-app browser as from a real app. Each engineer's day is their own and begins afresh at sign-in, the SLAs counting down from then, so signing in again runs the demonstration again. Its sign-in is filled in with the first demo engineer, and a name under <strong>Demo accounts</strong> fills it with theirs; an answer from PacketPulse that is not PacketPulse's own error (an older server's bare 404) is told as what it means.</li>
+<li>🧪 <strong>Manual Testing Playbook</strong>:<div class="tw"><table><thead>
+<tr>
+<th>ID</th>
+<th>Persona</th>
+<th>Scenario</th>
+<th>Steps</th>
+<th>Observable Expected Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>FAPP-001</code></td>
+<td>Administrator</td>
+<td>Register the app's certificate</td>
+<td><code>fieldengapp keygen --cert app.crt --key app.key</code>; paste <code>app.crt</code> under <strong>Field app certificates</strong>, label <em>Field Eng App server</em>, role <em>NOC Engineer</em></td>
+<td>The certificate is listed with its subject, expiry and a fingerprint equal, character for character, to the one <code>keygen</code> printed</td>
+</tr>
+<tr>
+<td><code>FAPP-002</code></td>
+<td>Field engineer</td>
+<td>One tap opens Run tests</td>
+<td>In Field Eng App press <strong>Sign in</strong> (the form is filled in with <code>FE-1001</code> / <code>field1001</code>); open <code>TT-2026-01458</code>; tap <strong>Test this line in PacketPulse</strong></td>
+<td>PacketPulse opens on <strong>Run tests</strong>, signed in as Asha Rao, the TT number <code>TT-2026-01458</code> and Customer ID <code>CUST-40217</code> filled in; the address bar shows <code>/app/</code> with no code left in it</td>
+</tr>
+<tr>
+<td><code>FAPP-003</code></td>
+<td>Field engineer</td>
+<td>The engineer presses Start</td>
+<td>After <code>FAPP-002</code>, choose the endpoint as usual and press <strong>Start</strong></td>
+<td>The test runs and is filed under the ticket, run by Asha Rao. 🛑 <strong>Must NOT</strong> start a test by itself</td>
+</tr>
+<tr>
+<td><code>FAPP-004</code></td>
+<td>Field engineer</td>
+<td>The app reads the result back</td>
+<td>After <code>FAPP-003</code>, in Field Eng App tap <strong>See the result</strong></td>
+<td>A verdict from PacketPulse's own grading - <em>Healthy</em>, <em>Degraded</em> or <em>Fault on the line</em> - then <em>Tested by</em> Asha Rao, the download and upload speed and each endpoint's loss, latency and jitter; <code>GET /result/bytt/TT-2026-01458</code> carries <code>tested_by</code> and <code>tested_by_email</code></td>
+</tr>
+<tr>
+<td><code>FAPP-005</code></td>
+<td>Field engineer</td>
+<td>A link works once</td>
+<td>Copy the address Field Eng App sent the phone to before it loads; open it twice; then wait over a minute with a fresh one</td>
+<td>The first opens Run tests; the second and the late one say <em>This link has run out or was already used. Go back to the field app and tap the test button again.</em></td>
+</tr>
+<tr>
+<td><code>FAPP-006</code></td>
+<td>Field engineer</td>
+<td>The same engineer again</td>
+<td>Tap the button on another ticket</td>
+<td>The same PacketPulse account as before, renamed if the app's name for them changed. 🛑 <strong>Must NOT</strong> add a second person or take a second place on the licence</td>
+</tr>
+<tr>
+<td><code>FAPP-007</code></td>
+<td>Attacker</td>
+<td>No password opens an app account</td>
+<td>On the website, sign in with Asha's email and any password</td>
+<td><em>Incorrect email address or password</em>. 🛑 <strong>Must NOT</strong> send a code, or add a failed sign-in to the trail</td>
+</tr>
+<tr>
+<td><code>FAPP-008</code></td>
+<td>Attacker</td>
+<td>Only the registered certificate gets a link</td>
+<td><code>curl</code> the partner address with no certificate; with a fresh self-signed one; with the registered one after <strong>Revoke</strong></td>
+<td>401 each, the message naming the registered certificate. 🛑 <strong>Must NOT</strong> make any account</td>
+</tr>
+<tr>
+<td><code>FAPP-009</code></td>
+<td>Attacker</td>
+<td>The certificate header is believed from nginx alone</td>
+<td><code>curl -H &quot;X-PacketPulse-Client-Cert: &lt;the registered PEM, escaped&gt;&quot; https://packetpulse.rummaan53.com/api/v1/partner/launch</code></td>
+<td>404 from the ordinary site, which wipes that header and refuses the partner route. 🛑 <strong>Must NOT</strong> return a link</td>
+</tr>
+<tr>
+<td><code>FAPP-010</code></td>
+<td>RIVAL owner</td>
+<td>The register is the organisation's own</td>
+<td>RIVAL's owner lists certificates, then revokes ACME's by its id; RIVAL's app names ACME's engineer's email</td>
+<td>RIVAL's list has none of ACME's; the revoke 404s; the launch 409 (<em>belongs to another PacketPulse account</em>)</td>
+</tr>
+<tr>
+<td><code>FAPP-011</code></td>
+<td>NOC Engineer, then Administrator</td>
+<td>The register is kept with the Results API keys</td>
+<td>A NOC Engineer calls <code>GET /partner/certificate/list</code>; an Administrator who is not the owner - the demo's <em>Demo Administrator</em> once given <code>apikey_manage</code> - opens <strong>Results API keys</strong></td>
+<td>403 to the engineer; the administrator sees <strong>Field app certificates</strong> load, registers and revokes. <code>GET https://packetpulse.rummaan53.com/api/v1/partner/certificate/list</code> without a session answers 401, never 404. 🛑 <strong>Must NOT</strong> offer the register to anyone who may not issue Results API keys</td>
+</tr>
+<tr>
+<td><code>FAPP-012</code></td>
+<td>Owner</td>
+<td>A full licence makes no one</td>
+<td>With every place on the licence taken, a new engineer taps the button</td>
+<td>Field Eng App shows <em>Your organisation's PacketPulse licence covers no more people</em> (<code>seat_limit_reached</code>). 🛑 <strong>Must NOT</strong> add the person</td>
+</tr>
+<tr>
+<td><code>FAPP-013</code></td>
+<td>Field engineer</td>
+<td>The public demo takes the field app, within its cap</td>
+<td>Register the certificate in the <code>DEMO_ORGANISATION_CODE</code> organisation (<code>NWTEL</code> live) as its owner or its <em>Demo Administrator</em>; tap the button as in <code>FAPP-002</code>; then fill the demo as in <code>DEMO-003</code> and tap again</td>
+<td>The first opens Run tests with the app's <code>TT-2026-01458</code> and <code>CUST-40217</code>, not the demo's example <code>TT-2026-00731</code>; the second opens PacketPulse's sign-in saying <em>the demo is busy</em> (<code>demo_busy</code>). 🛑 <strong>Must NOT</strong> let a launch past the demo's cap, or put the demo's example over the app's ticket</td>
+</tr>
+<tr>
+<td><code>FAPP-014</code></td>
+<td>Field engineer</td>
+<td>A job closes in the app</td>
+<td>After <code>FAPP-004</code>, open the job; <strong>Close this job</strong>, choose <em>Fixed at the customer's premises</em>, <strong>Close job</strong></td>
+<td>The job shows <em>Closed</em> with how and when, offers no test button, and moves to the end of today's jobs. 🛑 <strong>Must NOT</strong> close without a resolution</td>
+</tr>
+<tr>
+<td><code>FAPP-015</code></td>
+<td>Demo Administrator</td>
+<td>The app's engineers hold no more than whoever registered the certificate</td>
+<td>As <code>demo-admin</code> (every right but people, roles, ACL and the directory), open <strong>Register a certificate</strong>; then <code>POST /partner/certificate/add</code> naming the Administrator role</td>
+<td>The role list offers NOC Engineer and Viewer, not Administrator, and loads without the people screens' rights (<code>GET /partner/role/list</code>); the Administrator one is refused (422 on <code>engineer_role_id</code>, <em>a role whose rights you hold yourself</em>). 🛑 <strong>Must NOT</strong> let anyone make administrators through the field app</td>
+</tr>
+<tr>
+<td><code>FAPP-016</code></td>
+<td>Field engineer</td>
+<td>Each tap replaces the engineer's earlier session</td>
+<td>Tap <strong>Test this line in PacketPulse</strong> four times within a few minutes, on the demo (<code>DEMO_SEATS</code>), then once more; then look under <strong>Sessions and licence</strong></td>
+<td>Every tap opens Run tests; the engineer has one <em>Field app</em> session, the newest. 🛑 <strong>Must NOT</strong> pile up a session per tap - on the demo four such taps once filled its cap and turned everyone away (<em>the demo is busy</em>)</td>
+</tr>
+<tr>
+<td><code>FAPP-017</code></td>
+<td>Field engineer</td>
+<td>The hand-over, both ways</td>
+<td>On a phone, in Field Eng App, open <code>TT-2026-01458</code> and tap <strong>Test this line in PacketPulse</strong>; run the test and file it; tap <strong>Back to the field app</strong></td>
+<td>At once a PacketPulse screen <em>Opening your ticket from the field app</em> (never a blank page); Run tests under <em>Opened from your field app</em>; the way back opens the same job, <em>Back from PacketPulse</em>, where <em>Waiting for PacketPulse's result…</em> turns into the verdict without a reload, and the jobs list shows it. Installed on the phone's home screen, PacketPulse opens over the app; closing it returns to the same job, never to the <em>Opening PacketPulse…</em> overlay, which after twenty seconds offers <strong>Back to the job</strong>. A <code>return_url</code> that is not https is refused (422). 🛑 <strong>Must NOT</strong> offer a way back to anything but the app's own https page</td>
+</tr>
+<tr>
+<td><code>FAPP-018</code></td>
+<td>Field engineer</td>
+<td>The way back is beside the attached run</td>
+<td>After <code>FAPP-017</code>'s test, without scrolling, <strong>Attach to a ticket</strong></td>
+<td>Beside <em>Attached to ticket TT-…</em> and <strong>View ticket</strong>: <em>Your field app can show this result now.</em> and <strong>Back to the field app</strong>, which opens the app's own page for the job in the same tab; before the run is attached it is not offered there, and on a session no field app opened, or one whose app named no page, never. 🛑 <strong>Must NOT</strong> make the engineer scroll back to the top of the page to leave</td>
+</tr>
+<tr>
+<td><code>FAPP-019</code></td>
+<td>Field engineer</td>
+<td>A way with no figure says so in the app</td>
+<td>In Field Eng App, open the result of a test whose upload was not filed (<em>At least</em>, or not measured) and whose download was</td>
+<td>The job's result and its live card show both tiles: <strong>Download</strong> with its figure and <em>Mbit/s</em>, <strong>Upload</strong> <em>Not recorded</em>; a test with no speed at all shows no tiles. 🛑 <strong>Must NOT</strong> show the download alone, as if the upload had gone missing</td>
+</tr>
+<tr>
+<td><code>FAPP-020</code></td>
+<td>Field engineer</td>
+<td>The speed reads as dials in the app</td>
+<td>In Field Eng App, open the result of a test with a download and an upload, then one whose upload was not filed; then watch a job's live card as its result lands</td>
+<td>Above the <strong>Download</strong> and <strong>Upload</strong> tiles two dials, side by side and subtle, each resting at its figure on PacketPulse's own scale (0 to 500 Mbit/s, each step between marks the same share of the sweep): the download in the app's blue, the upload in violet, a way with no figure at nought, in grey, with a dash. The live card draws the same dials as the result page. A screen reader reads the tiles, not the drawings. 🛑 <strong>Must NOT</strong> draw a way with no figure as a speed, differ between the live card and the result page, or overflow a phone's width</td>
+</tr>
+</tbody>
+</table></div>
+</li>
+<li>⚙️ <strong>Developer Guide &amp; Release Confidence</strong>:
+<ul>
+<li><code>packetpulsego/pkg/partnermicroservice/</code> (certificates, launches, links), <code>packetpulsego/pkg/usermicroservice/userservice/UserLaunch.go</code> (the session, through <code>newSession</code>), migration <code>0043_2026_11_18_partner_app_launch.sql</code>.</li>
+<li>The certificate is read from <code>X-PacketPulse-Client-Cert</code> only on a connection from a trusted proxy (<code>apiratelimit.FromTrustedProxy</code>). nginx's partner site asks every caller for a certificate (<code>ssl_verify_client optional_no_ca</code>) and passes <code>$ssl_client_escaped_cert</code>; the ordinary site wipes the header in <code>location /api/</code> and refuses <code>/api/v1/partner/launch</code> - that alone: the certificate register under <code>/api/v1/partner/certificate/</code> is the web app's, through this site (refusing all of <code>/api/v1/partner/</code> shut it, live, on 18 November 2026; <code>PacketPulsePartnerNginxCheck.sh</code> now fails on that). PacketPulse pins the SHA-256 of the certificate itself.</li>
+<li>A link's code is 32 random bytes; only its SHA-256 is stored, it lives 60 seconds, and the one statement that redeems it spends it - two phones with the same code open one session. A new link ends the engineer's earlier sessions before it opens one (<code>SessionRevokeAllForStaff</code> in <code>UserSignInLaunch</code>): an engineer the app signs in comes in no other way, so the newest tap is their one session. Revoking the certificate spoils its unused links.</li>
+<li><code>PARTNER_LAUNCH_APP_URL</code> is where links send the phone; empty takes no launches. <code>PARTNER_LAUNCHES_PER_MINUTE</code> is the app server's own limit.</li>
+<li>Coverage: <code>packetpulsego/pkg/partnermicroservice/</code>, <code>packetpulsego/pkg/usermicroservice/userservice/UserLaunch_test.go</code>, <code>packetpulsego/pkg/staffmicroservice/staffdomain/repository/StaffAppEngineerRepositoryPostgres_test.go</code>, and the <code>fieldapp</code> suite, <code>packetpulsetest/golang/fieldengapp/</code> - Field Eng App and its stand-in for nginx's partner site, driven against the server.</li>
 </ul>
 </li>
 </ul>
@@ -4837,6 +5041,21 @@ flutter run -d chrome --dart-define=PACKETPULSE_API_BASE_URL=http://localhost:18
 <td>Forms</td>
 <td>Required fields end with <code> *</code>; a refused save names each field; a form whose load failed offers no <strong>Save</strong></td>
 </tr>
+<tr>
+<td><code>NFR-021</code></td>
+<td>Pull a screen down from its top, on a phone or a tablet (since 18 November 2026)</td>
+<td>It reloads, as <strong>Try again</strong> does; <strong>Run diagnostic</strong> reloads its endpoints and settings, and does nothing while a test runs; <strong>Settings</strong> has nothing to reload. A desktop keeps its <strong>Refresh</strong> button (Dashboard, Sessions and licence, Platform), which a touch screen does without. 🛑 <strong>Must NOT</strong> reload under a running test</td>
+</tr>
+<tr>
+<td><code>NFR-022</code></td>
+<td>On <strong>Directory</strong>, <strong>Sign-in security</strong> or <strong>Result export</strong>, change a field, then pull</td>
+<td><em>Discard your changes?</em> - <strong>Keep editing</strong> keeps them and reloads nothing; <strong>Discard and reload</strong> brings back what was saved; with nothing changed, or once saved, it reloads at once. 🛑 <strong>Must NOT</strong> throw an unsaved edit away without asking</td>
+</tr>
+<tr>
+<td><code>NFR-023</code></td>
+<td><strong>Help</strong> on every screen</td>
+<td>The help icon in the top bar, beside the theme buttons, opens the open screen's help above it; another screen closes it and offers its own; no <strong>Help</strong> row above the screen, so a screen with no actions starts under the top bar. 🛑 <strong>Must NOT</strong> offer one screen's help on another</td>
+</tr>
 </tbody>
 </table></div>
 <h2 id="43-appearance-and-accessibility">4.3 Appearance and accessibility<a class="anchor" href="#43-appearance-and-accessibility" aria-label="Link to this section">#</a></h2>
@@ -5536,6 +5755,46 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/packetpulse/releases/&lt;previous&gt;
 </tr>
 <tr>
 <td><code>POST</code></td>
+<td><code>/partner/certificate/add</code></td>
+<td>member</td>
+<td><code>apikey_manage</code></td>
+<td style="text-align:center">—</td>
+<td style="text-align:center">✅</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/partner/certificate/list</code></td>
+<td>member</td>
+<td><code>apikey_manage</code></td>
+<td style="text-align:center">—</td>
+<td style="text-align:center">—</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/partner/certificate/{certificateId}/revoke</code></td>
+<td>member</td>
+<td><code>apikey_manage</code></td>
+<td style="text-align:center">—</td>
+<td style="text-align:center">✅</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/partner/role/list</code></td>
+<td>member</td>
+<td><code>apikey_manage</code></td>
+<td style="text-align:center">—</td>
+<td style="text-align:center">—</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/partner/launch</code></td>
+<td>public</td>
+<td>—</td>
+<td style="text-align:center">—</td>
+<td style="text-align:center">—</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
 <td><code>/platform/licence/{licenceId}/file</code></td>
 <td>superuser</td>
 <td>—</td>
@@ -5904,6 +6163,14 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/packetpulse/releases/&lt;previous&gt;
 </tr>
 <tr>
 <td><code>POST</code></td>
+<td><code>/user/signin/launch</code></td>
+<td>public</td>
+<td>—</td>
+<td style="text-align:center">—</td>
+<td style="text-align:center">—</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
 <td><code>/user/signin/resend</code></td>
 <td>public</td>
 <td>—</td>
@@ -6071,7 +6338,7 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/packetpulse/releases/&lt;previous&gt;
 </tr>
 <tr>
 <td><code>apikey_manage</code></td>
-<td>Issue and revoke Results API keys, and set up the result export.</td>
+<td>Issue and revoke Results API keys, register the field app's certificate, and set up the result export.</td>
 <td style="text-align:center">✅</td>
 <td style="text-align:center">—</td>
 <td style="text-align:center">—</td>
@@ -6262,6 +6529,14 @@ ssh mshop.rummaan53.com 'sudo ln -sfn /opt/packetpulse/releases/&lt;previous&gt;
 <tr>
 <td><code>0042_2026_11_16_visitor_tracking.sql</code></td>
 <td>Privacy-safe web and app visitor tracking (<code>visitor_location</code> with each structured street-address column stored separately, <code>visitor_visit</code>, <code>visitor_unique_visitor</code>, <code>visitor_unique_daily</code>, <code>visitor_stats</code>, and <code>visitor_stats_apply_visit</code>). Raw IPs are never persisted; unique visitor counts are aggregated via trigger.</td>
+</tr>
+<tr>
+<td><code>0043_2026_11_18_partner_app_launch.sql</code></td>
+<td>The operator's own field app opening Run tests without a second sign-in (<code>partner_certificate</code>, pinned by SHA-256 to one organisation; <code>partner_engineer</code>, the app's id for each engineer; <code>partner_launch</code>, one-time links kept only as their SHA-256, used once within a minute). Adds <code>auth_source</code> <code>partner_app</code>: an account the app signs in, refused at the password step.</td>
+</tr>
+<tr>
+<td><code>0044_2026_11_18_partner_launch_return.sql</code></td>
+<td>Where a field app's link sends the engineer back to: <code>partner_launch.return_url</code>, the app's own https page for the ticket (512 characters at most, or empty), which Run tests offers as <strong>Back to the field app</strong>.</td>
 </tr>
 </tbody>
 </table></div>

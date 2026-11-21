@@ -77,6 +77,17 @@ var gatedRoutes = []routeCheck{
 	{"save the report logo", http.MethodPut, "/organisation/brand/logo",
 		map[string]any{"image": onePixelPng}, "staff_manage"},
 	{"list API keys", http.MethodGet, "/apikey/list", nil, "apikey_manage"},
+	// The field app's certificate is how the operator's own software opens
+	// PacketPulse, as a Results API key is how it reads it: kept on the same
+	// screen, gated by the same capability (18 November 2026). Whoever may
+	// gets the list, a 422 for a certificate that is not one, and a 404 for
+	// one that does not exist; the rest, 403.
+	{"list field app certificates", http.MethodGet, "/partner/certificate/list", nil, "apikey_manage"},
+	{"register a field app certificate", http.MethodPost, "/partner/certificate/add",
+		map[string]any{"label": "ACL", "certificate": "not a certificate"}, "apikey_manage"},
+	{"revoke a field app certificate", http.MethodPost, "/partner/certificate/00000000-0000-4000-8000-000000000000/revoke",
+		nil, "apikey_manage"},
+	{"list the roles a field app certificate may give", http.MethodGet, "/partner/role/list", nil, "apikey_manage"},
 	// The result export hands the organisation's results to a machine, as the
 	// Results API does, so the same capability gates it.
 	{"read result export", http.MethodGet, "/export/target", nil, "apikey_manage"},

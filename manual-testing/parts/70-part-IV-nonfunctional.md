@@ -21,6 +21,9 @@ The app runs on the web (the live build), macOS, Windows, Android and iOS from o
 | `NFR-006` | Failed | The failure with **Try again** when the server says it is worth retrying. 🛑 **Must NOT** show the empty state — "No sites yet" under a refusal reads as data loss |
 | `NFR-007` | 403 | What the server says to do: a lapsed licence names who can renew; a missing capability says to ask an administrator |
 | `NFR-008` | Forms | Required fields end with ` *`; a refused save names each field; a form whose load failed offers no **Save** |
+| `NFR-021` | Pull a screen down from its top, on a phone or a tablet (since 18 November 2026) | It reloads, as **Try again** does; **Run diagnostic** reloads its endpoints and settings, and does nothing while a test runs; **Settings** has nothing to reload. A desktop keeps its **Refresh** button (Dashboard, Sessions and licence, Platform), which a touch screen does without. 🛑 **Must NOT** reload under a running test |
+| `NFR-022` | On **Directory**, **Sign-in security** or **Result export**, change a field, then pull | *Discard your changes?* - **Keep editing** keeps them and reloads nothing; **Discard and reload** brings back what was saved; with nothing changed, or once saved, it reloads at once. 🛑 **Must NOT** throw an unsaved edit away without asking |
+| `NFR-023` | **Help** on every screen | The help icon in the top bar, beside the theme buttons, opens the open screen's help above it; another screen closes it and offers its own; no **Help** row above the screen, so a screen with no actions starts under the top bar. 🛑 **Must NOT** offer one screen's help on another |
 
 ## 4.3 Appearance and accessibility
 

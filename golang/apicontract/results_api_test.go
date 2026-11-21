@@ -19,11 +19,12 @@ import (
 // contractFields are the top-level fields the Results API promises.
 // test_location - where the test was run, with its address once found - was
 // added on 2 November 2026, and download_mbps and upload_mbps - the line's
-// speed, null where none was measured - on 17 November 2026.
+// speed, null where none was measured - on 17 November 2026, and tested_by
+// and tested_by_email - who ran it - on 18 November 2026.
 var contractFields = []string{
 	"tt_number", "customer_id", "status", "site_count",
 	"success_count", "failure_count", "started_on", "results", "test_location",
-	"download_mbps", "upload_mbps",
+	"download_mbps", "upload_mbps", "tested_by", "tested_by_email",
 }
 
 // resultFields are the per-site fields it promises.

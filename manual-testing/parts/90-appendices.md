@@ -57,6 +57,11 @@ All routes are under `/api/v1`. **Access**: *public* (no session), *session* (si
 | `POST` | `/platform/licence/issue` | superuser | — | — | ✅ |
 | `GET` | `/platform/licence/list` | superuser | — | — | — |
 | `GET` | `/platform/licence/{licenceId}/event/list` | superuser | — | — | — |
+| `POST` | `/partner/certificate/add` | member | `apikey_manage` | — | ✅ |
+| `GET` | `/partner/certificate/list` | member | `apikey_manage` | — | — |
+| `POST` | `/partner/certificate/{certificateId}/revoke` | member | `apikey_manage` | — | ✅ |
+| `GET` | `/partner/role/list` | member | `apikey_manage` | — | — |
+| `POST` | `/partner/launch` | public | — | — | — |
 | `POST` | `/platform/licence/{licenceId}/file` | superuser | — | — | ✅ |
 | `POST` | `/platform/licence/{licenceId}/renew` | superuser | — | — | ✅ |
 | `POST` | `/platform/licence/{licenceId}/resume` | superuser | — | — | ✅ |
@@ -103,6 +108,7 @@ All routes are under `/api/v1`. **Access**: *public* (no session), *session* (si
 | `GET` | `/user/me` | session | — | — | — |
 | `POST` | `/user/password` | session | — | — | ✅ |
 | `POST` | `/user/signin` | public | — | — | — |
+| `POST` | `/user/signin/launch` | public | — | — | — |
 | `POST` | `/user/signin/resend` | public | — | — | — |
 | `POST` | `/user/signin/verify` | public | — | — | — |
 | `POST` | `/user/signout` | session | — | — | — |
@@ -129,7 +135,7 @@ All routes are under `/api/v1`. **Access**: *public* (no session), *session* (si
 | `acl_manage` | Change roles and permission grants. | ✅ | — | — |
 | `auditlog_view` | Read the activity trail. | ✅ | — | — |
 | `ldap_manage` | Configure directory integration. | ✅ | — | — |
-| `apikey_manage` | Issue and revoke Results API keys, and set up the result export. | ✅ | — | — |
+| `apikey_manage` | Issue and revoke Results API keys, register the field app's certificate, and set up the result export. | ✅ | — | — |
 | `licence_view` | View the organisation's licence and seat usage. | ✅ | — | — |
 
 Built-in roles are shared by every organisation and cannot be edited; an organisation adds its own (§2.2). The organisation **owner** and the **platform superuser** are not roles: the owner holds every capability in its organisation, and the superuser none — it administers the platform, not a tenant.
@@ -182,6 +188,8 @@ Embedded in the server binary and applied in order at boot (`packetpulsego/pkg/c
 | `0040_2026_11_02_session_idle_timeout.sql` | A support session names the console session it was opened from (`staff_session.support_from_session_id`), so using support keeps the operator's console from the idle timeout (`SESSION_IDLE_TIMEOUT`, request of 2 November 2026). The timeout itself needs no column: a session is live while its `last_accessed_on` is within it. |
 | `0041_2026_11_02_test_address.sql` | Where a test was run, in words (`diagnostic_request.test_address`, `test_address_source`): the address looked up from the test's own position after it is filed - not the sign-in's, which can be somewhere else entirely - with who supplied it, which OpenStreetMap's licence requires to be credited. An address only beside a position (`diagnostic_request_test_address_needs_position`). Empty until found, and for tests filed before, until the boot catch-up finds it (request of 2 November 2026). |
 | `0042_2026_11_16_visitor_tracking.sql` | Privacy-safe web and app visitor tracking (`visitor_location` with each structured street-address column stored separately, `visitor_visit`, `visitor_unique_visitor`, `visitor_unique_daily`, `visitor_stats`, and `visitor_stats_apply_visit`). Raw IPs are never persisted; unique visitor counts are aggregated via trigger. |
+| `0043_2026_11_18_partner_app_launch.sql` | The operator's own field app opening Run tests without a second sign-in (`partner_certificate`, pinned by SHA-256 to one organisation; `partner_engineer`, the app's id for each engineer; `partner_launch`, one-time links kept only as their SHA-256, used once within a minute). Adds `auth_source` `partner_app`: an account the app signs in, refused at the password step. |
+| `0044_2026_11_18_partner_launch_return.sql` | Where a field app's link sends the engineer back to: `partner_launch.return_url`, the app's own https page for the ticket (512 characters at most, or empty), which Run tests offers as **Back to the field app**. |
 
 ## Appendix D — Settings
 
